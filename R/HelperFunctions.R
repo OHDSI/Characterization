@@ -18,15 +18,15 @@
   checkmate::assertClass(connection, "DatabaseConnectorConnection", add = errorMessages)
 }
 
-.checkTargetComparatorTables <- function(targetDatabaseSchema,
+.checkTargetOutcomeTables <- function(targetDatabaseSchema,
                                          targetTable,
-                                         comparatorDatabaseSchema,
-                                         comparatorTable,
+                                         outcomeDatabaseSchema,
+                                         outcomeTable,
                                          errorMessages) {
   checkmate::assertCharacter(targetDatabaseSchema, len = 1, add = errorMessages)
   checkmate::assertCharacter(targetTable, len = 1, add = errorMessages)
-  checkmate::assertCharacter(comparatorDatabaseSchema, len = 1, add = errorMessages)
-  checkmate::assertCharacter(comparatorTable, len = 1, add = errorMessages)
+  checkmate::assertCharacter(outcomeDatabaseSchema, len = 1, add = errorMessages)
+  checkmate::assertCharacter(outcomeTable, len = 1, add = errorMessages)
 }
 
 .checkTargetOutcomes <- function(targetOutcomes, errorMessages) {

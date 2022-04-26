@@ -2,7 +2,7 @@ library(Characterization)
 library(testthat)
 
 test_that("Create analysis specs and save and load them", {
-  targetOutcomes <- data.frame(targetId = 1, comparatorId = 2)
+  targetOutcomes <- data.frame(targetId = 1, outcomeId = 2)
 
   args <- createComputeIncidenceRatesArgs(targetOutcomes = targetOutcomes)
 
@@ -36,7 +36,7 @@ test_that("Create analysis specs and run them", {
                                  progressBar = FALSE,
                                  camelCaseToSnakeCase = TRUE)
 
-  targetOutcomes <- data.frame(targetId = 1, comparatorId = 2)
+  targetOutcomes <- data.frame(targetId = 1, outcomeId = 2)
 
   args <- createComputeIncidenceRatesArgs(targetOutcomes = targetOutcomes)
 
@@ -49,13 +49,18 @@ test_that("Create analysis specs and run them", {
   result <- runCharacterizationAnalyses(connectionDetails = connectionDetails,
                                         targetDatabaseSchema = "main",
                                         targetTable = "cohort",
-                                        comparatorDatabaseSchema = "main",
-                                        comparatorTable = "cohort",
+                                        outcomeDatabaseSchema = "main",
+                                        outcomeTable = "cohort",
+                                        databaseId = "Eunomia",
                                         characterizationAnalysisList = analysisList,
                                         exportFolder = tempFolder)
   incidenceRates <- readr::read_csv(file.path(tempFolder, "incidence_rate.csv"), show_col_types = FALSE)
 
   expect_equal(incidenceRates$incidence_rate, 0.5)
+
+  incidenceRatesAnalysis <- readr::read_csv(file.path(tempFolder, "incidence_rate_analysis.csv"), show_col_types = FALSE)
+
+  expect_equal(nrow(incidenceRatesAnalysis), 1)
 
   unlink(tempFolder, recursive = TRUE)
 })

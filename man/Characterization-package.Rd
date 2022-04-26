@@ -6,7 +6,7 @@
 \alias{Characterization-package}
 \title{Characterization: Characterizations of Cohorts}
 \description{
-Various caracterizations of a target and outcome cohort.
+Various characterizations of a target and outcome cohort.
 }
 \seealso{
 Useful links:

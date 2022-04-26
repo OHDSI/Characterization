@@ -17,13 +17,13 @@ test_that("Incidence rates", {
                                  progressBar = FALSE,
                                  camelCaseToSnakeCase = TRUE)
 
-  targetOutcomes <- data.frame(targetId = 1, comparatorId = 2)
+  targetOutcomes <- data.frame(targetId = 1, outcomeId = 2)
 
   result <- computeIncidenceRates(connection = connection,
                                   targetDatabaseSchema = "main",
                                   targetTable = "cohort",
-                                  comparatorDatabaseSchema = "main",
-                                  comparatorTable = "cohort",
+                                  outcomeDatabaseSchema = "main",
+                                  outcomeTable = "cohort",
                                   targetOutcomes = targetOutcomes,
                                   riskWindowStart = 0,
                                   startAnchor = "cohort start",

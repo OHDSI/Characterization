@@ -36,8 +36,8 @@ rCode <- ParallelLogger::createArgFunction("computeIncidenceRates",
                                                            "cdmDatabaseSchema",
                                                            "targetDatabaseSchema",
                                                            "targetTable",
-                                                           "comparatorDatabaseSchema",
-                                                           "comparatorTable",
+                                                           "outcomeDatabaseSchema",
+                                                           "outcomeTable",
                                                            "tempEmulationSchema"),
                                            rCode = rCode)
 writeLines(rCode, "r/CreateArgFunctions.R")

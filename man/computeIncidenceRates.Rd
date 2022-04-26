@@ -5,12 +5,11 @@
 \title{Compute incidence rates}
 \usage{
 computeIncidenceRates(
-  connection = NULL,
-  connectionDetails = NULL,
+  connection,
   targetDatabaseSchema,
   targetTable,
-  comparatorDatabaseSchema,
-  comparatorTable,
+  outcomeDatabaseSchema,
+  outcomeTable,
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   targetOutcomes,
   riskWindowStart = 0,
@@ -21,14 +20,7 @@ computeIncidenceRates(
 }
 \arguments{
 \item{connection}{An object of type \code{connection} as created using the
-\code{\link[DatabaseConnector:connect]{DatabaseConnector::connect()}} function. Can be left NULL if
-\code{connectionDetails} is provided, in which case a new connection will
-be opened at the start of the function, and closed when the function
-finishes.}
-
-\item{connectionDetails}{An object of type \code{connectionDetails} as created using the
-\code{\link[DatabaseConnector:createConnectionDetails]{DatabaseConnector::createConnectionDetails()}} function. Can be left
-NULL if \code{connection} is provided.}
+\code{\link[DatabaseConnector:connect]{DatabaseConnector::connect()}} function.}
 
 \item{targetDatabaseSchema}{Schema name where your target cohort table resides. Note that for SQL Server,
 this should include both the database and schema name, for example
@@ -36,11 +28,11 @@ this should include both the database and schema name, for example
 
 \item{targetTable}{Name of the target cohort table.}
 
-\item{comparatorDatabaseSchema}{Schema name where your comparator cohort table resides. Note that for SQL Server,
+\item{outcomeDatabaseSchema}{Schema name where your outcome cohort table resides. Note that for SQL Server,
 this should include both the database and schema name, for example
 'scratch.dbo'.}
 
-\item{comparatorTable}{Name of the target cohort table.}
+\item{outcomeTable}{Name of the outcome cohort table.}
 
 \item{tempEmulationSchema}{Some database platforms like Oracle and Impala do not truly support temp tables.
 To emulate temp tables, provide a schema with write privileges where temp tables

@@ -17,7 +17,7 @@
 #' Compute incidence rates
 #'
 #' @template Connection
-#' @template TargetComparatorTables
+#' @template TargetOutcomeTables
 #' @template TargetOutcomes
 #' @template TimeAtRisk
 #' @template TempEmulationSchema
@@ -29,8 +29,8 @@
 computeIncidenceRates <- function(connection,
                                   targetDatabaseSchema,
                                   targetTable,
-                                  comparatorDatabaseSchema,
-                                  comparatorTable,
+                                  outcomeDatabaseSchema,
+                                  outcomeTable,
                                   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
                                   targetOutcomes,
                                   riskWindowStart = 0,
@@ -39,11 +39,11 @@ computeIncidenceRates <- function(connection,
                                   endAnchor = "cohort end") {
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnection(connection, errorMessages)
-  .checkTargetComparatorTables(targetDatabaseSchema,
-                               targetTable,
-                               comparatorDatabaseSchema,
-                               comparatorTable,
-                               errorMessages)
+  .checkTargetOutcomeTables(targetDatabaseSchema,
+                            targetTable,
+                            outcomeDatabaseSchema,
+                            outcomeTable,
+                            errorMessages)
   .checkTargetOutcomes(targetOutcomes, errorMessages)
   .checkTimeAtRisk(riskWindowStart,
                    startAnchor,
@@ -73,8 +73,8 @@ computeIncidenceRates <- function(connection,
                                            tempEmulationSchema = tempEmulationSchema,
                                            target_database_schema = targetDatabaseSchema,
                                            target_table = targetTable,
-                                           comparator_database_schema = comparatorDatabaseSchema,
-                                           comparator_table = comparatorTable,
+                                           outcome_database_schema = outcomeDatabaseSchema,
+                                           outcome_table = outcomeTable,
                                            target_outcome_table = "#target_outcome",
                                            risk_window_start = riskWindowStart,
                                            start_anchor = startAnchor,
