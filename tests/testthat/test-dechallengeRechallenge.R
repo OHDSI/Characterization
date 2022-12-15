@@ -64,25 +64,27 @@ test_that("computeDechallengeRechallengeAnalyses", {
   testthat::expect_true(inherits(dc, 'Andromeda'))
   testthat::expect_true(names(dc) == 'dechallengeRechallenge')
 
+
+  # check saving
   if(actions){ # causing *** caught segfault *** address 0x68, cause 'memory not mapped' zip::zipr
 
-  # test saving/loading
-  saveDechallengeRechallengeAnalyses(
-    result = dc,
-    saveDirectory = file.path(tempdir())
-  )
+    # test saving/loading
+    saveDechallengeRechallengeAnalyses(
+      result = dc,
+      saveDirectory = file.path(tempdir())
+    )
 
-  testthat::expect_true(
-    file.exists(file.path(tempdir(), 'DechallengeRechallenge'))
-  )
+    testthat::expect_true(
+      file.exists(file.path(tempdir(), 'DechallengeRechallenge'))
+    )
 
-  res2 <- loadDechallengeRechallengeAnalyses(
-    saveDirectory = file.path(tempdir())
-  )
+    res2 <- loadDechallengeRechallengeAnalyses(
+      saveDirectory = file.path(tempdir())
+    )
 
-  testthat::expect_equal(
-    nrow(dc$dechallengeRechallenge %>% collect()),
-    nrow(res2$dechallengeRechallenge %>% collect())
+    testthat::expect_equal(
+      nrow(dc$dechallengeRechallenge %>% collect()),
+      nrow(res2$dechallengeRechallenge %>% collect())
     )
   }
 
@@ -106,75 +108,8 @@ test_that("computeDechallengeRechallengeAnalyses", {
   }
 
 
-
 })
 
-test_that("computeRechallengeFailCaseSeriesAnalyses", {
-
-  targetIds <- c(1,2)
-  outcomeIds <- c(4)
-
-  res <- createDechallengeRechallengeSettings(
-    targetIds = targetIds,
-    outcomeIds = outcomeIds,
-    dechallengeStopInterval = 30,
-    dechallengeEvaluationWindow = 31
-  )
-
-  dc <- computeRechallengeFailCaseSeriesAnalyses(
-    connectionDetails = connectionDetails,
-    targetDatabaseSchema = 'main',
-    targetTable = 'cohort',
-    dechallengeRechallengeSettings = res,
-    databaseId = 'testing'
-  )
-
-  testthat::expect_true(inherits(dc, 'Andromeda'))
-  testthat::expect_true(names(dc) == 'rechallengeFailCaseSeries')
-
-  # test saving/loading
-  if(actions){ # causing *** caught segfault *** address 0x68, cause 'memory not mapped' zip::zipr
-
-  saveRechallengeFailCaseSeriesAnalyses(
-    result = dc,
-    saveDirectory = file.path(tempdir())
-  )
-
-  testthat::expect_true(
-    file.exists(file.path(tempdir(), 'rechallengeFailCaseSeries'))
-  )
-
-  res2 <- loadRechallengeFailCaseSeriesAnalyses(
-    saveDirectory = file.path(tempdir())
-  )
-
-  testthat::expect_equal(
-    nrow(dc$rechallengeFailCaseSeries %>% collect()),
-    nrow(res2$rechallengeFailCaseSeries %>% collect())
-  )
-  }
-
-  # check exporting to csv
-  exportRechallengeFailCaseSeriesToCsv(
-    result = dc,
-    saveDirectory = tempdir()
-  )
-
-  countN <- dc$rechallengeFailCaseSeries %>%
-    dplyr::tally()
-
-  if(!is.null(countN$n)){
-    testthat::expect_true(
-      file.exists(file.path(
-        tempdir(),
-        'rechallenge_fail_case_series.csv'
-      )
-      )
-    )
-  }
-
-
-})
 
 
 test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
@@ -287,5 +222,9 @@ testthat::expect_equal(
 
 sub <- dc$rechallengeFailCaseSeries %>% dplyr::select(.data$subjectId) %>% dplyr::collect()
 testthat::expect_equal(sub$subjectId, 2)
+
+
+
+
 
 })

@@ -14,15 +14,11 @@ test_that("createTimeToEventSettings", {
     )
 
   testthat::expect_true(
-    nrow(res$pairs) == length(targetIds)*length(outcomeIds)
-    )
-
-  testthat::expect_true(
-    length(unique(res$pairs$targetCohortDefinitionId)) == length(targetIds)
+    length(unique(res$targetIds)) == length(targetIds)
   )
 
   testthat::expect_true(
-    length(unique(res$pairs$outcomeCohortDefinitionId)) == length(outcomeIds)
+    length(unique(res$outcomeIds)) == length(outcomeIds)
   )
 
 })
@@ -132,13 +128,13 @@ test_that("computeTimeToEventSettings", {
   )
 
   # check it saved correctly and uses snake case
-  res <- CohortGenerator::readCsv(
+  res <- readr::read_csv(
     file =
       file.path(
     tempdir(),
     'time_to_event.csv'
   ),
-  col_names = T,
+    col_names = T
   )
   testthat::expect_true(nrow(res) == 160)
   testthat::expect_true(colnames(res)[1] == 'database_id')
