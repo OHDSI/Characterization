@@ -17,9 +17,6 @@
 #' @keywords internal
 "_PACKAGE"
 
-#' @importFrom SqlRender loadRenderTranslateSql
 #' @importFrom rlang .data
-#' @import DatabaseConnector
-#' @import FeatureExtraction
-#' @import dplyr
+#' @importFrom dplyr %>%
 NULL

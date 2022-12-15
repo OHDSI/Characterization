@@ -18,12 +18,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Patrick Ryan \email{ryan@ohdsi.org}
-
-Authors:
-\itemize{
-  \item Martijn Schuemie
-}
+\strong{Maintainer}: Jenna Reps \email{reps@ohdsi.org}
 
 }
 \keyword{internal}

@@ -1,8 +1,4 @@
-library(Eunomia)
-connectionDetails <- getEunomiaConnectionDetails()
-connection <- DatabaseConnector::connect(connectionDetails)
+actions <- T
 
-withr::defer({
-  DatabaseConnector::disconnect(connection)
-  unlink(connectionDetails$server())
-}, testthat::teardown_env())
+connectionDetails <- Eunomia::getEunomiaConnectionDetails()
+Eunomia::createCohorts(connectionDetails = connectionDetails)
