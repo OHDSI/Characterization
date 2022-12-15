@@ -1,5 +1,5 @@
 if(Sys.getenv('GITHUB_ACTIONS') == 'true') {
-  actions <- T
+  actions <- F
 } else{
   actions <- F
 }
