@@ -7,7 +7,7 @@ Authors@R: c(
 	person("Jenna", "Reps", , "reps@ohdsi.org", role = c("aut", "cre"))
 	)
 Maintainer: Jenna Reps <reps@ohdsi.org>
-Description: Various characterizations of a target and outcome cohort.
+Description: Various characterizations of target and outcome cohorts.
 License: Apache License 2.0
 URL: https://ohdsi.github.io/Characterization, https://github.com/OHDSI/Characterization
 BugReports: https://github.com/OHDSI/Characterization/issues
@@ -22,6 +22,7 @@ Imports:
 	ParallelLogger (>= 3.0.0),
 	checkmate,
 	dplyr,
+	readr, 
 	rlang
 Suggests:
 	testthat,
@@ -33,5 +34,5 @@ Remotes:
 	ohdsi/FeatureExtraction,
 	ohdsi/Eunomia
 NeedsCompilation: no
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.2
 Encoding: UTF-8
