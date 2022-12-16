@@ -25,7 +25,7 @@ output:
 ---
 <!--
 %\VignetteEngine{knitr}
-%\VignetteIndexEntry{Installation guide}
+%\VignetteIndexEntry{Installation_guide}
 -->
 
 # Introduction
