@@ -1,0 +1,88 @@
+---
+title: "Characterization Installation Guide"
+author: "Jenna Reps"
+date: '`r Sys.Date()`'
+header-includes:
+    - \usepackage{fancyhdr}
+    - \pagestyle{fancy}
+    - \fancyhead{}
+    - \fancyhead[CO,CE]{Installation Guide}
+    - \fancyfoot[CO,CE]{Characterization Package Version `r    utils::packageVersion("Characterization")`}
+    - \fancyfoot[LE,RO]{\thepage}
+    - \renewcommand{\headrulewidth}{0.4pt}
+    - \renewcommand{\footrulewidth}{0.4pt}
+output:
+  pdf_document:
+    includes:
+      in_header: preamble.tex
+    number_sections: yes
+    toc: yes
+  word_document:
+    toc: yes
+  html_document:
+    number_sections: yes
+    toc: yes
+---
+<!--
+%\VignetteEngine{knitr}
+%\VignetteIndexEntry{Installation guide}
+-->
+
+# Introduction
+This vignette describes how you need to install the Observational Health Data Sciencs and Informatics (OHDSI) [`Characterization`](http://github.com/OHDSI/Characterization) package under Windows, Mac, and Linux.
+
+# Software Prerequisites
+
+## Windows Users
+Under Windows the OHDSI Characterization package requires installing:
+
+* R (https://cran.cnr.berkeley.edu/ ) \- (R >= 3.3.0, but latest is recommended)
+* Rstudio (https://www.rstudio.com/  )
+* Java (http://www.java.com )
+* RTools (https://cran.r-project.org/bin/windows/Rtools/) 
+
+## Mac/Linux Users
+Under Mac and Linux the OHDSI Characterization package requires installing:
+
+* R (https://cran.cnr.berkeley.edu/ ) \- (R >= 3.3.0, but latest is recommended)
+* Rstudio (https://www.rstudio.com/  )
+* Java (http://www.java.com )
+* Xcode command line tools(run in terminal: xcode-select --install) [MAC USERS ONLY]
+
+
+# Installing the Package
+The preferred way to install the package is by using `remotes`, which will automatically install the latest release and all the latest dependencies.
+
+If you do not want the official release you could install the bleading edge version of the package (latest develop branch).
+
+Note that the latest develop branch could contain bugs, please report them to us if you experience problems.
+
+## Installing Characterization using remotes
+To install using `remotes` run:
+```{r, echo = TRUE, message = FALSE, warning = FALSE,tidy=FALSE,eval=FALSE}
+install.packages("remotes")
+remotes::install_github("OHDSI/FeatureExtraction")
+remotes::install_github("OHDSI/Characterization")
+```
+
+When installing make sure to close any other Rstudio sessions that are using `Characterization` or any dependency.  Keeping Rstudio sessions open can cause locks that prevent the package installing.
+
+
+# Installation issues
+Installation issues need to be posted in our issue tracker:
+http://github.com/OHDSI/Characterization/issues
+
+The list below provides solutions for some common issues:
+
+1. If you have an error when trying to install a package in R saying **'Dependancy X not available ...'** then this can sometimes be fixed by running `install.packages('X')` and then once that completes trying to reinstall the package that had the error.
+
+2. I have found that using the github `remotes`` to install packages can be impacted if you have **multiple R sessions** open as one session with a library open can cause the library to be locked and this can prevent an install of a package that depends on that library.
+
+
+# Acknowledgments
+
+Considerable work has been dedicated to provide the `Characterization` package.
+
+```{r tidy=TRUE,eval=TRUE}
+citation("Characterization")
+```

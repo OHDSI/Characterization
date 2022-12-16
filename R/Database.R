@@ -241,11 +241,11 @@ exportDatabaseToCsv <- function(
       sql = sql,
       targetDialect = targetDialect,
       tempEmulationSchema = tempEmulationSchema)
-    result <- DatabaseConnector::querySql(connection, sql, snakeCaseToCamelCase = TRUE)
+    result <- DatabaseConnector::querySql(connection, sql, snakeCaseToCamelCase = F)
     result <- formatDouble(result)
 
     # save the results as a csv
-    CohortGenerator::writeCsv(
+    readr::write_csv(
       x = result,
       file = file.path(saveDirectory, paste0(tolower(filePrefix), tolower(table),'.csv'))
     )
@@ -256,12 +256,12 @@ exportDatabaseToCsv <- function(
 
 getResultTables <- function(){
   return(unique(toupper(
-    CohortGenerator::readCsv(
+    readr::read_csv(
       file = system.file(
         'settings', 'resultsDataModelSpecification.csv',
         package = 'Characterization'
       )
-    )$tableName
+    )$table_name
   )))
 }
 

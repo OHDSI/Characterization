@@ -122,11 +122,11 @@ runCharacterizationAnalyses(
 testthat::expect_true(
   file.exists(file.path(tempdir(),'run', 'tracker.csv'))
 )
-tracker <- CohortGenerator::readCsv(
+tracker <- readr::read_csv(
   file = file.path(tempdir(),'run', 'tracker.csv')
 )
 testthat::expect_true(
-  nrow(tracker) == 5
+  nrow(tracker) == 6
 )
 
 # check the sqlite database here using export to csv

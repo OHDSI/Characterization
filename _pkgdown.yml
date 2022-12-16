@@ -9,9 +9,84 @@ home:
 
 navbar:
   structure:
+    left:
+    - home
+    - intro
+    - reference
+    - articles
+    - news
     right: [hades, github]
   components:
+    home:
+      icon: fa-home fa-lg
+      href: index.html
+    reference:
+      text: Reference
+      href: reference/index.html
+    intro:
+      text: Get started
+      href: articles/InstallationGuide.html
+    news:
+      text: Changelog
+      href: news/index.html
+    github:
+      icon: fa-github fa-lg
+      href: https://github.com/OHDSI/PatientLevelPrediction
     hades:
       text: hadesLogo
       href: https://ohdsi.github.io/Hades
+
+reference:
+  - title: "Aggregate Covariate Analysis"
+    desc: >
+      This analysis calculates the aggregate characteristics for a Target cohort (T), an Outcome cohort (O) and combiations of T with O during time at risk and T without O during time at risk.
+    contents:
+      - createAggregateCovariateSettings
+      - computeAggregateCovariateAnalyses
+  - title: "Dechallenge Rechallenge Analysis"
+    desc: >
+      For a given Target cohort (T) and Outcome cohort (O) find any occurrances of a dechallenge (when the T cohort stops close to when O started) and a rechallenge (when T restarts and O starts again)  This is useful for investigating causality between drugs and events.
+    contents:
+      - createDechallengeRechallengeSettings
+      - computeDechallengeRechallengeAnalyses
+      - computeRechallengeFailCaseSeriesAnalyses
+  - title: "Time to Event Analysis"
+    desc: >
+      This analysis calculates the timing between the Target cohort (T) and an Outcome cohort (O).
+    contents:
+      - createTimeToEventSettings
+      - computeTimeToEventAnalyses
+  - title: "Run Large Scale Characterization Study"
+    desc: >
+      Run multipe aggregate covariate analysis, time to event and dechallenge/rechallenge studies.
+    contents:
+      - createCharacterizationSettings
+      - runCharacterizationAnalyses
+      - saveCharacterizationSettings
+      - loadCharacterizationSettings
+  - title: "Save Load"
+    desc: >
+      Functions to save the analysis settings and the results (as sqlite or csv files).
+    contents:
+      - saveTimeToEventAnalyses
+      - exportTimeToEventToCsv
+      - loadTimeToEventAnalyses
+      - saveDechallengeRechallengeAnalyses
+      - saveRechallengeFailCaseSeriesAnalyses
+      - loadDechallengeRechallengeAnalyses
+      - loadRechallengeFailCaseSeriesAnalyses
+      - exportDechallengeRechallengeToCsv
+      - exportRechallengeFailCaseSeriesToCsv
+      - saveAggregateCovariateAnalyses
+      - loadAggregateCovariateAnalyses
+      - exportAggregateCovariateToCsv
+  - title: "Insert into Database"
+    desc: >
+      Functions to insert the results into a database.
+    contents:
+      - createSqliteDatabase
+      - createCharacterizationTables
+      - exportDatabaseToCsv
+
+
 

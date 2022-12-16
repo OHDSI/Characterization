@@ -6,7 +6,7 @@
 \alias{Characterization-package}
 \title{Characterization: Characterizations of Cohorts}
 \description{
-Various characterizations of a target and outcome cohort.
+Various characterizations of target and outcome cohorts.
 }
 \seealso{
 Useful links:
@@ -19,6 +19,11 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: Jenna Reps \email{reps@ohdsi.org}
+
+Authors:
+\itemize{
+  \item Patrick Ryan \email{ryan@ohdsi.org}
+}
 
 }
 \keyword{internal}

@@ -97,6 +97,7 @@ computeAggregateCovariateAnalyses <- function(
   # into temp table #agg_cohorts
   createCohortsOfInterest(
     connection = connection,
+    dbms = connectionDetails$dbms,
     aggregateCovariateSettings,
     targetDatabaseSchema,
     targetTable,
@@ -201,7 +202,7 @@ computeAggregateCovariateAnalyses <- function(
     'O' as cohort_type
     from #outcomes_agg
     ;",
-    targetDialect = connection@dbms
+    targetDialect = connectionDetails$dbms
     ),
     snakeCaseToCamelCase = T
   )
@@ -226,7 +227,7 @@ computeAggregateCovariateAnalyses <- function(
   sql <- SqlRender::loadRenderTranslateSql(
     sqlFilename = "DropAggregateCovariate.sql",
     packageName = "Characterization",
-    dbms = connection@dbms,
+    dbms = connectionDetails$dbms,
     tempEmulationSchema = tempEmulationSchema
   )
   DatabaseConnector::executeSql(
@@ -240,7 +241,8 @@ computeAggregateCovariateAnalyses <- function(
 
 
 createCohortsOfInterest <- function(
-  connection = connection,
+  connection,
+  dbms,
   aggregateCovariateSettings,
   targetDatabaseSchema,
   targetTable,
@@ -249,12 +251,10 @@ createCohortsOfInterest <- function(
   tempEmulationSchema
 ){
 
-  ParallelLogger::logInfo(paste0('connection type ', connection@dbms))
-
   sql <- SqlRender::loadRenderTranslateSql(
     sqlFilename = "createTargetOutcomeCombinations.sql",
     packageName = "Characterization",
-    dbms = connection@dbms,
+    dbms = dbms,
     tempEmulationSchema = tempEmulationSchema,
     target_database_schema = targetDatabaseSchema,
     target_table = targetTable,

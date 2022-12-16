@@ -192,10 +192,12 @@ runCharacterizationAnalyses <- function(
       }, error = function(e){return(NULL)}
       )
 
+      append <- file.exists(file.path(saveDirectory, 'tracker.csv'))
+
       if(!is.null(result)){
 
         # log that run was successful
-        CohortGenerator::writeCsv(
+        readr::write_csv(
           x = data.frame(
             analysis_type = 'timeToEvent',
             run_id = i,
@@ -203,10 +205,7 @@ runCharacterizationAnalyses <- function(
             date_time = as.character(Sys.time())
           ),
           file = file.path(saveDirectory, 'tracker.csv'),
-          append = T,
-          warnOnCaseMismatch = FALSE,
-          warnOnFileNameCaseMismatch = FALSE,
-          warnOnUploadRuleViolations = FALSE
+          append = append
         )
 
         insertAndromedaToDatabase(
@@ -243,7 +242,7 @@ runCharacterizationAnalyses <- function(
 
       if(!is.null(result)){
         # log that run was sucessful
-        CohortGenerator::writeCsv(
+        readr::write_csv(
           x = data.frame(
             analysis_type = 'dechallengeRechallenge',
             run_id = i,
@@ -251,10 +250,7 @@ runCharacterizationAnalyses <- function(
             date_time = as.character(Sys.time())
           ),
           file = file.path(saveDirectory, 'tracker.csv'),
-          append = T,
-          warnOnCaseMismatch = FALSE,
-          warnOnFileNameCaseMismatch = FALSE,
-          warnOnUploadRuleViolations = FALSE
+          append = append
         )
 
         insertAndromedaToDatabase(
@@ -287,7 +283,7 @@ runCharacterizationAnalyses <- function(
 
       if(!is.null(result)){
         # log that run was sucessful
-        CohortGenerator::writeCsv(
+        readr::write_csv(
           x = data.frame(
             analysis_type = 'rechallengeFailCaseSeries',
             run_id = i,
@@ -295,10 +291,7 @@ runCharacterizationAnalyses <- function(
             date_time = as.character(Sys.time())
           ),
           file = file.path(saveDirectory, 'tracker.csv'),
-          append = T,
-          warnOnCaseMismatch = FALSE,
-          warnOnFileNameCaseMismatch = FALSE,
-          warnOnUploadRuleViolations = FALSE
+          append = append
         )
 
         insertAndromedaToDatabase(
@@ -339,7 +332,7 @@ runCharacterizationAnalyses <- function(
       if(!is.null(result)){
 
         # log that run was sucessful
-        CohortGenerator::writeCsv(
+        readr::write_csv(
           x = data.frame(
             analysis_type = 'aggregateCovariates',
             run_id = i,
@@ -347,10 +340,7 @@ runCharacterizationAnalyses <- function(
             date_time = as.character(Sys.time())
             ),
           file = file.path(saveDirectory, 'tracker.csv'),
-          append = T,
-          warnOnCaseMismatch = FALSE,
-          warnOnFileNameCaseMismatch = FALSE,
-          warnOnUploadRuleViolations = FALSE
+          append = append
         )
 
         insertAndromedaToDatabase(

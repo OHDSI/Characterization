@@ -28,3 +28,16 @@ system("R CMD Rd2pdf ./ --output=extras/Characterization.pdf")
 pkgdown::build_site()
 OhdsiRTools::fixHadesLogo()
 
+
+rmarkdown::render("vignettes/UsingCharacterizationPackage.Rmd",
+                  output_file = "../inst/doc/UsingCharacterizationPackage.pdf",
+                  rmarkdown::pdf_document(latex_engine = "pdflatex",
+                                          toc = TRUE,
+                                          number_sections = TRUE))
+
+rmarkdown::render("vignettes/InstallationGuide.Rmd",
+                  output_file = "../inst/doc/InstallationGuide.pdf",
+                  rmarkdown::pdf_document(latex_engine = "pdflatex",
+                                          toc = TRUE,
+                                          number_sections = TRUE))
+
