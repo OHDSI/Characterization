@@ -83,6 +83,6 @@ The list below provides solutions for some common issues:
 
 Considerable work has been dedicated to provide the `Characterization` package.
 
-```{r tidy=TRUE,eval=TRUE}
+```{r tidy=FALSE,eval=TRUE}
 citation("Characterization")
 ```
