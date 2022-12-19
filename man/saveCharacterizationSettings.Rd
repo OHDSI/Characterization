@@ -4,12 +4,12 @@
 \alias{saveCharacterizationSettings}
 \title{Save the characterization settings as a json}
 \usage{
-saveCharacterizationSettings(settings, saveDirectory)
+saveCharacterizationSettings(settings, fileName)
 }
 \arguments{
 \item{settings}{An object of class characterizationSettings created using \code{createCharacterizationSettings}}
 
-\item{saveDirectory}{The location to save the json settings}
+\item{fileName}{The location to save the json settings}
 }
 \value{
 Returns the location of the drectory containing the json settings

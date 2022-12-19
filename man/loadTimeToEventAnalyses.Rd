@@ -4,10 +4,10 @@
 \alias{loadTimeToEventAnalyses}
 \title{Load the TimeToEvent results}
 \usage{
-loadTimeToEventAnalyses(saveDirectory)
+loadTimeToEventAnalyses(fileName)
 }
 \arguments{
-\item{saveDirectory}{An directory location to save the results into}
+\item{fileName}{The file to save the results into.}
 }
 \value{
 A data.frame with the TimeToEvent results

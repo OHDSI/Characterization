@@ -4,10 +4,10 @@
 \alias{loadDechallengeRechallengeAnalyses}
 \title{Load the DechallengeRechallenge results}
 \usage{
-loadDechallengeRechallengeAnalyses(saveDirectory)
+loadDechallengeRechallengeAnalyses(fileName)
 }
 \arguments{
-\item{saveDirectory}{An directory location to save the results into}
+\item{fileName}{The file to save the results into.}
 }
 \value{
 A data.frame with the DechallengeRechallenge results

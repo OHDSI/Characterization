@@ -4,10 +4,10 @@
 \alias{loadCharacterizationSettings}
 \title{Load the characterization settings previously saved as a json file}
 \usage{
-loadCharacterizationSettings(saveDirectory)
+loadCharacterizationSettings(fileName)
 }
 \arguments{
-\item{saveDirectory}{The location of the the json settings}
+\item{fileName}{The location of the the json settings}
 }
 \value{
 Returns the json settings as an R object

@@ -4,10 +4,10 @@
 \alias{loadRechallengeFailCaseSeriesAnalyses}
 \title{Load the RechallengeFailCaseSeries results}
 \usage{
-loadRechallengeFailCaseSeriesAnalyses(saveDirectory)
+loadRechallengeFailCaseSeriesAnalyses(fileName)
 }
 \arguments{
-\item{saveDirectory}{An directory location to save the results into}
+\item{fileName}{The file to save the results into.}
 }
 \value{
 A data.frame with the RechallengeFailCaseSeries results

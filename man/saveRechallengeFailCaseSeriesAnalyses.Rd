@@ -4,12 +4,12 @@
 \alias{saveRechallengeFailCaseSeriesAnalyses}
 \title{Save the RechallengeFailCaseSeries results}
 \usage{
-saveRechallengeFailCaseSeriesAnalyses(result, saveDirectory)
+saveRechallengeFailCaseSeriesAnalyses(result, fileName)
 }
 \arguments{
 \item{result}{The output of running \code{computeRechallengeFailCaseSeriesAnalyses()}}
 
-\item{saveDirectory}{An directory location to save the results into}
+\item{fileName}{The file to save the results into.}
 }
 \value{
 A string specifying the directory the results are saved to

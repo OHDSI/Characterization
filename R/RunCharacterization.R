@@ -61,7 +61,7 @@ createCharacterizationSettings <- function(timeToEventSettings = NULL,
 #' Input the characterization settings and output a json file to a file named 'characterizationSettings.json' inside the saveDirectory
 #'
 #' @param settings    An object of class characterizationSettings created using \code{createCharacterizationSettings}
-#' @param saveDirectory  The location to save the json settings
+#' @param fileName  The location to save the json settings
 #'
 #' @return
 #' Returns the location of the drectory containing the json settings
@@ -84,7 +84,7 @@ saveCharacterizationSettings <- function(settings,
 #' @details
 #' Input the directory containing the 'characterizationSettings.json' file and load the settings into R
 #'
-#' @param saveDirectory  The location of the the json settings
+#' @param fileName  The location of the the json settings
 #'
 #' @return
 #' Returns the json settings as an R object

@@ -4,12 +4,12 @@
 \alias{saveAggregateCovariateAnalyses}
 \title{Save the AggregateCovariate results}
 \usage{
-saveAggregateCovariateAnalyses(result, saveDirectory)
+saveAggregateCovariateAnalyses(result, fileName)
 }
 \arguments{
 \item{result}{The output of running \code{computeAggregateCovariateAnalyses()}}
 
-\item{saveDirectory}{An directory location to save the results into}
+\item{fileName}{The file to save the results into.}
 }
 \value{
 A string specifying the directory the results are saved to

@@ -36,6 +36,6 @@ Remotes:
 	ohdsi/FeatureExtraction,
 	ohdsi/Eunomia
 NeedsCompilation: no
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Encoding: UTF-8
 VignetteBuilder: knitr

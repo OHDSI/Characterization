@@ -90,6 +90,9 @@ test_that("runCharacterizationAnalyses", {
     fileName = tempFile
   )
 
+  # In R, empty arrays are automatically of type 'logical.' When loading JSON
+  # they are currently automatically of type 'list'. Neither is right or wrong,
+  # so ignoring distinction:
   convertEmptyListToEmptyLogical <- function(object) {
     if (is.list(object)) {
       if (length(object) == 0) {

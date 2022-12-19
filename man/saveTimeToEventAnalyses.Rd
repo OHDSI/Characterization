@@ -4,12 +4,12 @@
 \alias{saveTimeToEventAnalyses}
 \title{Save the TimeToEvent results}
 \usage{
-saveTimeToEventAnalyses(result, saveDirectory)
+saveTimeToEventAnalyses(result, fileName)
 }
 \arguments{
 \item{result}{The output of running \code{computeTimeToEventAnalyses()}}
 
-\item{saveDirectory}{An directory location to save the results into}
+\item{fileName}{The file to save the results into.}
 }
 \value{
 A string specifying the directory the results are saved to

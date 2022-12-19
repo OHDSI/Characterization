@@ -22,7 +22,7 @@ colnamesLower <- function(data) {
 #' Save the TimeToEvent results
 #'
 #' @param result  The output of running \code{computeTimeToEventAnalyses()}
-#' @template saveDirectory
+#' @template FileName
 #'
 #' @return
 #' A string specifying the directory the results are saved to
@@ -78,7 +78,7 @@ exportTimeToEventToCsv <- function(result,
 
 #' Load the TimeToEvent results
 #'
-#' @template saveDirectory
+#' @template FileName
 #'
 #' @return
 #' A data.frame with the TimeToEvent results
@@ -92,7 +92,7 @@ loadTimeToEventAnalyses <- function(fileName) {
 #' Save the DechallengeRechallenge results
 #'
 #' @param result  The output of running \code{computeDechallengeRechallengeAnalyses()}
-#' @template saveDirectory
+#' @template FileName
 #'
 #' @return
 #' A string specifying the directory the results are saved to
@@ -113,7 +113,7 @@ saveDechallengeRechallengeAnalyses <- function(result,
 #' Save the RechallengeFailCaseSeries results
 #'
 #' @param result  The output of running \code{computeRechallengeFailCaseSeriesAnalyses()}
-#' @template saveDirectory
+#' @template FileName
 #'
 #' @return
 #' A string specifying the directory the results are saved to
@@ -133,7 +133,7 @@ saveRechallengeFailCaseSeriesAnalyses <- function(result,
 
 #' Load the DechallengeRechallenge results
 #'
-#' @template saveDirectory
+#' @template FileName
 #'
 #' @return
 #' A data.frame with the DechallengeRechallenge results
@@ -146,7 +146,7 @@ loadDechallengeRechallengeAnalyses <- function(fileName) {
 
 #' Load the RechallengeFailCaseSeries results
 #'
-#' @template saveDirectory
+#' @template FileName
 #'
 #' @return
 #' A data.frame with the RechallengeFailCaseSeries results
@@ -239,7 +239,7 @@ exportRechallengeFailCaseSeriesToCsv <- function(result,
 #' Save the AggregateCovariate results
 #'
 #' @param result  The output of running \code{computeAggregateCovariateAnalyses()}
-#' @template saveDirectory
+#' @template FileName
 #'
 #' @return
 #' A string specifying the directory the results are saved to
@@ -258,7 +258,7 @@ saveAggregateCovariateAnalyses <- function(result,
 
 #' Load the AggregateCovariate results
 #'
-#' @template saveDirectory
+#' @template FileName
 #'
 #' @return
 #' A list of data.frames with the AggregateCovariate results

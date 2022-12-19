@@ -4,10 +4,10 @@
 \alias{loadAggregateCovariateAnalyses}
 \title{Load the AggregateCovariate results}
 \usage{
-loadAggregateCovariateAnalyses(saveDirectory)
+loadAggregateCovariateAnalyses(fileName)
 }
 \arguments{
-\item{saveDirectory}{An directory location to save the results into}
+\item{fileName}{The file to save the results into.}
 }
 \value{
 A list of data.frames with the AggregateCovariate results

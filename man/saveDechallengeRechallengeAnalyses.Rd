@@ -4,12 +4,12 @@
 \alias{saveDechallengeRechallengeAnalyses}
 \title{Save the DechallengeRechallenge results}
 \usage{
-saveDechallengeRechallengeAnalyses(result, saveDirectory)
+saveDechallengeRechallengeAnalyses(result, fileName)
 }
 \arguments{
 \item{result}{The output of running \code{computeDechallengeRechallengeAnalyses()}}
 
-\item{saveDirectory}{An directory location to save the results into}
+\item{fileName}{The file to save the results into.}
 }
 \value{
 A string specifying the directory the results are saved to
