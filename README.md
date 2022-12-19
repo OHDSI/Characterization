@@ -11,28 +11,95 @@ Characterization is an R package for performing characterization of a target and
 
 Features
 ========
-- Compute incidence rates
 - Compute time to event
-- ...
+- Compute dechallenge and rechallenge 
+- Computer characterization of target cohort with and without occurring in an outcome cohort during some time at risk
+- Run multiple characterization analyses efficiently 
+- upload results to database
+- export results as csv files
 
 Examples
 ========
 
 ```r
-targetOutcomes <- data.frame(targetId = 1, comparatorId = 2)
 
+library(Eunomia)
+library(Characterization)
 
-# Connection is a DatabaseConnector connection:
-result <- computeIncidenceRates(connection = connection,
-                                targetDatabaseSchema = "main",
-                                targetTable = "cohort",
-                                comparatorDatabaseSchema = "main",
-                                comparatorTable = "cohort",
-                                targetOutcomes = targetOutcomes,
-                                riskWindowStart = 0,
-                                startAnchor = "cohort start",
-                                riskWindowEnd = 0,
-                                endAnchor = "cohort end")
+connectionDetails <- Eunomia::getEunomiaConnectionDetails()
+Eunomia::createCohorts(connectionDetails = connectionDetails)
+
+targetIds <- c(1,2,4)
+  outcomeIds <- c(3)
+
+  timeToEventSettings1 <- createTimeToEventSettings(
+    targetIds = 1,
+    outcomeIds = c(3,4)
+  )
+  timeToEventSettings2 <- createTimeToEventSettings(
+    targetIds = 2,
+    outcomeIds = c(3,4)
+  )
+
+  dechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
+    targetIds = targetIds,
+    outcomeIds = outcomeIds,
+    dechallengeStopInterval = 30,
+    dechallengeEvaluationWindow = 31
+  )
+
+  aggregateCovariateSettings1 <- createAggregateCovariateSettings(
+    targetIds = targetIds,
+    outcomeIds = outcomeIds,
+    riskWindowStart = 1,
+    startAnchor = 'cohort start',
+    riskWindowEnd = 365,
+    endAnchor = 'cohort start',
+    covariateSettings = FeatureExtraction::createCovariateSettings(
+      useDemographicsGender = T,
+      useDemographicsAge = T,
+      useDemographicsRace = T
+    )
+    )
+
+  aggregateCovariateSettings2 <- createAggregateCovariateSettings(
+    targetIds = targetIds,
+    outcomeIds = outcomeIds,
+    riskWindowStart = 1,
+    startAnchor = 'cohort start',
+    riskWindowEnd = 365,
+    endAnchor = 'cohort start',
+    covariateSettings = FeatureExtraction::createCovariateSettings(
+      useConditionOccurrenceLongTerm = T
+    )
+  )
+
+  characterizationSettings <- createCharacterizationSettings(
+    timeToEventSettings = list(
+      timeToEventSettings1,
+      timeToEventSettings2
+      ),
+    dechallengeRechallengeSettings = list(
+      dechallengeRechallengeSettings
+    ),
+    aggregateCovariateSettings = list(
+      aggregateCovariateSettings1,
+      aggregateCovariateSettings2
+      )
+  )
+  
+runCharacterizationAnalyses(
+  connectionDetails = connectionDetails,
+  cdmDatabaseSchema = 'main',
+  targetDatabaseSchema = 'main',
+  targetTable = 'cohort',
+  outcomeDatabaseSchema = 'main',
+  outcomeTable = 'cohort',
+  characterizationSettings = characterizationSettings,
+  saveDirectory = file.path(tempdir(), 'example'),
+  tablePrefix = 'c_',
+  databaseId = 'Eunomia'
+)
 ```
 
 Technology
@@ -58,9 +125,6 @@ User Documentation
 ==================
 Documentation can be found on the [package website](https://ohdsi.github.io/Characterization).
 
-PDF versions of the documentation are also available:
-* Package manual: [Characterization.pdf](https://raw.githubusercontent.com/OHDSI/Characterization/main/extras/Characterization.pdf)
-
 Support
 =======
 * Developer questions/comments/feedback: <a href="http://forums.ohdsi.org/c/developers">OHDSI Forum</a>
@@ -77,7 +141,3 @@ Characterization is licensed under Apache License 2.0
 Development
 ===========
 Characterization is being developed in R Studio.
-
-### Development status
-
-Characterization is under development. Do not use.

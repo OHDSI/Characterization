@@ -33,15 +33,21 @@ createSqliteDatabase <- function(
   sqliteLocation = tempdir()
 ){
 
-  sqliteLocation <- file.path(sqliteLocation, 'sqliteCharacterization')
+  sqliteLocation <- file.path(
+    sqliteLocation,
+    'sqliteCharacterization'
+    )
 
   if(!dir.exists(sqliteLocation )){
-    dir.create(sqliteLocation, recursive = T)
+    dir.create(
+      path = sqliteLocation,
+      recursive = T
+      )
   }
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(
   dbms = 'sqlite',
-  server = file.path(sqliteLocation, 'sqlite')
+  server = file.path(sqliteLocation, 'sqlite.sql')
   )
 connection <- DatabaseConnector::connect(
   connectionDetails = connectionDetails
@@ -61,12 +67,13 @@ insertAndromedaToDatabase <- function(
   tablePrefix = 'c_'
 ){
   errorMessages <- checkmate::makeAssertCollection()
-  .checkTablePrefix(tablePrefix = tablePrefix, errorMessages = errorMessages)
+  .checkTablePrefix(
+    tablePrefix = tablePrefix,
+    errorMessages = errorMessages
+    )
   checkmate::reportAssertions(errorMessages)
 
-  ParallelLogger::logInfo(
-    paste0('Inserting Andromeda table into Datbase table ', paste0(tablePrefix,tableName))
-  )
+  message('Inserting Andromeda table into Datbase table ', tablePrefix, tableName)
 
   Andromeda::batchApply(
     tbl = andromedaObject,
@@ -122,37 +129,58 @@ createCharacterizationTables <- function(
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
 ){
   errorMessages <- checkmate::makeAssertCollection()
-  .checkTablePrefix(tablePrefix = tablePrefix, errorMessages = errorMessages)
+  .checkTablePrefix(
+    tablePrefix = tablePrefix,
+    errorMessages = errorMessages
+    )
   checkmate::reportAssertions(errorMessages)
 
 
   if(deleteExistingTables){
-    ParallelLogger::logInfo('Deleting existing tables')
+    message('Deleting existing tables')
     tables <- getResultTables()
     tables <- paste0(toupper(tablePrefix),tables)
 
-    alltables <- toupper(DatabaseConnector::getTableNames(
-      connection = conn,
-      databaseSchema = resultSchema
-    ))
+    alltables <- toupper(
+      DatabaseConnector::getTableNames(
+        connection = conn,
+        databaseSchema = resultSchema
+      )
+    )
 
     for(tb in tables){
       if(tb %in% alltables){
         sql <- 'DELETE FROM @my_schema.@table'
-        sql <- SqlRender::render(sql,
-                                 my_schema = resultSchema,
-                                 table=tb)
-        sql <- SqlRender::translate(sql, targetDialect = targetDialect,
-                                    tempEmulationSchema = tempEmulationSchema)
-        DatabaseConnector::executeSql(conn, sql)
+        sql <- SqlRender::render(
+          sql = sql,
+          my_schema = resultSchema,
+          table = tb
+        )
+        sql <- SqlRender::translate(
+          sql = sql,
+          targetDialect = targetDialect,
+          tempEmulationSchema = tempEmulationSchema
+        )
+        DatabaseConnector::executeSql(
+          connection = conn,
+          sql = sql
+          )
 
         sql <- 'DROP TABLE @my_schema.@table'
-        sql <- SqlRender::render(sql,
-                                 my_schema = resultSchema,
-                                 table=tb)
-        sql <- SqlRender::translate(sql, targetDialect = targetDialect,
-                                    tempEmulationSchema = tempEmulationSchema)
-        DatabaseConnector::executeSql(conn, sql)
+        sql <- SqlRender::render(
+          sql = sql,
+          my_schema = resultSchema,
+          table = tb
+        )
+        sql <- SqlRender::translate(
+          sql = sql,
+          targetDialect = targetDialect,
+          tempEmulationSchema = tempEmulationSchema
+        )
+        DatabaseConnector::executeSql(
+          connection = conn,
+          sql = sql
+          )
       }
 
     }
@@ -170,7 +198,10 @@ createCharacterizationTables <- function(
       table_prefix = tablePrefix
     )
 
-    DatabaseConnector::executeSql(conn, renderedSql)
+    DatabaseConnector::executeSql(
+      connection = conn,
+      sql = renderedSql
+      )
   }
 
 }
@@ -207,7 +238,10 @@ exportDatabaseToCsv <- function(
 ){
 
   errorMessages <- checkmate::makeAssertCollection()
-  .checkTablePrefix(tablePrefix = tablePrefix, errorMessages = errorMessages)
+  .checkTablePrefix(
+    tablePrefix = tablePrefix,
+    errorMessages = errorMessages
+    )
   checkmate::reportAssertions(errorMessages)
 
   if (is.null(filePrefix)) {
@@ -218,11 +252,16 @@ exportDatabaseToCsv <- function(
   connection <- DatabaseConnector::connect(
     connectionDetails = connectionDetails
     )
-  on.exit(DatabaseConnector::disconnect(connection))
+  on.exit(
+    DatabaseConnector::disconnect(connection)
+    )
 
   # create the folder to save the csv files
   if(!dir.exists(saveDirectory)){
-    dir.create(saveDirectory, recursive = T)
+    dir.create(
+      path = saveDirectory,
+      recursive = T
+      )
   }
 
   # get the table names using the function in uploadToDatabase.R
@@ -232,7 +271,7 @@ exportDatabaseToCsv <- function(
   for(table in tables){
     sql <- "select * from @resultSchema.@appendtotable@tablename"
     sql <- SqlRender::render(
-      sql,
+      sql = sql,
       resultSchema = resultSchema,
       appendtotable = tablePrefix,
       tablename = table
@@ -240,8 +279,13 @@ exportDatabaseToCsv <- function(
     sql <- SqlRender::translate(
       sql = sql,
       targetDialect = targetDialect,
-      tempEmulationSchema = tempEmulationSchema)
-    result <- DatabaseConnector::querySql(connection, sql, snakeCaseToCamelCase = F)
+      tempEmulationSchema = tempEmulationSchema
+      )
+    result <- DatabaseConnector::querySql(
+      connection = connection,
+      sql = sql,
+      snakeCaseToCamelCase = F
+      )
     result <- formatDouble(result)
 
     # save the results as a csv
@@ -251,18 +295,22 @@ exportDatabaseToCsv <- function(
     )
   }
 
-  return(invisible(saveDirectory))
+  invisible(saveDirectory)
 }
 
 getResultTables <- function(){
-  return(unique(toupper(
-    readr::read_csv(
-      file = system.file(
-        'settings', 'resultsDataModelSpecification.csv',
-        package = 'Characterization'
-      )
-    )$table_name
-  )))
+  return(
+    unique(toupper(
+      readr::read_csv(
+        file = system.file(
+          'settings',
+          'resultsDataModelSpecification.csv',
+          package = 'Characterization'
+        )
+      )$table_name
+    )
+    )
+  )
 }
 
 
@@ -273,7 +321,7 @@ getResultTables <- function(){
 formatDouble <- function(x, scientific = F, ...) {
   doubleCols <- vapply(x, is.double, logical(1))
   x[doubleCols] <- lapply(x[doubleCols], format, scientific = scientific, ...)
-  x
 
+  return(x)
 }
 

@@ -106,7 +106,9 @@ computeDechallengeRechallengeAnalyses <- function(
     errorMessages =  errorMessages
     )
 
-  valid <- checkmate::reportAssertions(errorMessages)
+  valid <- checkmate::reportAssertions(
+    collection = errorMessages
+    )
 
   if(valid){
     # inputs all pass if getting here
@@ -117,7 +119,9 @@ computeDechallengeRechallengeAnalyses <- function(
     connection <- DatabaseConnector::connect(
       connectionDetails = connectionDetails
     )
-    on.exit(DatabaseConnector::disconnect(connection))
+    on.exit(
+      DatabaseConnector::disconnect(connection)
+      )
 
     message("Computing dechallenge rechallenge results")
     sql <- SqlRender::loadRenderTranslateSql(
@@ -244,7 +248,9 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     connection <- DatabaseConnector::connect(
       connectionDetails = connectionDetails
     )
-    on.exit(DatabaseConnector::disconnect(connection))
+    on.exit(
+      DatabaseConnector::disconnect(connection)
+      )
 
     message("Computing dechallenge rechallenge results")
     sql <- SqlRender::loadRenderTranslateSql(

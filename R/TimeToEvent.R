@@ -112,7 +112,9 @@ computeTimeToEventAnalyses <- function(
     connection <- DatabaseConnector::connect(
       connectionDetails = connectionDetails
     )
-    on.exit(DatabaseConnector::disconnect(connection))
+    on.exit(
+      DatabaseConnector::disconnect(connection)
+      )
 
     # upload table to #cohort_settings
     message("Uploading #cohort_settings")
@@ -147,6 +149,7 @@ computeTimeToEventAnalyses <- function(
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable
     )
+
     DatabaseConnector::executeSql(
       connection = connection,
       sql = sql
@@ -173,6 +176,7 @@ computeTimeToEventAnalyses <- function(
       dbms = connection@dbms,
       tempEmulationSchema = tempEmulationSchema
     )
+
     DatabaseConnector::executeSql(
       connection = connection,
       sql = sql, progressBar = FALSE,

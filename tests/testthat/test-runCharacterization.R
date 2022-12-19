@@ -134,7 +134,7 @@ test_that("runCharacterizationAnalyses", {
 
   connectionDetailsT <- DatabaseConnector::createConnectionDetails(
     dbms = "sqlite",
-    server = file.path(tempFolder, "sqliteCharacterization", "sqlite")
+    server = file.path(tempFolder, "sqliteCharacterization", "sqlite.sql")
   )
 
   exportDatabaseToCsv(

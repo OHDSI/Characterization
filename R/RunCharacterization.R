@@ -13,9 +13,12 @@
 #' Returns the connection to the sqlite database
 #'
 #' @export
-createCharacterizationSettings <- function(timeToEventSettings = NULL,
-                                           dechallengeRechallengeSettings = NULL,
-                                           aggregateCovariateSettings = NULL) {
+createCharacterizationSettings <- function(
+    timeToEventSettings = NULL,
+    dechallengeRechallengeSettings = NULL,
+    aggregateCovariateSettings = NULL
+)
+{
   errorMessages <- checkmate::makeAssertCollection()
   .checkTimeToEventSettingsList(
     settings = timeToEventSettings,
@@ -67,8 +70,10 @@ createCharacterizationSettings <- function(timeToEventSettings = NULL,
 #' Returns the location of the drectory containing the json settings
 #'
 #' @export
-saveCharacterizationSettings <- function(settings,
-                                         fileName) {
+saveCharacterizationSettings <- function(
+    settings,
+    fileName
+) {
   ParallelLogger::saveSettingsToJson(
     object = settings,
     fileName = fileName
@@ -90,7 +95,10 @@ saveCharacterizationSettings <- function(settings,
 #' Returns the json settings as an R object
 #'
 #' @export
-loadCharacterizationSettings <- function(fileName) {
+loadCharacterizationSettings <- function(
+    fileName
+) {
+
   settings <- ParallelLogger::loadSettingsFromJson(
     fileName = fileName
   )
@@ -122,31 +130,42 @@ loadCharacterizationSettings <- function(fileName) {
 #' details which analyses have run to completion.
 #'
 #' @export
-runCharacterizationAnalyses <- function(connectionDetails,
-                                        targetDatabaseSchema,
-                                        targetTable,
-                                        outcomeDatabaseSchema,
-                                        outcomeTable,
-                                        tempEmulationSchema = NULL,
-                                        cdmDatabaseSchema,
-                                        characterizationSettings,
-                                        saveDirectory,
-                                        tablePrefix = "c_",
-                                        databaseId = "1",
-                                        showSubjectId = F) {
+runCharacterizationAnalyses <- function(
+    connectionDetails,
+    targetDatabaseSchema,
+    targetTable,
+    outcomeDatabaseSchema,
+    outcomeTable,
+    tempEmulationSchema = NULL,
+    cdmDatabaseSchema,
+    characterizationSettings,
+    saveDirectory,
+    tablePrefix = "c_",
+    databaseId = "1",
+    showSubjectId = F
+) {
   # inputs checks
   errorMessages <- checkmate::makeAssertCollection()
   .checkCharacterizationSettings(
     settings = characterizationSettings,
     errorMessages = errorMessages
   )
-  .checkTablePrefix(tablePrefix = tablePrefix, errorMessages = errorMessages)
-  checkmate::reportAssertions(errorMessages)
+  .checkTablePrefix(
+    tablePrefix = tablePrefix,
+    errorMessages = errorMessages
+    )
+  checkmate::reportAssertions(
+    errorMessages
+    )
 
   # create the Database
   conn <- createSqliteDatabase(
     sqliteLocation = saveDirectory
   )
+  on.exit(
+    DatabaseConnector::disconnect(conn)
+    )
+
   createCharacterizationTables(
     conn = conn,
     resultSchema = "main",
@@ -213,6 +232,7 @@ runCharacterizationAnalyses <- function(connectionDetails,
           )
         },
         error = function(e) {
+          message(e);
           return(NULL)
         }
       )
@@ -240,7 +260,7 @@ runCharacterizationAnalyses <- function(connectionDetails,
       }
 
       # run failed analysis
-      ParallelLogger::logInfo(paste0("Running rechallenge failed case analysis ", i))
+      message("Running rechallenge failed case analysis ", i)
 
       result <- tryCatch(
         {
@@ -257,6 +277,7 @@ runCharacterizationAnalyses <- function(connectionDetails,
           )
         },
         error = function(e) {
+          message(e);
           return(NULL)
         }
       )
@@ -306,6 +327,7 @@ runCharacterizationAnalyses <- function(connectionDetails,
           )
         },
         error = function(e) {
+          message(e);
           return(NULL)
         }
       )
@@ -370,5 +392,5 @@ runCharacterizationAnalyses <- function(connectionDetails,
   }
 
 
-  return(invisible(saveDirectory))
+  invisible(saveDirectory)
 }

@@ -91,7 +91,9 @@ computeAggregateCovariateAnalyses <- function(
   connection <- DatabaseConnector::connect(
     connectionDetails = connectionDetails
   )
-  on.exit(DatabaseConnector::disconnect(connection))
+  on.exit(
+    DatabaseConnector::disconnect(connection)
+    )
 
   # select T, O, create TnO, TnOc, Onprior T
   # into temp table #agg_cohorts
@@ -211,7 +213,7 @@ computeAggregateCovariateAnalyses <- function(
     ParallelLogger::convertSettingsToJson(
       aggregateCovariateSettings$covariateSettings
     )
-    )
+  )
 
   result$settings <- result$settings %>%
     dplyr::mutate(
@@ -230,6 +232,7 @@ computeAggregateCovariateAnalyses <- function(
     dbms = connectionDetails$dbms,
     tempEmulationSchema = tempEmulationSchema
   )
+
   DatabaseConnector::executeSql(
     connection = connection,
     sql = sql, progressBar = FALSE,
@@ -263,9 +266,17 @@ createCohortsOfInterest <- function(
     target_ids = paste(aggregateCovariateSettings$targetIds, collapse = ',', sep = ','),
     outcome_ids = paste(aggregateCovariateSettings$outcomeIds, collapse = ',', sep = ','),
     tar_start = aggregateCovariateSettings$riskWindowStart,
-    tar_start_anchor = ifelse(aggregateCovariateSettings$startAnchor == 'cohort start', 'cohort_start_date', 'cohort_end_date'),
+    tar_start_anchor = ifelse(
+      aggregateCovariateSettings$startAnchor == 'cohort start',
+      'cohort_start_date',
+      'cohort_end_date'
+      ),
     tar_end = aggregateCovariateSettings$riskWindowEnd,
-    tar_end_anchor = ifelse(aggregateCovariateSettings$endAnchor == 'cohort start', 'cohort_start_date', 'cohort_end_date')
+    tar_end_anchor = ifelse(
+      aggregateCovariateSettings$endAnchor == 'cohort start',
+      'cohort_start_date',
+      'cohort_end_date'
+      )
   )
 
   DatabaseConnector::executeSql(
