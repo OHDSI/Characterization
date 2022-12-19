@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-colnamesLower <- function(data){
+colnamesLower <- function(data) {
   colnames(data) <- tolower(colnames(data))
   return(data)
 }
@@ -28,24 +28,15 @@ colnamesLower <- function(data){
 #' A string specifying the directory the results are saved to
 #'
 #' @export
-saveTimeToEventAnalyses <- function(
-  result,
-  saveDirectory
-  ){
-
-  folderLoc <- file.path(saveDirectory, 'TimeToEvent')
-
-  if(!dir.exists(saveDirectory)){
-    dir.create(saveDirectory, recursive = T)
-  }
-
+saveTimeToEventAnalyses <- function(result,
+                                    fileName) {
   Andromeda::saveAndromeda(
     andromeda = result,
-    fileName = folderLoc,
+    fileName = fileName,
     maintainConnection = T
-    )
+  )
 
-  return(invisible(saveDirectory))
+  invisible(fileName)
 }
 
 #' export the TimeToEvent results as csv
@@ -57,37 +48,32 @@ saveTimeToEventAnalyses <- function(
 #' A string specifying the directory the csv results are saved to
 #'
 #' @export
-exportTimeToEventToCsv <- function(
-  result,
-  saveDirectory
-){
-
-  if(!dir.exists(saveDirectory)){
+exportTimeToEventToCsv <- function(result,
+                                   saveDirectory) {
+  if (!dir.exists(saveDirectory)) {
     dir.create(saveDirectory, recursive = T)
   }
 
   Andromeda::batchApply(
     tbl = result$timeToEvent,
-    fun = function(x){
-      append <- file.exists(file.path(saveDirectory, 'time_to_event.csv'));
-      dat <- as.data.frame(x %>% dplyr::collect());
-      colnames(dat) <- SqlRender::camelCaseToSnakeCase(colnames(dat));
+    fun = function(x) {
+      append <- file.exists(file.path(saveDirectory, "time_to_event.csv"))
+      dat <- as.data.frame(x %>% dplyr::collect())
+      colnames(dat) <- SqlRender::camelCaseToSnakeCase(colnames(dat))
       readr::write_csv(
         x = dat,
-        file = file.path(saveDirectory, 'time_to_event.csv'),
+        file = file.path(saveDirectory, "time_to_event.csv"),
         append = append
       )
     }
   )
 
-  return(
-    invisible(
-      file.path(
-        saveDirectory,
-        'time_to_event.csv'
-        )
-      )
+  invisible(
+    file.path(
+      saveDirectory,
+      "time_to_event.csv"
     )
+  )
 }
 
 #' Load the TimeToEvent results
@@ -98,12 +84,8 @@ exportTimeToEventToCsv <- function(
 #' A data.frame with the TimeToEvent results
 #'
 #' @export
-loadTimeToEventAnalyses <- function(saveDirectory){
-
-  folderLoc <- file.path(saveDirectory, 'TimeToEvent')
-
-  result <- Andromeda::loadAndromeda(folderLoc)
-
+loadTimeToEventAnalyses <- function(fileName) {
+  result <- Andromeda::loadAndromeda(fileName)
   return(result)
 }
 
@@ -116,24 +98,15 @@ loadTimeToEventAnalyses <- function(saveDirectory){
 #' A string specifying the directory the results are saved to
 #'
 #' @export
-saveDechallengeRechallengeAnalyses <- function(
-  result,
-  saveDirectory
-  ){
-
-  folderLoc <- file.path(saveDirectory, 'DechallengeRechallenge')
-
-  if(!dir.exists(folderLoc)){
-    dir.create(folderLoc, recursive = T)
-  }
-
+saveDechallengeRechallengeAnalyses <- function(result,
+                                               fileName) {
   Andromeda::saveAndromeda(
     andromeda = result,
-    fileName = folderLoc,
+    fileName = fileName,
     maintainConnection = T
   )
 
-  return(invisible(saveDirectory))
+  invisible(fileName)
 }
 
 
@@ -146,24 +119,15 @@ saveDechallengeRechallengeAnalyses <- function(
 #' A string specifying the directory the results are saved to
 #'
 #' @export
-saveRechallengeFailCaseSeriesAnalyses <- function(
-  result,
-  saveDirectory
-){
-
-  folderLoc <- file.path(saveDirectory, 'RechallengeFailedCaseSeries')
-
-  if(!dir.exists(folderLoc)){
-    dir.create(folderLoc, recursive = T)
-  }
-
+saveRechallengeFailCaseSeriesAnalyses <- function(result,
+                                                  fileName) {
   Andromeda::saveAndromeda(
     andromeda = result,
-    fileName = folderLoc,
+    fileName = fileName,
     maintainConnection = T
   )
 
-  return(invisible(saveDirectory))
+  invisible(fileName)
 }
 
 
@@ -175,16 +139,9 @@ saveRechallengeFailCaseSeriesAnalyses <- function(
 #' A data.frame with the DechallengeRechallenge results
 #'
 #' @export
-loadDechallengeRechallengeAnalyses <- function(
-  saveDirectory
-){
-
-  folderLoc <- file.path(saveDirectory, 'DechallengeRechallenge')
-
-  result <- Andromeda::loadAndromeda(folderLoc)
-
+loadDechallengeRechallengeAnalyses <- function(fileName) {
+  result <- Andromeda::loadAndromeda(fileName)
   return(result)
-
 }
 
 #' Load the RechallengeFailCaseSeries results
@@ -195,14 +152,8 @@ loadDechallengeRechallengeAnalyses <- function(
 #' A data.frame with the RechallengeFailCaseSeries results
 #'
 #' @export
-loadRechallengeFailCaseSeriesAnalyses <- function(
-  saveDirectory
-){
-
-  folderLoc <- file.path(saveDirectory, 'RechallengeFailCaseSeries')
-
-  result <- Andromeda::loadAndromeda(folderLoc)
-
+loadRechallengeFailCaseSeriesAnalyses <- function(fileName) {
+  result <- Andromeda::loadAndromeda(fileName)
   return(result)
 }
 
@@ -215,40 +166,30 @@ loadRechallengeFailCaseSeriesAnalyses <- function(
 #' A string specifying the directory the csv results are saved to
 #'
 #' @export
-exportDechallengeRechallengeToCsv <- function(
-  result,
-  saveDirectory
-){
+exportDechallengeRechallengeToCsv <- function(result,
+                                              saveDirectory) {
+  countN <- dplyr::pull(dplyr::count(result$dechallengeRechallenge))
+  message("Writing ", countN, " rows to csv")
 
-  if(!dir.exists(saveDirectory)){
-    dir.create(saveDirectory, recursive = T)
-  }
+  Andromeda::batchApply(
+    tbl = result$dechallengeRechallenge,
+    fun = function(x) {
+      append <- file.exists(file.path(saveDirectory, "dechallenge_rechallenge.csv"))
+      dat <- as.data.frame(x %>% dplyr::collect())
+      colnames(dat) <- SqlRender::camelCaseToSnakeCase(colnames(dat))
 
-  countN <- result$dechallengeRechallenge %>% dplyr::tally()
-  ParallelLogger::logInfo(paste0('Writing ', ifelse(is.null(countN$n),0,countN$n), ' rows to csv'))
-
-    Andromeda::batchApply(
-      tbl = result$dechallengeRechallenge,
-      fun = function(x){
-        append <- file.exists(file.path(saveDirectory, 'dechallenge_rechallenge.csv'))
-        dat <- as.data.frame(x %>% dplyr::collect());
-        colnames(dat) <- SqlRender::camelCaseToSnakeCase(colnames(dat))
-
-        readr::write_csv(
-          x = dat,
-          file = file.path(saveDirectory, 'dechallenge_rechallenge.csv'),
-          append = append
-        )
-      }
-    )
-
-
-  return(
-    invisible(
-      file.path(
-        saveDirectory,
-        'dechallenge_rechallenge.csv'
+      readr::write_csv(
+        x = dat,
+        file = file.path(saveDirectory, "dechallenge_rechallenge.csv"),
+        append = append
       )
+    }
+  )
+
+  invisible(
+    file.path(
+      saveDirectory,
+      "dechallenge_rechallenge.csv"
     )
   )
 }
@@ -262,41 +203,35 @@ exportDechallengeRechallengeToCsv <- function(
 #' A string specifying the directory the csv results are saved to
 #'
 #' @export
-exportRechallengeFailCaseSeriesToCsv <- function(
-  result,
-  saveDirectory
-){
-
-  if(!dir.exists(saveDirectory)){
+exportRechallengeFailCaseSeriesToCsv <- function(result,
+                                                 saveDirectory) {
+  if (!dir.exists(saveDirectory)) {
     dir.create(saveDirectory, recursive = T)
   }
 
-  countN <- result$rechallengeFailCaseSeries %>%
-    dplyr::tally()
+  countN <- dplyr::pull(dplyr::count(result$rechallengeFailCaseSeries))
 
-  ParallelLogger::logInfo(paste0('Writing ', ifelse(is.null(countN$n),0,countN$n), ' rows to csv'))
+  message("Writing ", countN, " rows to csv")
 
-    Andromeda::batchApply(
-      tbl = result$rechallengeFailCaseSeries,
-      fun = function(x){
-        append <- file.exists(file.path(saveDirectory, 'rechallenge_fail_case_series.csv'))
-        dat <- as.data.frame(x %>% dplyr::collect());
-        colnames(dat) <- SqlRender::camelCaseToSnakeCase(colnames(dat))
+  Andromeda::batchApply(
+    tbl = result$rechallengeFailCaseSeries,
+    fun = function(x) {
+      append <- file.exists(file.path(saveDirectory, "rechallenge_fail_case_series.csv"))
+      dat <- as.data.frame(x %>% dplyr::collect())
+      colnames(dat) <- SqlRender::camelCaseToSnakeCase(colnames(dat))
 
-        readr::write_csv(
-          x = dat,
-          file = file.path(saveDirectory, 'rechallenge_fail_case_series.csv'),
-          append = append
-        )
-      }
-    )
-
-  return(
-    invisible(
-      file.path(
-        saveDirectory,
-        'rechallenge_fail_case_series.csv'
+      readr::write_csv(
+        x = dat,
+        file = file.path(saveDirectory, "rechallenge_fail_case_series.csv"),
+        append = append
       )
+    }
+  )
+
+  invisible(
+    file.path(
+      saveDirectory,
+      "rechallenge_fail_case_series.csv"
     )
   )
 }
@@ -310,24 +245,15 @@ exportRechallengeFailCaseSeriesToCsv <- function(
 #' A string specifying the directory the results are saved to
 #'
 #' @export
-saveAggregateCovariateAnalyses <- function(
-  result,
-  saveDirectory
-){
-
-  folderLoc <- file.path(saveDirectory, 'AggregateCovariate')
-
-  if(!dir.exists(saveDirectory )){
-    dir.create(saveDirectory, recursive = T)
-  }
-
+saveAggregateCovariateAnalyses <- function(result,
+                                           fileName) {
   Andromeda::saveAndromeda(
     andromeda = result,
-    fileName = folderLoc,
+    fileName = fileName,
     maintainConnection = T
   )
 
-  return(invisible(saveDirectory))
+  invisible(fileName)
 }
 
 #' Load the AggregateCovariate results
@@ -338,15 +264,10 @@ saveAggregateCovariateAnalyses <- function(
 #' A list of data.frames with the AggregateCovariate results
 #'
 #' @export
-loadAggregateCovariateAnalyses <- function(
-  saveDirectory
-){
-
-  folderLoc <- file.path(saveDirectory, 'AggregateCovariate')
-
+loadAggregateCovariateAnalyses <- function(fileName) {
   result <- Andromeda::loadAndromeda(
-    fileName = file.path(saveDirectory, 'AggregateCovariate')
-    )
+    fileName = fileName
+  )
 
   return(result)
 }
@@ -360,26 +281,23 @@ loadAggregateCovariateAnalyses <- function(
 #' A string specifying the directory the csv results are saved to
 #'
 #' @export
-exportAggregateCovariateToCsv <- function(
-  result,
-  saveDirectory
-){
-
-  if(!dir.exists(saveDirectory)){
+exportAggregateCovariateToCsv <- function(result,
+                                          saveDirectory) {
+  if (!dir.exists(saveDirectory)) {
     dir.create(saveDirectory, recursive = T)
   }
 
   # analysisRef
   Andromeda::batchApply(
     tbl = result$analysisRef,
-    fun = function(x){
-      append <- file.exists(file.path(saveDirectory, 'analysis_ref.csv'))
-      dat <- as.data.frame(x %>% dplyr::collect());
+    fun = function(x) {
+      append <- file.exists(file.path(saveDirectory, "analysis_ref.csv"))
+      dat <- as.data.frame(x %>% dplyr::collect())
       colnames(dat) <- SqlRender::camelCaseToSnakeCase(colnames(dat))
 
       readr::write_csv(
         x = colnamesLower(as.data.frame(x %>% dplyr::collect())),
-        file = file.path(saveDirectory, 'analysis_ref.csv'),
+        file = file.path(saveDirectory, "analysis_ref.csv"),
         append = append
       )
     }
@@ -388,14 +306,14 @@ exportAggregateCovariateToCsv <- function(
   # covariateRef
   Andromeda::batchApply(
     tbl = result$covariateRef,
-    fun = function(x){
-      append <- file.exists(file.path(saveDirectory, 'covariate_ref.csv'))
-      dat <- as.data.frame(x %>% dplyr::collect());
+    fun = function(x) {
+      append <- file.exists(file.path(saveDirectory, "covariate_ref.csv"))
+      dat <- as.data.frame(x %>% dplyr::collect())
       colnames(dat) <- SqlRender::camelCaseToSnakeCase(colnames(dat))
 
       readr::write_csv(
         x = colnamesLower(as.data.frame(x %>% dplyr::collect())),
-        file = file.path(saveDirectory, 'covariate_ref.csv'),
+        file = file.path(saveDirectory, "covariate_ref.csv"),
         append = append
       )
     }
@@ -404,14 +322,14 @@ exportAggregateCovariateToCsv <- function(
   # covariates
   Andromeda::batchApply(
     tbl = result$covariates,
-    fun = function(x){
-      append <- file.exists(file.path(saveDirectory, 'covariates.csv'))
-      dat <- as.data.frame(x %>% dplyr::collect());
+    fun = function(x) {
+      append <- file.exists(file.path(saveDirectory, "covariates.csv"))
+      dat <- as.data.frame(x %>% dplyr::collect())
       colnames(dat) <- SqlRender::camelCaseToSnakeCase(colnames(dat))
 
       readr::write_csv(
         x = colnamesLower(as.data.frame(x %>% dplyr::collect())),
-        file = file.path(saveDirectory, 'covariates.csv'),
+        file = file.path(saveDirectory, "covariates.csv"),
         append = append
       )
     }
@@ -420,24 +338,22 @@ exportAggregateCovariateToCsv <- function(
   # covariatesContinuous
   Andromeda::batchApply(
     tbl = result$covariatesContinuous,
-    fun = function(x){
-      append <- file.exists(file.path(saveDirectory, 'covariates_continuous.csv'))
-      dat <- as.data.frame(x %>% dplyr::collect());
+    fun = function(x) {
+      append <- file.exists(file.path(saveDirectory, "covariates_continuous.csv"))
+      dat <- as.data.frame(x %>% dplyr::collect())
       colnames(dat) <- SqlRender::camelCaseToSnakeCase(colnames(dat))
 
       readr::write_csv(
         x = colnamesLower(as.data.frame(x %>% dplyr::collect())),
-        file = file.path(saveDirectory, 'covariates_continuous.csv'),
+        file = file.path(saveDirectory, "covariates_continuous.csv"),
         append = append
       )
     }
   )
-  return(
-    invisible(
-      file.path(
-        saveDirectory,
-        c('analysis_ref.csv','covariate_ref.csv','covariates.csv','covariates_continuous.csv')
-      )
+  invisible(
+    file.path(
+      saveDirectory,
+      c("analysis_ref.csv", "covariate_ref.csv", "covariates.csv", "covariates_continuous.csv")
     )
   )
 }

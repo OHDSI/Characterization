@@ -143,8 +143,8 @@ computeAggregateCovariateAnalyses <- function(
         databaseId = !!databaseId
       ) %>%
       dplyr::relocate(
-        .data$databaseId,
-        .data$runId
+        "databaseId",
+        "runId"
         )
   }
 

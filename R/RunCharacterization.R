@@ -13,12 +13,9 @@
 #' Returns the connection to the sqlite database
 #'
 #' @export
-createCharacterizationSettings <- function(
-  timeToEventSettings = NULL,
-  dechallengeRechallengeSettings = NULL,
-  aggregateCovariateSettings = NULL
-){
-
+createCharacterizationSettings <- function(timeToEventSettings = NULL,
+                                           dechallengeRechallengeSettings = NULL,
+                                           aggregateCovariateSettings = NULL) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkTimeToEventSettingsList(
     settings = timeToEventSettings,
@@ -26,20 +23,20 @@ createCharacterizationSettings <- function(
   )
   .checkAggregateCovariateSettingsList(
     settings = aggregateCovariateSettings,
-    errorMessages =  errorMessages
+    errorMessages = errorMessages
   )
   .checkDechallengeRechallengeSettingsList(
     settings = dechallengeRechallengeSettings,
-    errorMessages =  errorMessages
+    errorMessages = errorMessages
   )
 
-  if(class(timeToEventSettings) == 'timeToEventSettings'){
+  if (class(timeToEventSettings) == "timeToEventSettings") {
     timeToEventSettings <- list(timeToEventSettings)
   }
-  if(class(dechallengeRechallengeSettings) == 'dechallengeRechallengeSettings'){
-    dechallengeRechallengeSettings<- list(dechallengeRechallengeSettings)
+  if (class(dechallengeRechallengeSettings) == "dechallengeRechallengeSettings") {
+    dechallengeRechallengeSettings <- list(dechallengeRechallengeSettings)
   }
-  if(class(aggregateCovariateSettings) == 'aggregateCovariateSettings'){
+  if (class(aggregateCovariateSettings) == "aggregateCovariateSettings") {
     aggregateCovariateSettings <- list(aggregateCovariateSettings)
   }
 
@@ -51,7 +48,7 @@ createCharacterizationSettings <- function(
     aggregateCovariateSettings = aggregateCovariateSettings
   )
 
-  class(settings) <- 'characterizationSettings'
+  class(settings) <- "characterizationSettings"
 
   return(settings)
 }
@@ -70,20 +67,14 @@ createCharacterizationSettings <- function(
 #' Returns the location of the drectory containing the json settings
 #'
 #' @export
-saveCharacterizationSettings <- function(
-  settings,
-  saveDirectory
-){
-
+saveCharacterizationSettings <- function(settings,
+                                         fileName) {
   ParallelLogger::saveSettingsToJson(
     object = settings,
-    fileName = file.path(
-      saveDirectory,
-      'characterizationSettings.json'
-      )
+    fileName = fileName
   )
 
-  return(saveDirectory)
+  return(fileName)
 }
 
 #' Load the characterization settings previously saved as a json file
@@ -99,15 +90,9 @@ saveCharacterizationSettings <- function(
 #' Returns the json settings as an R object
 #'
 #' @export
-loadCharacterizationSettings <- function(
-  saveDirectory
-){
-
+loadCharacterizationSettings <- function(fileName) {
   settings <- ParallelLogger::loadSettingsFromJson(
-    fileName = file.path(
-      saveDirectory,
-      'characterizationSettings.json'
-    )
+    fileName = fileName
   )
 
   return(settings)
@@ -137,26 +122,24 @@ loadCharacterizationSettings <- function(
 #' details which analyses have run to completion.
 #'
 #' @export
-runCharacterizationAnalyses <- function(
-  connectionDetails,
-  targetDatabaseSchema,
-  targetTable,
-  outcomeDatabaseSchema,
-  outcomeTable,
-  tempEmulationSchema = NULL,
-  cdmDatabaseSchema,
-  characterizationSettings,
-  saveDirectory,
-  tablePrefix = 'c_',
-  databaseId = '1',
-  showSubjectId = F
-){
+runCharacterizationAnalyses <- function(connectionDetails,
+                                        targetDatabaseSchema,
+                                        targetTable,
+                                        outcomeDatabaseSchema,
+                                        outcomeTable,
+                                        tempEmulationSchema = NULL,
+                                        cdmDatabaseSchema,
+                                        characterizationSettings,
+                                        saveDirectory,
+                                        tablePrefix = "c_",
+                                        databaseId = "1",
+                                        showSubjectId = F) {
   # inputs checks
   errorMessages <- checkmate::makeAssertCollection()
   .checkCharacterizationSettings(
     settings = characterizationSettings,
-    errorMessages =  errorMessages
-    )
+    errorMessages = errorMessages
+  )
   .checkTablePrefix(tablePrefix = tablePrefix, errorMessages = errorMessages)
   checkmate::reportAssertions(errorMessages)
 
@@ -166,138 +149,135 @@ runCharacterizationAnalyses <- function(
   )
   createCharacterizationTables(
     conn = conn,
-    resultSchema = 'main',
-    targetDialect = 'sqlite',
+    resultSchema = "main",
+    targetDialect = "sqlite",
     deleteExistingTables = T,
     createTables = T,
     tablePrefix = tablePrefix
   )
 
-  if(!is.null(characterizationSettings$timeToEventSettings)){
-
-    for(i in 1:length(characterizationSettings$timeToEventSettings)){
-      ParallelLogger::logInfo(paste0('Running time to event analysis ', i))
-      result <- tryCatch({
-        computeTimeToEventAnalyses(
-          connectionDetails = connectionDetails,
-          targetDatabaseSchema = targetDatabaseSchema,
-          targetTable = targetTable,
-          outcomeDatabaseSchema = outcomeDatabaseSchema,
-          outcomeTable = outcomeTable,
-          tempEmulationSchema = tempEmulationSchema,
-          cdmDatabaseSchema = cdmDatabaseSchema,
-          timeToEventSettings = characterizationSettings$timeToEventSettings[[i]],
-          databaseId = databaseId
-        )
-      }, error = function(e){return(NULL)}
+  if (!is.null(characterizationSettings$timeToEventSettings)) {
+    for (i in 1:length(characterizationSettings$timeToEventSettings)) {
+      message("Running time to event analysis ", i)
+      result <- computeTimeToEventAnalyses(
+        connectionDetails = connectionDetails,
+        targetDatabaseSchema = targetDatabaseSchema,
+        targetTable = targetTable,
+        outcomeDatabaseSchema = outcomeDatabaseSchema,
+        outcomeTable = outcomeTable,
+        tempEmulationSchema = tempEmulationSchema,
+        cdmDatabaseSchema = cdmDatabaseSchema,
+        timeToEventSettings = characterizationSettings$timeToEventSettings[[i]],
+        databaseId = databaseId
       )
 
-      append <- file.exists(file.path(saveDirectory, 'tracker.csv'))
+      append <- file.exists(file.path(saveDirectory, "tracker.csv"))
 
-      if(!is.null(result)){
+      # log that run was successful
+      readr::write_csv(
+        x = data.frame(
+          analysis_type = "timeToEvent",
+          run_id = i,
+          database_id = databaseId,
+          date_time = as.character(Sys.time())
+        ),
+        file = file.path(saveDirectory, "tracker.csv"),
+        append = append
+      )
 
-        # log that run was successful
-        readr::write_csv(
-          x = data.frame(
-            analysis_type = 'timeToEvent',
-            run_id = i,
-            database_id = databaseId,
-            date_time = as.character(Sys.time())
-          ),
-          file = file.path(saveDirectory, 'tracker.csv'),
-          append = append
-        )
-
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = 'main',
-          tableName = 'time_to_event',
-          andromedaObject = result$timeToEvent,
-          tablePrefix = tablePrefix
-        )
-      }
+      insertAndromedaToDatabase(
+        connection = conn,
+        databaseSchema = "main",
+        tableName = "time_to_event",
+        andromedaObject = result$timeToEvent,
+        tablePrefix = tablePrefix
+      )
     }
   }
 
-  if(!is.null(characterizationSettings$dechallengeRechallengeSettings)){
+  if (!is.null(characterizationSettings$dechallengeRechallengeSettings)) {
+    for (i in 1:length(characterizationSettings$dechallengeRechallengeSettings)) {
+      ParallelLogger::logInfo(paste0("Running dechallenge rechallenge analysis ", i))
 
-    for(i in 1:length(characterizationSettings$dechallengeRechallengeSettings)){
-
-      ParallelLogger::logInfo(paste0('Running dechallenge rechallenge analysis ', i))
-
-      result <- tryCatch({
-        computeDechallengeRechallengeAnalyses(
-          connectionDetails = connectionDetails,
-          targetDatabaseSchema = targetDatabaseSchema,
-          targetTable = targetTable,
-          outcomeDatabaseSchema = outcomeDatabaseSchema,
-          outcomeTable = outcomeTable,
-          tempEmulationSchema = tempEmulationSchema,
-          dechallengeRechallengeSettings = characterizationSettings$dechallengeRechallengeSettings[[i]],
-          databaseId = databaseId
-        )
-      },
-      error = function(e){return(NULL)}
+      result <- tryCatch(
+        {
+          computeDechallengeRechallengeAnalyses(
+            connectionDetails = connectionDetails,
+            targetDatabaseSchema = targetDatabaseSchema,
+            targetTable = targetTable,
+            outcomeDatabaseSchema = outcomeDatabaseSchema,
+            outcomeTable = outcomeTable,
+            tempEmulationSchema = tempEmulationSchema,
+            dechallengeRechallengeSettings = characterizationSettings$dechallengeRechallengeSettings[[i]],
+            databaseId = databaseId
+          )
+        },
+        error = function(e) {
+          return(NULL)
+        }
       )
 
-      if(!is.null(result)){
+      if (!is.null(result)) {
         # log that run was sucessful
         readr::write_csv(
           x = data.frame(
-            analysis_type = 'dechallengeRechallenge',
+            analysis_type = "dechallengeRechallenge",
             run_id = i,
             database_id = databaseId,
             date_time = as.character(Sys.time())
           ),
-          file = file.path(saveDirectory, 'tracker.csv'),
+          file = file.path(saveDirectory, "tracker.csv"),
           append = append
         )
 
         insertAndromedaToDatabase(
           connection = conn,
-          databaseSchema = 'main',
-          tableName = 'dechallenge_rechallenge',
+          databaseSchema = "main",
+          tableName = "dechallenge_rechallenge",
           andromedaObject = result$dechallengeRechallenge,
           tablePrefix = tablePrefix
         )
       }
 
       # run failed analysis
-      ParallelLogger::logInfo(paste0('Running rechallenge failed case analysis ', i))
+      ParallelLogger::logInfo(paste0("Running rechallenge failed case analysis ", i))
 
-      result <- tryCatch({
-        computeRechallengeFailCaseSeriesAnalyses(
-          connectionDetails = connectionDetails,
-          targetDatabaseSchema = targetDatabaseSchema,
-          targetTable = targetTable,
-          outcomeDatabaseSchema = outcomeDatabaseSchema,
-          outcomeTable = outcomeTable,
-          tempEmulationSchema = tempEmulationSchema,
-          dechallengeRechallengeSettings = characterizationSettings$dechallengeRechallengeSettings[[i]],
-          databaseId = databaseId,
-          showSubjectId = showSubjectId
-        )
-      },
-      error = function(e){return(NULL)}
+      result <- tryCatch(
+        {
+          computeRechallengeFailCaseSeriesAnalyses(
+            connectionDetails = connectionDetails,
+            targetDatabaseSchema = targetDatabaseSchema,
+            targetTable = targetTable,
+            outcomeDatabaseSchema = outcomeDatabaseSchema,
+            outcomeTable = outcomeTable,
+            tempEmulationSchema = tempEmulationSchema,
+            dechallengeRechallengeSettings = characterizationSettings$dechallengeRechallengeSettings[[i]],
+            databaseId = databaseId,
+            showSubjectId = showSubjectId
+          )
+        },
+        error = function(e) {
+          return(NULL)
+        }
       )
 
-      if(!is.null(result)){
+      if (!is.null(result)) {
         # log that run was sucessful
         readr::write_csv(
           x = data.frame(
-            analysis_type = 'rechallengeFailCaseSeries',
+            analysis_type = "rechallengeFailCaseSeries",
             run_id = i,
             database_id = databaseId,
             date_time = as.character(Sys.time())
           ),
-          file = file.path(saveDirectory, 'tracker.csv'),
+          file = file.path(saveDirectory, "tracker.csv"),
           append = append
         )
 
         insertAndromedaToDatabase(
           connection = conn,
-          databaseSchema = 'main',
-          tableName = 'rechallenge_fail_case_series',
+          databaseSchema = "main",
+          tableName = "rechallenge_fail_case_series",
           andromedaObject = result$rechallengeFailCaseSeries,
           tablePrefix = tablePrefix
         )
@@ -306,90 +286,87 @@ runCharacterizationAnalyses <- function(
   }
 
 
-  if(!is.null(characterizationSettings$aggregateCovariateSettings)){
-    ParallelLogger::logInfo('Running aggregate covariate analyses')
+  if (!is.null(characterizationSettings$aggregateCovariateSettings)) {
+    ParallelLogger::logInfo("Running aggregate covariate analyses")
 
-    for(i in 1:length(characterizationSettings$aggregateCovariateSettings)){
-
-      result <- tryCatch({
-
-        computeAggregateCovariateAnalyses(
-          connectionDetails = connectionDetails,
-          cdmDatabaseSchema = cdmDatabaseSchema,
-          targetDatabaseSchema = targetDatabaseSchema,
-          targetTable = targetTable,
-          outcomeDatabaseSchema = outcomeDatabaseSchema,
-          outcomeTable = outcomeTable,
-          tempEmulationSchema = tempEmulationSchema,
-          aggregateCovariateSettings = characterizationSettings$aggregateCovariateSettings[[i]],
-          databaseId = databaseId,
-          runId = i
-        )
-      },
-      error = function(e){return(NULL)}
+    for (i in 1:length(characterizationSettings$aggregateCovariateSettings)) {
+      result <- tryCatch(
+        {
+          computeAggregateCovariateAnalyses(
+            connectionDetails = connectionDetails,
+            cdmDatabaseSchema = cdmDatabaseSchema,
+            targetDatabaseSchema = targetDatabaseSchema,
+            targetTable = targetTable,
+            outcomeDatabaseSchema = outcomeDatabaseSchema,
+            outcomeTable = outcomeTable,
+            tempEmulationSchema = tempEmulationSchema,
+            aggregateCovariateSettings = characterizationSettings$aggregateCovariateSettings[[i]],
+            databaseId = databaseId,
+            runId = i
+          )
+        },
+        error = function(e) {
+          return(NULL)
+        }
       )
 
-      if(!is.null(result)){
-
+      if (!is.null(result)) {
         # log that run was sucessful
         readr::write_csv(
           x = data.frame(
-            analysis_type = 'aggregateCovariates',
+            analysis_type = "aggregateCovariates",
             run_id = i,
             database_id = databaseId,
             date_time = as.character(Sys.time())
-            ),
-          file = file.path(saveDirectory, 'tracker.csv'),
+          ),
+          file = file.path(saveDirectory, "tracker.csv"),
           append = append
         )
 
         insertAndromedaToDatabase(
           connection = conn,
-          databaseSchema = 'main',
-          tableName = 'settings',
+          databaseSchema = "main",
+          tableName = "settings",
           andromedaObject = result$settings,
           tablePrefix = tablePrefix
-        );
+        )
 
         insertAndromedaToDatabase(
           connection = conn,
-          databaseSchema = 'main',
-          tableName = 'analysis_ref',
+          databaseSchema = "main",
+          tableName = "analysis_ref",
           andromedaObject = result$analysisRef,
           tablePrefix = tablePrefix
-        );
+        )
         insertAndromedaToDatabase(
           connection = conn,
-          databaseSchema = 'main',
-          tableName = 'covariate_ref',
+          databaseSchema = "main",
+          tableName = "covariate_ref",
           andromedaObject = result$covariateRef,
           tablePrefix = tablePrefix
-        );
+        )
 
-        if(!is.null(result$covariates)){
+        if (!is.null(result$covariates)) {
           insertAndromedaToDatabase(
             connection = conn,
-            databaseSchema = 'main',
-            tableName = 'covariates',
+            databaseSchema = "main",
+            tableName = "covariates",
             andromedaObject = result$covariates,
             tablePrefix = tablePrefix
           )
-        };
+        }
 
-        if(!is.null(result$covariatesContinuous)){
+        if (!is.null(result$covariatesContinuous)) {
           insertAndromedaToDatabase(
             connection = conn,
-            databaseSchema = 'main',
-            tableName = 'covariates_continuous',
+            databaseSchema = "main",
+            tableName = "covariates_continuous",
             andromedaObject = result$covariatesContinuous,
             tablePrefix = tablePrefix
           )
-        };
-
+        }
       }
-
     }
-
   }
 
 

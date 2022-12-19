@@ -1,20 +1,19 @@
-#library(Characterization)
-#library(testthat)
+# library(Characterization)
+# library(testthat)
 
-context('runCharacterizationAnalyses')
+context("runCharacterizationAnalyses")
 
 test_that("runCharacterizationAnalyses", {
-
-  targetIds <- c(1,2,4)
+  targetIds <- c(1, 2, 4)
   outcomeIds <- c(3)
 
   timeToEventSettings1 <- createTimeToEventSettings(
     targetIds = 1,
-    outcomeIds = c(3,4)
+    outcomeIds = c(3, 4)
   )
   timeToEventSettings2 <- createTimeToEventSettings(
     targetIds = 2,
-    outcomeIds = c(3,4)
+    outcomeIds = c(3, 4)
   )
 
   dechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
@@ -28,23 +27,23 @@ test_that("runCharacterizationAnalyses", {
     targetIds = targetIds,
     outcomeIds = outcomeIds,
     riskWindowStart = 1,
-    startAnchor = 'cohort start',
+    startAnchor = "cohort start",
     riskWindowEnd = 365,
-    endAnchor = 'cohort start',
+    endAnchor = "cohort start",
     covariateSettings = FeatureExtraction::createCovariateSettings(
       useDemographicsGender = T,
       useDemographicsAge = T,
       useDemographicsRace = T
     )
-    )
+  )
 
   aggregateCovariateSettings2 <- createAggregateCovariateSettings(
     targetIds = targetIds,
     outcomeIds = outcomeIds,
     riskWindowStart = 1,
-    startAnchor = 'cohort start',
+    startAnchor = "cohort start",
     riskWindowEnd = 365,
-    endAnchor = 'cohort start',
+    endAnchor = "cohort start",
     covariateSettings = FeatureExtraction::createCovariateSettings(
       useConditionOccurrenceLongTerm = T
     )
@@ -54,14 +53,14 @@ test_that("runCharacterizationAnalyses", {
     timeToEventSettings = list(
       timeToEventSettings1,
       timeToEventSettings2
-      ),
+    ),
     dechallengeRechallengeSettings = list(
       dechallengeRechallengeSettings
     ),
     aggregateCovariateSettings = list(
       aggregateCovariateSettings1,
       aggregateCovariateSettings2
-      )
+    )
   )
 
   testthat::expect_true(
@@ -78,74 +77,72 @@ test_that("runCharacterizationAnalyses", {
     length(characterizationSettings$aggregateCovariateSettings) == 2
   )
 
+  tempFile <- tempfile(fileext = ".json")
+  on.exit(unlink(tempFile))
   saveLoc <- saveCharacterizationSettings(
     settings = characterizationSettings,
-    saveDirectory = tempdir()
-    )
+    fileName = tempFile
+  )
 
-  testthat::expect_true(
-    file.exists(
-      file.path(tempdir(), 'characterizationSettings.json')
-      )
-    )
+  testthat::expect_true(file.exists(tempFile))
 
   loadedSettings <- loadCharacterizationSettings(
-    saveDirectory = saveLoc
-    )
-
-  testthat::expect_true(
-  length(loadedSettings$timeToEventSettings) ==
-    length(characterizationSettings$timeToEventSettings)
-  )
-  testthat::expect_true(
-    length(loadedSettings$dechallengeRechallengeSettings) ==
-      length(characterizationSettings$dechallengeRechallengeSettings)
-  )
-  testthat::expect_true(
-    length(loadedSettings$aggregateCovariateSettings) ==
-      length(characterizationSettings$aggregateCovariateSettings)
+    fileName = tempFile
   )
 
-runCharacterizationAnalyses(
-  connectionDetails = connectionDetails,
-  cdmDatabaseSchema = 'main',
-  targetDatabaseSchema = 'main',
-  targetTable = 'cohort',
-  outcomeDatabaseSchema = 'main',
-  outcomeTable = 'cohort',
-  characterizationSettings = characterizationSettings,
-  saveDirectory = file.path(tempdir(), 'run'),
-  tablePrefix = 'c_',
-  databaseId = '1'
-)
+  convertEmptyListToEmptyLogical <- function(object) {
+    if (is.list(object)) {
+      if (length(object) == 0) {
+        return(vector(mode = "logical", length = 0))
+      } else {
+        return(lapply(object, convertEmptyListToEmptyLogical))
+      }
+    } else {
+      return(object)
+    }
+  }
+  testthat::expect_equivalent(characterizationSettings, convertEmptyListToEmptyLogical(loadedSettings))
 
-testthat::expect_true(
-  file.exists(file.path(tempdir(),'run', 'tracker.csv'))
-)
-tracker <- readr::read_csv(
-  file = file.path(tempdir(),'run', 'tracker.csv')
-)
-testthat::expect_true(
-  nrow(tracker) == 6
-)
+  tempFolder <- tempfile("Characterization")
+  on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
 
-# check the sqlite database here using export to csv
+  runCharacterizationAnalyses(
+    connectionDetails = connectionDetails,
+    cdmDatabaseSchema = "main",
+    targetDatabaseSchema = "main",
+    targetTable = "cohort",
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort",
+    characterizationSettings = characterizationSettings,
+    saveDirectory = tempFolder,
+    tablePrefix = "c_",
+    databaseId = "1"
+  )
 
-connectionDetailsT <- DatabaseConnector::createConnectionDetails(
-  dbms = 'sqlite',
-  server = file.path(tempdir(),'run','sqliteCharacterization', 'sqlite')
-)
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "tracker.csv"))
+  )
+  tracker <- readr::read_csv(
+    file = file.path(tempFolder, "tracker.csv")
+  )
+  testthat::expect_equal(nrow(tracker), 6)
 
-exportDatabaseToCsv(
-  connectionDetails = connectionDetailsT,
-  resultSchema = 'main',
-  targetDialect = 'sqlite',
-  tablePrefix = 'c_',
-  saveDirectory = file.path(tempdir(),'csv')
-)
+  # check the sqlite database here using export to csv
 
-testthat::expect_true(
-  length(dir(file.path(tempdir(),'csv'))) > 0
-)
+  connectionDetailsT <- DatabaseConnector::createConnectionDetails(
+    dbms = "sqlite",
+    server = file.path(tempFolder, "sqliteCharacterization", "sqlite")
+  )
 
+  exportDatabaseToCsv(
+    connectionDetails = connectionDetailsT,
+    resultSchema = "main",
+    targetDialect = "sqlite",
+    tablePrefix = "c_",
+    saveDirectory = file.path(tempFolder, "csv")
+  )
+
+  testthat::expect_true(
+    length(dir(file.path(tempFolder, "csv"))) > 0
+  )
 })
