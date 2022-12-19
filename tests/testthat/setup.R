@@ -1,8 +1,9 @@
-library(Eunomia)
-connectionDetails <- getEunomiaConnectionDetails()
-connection <- DatabaseConnector::connect(connectionDetails)
+connectionDetails <- Eunomia::getEunomiaConnectionDetails(databaseFile = "testEunomia.sqlite")
+Eunomia::createCohorts(connectionDetails = connectionDetails)
 
-withr::defer({
-  DatabaseConnector::disconnect(connection)
-  unlink(connectionDetails$server())
-}, testthat::teardown_env())
+withr::defer(
+  {
+    unlink("testEunomia.sqlite", recursive = TRUE, force = TRUE)
+  },
+  testthat::teardown_env()
+)

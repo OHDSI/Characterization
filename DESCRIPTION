@@ -1,36 +1,41 @@
 Package: Characterization
 Type: Package
 Title: Characterizations of Cohorts
-Version: 0.0.1
-Date: 2022-04-26
+Version: 0.0.4
+Date: 2022-12-14
 Authors@R: c(
-	person("Patrick", "Ryan", , "ryan@ohdsi.org", role = c("aut", "cre")),
-	person("Martijn", "Schuemie", role = c("aut"))
+	person("Jenna", "Reps", , "reps@ohdsi.org", role = c("aut", "cre")),
+	person("Patrick", "Ryan", , "ryan@ohdsi.org", role = c("aut"))
 	)
-Maintainer: Patrick Ryan <ryan@ohdsi.org>
-Description: Various characterizations of a target and outcome cohort.
+Maintainer: Jenna Reps <reps@ohdsi.org>
+Description: Various characterizations of target and outcome cohorts.
 License: Apache License 2.0
 URL: https://ohdsi.github.io/Characterization, https://github.com/OHDSI/Characterization
 BugReports: https://github.com/OHDSI/Characterization/issues
 Depends:
-	R (>= 4.0.0),
-	DatabaseConnector (>= 5.0.0),
-	FeatureExtraction  (>= 3.0.0)
+	R (>= 4.0.0)
 Imports:
+  Andromeda,
+	DatabaseConnector (>= 5.0.4),
+	FeatureExtraction  (>= 3.0.0),
 	SqlRender (>= 1.9.0),
 	ParallelLogger (>= 3.0.0),
 	checkmate,
-	readr,
 	dplyr,
+	readr, 
 	rlang
 Suggests:
 	testthat,
 	Eunomia,
+	kableExtra,
+	knitr,
+	markdown,
 	withr
 Remotes:
+  ohdsi/Andromeda,
 	ohdsi/FeatureExtraction,
 	ohdsi/Eunomia
 NeedsCompilation: no
-RoxygenNote: 7.1.2
-Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
 Encoding: UTF-8
+VignetteBuilder: knitr
