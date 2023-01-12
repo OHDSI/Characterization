@@ -79,7 +79,7 @@ saveCharacterizationSettings <- function(
     fileName = fileName
   )
 
-  return(fileName)
+  invisible(fileName)
 }
 
 #' Load the characterization settings previously saved as a json file

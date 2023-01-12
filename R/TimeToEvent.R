@@ -82,7 +82,7 @@ computeTimeToEventAnalyses <- function(
 
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
-  .checkConnectionDetails(connectionDetails)
+  .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
     cohortDatabaseSchema = targetDatabaseSchema,
     cohortTable = targetTable,

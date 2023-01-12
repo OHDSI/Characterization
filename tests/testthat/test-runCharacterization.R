@@ -126,7 +126,8 @@ test_that("runCharacterizationAnalyses", {
     file.exists(file.path(tempFolder, "tracker.csv"))
   )
   tracker <- readr::read_csv(
-    file = file.path(tempFolder, "tracker.csv")
+    file = file.path(tempFolder, "tracker.csv"),
+    show_col_types = FALSE
   )
   testthat::expect_equal(nrow(tracker), 6)
 

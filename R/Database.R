@@ -306,7 +306,8 @@ getResultTables <- function(){
           'settings',
           'resultsDataModelSpecification.csv',
           package = 'Characterization'
-        )
+        ),
+        show_col_types = FALSE
       )$table_name
     )
     )

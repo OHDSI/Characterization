@@ -84,7 +84,7 @@ computeDechallengeRechallengeAnalyses <- function(
 
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
-  .checkConnectionDetails(connectionDetails)
+  .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
     cohortDatabaseSchema = targetDatabaseSchema,
     cohortTable = targetTable,
@@ -215,7 +215,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
 
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
-  .checkConnectionDetails(connectionDetails)
+  .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
     cohortDatabaseSchema = targetDatabaseSchema,
     cohortTable = targetTable,
