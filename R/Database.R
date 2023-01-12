@@ -47,7 +47,7 @@ createSqliteDatabase <- function(
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(
   dbms = 'sqlite',
-  server = file.path(sqliteLocation, 'sqlite.sql')
+  server = file.path(sqliteLocation, 'sqlite.sqlite')
   )
 connection <- DatabaseConnector::connect(
   connectionDetails = connectionDetails

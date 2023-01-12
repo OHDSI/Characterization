@@ -190,7 +190,6 @@ runCharacterizationAnalyses <- function(
         databaseId = databaseId
       )
 
-      append <- file.exists(file.path(saveDirectory, "tracker.csv"))
 
       # log that run was successful
       readr::write_csv(
@@ -201,7 +200,7 @@ runCharacterizationAnalyses <- function(
           date_time = as.character(Sys.time())
         ),
         file = file.path(saveDirectory, "tracker.csv"),
-        append = append
+        append = file.exists(file.path(saveDirectory, "tracker.csv"))
       )
 
       insertAndromedaToDatabase(
@@ -247,7 +246,7 @@ runCharacterizationAnalyses <- function(
             date_time = as.character(Sys.time())
           ),
           file = file.path(saveDirectory, "tracker.csv"),
-          append = append
+          append = file.exists(file.path(saveDirectory, "tracker.csv"))
         )
 
         insertAndromedaToDatabase(
@@ -292,7 +291,7 @@ runCharacterizationAnalyses <- function(
             date_time = as.character(Sys.time())
           ),
           file = file.path(saveDirectory, "tracker.csv"),
-          append = append
+          append = file.exists(file.path(saveDirectory, "tracker.csv"))
         )
 
         insertAndromedaToDatabase(
@@ -342,7 +341,7 @@ runCharacterizationAnalyses <- function(
             date_time = as.character(Sys.time())
           ),
           file = file.path(saveDirectory, "tracker.csv"),
-          append = append
+          append = file.exists(file.path(saveDirectory, "tracker.csv"))
         )
 
         insertAndromedaToDatabase(
