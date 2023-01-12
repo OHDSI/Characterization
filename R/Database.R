@@ -202,6 +202,8 @@ createCharacterizationTables <- function(
       connection = conn,
       sql = renderedSql
       )
+
+    # add database migration here in the future
   }
 
 }

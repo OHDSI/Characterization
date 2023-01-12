@@ -1,8 +1,8 @@
 Package: Characterization
 Type: Package
 Title: Characterizations of Cohorts
-Version: 0.0.4
-Date: 2022-12-14
+Version: 0.0.5
+Date: 2023-01-12
 Authors@R: c(
 	person("Jenna", "Reps", , "reps@ohdsi.org", role = c("aut", "cre")),
 	person("Patrick", "Ryan", , "ryan@ohdsi.org", role = c("aut"))
