@@ -306,8 +306,8 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     message(
       paste0(
         "Computing dechallenge failed case series for ",
-        length(dechallengeRechallengeSettings$targetCohortDefinitionIds), " target ids and ",
-        length(dechallengeRechallengeSettings$outcomeCohortDefinitionIds),"outcome ids took ",
+        length(dechallengeRechallengeSettings$targetCohortDefinitionIds), " target IDs and ",
+        length(dechallengeRechallengeSettings$outcomeCohortDefinitionIds)," outcome IDs took ",
         signif(delta, 3), " ",
         attr(delta, "units")
       )
