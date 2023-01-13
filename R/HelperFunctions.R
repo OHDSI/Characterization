@@ -219,3 +219,16 @@
     add = errorMessages
   )
 }
+
+
+
+.checkCovariateSettings <- function(
+    covariateSettings,
+  errorMessages
+) {
+  checkmate::assertClass(
+    x = covariateSettings,
+    classes = "covariateSettings",
+    add = errorMessages
+  )
+}

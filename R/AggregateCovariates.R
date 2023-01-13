@@ -35,9 +35,34 @@ createAggregateCovariateSettings <- function(
   covariateSettings
 ){
 
-  # check cohortIds is a vector of int/double
 
+  errorMessages <- checkmate::makeAssertCollection()
+  # check targetIds is a vector of int/double
+  .checkCohortIds(
+    cohortIds = targetIds,
+    type = 'target',
+    errorMessages = errorMessages
+  )
   # check outcomeIds is a vector of int/double
+  .checkCohortIds(
+    cohortIds = outcomeIds,
+    type = 'outcome',
+    errorMessages = errorMessages
+  )
+
+  # check TAR
+  .checkTimeAtRisk(
+    riskWindowStart = riskWindowStart,
+    startAnchor = startAnchor,
+    riskWindowEnd = riskWindowEnd,
+    endAnchor = endAnchor,
+    errorMessages = errorMessages
+  )
+  # check covariateSettings
+  .checkCovariateSettings(
+    covariateSettings = covariateSettings,
+    errorMessages = errorMessages
+  )
 
   #check TAR
 
