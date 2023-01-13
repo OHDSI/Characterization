@@ -32,7 +32,6 @@ Suggests:
 	markdown,
 	withr
 Remotes:
-  ohdsi/Andromeda,
 	ohdsi/FeatureExtraction,
 	ohdsi/Eunomia
 NeedsCompilation: no
