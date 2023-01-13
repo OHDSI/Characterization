@@ -45,6 +45,29 @@ createDechallengeRechallengeSettings <- function(
     type = 'outcome',
     errorMessages = errorMessages
   )
+
+  # check dechallengeStopInterval is numeric
+  checkmate::assertNumeric(
+    x = dechallengeStopInterval,
+    lower = 0,
+    finite = TRUE,
+    any.missing = FALSE,
+    len = 1,
+    .var.name = 'dechallengeStopInterval',
+    add = errorMessages
+  )
+
+  # check dechallengeEvaluationWindowl is numeric
+  checkmate::assertNumeric(
+    x = dechallengeEvaluationWindow,
+    lower = 0,
+    finite = TRUE,
+    any.missing = FALSE,
+    len = 1,
+    .var.name = 'dechallengeEvaluationWindow',
+    add = errorMessages
+  )
+
   checkmate::reportAssertions(errorMessages)
 
   # create data.frame with all combinations

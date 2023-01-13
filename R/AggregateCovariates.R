@@ -49,9 +49,20 @@ createAggregateCovariateSettings <- function(
     errorMessages = errorMessages
   )
 
-  # TODO check TAR
-
-  # TODO check covariateSettings
+  # check TAR
+  .checkTimeAtRisk(
+    riskWindowStart = riskWindowStart,
+    startAnchor = startAnchor,
+    riskWindowEnd = riskWindowEnd,
+    endAnchor = endAnchor,
+    errorMessages = errorMessages
+  )
+  
+  # check covariateSettings
+  .checkCovariateSettings(
+    covariateSettings = covariateSettings,
+    errorMessages = errorMessages
+  )
 
   checkmate::reportAssertions(errorMessages)
 
