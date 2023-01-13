@@ -79,7 +79,7 @@ saveCharacterizationSettings <- function(
     fileName = fileName
   )
 
-  return(fileName)
+  invisible(fileName)
 }
 
 #' Load the characterization settings previously saved as a json file
@@ -177,40 +177,51 @@ runCharacterizationAnalyses <- function(
 
   if (!is.null(characterizationSettings$timeToEventSettings)) {
     for (i in 1:length(characterizationSettings$timeToEventSettings)) {
+
       message("Running time to event analysis ", i)
-      result <- computeTimeToEventAnalyses(
-        connectionDetails = connectionDetails,
-        targetDatabaseSchema = targetDatabaseSchema,
-        targetTable = targetTable,
-        outcomeDatabaseSchema = outcomeDatabaseSchema,
-        outcomeTable = outcomeTable,
-        tempEmulationSchema = tempEmulationSchema,
-        cdmDatabaseSchema = cdmDatabaseSchema,
-        timeToEventSettings = characterizationSettings$timeToEventSettings[[i]],
-        databaseId = databaseId
+
+      result <- tryCatch(
+        {
+          computeTimeToEventAnalyses(
+            connectionDetails = connectionDetails,
+            targetDatabaseSchema = targetDatabaseSchema,
+            targetTable = targetTable,
+            outcomeDatabaseSchema = outcomeDatabaseSchema,
+            outcomeTable = outcomeTable,
+            tempEmulationSchema = tempEmulationSchema,
+            cdmDatabaseSchema = cdmDatabaseSchema,
+            timeToEventSettings = characterizationSettings$timeToEventSettings[[i]],
+            databaseId = databaseId
+          )
+        },
+        error = function(e) {
+          message(e);
+          return(NULL)
+        }
       )
 
-      append <- file.exists(file.path(saveDirectory, "tracker.csv"))
+      if (!is.null(result)) {
+        # log that run was sucessful
+        readr::write_csv(
+          x = data.frame(
+            analysis_type = "timeToEvent",
+            run_id = i,
+            database_id = databaseId,
+            date_time = as.character(Sys.time())
+          ),
+          file = file.path(saveDirectory, "tracker.csv"),
+          append = file.exists(file.path(saveDirectory, "tracker.csv"))
+        )
 
-      # log that run was successful
-      readr::write_csv(
-        x = data.frame(
-          analysis_type = "timeToEvent",
-          run_id = i,
-          database_id = databaseId,
-          date_time = as.character(Sys.time())
-        ),
-        file = file.path(saveDirectory, "tracker.csv"),
-        append = append
-      )
+        insertAndromedaToDatabase(
+          connection = conn,
+          databaseSchema = "main",
+          tableName = "time_to_event",
+          andromedaObject = result$timeToEvent,
+          tablePrefix = tablePrefix
+        )
+      }
 
-      insertAndromedaToDatabase(
-        connection = conn,
-        databaseSchema = "main",
-        tableName = "time_to_event",
-        andromedaObject = result$timeToEvent,
-        tablePrefix = tablePrefix
-      )
     }
   }
 
@@ -247,7 +258,7 @@ runCharacterizationAnalyses <- function(
             date_time = as.character(Sys.time())
           ),
           file = file.path(saveDirectory, "tracker.csv"),
-          append = append
+          append = file.exists(file.path(saveDirectory, "tracker.csv"))
         )
 
         insertAndromedaToDatabase(
@@ -292,7 +303,7 @@ runCharacterizationAnalyses <- function(
             date_time = as.character(Sys.time())
           ),
           file = file.path(saveDirectory, "tracker.csv"),
-          append = append
+          append = file.exists(file.path(saveDirectory, "tracker.csv"))
         )
 
         insertAndromedaToDatabase(
@@ -342,7 +353,7 @@ runCharacterizationAnalyses <- function(
             date_time = as.character(Sys.time())
           ),
           file = file.path(saveDirectory, "tracker.csv"),
-          append = append
+          append = file.exists(file.path(saveDirectory, "tracker.csv"))
         )
 
         insertAndromedaToDatabase(
@@ -350,6 +361,14 @@ runCharacterizationAnalyses <- function(
           databaseSchema = "main",
           tableName = "settings",
           andromedaObject = result$settings,
+          tablePrefix = tablePrefix
+        )
+
+        insertAndromedaToDatabase(
+          connection = conn,
+          databaseSchema = "main",
+          tableName = "cohort_details",
+          andromedaObject = result$cohortDetails,
           tablePrefix = tablePrefix
         )
 

@@ -310,7 +310,7 @@ This will create an SQLITE database with all the analyses saved into the saveDir
 ```{r eval=FALSE}
 connectionDetailsT <- DatabaseConnector::createConnectionDetails(
   dbms = 'sqlite',
-  server = file.path(tempdir(),'example','sqliteCharacterization', 'sqlite')
+  server = file.path(tempdir(),'example','sqliteCharacterization', 'sqlite.sqlite')
 )
 
 exportDatabaseToCsv(

@@ -65,8 +65,20 @@ test_that("computeAggregateCovariateAnalyses", {
       "analysisRef",
       "covariateRef",
       "covariates",
-      "covariatesContinuous"
-    )) == 4
+      "covariatesContinuous",
+      "settings",
+      "cohortDetails"
+    )) == 6
+  )
+
+  # check cohortDetails
+  testthat::expect_true(
+    length(unique(as.data.frame(agc$cohortDetails)$cohortDefinitionId)) ==
+      nrow(as.data.frame(agc$cohortDetails))
+  )
+
+  testthat::expect_true(
+    nrow(as.data.frame(agc$cohortDetails)) == 13 # 4 T/Os, 3 TnO, 3 TnOc, 3 OnT
   )
 
   # test saving/loading

@@ -4,6 +4,8 @@ Characterization
 [![Build Status](https://github.com/OHDSI/Characterization/workflows/R-CMD-check/badge.svg)](https://github.com/OHDSI/Characterization/actions?query=workflow%3AR-CMD-check)
 [![codecov.io](https://codecov.io/github/OHDSI/Characterization/coverage.svg?branch=main)](https://codecov.io/github/OHDSI/Characterization?branch=main)
 
+Characterization is part of [HADES](https://ohdsi.github.io/Hades/).
+
 
 Introduction
 ============

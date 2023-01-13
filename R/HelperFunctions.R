@@ -29,11 +29,20 @@
   connectionDetails,
   errorMessages
   ) {
+  if (is(connectionDetails, "connectionDetails")) {
   checkmate::assertClass(
     x = connectionDetails,
     classes = "connectionDetails",
     add = errorMessages
     )
+  } else {
+    checkmate::assertClass(
+      x = connectionDetails,
+      classes = "ConnectionDetails",
+      add = errorMessages
+    )
+
+  }
 }
 
 .checkDechallengeRechallengeSettings <- function(

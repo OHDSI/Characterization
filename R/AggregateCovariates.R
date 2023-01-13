@@ -35,7 +35,6 @@ createAggregateCovariateSettings <- function(
   covariateSettings
 ){
 
-
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
   .checkCohortIds(
@@ -58,13 +57,14 @@ createAggregateCovariateSettings <- function(
     endAnchor = endAnchor,
     errorMessages = errorMessages
   )
+  
   # check covariateSettings
   .checkCovariateSettings(
     covariateSettings = covariateSettings,
     errorMessages = errorMessages
   )
 
-  #check TAR
+  checkmate::reportAssertions(errorMessages)
 
   # create list
   result <- list(
@@ -111,6 +111,7 @@ computeAggregateCovariateAnalyses <- function(
 ) {
 
   # check inputs
+
   start <- Sys.time()
 
   connection <- DatabaseConnector::connect(
@@ -175,64 +176,28 @@ computeAggregateCovariateAnalyses <- function(
         )
   }
 
-  # settings:
-  # run_id, database_id, covariate_setting_json,
-  # riskWindowStart, startAnchor, riskWindowEnd, endAnchor
-  # combined_cohort_id, target_cohort_id, outcome_cohort_id,
-  # type
+# cohort details:
 
-
-  result$settings <- DatabaseConnector::querySql(
+  result$cohortDetails <- DatabaseConnector::querySql(
     connection = connection,
     sql = SqlRender::translate(
-    sql = "
-    select distinct
-    cohort_definition_id as combined_cohort_id,
-    target_id as target_cohort_id,
-    outcome_id as outcome_cohort_id,
-    cohort_type
-    from #target_with_outcome
-
-    union
-
-    select distinct
-    cohort_definition_id as combined_cohort_id,
-    target_id as target_cohort_id,
-    outcome_id as outcome_cohort_id,
-    cohort_type
-    from #target_nooutcome
-
-    union
-
-    select distinct
-    cohort_definition_id + 2 as combined_cohort_id,
-    target_id as target_cohort_id,
-    outcome_id as outcome_cohort_id,
-    'OnT' as cohort_type
-    from #target_with_outcome
-
-    union
-
-    select distinct
-    cohort_definition_id*100000 as combined_cohort_id,
-    cohort_definition_id as target_cohort_id,
-    0 as outcome_cohort_id,
-    'T' as cohort_type
-    from #targets_agg
-
- union
-
- select distinct
-    cohort_definition_id*100000 as combined_cohort_id,
-    0 as target_cohort_id,
-    cohort_definition_id as outcome_cohort_id,
-    'O' as cohort_type
-    from #outcomes_agg
-    ;",
+    sql = " select * from #cohort_details;",
     targetDialect = connectionDetails$dbms
     ),
     snakeCaseToCamelCase = T
-  )
+  ) %>%
+    dplyr::mutate(
+      runId = !!runId,
+      databaseId = !!databaseId
+    ) %>%
+    dplyr::relocate(
+      "databaseId",
+      "runId"
+    )
+
+  # settings:
+  # run_id, database_id, covariate_setting_json,
+  # riskWindowStart, startAnchor, riskWindowEnd, endAnchor
 
   covariateSettingsJson <- as.character(
     ParallelLogger::convertSettingsToJson(
@@ -240,15 +205,14 @@ computeAggregateCovariateAnalyses <- function(
     )
   )
 
-  result$settings <- result$settings %>%
-    dplyr::mutate(
-      runId = !!runId,
-      databaseId = !!databaseId,
-      covariateSettingJson = !!covariateSettingsJson,
-      riskWindowStart = !!aggregateCovariateSettings$riskWindowStart,
-      startAnchor = !!aggregateCovariateSettings$startAnchor,
-      riskWindowEnd = !!aggregateCovariateSettings$riskWindowEnd ,
-      endAnchor = !!aggregateCovariateSettings$endAnchor
+  result$settings <- data.frame(
+      runId = runId,
+      databaseId = databaseId,
+      covariateSettingJson = covariateSettingsJson,
+      riskWindowStart = aggregateCovariateSettings$riskWindowStart,
+      startAnchor = aggregateCovariateSettings$startAnchor,
+      riskWindowEnd = aggregateCovariateSettings$riskWindowEnd ,
+      endAnchor = aggregateCovariateSettings$endAnchor
     )
 
   sql <- SqlRender::loadRenderTranslateSql(
