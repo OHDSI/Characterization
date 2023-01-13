@@ -45,6 +45,29 @@ createDechallengeRechallengeSettings <- function(
     type = 'outcome',
     errorMessages = errorMessages
   )
+
+  # check dechallengeStopInterval is numeric
+  checkmate::assertNumeric(
+    x = dechallengeStopInterval,
+    lower = 0,
+    finite = TRUE,
+    any.missing = FALSE,
+    len = 1,
+    .var.name = 'dechallengeStopInterval',
+    add = errorMessages
+  )
+
+  # check dechallengeEvaluationWindowl is numeric
+  checkmate::assertNumeric(
+    x = dechallengeEvaluationWindow,
+    lower = 0,
+    finite = TRUE,
+    any.missing = FALSE,
+    len = 1,
+    .var.name = 'dechallengeEvaluationWindow',
+    add = errorMessages
+  )
+
   checkmate::reportAssertions(errorMessages)
 
   # create data.frame with all combinations
@@ -84,7 +107,7 @@ computeDechallengeRechallengeAnalyses <- function(
 
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
-  .checkConnectionDetails(connectionDetails)
+  .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
     cohortDatabaseSchema = targetDatabaseSchema,
     cohortTable = targetTable,
@@ -215,7 +238,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
 
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
-  .checkConnectionDetails(connectionDetails)
+  .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
     cohortDatabaseSchema = targetDatabaseSchema,
     cohortTable = targetTable,
@@ -306,8 +329,8 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     message(
       paste0(
         "Computing dechallenge failed case series for ",
-        length(dechallengeRechallengeSettings$targetCohortDefinitionIds), " target ids and ",
-        length(dechallengeRechallengeSettings$outcomeCohortDefinitionIds),"outcome ids took ",
+        length(dechallengeRechallengeSettings$targetCohortDefinitionIds), " target IDs and ",
+        length(dechallengeRechallengeSettings$outcomeCohortDefinitionIds)," outcome IDs took ",
         signif(delta, 3), " ",
         attr(delta, "units")
       )

@@ -126,7 +126,8 @@ test_that("runCharacterizationAnalyses", {
     file.exists(file.path(tempFolder, "tracker.csv"))
   )
   tracker <- readr::read_csv(
-    file = file.path(tempFolder, "tracker.csv")
+    file = file.path(tempFolder, "tracker.csv"),
+    show_col_types = FALSE
   )
   testthat::expect_equal(nrow(tracker), 6)
 
@@ -134,7 +135,7 @@ test_that("runCharacterizationAnalyses", {
 
   connectionDetailsT <- DatabaseConnector::createConnectionDetails(
     dbms = "sqlite",
-    server = file.path(tempFolder, "sqliteCharacterization", "sqlite.sql")
+    server = file.path(tempFolder, "sqliteCharacterization", "sqlite.sqlite")
   )
 
   exportDatabaseToCsv(
@@ -148,4 +149,28 @@ test_that("runCharacterizationAnalyses", {
   testthat::expect_true(
     length(dir(file.path(tempFolder, "csv"))) > 0
   )
+
+  # check cohort details is saved
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "csv", "cohort_details.csv"))
+  )
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "csv", "settings.csv"))
+  )
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "csv", "analysis_ref.csv"))
+  )
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "csv", "covariate_ref.csv"))
+  )
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "csv", "dechallenge_rechallenge.csv"))
+  )
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "csv", "rechallenge_fail_case_series.csv"))
+  )
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "csv", "time_to_event.csv"))
+  )
+
 })

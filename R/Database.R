@@ -30,50 +30,50 @@
 #'
 #' @export
 createSqliteDatabase <- function(
-  sqliteLocation = tempdir()
+    sqliteLocation = tempdir()
 ){
 
   sqliteLocation <- file.path(
     sqliteLocation,
     'sqliteCharacterization'
-    )
+  )
 
   if(!dir.exists(sqliteLocation )){
     dir.create(
       path = sqliteLocation,
       recursive = T
-      )
+    )
   }
 
-connectionDetails <- DatabaseConnector::createConnectionDetails(
-  dbms = 'sqlite',
-  server = file.path(sqliteLocation, 'sqlite.sql')
+  connectionDetails <- DatabaseConnector::createConnectionDetails(
+    dbms = 'sqlite',
+    server = file.path(sqliteLocation, 'sqlite.sqlite')
   )
-connection <- DatabaseConnector::connect(
-  connectionDetails = connectionDetails
+  connection <- DatabaseConnector::connect(
+    connectionDetails = connectionDetails
   )
 
-return(connection)
+  return(connection)
 }
 
 # move Andromeda to sqlite database
 insertAndromedaToDatabase <- function(
-  connection,
-  databaseSchema,
-  tableName,
-  andromedaObject,
-  tempEmulationSchema,
-  bulkLoad = T,
-  tablePrefix = 'c_'
+    connection,
+    databaseSchema,
+    tableName,
+    andromedaObject,
+    tempEmulationSchema,
+    bulkLoad = T,
+    tablePrefix = 'c_'
 ){
   errorMessages <- checkmate::makeAssertCollection()
   .checkTablePrefix(
     tablePrefix = tablePrefix,
     errorMessages = errorMessages
-    )
+  )
   checkmate::reportAssertions(errorMessages)
 
-  message('Inserting Andromeda table into Datbase table ', tablePrefix, tableName)
+  message('Inserting Andromeda table into database table ', tablePrefix, tableName)
 
   Andromeda::batchApply(
     tbl = andromedaObject,
@@ -120,28 +120,28 @@ insertAndromedaToDatabase <- function(
 #'
 #' @export
 createCharacterizationTables <- function(
-  conn,
-  resultSchema,
-  targetDialect = 'postgresql',
-  deleteExistingTables = T,
-  createTables = T,
-  tablePrefix = 'c_',
-  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
+    conn,
+    resultSchema,
+    targetDialect = 'postgresql',
+    deleteExistingTables = T,
+    createTables = T,
+    tablePrefix = 'c_',
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
 ){
   errorMessages <- checkmate::makeAssertCollection()
   .checkTablePrefix(
     tablePrefix = tablePrefix,
     errorMessages = errorMessages
-    )
+  )
   checkmate::reportAssertions(errorMessages)
 
 
   if(deleteExistingTables){
     message('Deleting existing tables')
     tables <- getResultTables()
-    tables <- paste0(toupper(tablePrefix),tables)
+    tables <- paste0(tablePrefix, tables)
 
-    alltables <- toupper(
+    alltables <- tolower(
       DatabaseConnector::getTableNames(
         connection = conn,
         databaseSchema = resultSchema
@@ -164,7 +164,7 @@ createCharacterizationTables <- function(
         DatabaseConnector::executeSql(
           connection = conn,
           sql = sql
-          )
+        )
 
         sql <- 'DROP TABLE @my_schema.@table'
         sql <- SqlRender::render(
@@ -180,7 +180,7 @@ createCharacterizationTables <- function(
         DatabaseConnector::executeSql(
           connection = conn,
           sql = sql
-          )
+        )
       }
 
     }
@@ -201,7 +201,9 @@ createCharacterizationTables <- function(
     DatabaseConnector::executeSql(
       connection = conn,
       sql = renderedSql
-      )
+    )
+
+    # add database migration here in the future
   }
 
 }
@@ -228,20 +230,21 @@ createCharacterizationTables <- function(
 #'
 #' @export
 exportDatabaseToCsv <- function(
-  connectionDetails,
-  resultSchema,
-  targetDialect,
-  tablePrefix = "c_",
-  filePrefix = NULL,
-  tempEmulationSchema = NULL,
-  saveDirectory
+    connectionDetails,
+    resultSchema,
+    targetDialect,
+    tablePrefix = "c_",
+    filePrefix = NULL,
+    tempEmulationSchema = NULL,
+    saveDirectory
 ){
 
   errorMessages <- checkmate::makeAssertCollection()
+  .checkConnectionDetails(connectionDetails, errorMessages)
   .checkTablePrefix(
     tablePrefix = tablePrefix,
     errorMessages = errorMessages
-    )
+  )
   checkmate::reportAssertions(errorMessages)
 
   if (is.null(filePrefix)) {
@@ -251,17 +254,17 @@ exportDatabaseToCsv <- function(
   # connect to result database
   connection <- DatabaseConnector::connect(
     connectionDetails = connectionDetails
-    )
+  )
   on.exit(
     DatabaseConnector::disconnect(connection)
-    )
+  )
 
   # create the folder to save the csv files
   if(!dir.exists(saveDirectory)){
     dir.create(
       path = saveDirectory,
       recursive = T
-      )
+    )
   }
 
   # get the table names using the function in uploadToDatabase.R
@@ -280,18 +283,18 @@ exportDatabaseToCsv <- function(
       sql = sql,
       targetDialect = targetDialect,
       tempEmulationSchema = tempEmulationSchema
-      )
+    )
     result <- DatabaseConnector::querySql(
       connection = connection,
       sql = sql,
       snakeCaseToCamelCase = F
-      )
+    )
     result <- formatDouble(result)
 
     # save the results as a csv
     readr::write_csv(
       x = result,
-      file = file.path(saveDirectory, paste0(tolower(filePrefix), tolower(table),'.csv'))
+      file = file.path(saveDirectory, paste0(tolower(filePrefix), table,'.csv'))
     )
   }
 
@@ -300,15 +303,15 @@ exportDatabaseToCsv <- function(
 
 getResultTables <- function(){
   return(
-    unique(toupper(
+    unique(
       readr::read_csv(
         file = system.file(
           'settings',
           'resultsDataModelSpecification.csv',
           package = 'Characterization'
-        )
+        ),
+        show_col_types = FALSE
       )$table_name
-    )
     )
   )
 }

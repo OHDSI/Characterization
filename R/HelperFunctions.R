@@ -29,11 +29,20 @@
   connectionDetails,
   errorMessages
   ) {
+  if (is(connectionDetails, "connectionDetails")) {
   checkmate::assertClass(
     x = connectionDetails,
     classes = "connectionDetails",
     add = errorMessages
     )
+  } else {
+    checkmate::assertClass(
+      x = connectionDetails,
+      classes = "ConnectionDetails",
+      add = errorMessages
+    )
+
+  }
 }
 
 .checkDechallengeRechallengeSettings <- function(
@@ -216,6 +225,19 @@
     x = tablePrefix,
     len = 1,
     null.ok = TRUE,
+    add = errorMessages
+  )
+}
+
+
+
+.checkCovariateSettings <- function(
+    covariateSettings,
+  errorMessages
+) {
+  checkmate::assertClass(
+    x = covariateSettings,
+    classes = "covariateSettings",
     add = errorMessages
   )
 }

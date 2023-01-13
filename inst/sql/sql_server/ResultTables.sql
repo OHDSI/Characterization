@@ -62,8 +62,14 @@ CREATE TABLE @my_schema.@table_prefixsettings (
     risk_window_start int,
     start_anchor varchar(15),
     risk_window_end int,
-    end_anchor varchar(15),
-    combined_cohort_id int,
+    end_anchor varchar(15)
+);
+
+-- added this table
+CREATE TABLE @my_schema.@table_prefixcohort_details (
+    run_id int NOT NULL,
+    database_id varchar(100),
+    cohort_definition_id int,
     target_cohort_id int,
     outcome_cohort_id int,
     cohort_type varchar(10)

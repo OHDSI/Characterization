@@ -82,11 +82,13 @@ covariates_continuous,p_90_value,float,Y,N,N,N,N,The 90th percentile
 settings,run_id,int,Y,Y,N,N,N,The run identifier
 settings,database_id,varchar(100),Y,Y,N,N,N,The database identifier
 settings,covariate_setting_json,varchar(max),Y,N,N,N,N,The covariate settings JSON
-settings,combined_cohort_id,int,Y,N,N,N,N,The combined cohort id
-settings,cohort_type,varchar(10),Y,N,N,N,N,The cohort type
-settings,target_cohort_id,int,Y,N,N,N,N,The target cohort id
-settings,outcome_cohort_id,int,Y,N,N,N,N,The outcome cohort id
 settings,risk_window_start,int,Y,N,N,N,N,The risk window start
 settings,risk_window_end,int,Y,N,N,N,N,The risk window end
 settings,start_anchor,varchar(15),Y,N,N,N,N,The start anchor
 settings,end_anchor,varchar(15),Y,N,N,N,N,The end anchor
+cohort_details,run_id,int,Y,Y,N,N,N,The run identifier
+cohort_details,database_id,varchar(100),Y,Y,N,N,N,The database identifier
+cohort_details,cohort_definition_id,int,Y,N,N,N,N,The study cohort id
+cohort_details,cohort_type,varchar(10),Y,N,N,N,N,The cohort type
+cohort_details,target_cohort_id,int,Y,N,N,N,N,The target cohort id
+cohort_details,outcome_cohort_id,int,Y,N,N,N,N,The outcome cohort id

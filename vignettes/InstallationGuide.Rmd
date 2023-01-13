@@ -61,7 +61,6 @@ Note that the latest develop branch could contain bugs, please report them to us
 To install using `remotes` run:
 ```{r, echo = TRUE, message = FALSE, warning = FALSE,tidy=FALSE,eval=FALSE}
 install.packages("remotes")
-remotes::install_github("OHDSI/FeatureExtraction")
 remotes::install_github("OHDSI/Characterization")
 ```
 
