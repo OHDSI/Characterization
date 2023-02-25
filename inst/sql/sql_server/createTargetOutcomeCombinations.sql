@@ -143,7 +143,7 @@ from #target_with_outcome tno
 INNER JOIN #cohort_details cd
 on cd.target_cohort_id = tno.target_cohort_id
 and cd.outcome_cohort_id = tno.outcome_cohort_id
-and cd.cohort_type = 'TnOc'
+and cd.cohort_type = 'OnT'
 
 union
 
