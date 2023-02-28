@@ -100,6 +100,7 @@ CREATE TABLE @my_schema.@table_prefixcovariates (
     run_id int NOT NULL,
     database_id varchar(100) NOT NULL,
     cohort_definition_id int NOT NULL,
+    time_id INT NULL,
     covariate_id int NOT NULL,
     sum_value int NOT NULL,
     average_value float NOT NULL
@@ -109,6 +110,7 @@ CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
     run_id int NOT NULL,
     database_id varchar(100) NOT NULL,
     cohort_definition_id int NOT NULL,
+    time_id INT NULL,
     covariate_id int NOT NULL,
     count_value int NOT NULL,
     min_value float,
@@ -120,4 +122,12 @@ CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
     p_25_value float,
     p_75_value float,
     p_90_value float
+);
+
+CREATE TABLE @my_schema.@table_prefixtime_ref (
+    run_id int NOT NULL,
+    database_id varchar(100) NOT NULL,
+    time_id INT NOT NULL,
+    start_day BIGINT NOT NULL,
+    end_day BIGINT NOT NULL
 );
