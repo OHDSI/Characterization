@@ -92,3 +92,8 @@ cohort_details,cohort_definition_id,int,Y,N,N,N,The study cohort id
 cohort_details,cohort_type,varchar(10),Y,N,N,N,The cohort type
 cohort_details,target_cohort_id,int,Y,N,N,N,The target cohort id
 cohort_details,outcome_cohort_id,int,Y,N,N,N,The outcome cohort id
+time_ref,run_id,int,Y,Y,N,N,The run identifier
+time_ref,database_id,varchar(100),Y,Y,N,N,The database identifier
+time_ref,time_id,int,Yes,Yes,No,Yes,No,No,No
+time_ref,start_day,int,Y,N,N,N,The start day
+time_ref,end_day,int,Y,N,N,N,The end day

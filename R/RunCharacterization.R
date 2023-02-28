@@ -406,6 +406,16 @@ runCharacterizationAnalyses <- function(
             tablePrefix = tablePrefix
           )
         }
+
+        if (!is.null(result$timeRef)) {
+          insertAndromedaToDatabase(
+            connection = conn,
+            databaseSchema = "main",
+            tableName = "time_ref",
+            andromedaObject = result$timeRef,
+            tablePrefix = tablePrefix
+          )
+        }
       }
     }
   }
