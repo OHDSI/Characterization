@@ -344,7 +344,7 @@ runCharacterizationAnalyses <- function(
       )
 
       if (!is.null(result)) {
-        # log that run was sucessful
+        # log that run was successful
         readr::write_csv(
           x = data.frame(
             analysis_type = "aggregateCovariates",
