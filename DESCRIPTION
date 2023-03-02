@@ -18,6 +18,7 @@ Imports:
   Andromeda,
 	DatabaseConnector (>= 5.0.4),
 	FeatureExtraction  (>= 3.0.0),
+	methods,
 	SqlRender (>= 1.9.0),
 	ParallelLogger (>= 3.0.0),
 	checkmate,
