@@ -244,7 +244,7 @@ createCohortsOfInterest <- function(
 ){
 
   tableExists <- DatabaseConnector::existsTable(
-    conneciton = connection,
+    connection = connection,
     databaseSchema = NULL,
     tableName = '#agg_cohorts'
   )
