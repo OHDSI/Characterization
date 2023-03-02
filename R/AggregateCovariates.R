@@ -57,7 +57,7 @@ createAggregateCovariateSettings <- function(
     endAnchor = endAnchor,
     errorMessages = errorMessages
   )
-  
+
   # check covariateSettings
   .checkCovariateSettings(
     covariateSettings = covariateSettings,
@@ -243,6 +243,16 @@ createCohortsOfInterest <- function(
   tempEmulationSchema
 ){
 
+  tableExists <- DatabaseConnector::existsTable(
+    conneciton = connection,
+    databaseSchema = NULL,
+    tableName = '#agg_cohorts'
+  )
+
+  if (tableExists) {
+    return(NULL)
+  }
+
   sql <- SqlRender::loadRenderTranslateSql(
     sqlFilename = "createTargetOutcomeCombinations.sql",
     packageName = "Characterization",
@@ -268,10 +278,11 @@ createCohortsOfInterest <- function(
       )
   )
 
+  rlang::inform("Creating cohorts of interest from Target and Outcome cohorts.")
   DatabaseConnector::executeSql(
     connection = connection,
     sql = sql,
-    progressBar = FALSE,
+    progressBar = TRUE,
     reportOverallTime = FALSE
   )
 

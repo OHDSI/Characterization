@@ -344,7 +344,7 @@ runCharacterizationAnalyses <- function(
       )
 
       if (!is.null(result)) {
-        # log that run was sucessful
+        # log that run was successful
         readr::write_csv(
           x = data.frame(
             analysis_type = "aggregateCovariates",
@@ -403,6 +403,16 @@ runCharacterizationAnalyses <- function(
             databaseSchema = "main",
             tableName = "covariates_continuous",
             andromedaObject = result$covariatesContinuous,
+            tablePrefix = tablePrefix
+          )
+        }
+
+        if (!is.null(result$timeRef)) {
+          insertAndromedaToDatabase(
+            connection = conn,
+            databaseSchema = "main",
+            tableName = "time_ref",
+            andromedaObject = result$timeRef,
             tablePrefix = tablePrefix
           )
         }
