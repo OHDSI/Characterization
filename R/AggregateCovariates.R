@@ -84,6 +84,7 @@ createAggregateCovariateSettings <- function(
 #' Compute aggregate covariate study
 #'
 #' @template ConnectionDetails
+#' @template Connection
 #' @param cdmDatabaseSchema The schema with the OMOP CDM data
 #' @param cdmVersion  The version of the OMOP CDM
 #' @template TargetOutcomeTables
@@ -98,6 +99,7 @@ createAggregateCovariateSettings <- function(
 #' @export
 computeAggregateCovariateAnalyses <- function(
   connectionDetails = NULL,
+  connection = NULL,
   cdmDatabaseSchema,
   cdmVersion = 5,
   targetDatabaseSchema,
@@ -114,12 +116,15 @@ computeAggregateCovariateAnalyses <- function(
 
   start <- Sys.time()
 
-  connection <- DatabaseConnector::connect(
-    connectionDetails = connectionDetails
-  )
-  on.exit(
-    DatabaseConnector::disconnect(connection)
-    )
+  # Set up connection to server ----------------------------------------------------
+  if (is.null(connection)) {
+    if (!is.null(connectionDetails)) {
+      connection <- DatabaseConnector::connect(connectionDetails)
+      on.exit(DatabaseConnector::disconnect(connection))
+    } else {
+      stop("No connection or connectionDetails provided.")
+    }
+  }
 
   # select T, O, create TnO, TnOc, Onprior T
   # into temp table #agg_cohorts

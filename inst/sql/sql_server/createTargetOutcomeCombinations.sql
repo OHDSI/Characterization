@@ -113,6 +113,7 @@ where two.subject_id IS NULL;
 
 -- Final: select into #agg_cohorts
 
+drop table if exists #agg_cohorts;
 select * into #agg_cohorts
 
 from

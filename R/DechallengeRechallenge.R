@@ -85,6 +85,7 @@ createDechallengeRechallengeSettings <- function(
 #' Compute dechallenge rechallenge study
 #'
 #' @template ConnectionDetails
+#' @template Connection
 #' @template TargetOutcomeTables
 #' @template TempEmulationSchema
 #' @param dechallengeRechallengeSettings   The settings for the timeToEvent study
@@ -96,6 +97,7 @@ createDechallengeRechallengeSettings <- function(
 #' @export
 computeDechallengeRechallengeAnalyses <- function(
   connectionDetails = NULL,
+  connection = NULL,
   targetDatabaseSchema,
   targetTable,
   outcomeDatabaseSchema = targetDatabaseSchema,
@@ -105,9 +107,19 @@ computeDechallengeRechallengeAnalyses <- function(
   databaseId = 'database 1'
 ) {
 
+  # Set up connection to server ----------------------------------------------------
+  if (is.null(connection)) {
+    if (!is.null(connectionDetails)) {
+      .checkConnectionDetails(connectionDetails)
+      connection <- DatabaseConnector::connect(connectionDetails)
+      on.exit(DatabaseConnector::disconnect(connection))
+    } else {
+      stop("No connection or connectionDetails provided.")
+    }
+  }
+
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
-  .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
     cohortDatabaseSchema = targetDatabaseSchema,
     cohortTable = targetTable,
@@ -138,13 +150,6 @@ computeDechallengeRechallengeAnalyses <- function(
     message("Inputs checked")
 
     start <- Sys.time()
-
-    connection <- DatabaseConnector::connect(
-      connectionDetails = connectionDetails
-    )
-    on.exit(
-      DatabaseConnector::disconnect(connection)
-      )
 
     message("Computing dechallenge rechallenge results")
     sql <- SqlRender::loadRenderTranslateSql(
@@ -214,6 +219,7 @@ computeDechallengeRechallengeAnalyses <- function(
 #' Compute fine the subjects that fail the dechallenge rechallenge study
 #'
 #' @template ConnectionDetails
+#' @template Connection
 #' @template TargetOutcomeTables
 #' @template TempEmulationSchema
 #' @param dechallengeRechallengeSettings   The settings for the timeToEvent study
@@ -226,6 +232,7 @@ computeDechallengeRechallengeAnalyses <- function(
 #' @export
 computeRechallengeFailCaseSeriesAnalyses <- function(
   connectionDetails = NULL,
+  connection = NULL,
   targetDatabaseSchema,
   targetTable,
   outcomeDatabaseSchema = targetDatabaseSchema,
@@ -236,9 +243,19 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
   showSubjectId = F
 ) {
 
+  # Set up connection to server ----------------------------------------------------
+  if (is.null(connection)) {
+    if (!is.null(connectionDetails)) {
+      .checkConnectionDetails(connectionDetails)
+      connection <- DatabaseConnector::connect(connectionDetails)
+      on.exit(DatabaseConnector::disconnect(connection))
+    } else {
+      stop("No connection or connectionDetails provided.")
+    }
+  }
+
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
-  .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
     cohortDatabaseSchema = targetDatabaseSchema,
     cohortTable = targetTable,
@@ -267,13 +284,6 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     message("Inputs checked")
 
     start <- Sys.time()
-
-    connection <- DatabaseConnector::connect(
-      connectionDetails = connectionDetails
-    )
-    on.exit(
-      DatabaseConnector::disconnect(connection)
-      )
 
     message("Computing dechallenge rechallenge results")
     sql <- SqlRender::loadRenderTranslateSql(

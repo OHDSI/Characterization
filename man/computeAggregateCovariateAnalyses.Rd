@@ -6,6 +6,7 @@
 \usage{
 computeAggregateCovariateAnalyses(
   connectionDetails = NULL,
+  connection = NULL,
   cdmDatabaseSchema,
   cdmVersion = 5,
   targetDatabaseSchema,
@@ -21,6 +22,9 @@ computeAggregateCovariateAnalyses(
 \arguments{
 \item{connectionDetails}{An object of type `connectionDetails` as created using the
 [DatabaseConnector::createConnectionDetails()] function.}
+
+\item{connection}{An object of type `connection` as created using the
+[DatabaseConnector::connect()] function.}
 
 \item{cdmDatabaseSchema}{The schema with the OMOP CDM data}
 

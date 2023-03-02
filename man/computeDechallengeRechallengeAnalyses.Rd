@@ -6,6 +6,7 @@
 \usage{
 computeDechallengeRechallengeAnalyses(
   connectionDetails = NULL,
+  connection = NULL,
   targetDatabaseSchema,
   targetTable,
   outcomeDatabaseSchema = targetDatabaseSchema,
@@ -18,6 +19,9 @@ computeDechallengeRechallengeAnalyses(
 \arguments{
 \item{connectionDetails}{An object of type `connectionDetails` as created using the
 [DatabaseConnector::createConnectionDetails()] function.}
+
+\item{connection}{An object of type `connection` as created using the
+[DatabaseConnector::connect()] function.}
 
 \item{targetDatabaseSchema}{Schema name where your target cohort table resides. Note that for SQL Server,
 this should include both the database and schema name, for example

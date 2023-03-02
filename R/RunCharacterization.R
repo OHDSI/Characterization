@@ -146,6 +146,7 @@ runCharacterizationAnalyses <- function(
 ) {
   # inputs checks
   errorMessages <- checkmate::makeAssertCollection()
+  .checkConnectionDetails(connectionDetails, errorMessages = errorMessages)
   .checkCharacterizationSettings(
     settings = characterizationSettings,
     errorMessages = errorMessages
@@ -159,21 +160,29 @@ runCharacterizationAnalyses <- function(
     )
 
   # create the Database
-  conn <- createSqliteDatabase(
+  connectionToSqlLite <- createSqliteDatabase(
     sqliteLocation = saveDirectory
   )
   on.exit(
-    DatabaseConnector::disconnect(conn)
+    DatabaseConnector::disconnect(connectionToSqlLite)
     )
 
   createCharacterizationTables(
-    conn = conn,
+    conn = connectionToSqlLite,
     resultSchema = "main",
     targetDialect = "sqlite",
     deleteExistingTables = T,
     createTables = T,
     tablePrefix = tablePrefix
   )
+
+  # Set up connection to server ----------------------------------------------------
+  if (!is.null(connectionDetails)) {
+    connectionToCdm <- DatabaseConnector::connect(connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connectionToCdm))
+  } else {
+    stop("No connection or connectionDetails provided.")
+  }
 
   if (!is.null(characterizationSettings$timeToEventSettings)) {
     for (i in 1:length(characterizationSettings$timeToEventSettings)) {
@@ -183,7 +192,7 @@ runCharacterizationAnalyses <- function(
       result <- tryCatch(
         {
           computeTimeToEventAnalyses(
-            connectionDetails = connectionDetails,
+            connection = connectionToCdm,
             targetDatabaseSchema = targetDatabaseSchema,
             targetTable = targetTable,
             outcomeDatabaseSchema = outcomeDatabaseSchema,
@@ -214,7 +223,7 @@ runCharacterizationAnalyses <- function(
         )
 
         insertAndromedaToDatabase(
-          connection = conn,
+          connection = connectionToSqlLite,
           databaseSchema = "main",
           tableName = "time_to_event",
           andromedaObject = result$timeToEvent,
@@ -233,6 +242,7 @@ runCharacterizationAnalyses <- function(
         {
           computeDechallengeRechallengeAnalyses(
             connectionDetails = connectionDetails,
+            connection = connectionToCdm,
             targetDatabaseSchema = targetDatabaseSchema,
             targetTable = targetTable,
             outcomeDatabaseSchema = outcomeDatabaseSchema,
@@ -262,7 +272,7 @@ runCharacterizationAnalyses <- function(
         )
 
         insertAndromedaToDatabase(
-          connection = conn,
+          connection = connectionToSqlLite,
           databaseSchema = "main",
           tableName = "dechallenge_rechallenge",
           andromedaObject = result$dechallengeRechallenge,
@@ -277,6 +287,7 @@ runCharacterizationAnalyses <- function(
         {
           computeRechallengeFailCaseSeriesAnalyses(
             connectionDetails = connectionDetails,
+            connection = connectionToCdm,
             targetDatabaseSchema = targetDatabaseSchema,
             targetTable = targetTable,
             outcomeDatabaseSchema = outcomeDatabaseSchema,
@@ -307,7 +318,7 @@ runCharacterizationAnalyses <- function(
         )
 
         insertAndromedaToDatabase(
-          connection = conn,
+          connection = connectionToSqlLite,
           databaseSchema = "main",
           tableName = "rechallenge_fail_case_series",
           andromedaObject = result$rechallengeFailCaseSeries,
@@ -326,6 +337,7 @@ runCharacterizationAnalyses <- function(
         {
           computeAggregateCovariateAnalyses(
             connectionDetails = connectionDetails,
+            connection = connectionToCdm,
             cdmDatabaseSchema = cdmDatabaseSchema,
             targetDatabaseSchema = targetDatabaseSchema,
             targetTable = targetTable,
@@ -357,7 +369,7 @@ runCharacterizationAnalyses <- function(
         )
 
         insertAndromedaToDatabase(
-          connection = conn,
+          connection = connectionToSqlLite,
           databaseSchema = "main",
           tableName = "settings",
           andromedaObject = result$settings,
@@ -365,7 +377,7 @@ runCharacterizationAnalyses <- function(
         )
 
         insertAndromedaToDatabase(
-          connection = conn,
+          connection = connectionToSqlLite,
           databaseSchema = "main",
           tableName = "cohort_details",
           andromedaObject = result$cohortDetails,
@@ -373,14 +385,14 @@ runCharacterizationAnalyses <- function(
         )
 
         insertAndromedaToDatabase(
-          connection = conn,
+          connection = connectionToSqlLite,
           databaseSchema = "main",
           tableName = "analysis_ref",
           andromedaObject = result$analysisRef,
           tablePrefix = tablePrefix
         )
         insertAndromedaToDatabase(
-          connection = conn,
+          connection = connectionToSqlLite,
           databaseSchema = "main",
           tableName = "covariate_ref",
           andromedaObject = result$covariateRef,
@@ -389,7 +401,7 @@ runCharacterizationAnalyses <- function(
 
         if (!is.null(result$covariates)) {
           insertAndromedaToDatabase(
-            connection = conn,
+            connection = connectionToSqlLite,
             databaseSchema = "main",
             tableName = "covariates",
             andromedaObject = result$covariates,
@@ -399,7 +411,7 @@ runCharacterizationAnalyses <- function(
 
         if (!is.null(result$covariatesContinuous)) {
           insertAndromedaToDatabase(
-            connection = conn,
+            connection = connectionToSqlLite,
             databaseSchema = "main",
             tableName = "covariates_continuous",
             andromedaObject = result$covariatesContinuous,
@@ -408,6 +420,17 @@ runCharacterizationAnalyses <- function(
         }
       }
     }
+    sql <- SqlRender::loadRenderTranslateSql(
+      sqlFilename = "DropAggregateCovariate.sql",
+      packageName = "Characterization",
+      dbms = connectionDetails$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    )
+    DatabaseConnector::executeSql(
+      connection = connectionToCdm,
+      sql = sql, progressBar = FALSE,
+      reportOverallTime = FALSE
+    )
   }
 
 

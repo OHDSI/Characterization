@@ -58,6 +58,7 @@ createTimeToEventSettings <- function(
 #' Compute time to event study
 #'
 #' @template ConnectionDetails
+#' @template Connection
 #' @template TargetOutcomeTables
 #' @template TempEmulationSchema
 #' @param cdmDatabaseSchema The database schema containing the OMOP CDM data
@@ -70,6 +71,7 @@ createTimeToEventSettings <- function(
 #' @export
 computeTimeToEventAnalyses <- function(
   connectionDetails = NULL,
+  connection = NULL,
   targetDatabaseSchema,
   targetTable,
   outcomeDatabaseSchema = targetDatabaseSchema,
@@ -80,9 +82,19 @@ computeTimeToEventAnalyses <- function(
   databaseId = 'database 1'
 ) {
 
+  # Set up connection to server ----------------------------------------------------
+  if (is.null(connection)) {
+    if (!is.null(connectionDetails)) {
+      .checkConnectionDetails(connectionDetails)
+      connection <- DatabaseConnector::connect(connectionDetails)
+      on.exit(DatabaseConnector::disconnect(connection))
+    } else {
+      stop("No connection or connectionDetails provided.")
+    }
+  }
+
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
-  .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
     cohortDatabaseSchema = targetDatabaseSchema,
     cohortTable = targetTable,
@@ -108,13 +120,6 @@ computeTimeToEventAnalyses <- function(
 
   if(valid){
     start <- Sys.time()
-
-    connection <- DatabaseConnector::connect(
-      connectionDetails = connectionDetails
-    )
-    on.exit(
-      DatabaseConnector::disconnect(connection)
-      )
 
     # upload table to #cohort_settings
     message("Uploading #cohort_settings")
