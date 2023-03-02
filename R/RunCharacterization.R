@@ -408,6 +408,18 @@ runCharacterizationAnalyses <- function(
         }
       }
     }
+
+    sql <- SqlRender::loadRenderTranslateSql(
+      sqlFilename = "DropAggregateCovariate.sql",
+      packageName = "Characterization",
+      dbms = connectionDetails$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    )
+    DatabaseConnector::executeSql(
+      connection = connection,
+      sql = sql, progressBar = FALSE,
+      reportOverallTime = FALSE
+    )
   }
 
 
