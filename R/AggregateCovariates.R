@@ -57,7 +57,6 @@ createAggregateCovariateSettings <- function(
     endAnchor = endAnchor,
     errorMessages = errorMessages
   )
-
   # check covariateSettings
   .checkCovariateSettings(
     covariateSettings = covariateSettings,
