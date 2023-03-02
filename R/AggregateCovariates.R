@@ -278,7 +278,7 @@ createCohortsOfInterest <- function(
       )
   )
 
-  rlang::inform("Creating cohorts of interest from Target and Outcome cohorts.")
+  rlang::inform("Creating Characterization Cohorts from Target and Outcome cohorts.")
   DatabaseConnector::executeSql(
     connection = connection,
     sql = sql,
