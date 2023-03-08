@@ -231,13 +231,18 @@
 
 
 
-.checkCovariateSettings <- function(
-    covariateSettings,
-  errorMessages
-) {
-  checkmate::assertClass(
-    x = covariateSettings,
-    classes = "covariateSettings",
-    add = errorMessages
-  )
+.checkCovariateSettings <- function(covariateSettings,
+                                    errorMessages) {
+  if (class(covariateSettings) == "covariateSettings") {
+    checkmate::assertClass(x = covariateSettings,
+                           classes = "covariateSettings",
+                           add = errorMessages)
+  } else {
+    for (j in (1:length(covariateSetting))) {
+      checkmate::assertClass(x = covariateSettings[[j]],
+                             classes = "covariateSettings",
+                             add = errorMessages)
+    }
+  }
+
 }
