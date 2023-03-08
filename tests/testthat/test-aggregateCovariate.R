@@ -41,7 +41,7 @@ test_that("createAggregateCovariateSettingsList", {
   covariateSettings2 <- FeatureExtraction::createCovariateSettings(
     useConditionOccurrenceAnyTimePrior = TRUE
   )
-  covariateSetting <- list(covariateSettings1, covariateSettings2)
+  covariateSettings <- list(covariateSettings1, covariateSettings2)
 
   res <- createAggregateCovariateSettings(
     targetIds = targetIds,
