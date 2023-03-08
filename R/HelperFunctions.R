@@ -238,7 +238,7 @@
                            classes = "covariateSettings",
                            add = errorMessages)
   } else {
-    for (j in (1:length(covariateSetting))) {
+    for (j in (1:length(covariateSettings))) {
       checkmate::assertClass(x = covariateSettings[[j]],
                              classes = "covariateSettings",
                              add = errorMessages)

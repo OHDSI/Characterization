@@ -30,6 +30,37 @@ test_that("createAggregateCovariateSettings", {
   )
 })
 
+test_that("createAggregateCovariateSettingsList", {
+  targetIds <- sample(x = 100, size = sample(10, 1))
+  outcomeIds <- sample(x = 100, size = sample(10, 1))
+  covariateSettings1 <- FeatureExtraction::createCovariateSettings(
+    useDemographicsGender = T,
+    useDemographicsAge = T,
+    useCharlsonIndex = T
+  )
+  covariateSettings2 <- FeatureExtraction::createCovariateSettings(
+    useConditionOccurrenceAnyTimePrior = TRUE
+  )
+  covariateSetting <- list(covariateSettings1, covariateSettings2)
+
+  res <- createAggregateCovariateSettings(
+    targetIds = targetIds,
+    outcomeIds = outcomeIds,
+    riskWindowStart = 1, startAnchor = "cohort start",
+    riskWindowEnd = 365, endAnchor = "cohort start",
+    covariateSettings = covariateSettings
+  )
+
+  testthat::expect_equal(
+    res$targetIds,
+    targetIds
+  )
+  testthat::expect_equal(
+    res$covariateSettings,
+    covariateSettings
+  )
+})
+
 test_that("computeAggregateCovariateAnalyses", {
   targetIds <- c(1, 2, 4)
   outcomeIds <- c(3)
