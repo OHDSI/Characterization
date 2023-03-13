@@ -30,10 +30,14 @@ Suggests:
 	kableExtra,
 	knitr,
 	markdown,
+	ResultModelManager,
+	ShinyAppBuilder,
 	withr
 Remotes:
 	ohdsi/FeatureExtraction,
-	ohdsi/Eunomia
+	ohdsi/Eunomia,
+	ohdsi/ResultModelManager,
+	ohdsi/ShinyAppBuilder
 NeedsCompilation: no
 RoxygenNote: 7.2.3
 Encoding: UTF-8
