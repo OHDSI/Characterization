@@ -107,7 +107,7 @@ viewCharacterization <- function(
   }
 
   databaseSettings <- list(
-    connectionDetailSettings = connectionDetailSettings,
+    connectionDetailsSettings = connectionDetailsSettings,
     schema = 'main',
     tablePrefix = 'c_',
     cohortTablePrefix = 'cg_',
@@ -125,10 +125,10 @@ viewChars <- function(databaseSettings){
 
   connectionDetails <- do.call(
     DatabaseConnector::createConnectionDetails,
-    databaseSettings$connectionDetailSettings
+    databaseSettings$connectionDetailsSettings
   )
   connection <- ResultModelManager::ConnectionHandler$new(connectionDetails)
-  databaseSettings$connectionDetailSettings <- NULL
+  databaseSettings$connectionDetailsSettings <- NULL
 
   # set database settings into system variables
   Sys.setenv("resultDatabaseDetails_characterization" = as.character(ParallelLogger::convertSettingsToJson(databaseSettings)))
