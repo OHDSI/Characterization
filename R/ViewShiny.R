@@ -15,6 +15,18 @@ viewCharacterization <- function(
     cohortDefinitionSet = NULL
     ) {
 
+  databaseSettings <- prepareCharacterizationShiny(
+    resultLocation = resultLocation,
+    cohortDefinitionSet = cohortDefinitionSet
+  )
+
+  viewChars(databaseSettings)
+}
+
+prepareCharacterizationShiny <- function(
+    resultLocation,
+    cohortDefinitionSet
+    ){
   server <- file.path(resultLocation, 'sqliteCharacterization', 'sqlite.sqlite')
 
   connectionDetailsSettings <- list(
@@ -93,7 +105,7 @@ viewCharacterization <- function(
            'outcomesPe', 'outcomes',
            'incidenceProportionP100p',
            'incidenceRateP100py'
-           )
+    )
     df <- data.frame(matrix(ncol = length(x), nrow = 0))
     colnames(df) <- x
 
@@ -115,11 +127,13 @@ viewCharacterization <- function(
     databaseTable = 'DATABASE_META_DATA'
   )
 
-  viewChars(databaseSettings)
-
+  return(databaseSettings)
 }
 
-viewChars <- function(databaseSettings){
+viewChars <- function(
+    databaseSettings,
+    testApp = F
+    ){
   ensure_installed("ShinyAppBuilder")
   ensure_installed("ResultModelManager")
 
@@ -140,7 +154,11 @@ viewChars <- function(databaseSettings){
     )
   )
 
-  ShinyAppBuilder::viewShiny(config = config, connection = connection)
+  if(!testApp){
+    ShinyAppBuilder::viewShiny(config = config, connection = connection)
+  } else{
+    ShinyAppBuilder::createShinyApp(config = config, connection = connection)
+  }
 }
 
 
