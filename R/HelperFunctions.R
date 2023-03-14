@@ -29,7 +29,7 @@
   connectionDetails,
   errorMessages
   ) {
-  if (is(connectionDetails, "connectionDetails")) {
+  if (inherits(connectionDetails, "connectionDetails")) {
   checkmate::assertClass(
     x = connectionDetails,
     classes = "connectionDetails",
@@ -99,7 +99,7 @@
     return()
   }
 
-  if(class(settings) == 'timeToEventSettings'){
+  if(inherits(settings,'timeToEventSettings')){
     settings <- list(settings)
   }
 
@@ -133,7 +133,7 @@
     return()
   }
 
-  if(class(settings) == 'aggregateCovariateSettings'){
+  if(inherits(settings,'aggregateCovariateSettings')){
     settings <- list(settings)
   }
 
