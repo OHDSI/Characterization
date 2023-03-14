@@ -33,6 +33,7 @@ Suggests:
 	markdown,
 	ResultModelManager,
 	ShinyAppBuilder,
+	shiny,
 	withr
 Remotes:
 	ohdsi/FeatureExtraction,

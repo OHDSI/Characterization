@@ -65,7 +65,7 @@
     return()
   }
 
-  if(class(settings) == 'dechallengeRechallengeSettings'){
+  if(inherits(settings, 'dechallengeRechallengeSettings')){
     settings <- list(settings)
   }
 
