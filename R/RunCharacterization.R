@@ -33,13 +33,13 @@ createCharacterizationSettings <- function(
     errorMessages = errorMessages
   )
 
-  if (class(timeToEventSettings) == "timeToEventSettings") {
+  if (inherits(timeToEventSettings, "timeToEventSettings")) {
     timeToEventSettings <- list(timeToEventSettings)
   }
-  if (class(dechallengeRechallengeSettings) == "dechallengeRechallengeSettings") {
+  if (inherits(dechallengeRechallengeSettings, "dechallengeRechallengeSettings")) {
     dechallengeRechallengeSettings <- list(dechallengeRechallengeSettings)
   }
-  if (class(aggregateCovariateSettings) == "aggregateCovariateSettings") {
+  if (inherits(aggregateCovariateSettings, "aggregateCovariateSettings")) {
     aggregateCovariateSettings <- list(aggregateCovariateSettings)
   }
 

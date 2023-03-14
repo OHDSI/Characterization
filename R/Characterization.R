@@ -18,6 +18,5 @@
 "_PACKAGE"
 
 #' @importFrom rlang .data
-#' @importFrom methods is
 #' @importFrom dplyr %>%
 NULL
