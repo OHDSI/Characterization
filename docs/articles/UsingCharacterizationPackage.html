@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -97,7 +97,7 @@
       <h1 data-toc-skip>Using Characterization Package</h1>
                         <h4 data-toc-skip class="author">Jenna Reps</h4>
             
-            <h4 data-toc-skip class="date">2022-12-16</h4>
+            <h4 data-toc-skip class="date">2023-03-15</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/HEAD/vignettes/UsingCharacterizationPackage.Rmd" class="external-link"><code>vignettes/UsingCharacterizationPackage.Rmd</code></a></small>
       <div class="hidden name"><code>UsingCharacterizationPackage.Rmd</code></div>
@@ -108,7 +108,7 @@
     
 <!--
 %\VignetteEngine{knitr}
-%\VignetteIndexEntry{Installation guide}
+%\VignetteIndexEntry{Using_Characterization_Package}
 -->
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
@@ -165,28 +165,28 @@ with the simulated data ready to be used.</p>
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.00556 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00634 secs</span></span></code></pre>
 <pre><code>## Creating cohort: Diclofenac
 ## 
   |                                                                            
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.00483 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00962 secs</span></span></code></pre>
 <pre><code>## Creating cohort: GiBleed
 ## 
   |                                                                            
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0104 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0088 secs</span></span></code></pre>
 <pre><code>## Creating cohort: NSAIDs
 ## 
   |                                                                            
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0512 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0492 secs</span></span></code></pre>
 <pre><code><span><span class="co">## Cohorts created in table main.cohort</span></span></code></pre>
 <pre><code><span><span class="co">##   cohortId       name</span></span>
 <span><span class="co">## 1        1  Celecoxib</span></span>
@@ -332,7 +332,767 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-100000
+1
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+237
+</td>
+<td style="text-align:right;">
+0.4947808
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+242
+</td>
+<td style="text-align:right;">
+0.5052192
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+180
+</td>
+<td style="text-align:right;">
+0.5070423
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+175
+</td>
+<td style="text-align:right;">
+0.4929577
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:right;">
+0.4596774
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+67
+</td>
+<td style="text-align:right;">
+0.5403226
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+237
+</td>
+<td style="text-align:right;">
+0.4947808
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+242
+</td>
+<td style="text-align:right;">
+0.5052192
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+894
+</td>
+<td style="text-align:right;">
+0.4966667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+906
+</td>
+<td style="text-align:right;">
+0.5033333
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+395
+</td>
+<td style="text-align:right;">
+0.4759036
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+435
+</td>
+<td style="text-align:right;">
+0.5240964
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+1289
+</td>
+<td style="text-align:right;">
+0.4901141
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+1341
+</td>
+<td style="text-align:right;">
+0.5098859
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+180
+</td>
+<td style="text-align:right;">
+0.5070423
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+175
+</td>
+<td style="text-align:right;">
+0.4929577
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:right;">
+0.4596774
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+67
+</td>
+<td style="text-align:right;">
+0.5403226
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+237
+</td>
+<td style="text-align:right;">
+0.4947808
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+242
+</td>
+<td style="text-align:right;">
+0.5052192
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+714
+</td>
+<td style="text-align:right;">
+0.4941176
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+731
+</td>
+<td style="text-align:right;">
+0.5058824
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+338
+</td>
+<td style="text-align:right;">
+0.4787535
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+368
+</td>
+<td style="text-align:right;">
+0.5212465
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+1052
+</td>
+<td style="text-align:right;">
+0.4890748
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+1099
+</td>
+<td style="text-align:right;">
+0.5109252
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+180
+</td>
+<td style="text-align:right;">
+0.5070423
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+175
+</td>
+<td style="text-align:right;">
+0.4929577
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:right;">
+0.4596774
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+67
+</td>
+<td style="text-align:right;">
+0.5403226
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+237
+</td>
+<td style="text-align:right;">
+0.4947808
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+242
+</td>
+<td style="text-align:right;">
+0.5052192
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+714
+</td>
+<td style="text-align:right;">
+0.4941176
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+731
+</td>
+<td style="text-align:right;">
+0.5058824
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+338
+</td>
+<td style="text-align:right;">
+0.4787535
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+368
+</td>
+<td style="text-align:right;">
+0.5212465
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+1052
+</td>
+<td style="text-align:right;">
+0.4890748
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+1099
+</td>
+<td style="text-align:right;">
+0.5109252
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+20
 </td>
 <td style="text-align:right;">
 8507001
@@ -352,7 +1112,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-100000
+20
 </td>
 <td style="text-align:right;">
 8532001
@@ -372,127 +1132,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-100031
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-180
-</td>
-<td style="text-align:right;">
-0.5070423
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-100031
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-175
-</td>
-<td style="text-align:right;">
-0.4929577
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-100032
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-734
-</td>
-<td style="text-align:right;">
-0.4929483
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-100032
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-755
-</td>
-<td style="text-align:right;">
-0.5070517
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-100033
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-180
-</td>
-<td style="text-align:right;">
-0.5070423
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-100033
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-175
-</td>
-<td style="text-align:right;">
-0.4929577
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-200000
+21
 </td>
 <td style="text-align:right;">
 8507001
@@ -512,7 +1152,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-200000
+21
 </td>
 <td style="text-align:right;">
 8532001
@@ -532,167 +1172,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-200031
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-57
-</td>
-<td style="text-align:right;">
-0.4596774
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-200031
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-67
-</td>
-<td style="text-align:right;">
-0.5403226
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-200032
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-350
-</td>
-<td style="text-align:right;">
-0.4820937
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-200032
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-376
-</td>
-<td style="text-align:right;">
-0.5179063
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-200033
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-57
-</td>
-<td style="text-align:right;">
-0.4596774
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-200033
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-67
-</td>
-<td style="text-align:right;">
-0.5403226
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-300000
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-237
-</td>
-<td style="text-align:right;">
-0.4947808
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-300000
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-242
-</td>
-<td style="text-align:right;">
-0.5052192
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-400000
+22
 </td>
 <td style="text-align:right;">
 8507001
@@ -712,7 +1192,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400000
+22
 </td>
 <td style="text-align:right;">
 8532001
@@ -732,7 +1212,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400031
+23
 </td>
 <td style="text-align:right;">
 8507001
@@ -752,7 +1232,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400031
+23
 </td>
 <td style="text-align:right;">
 8532001
@@ -772,16 +1252,16 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400032
+24
 </td>
 <td style="text-align:right;">
 8507001
 </td>
 <td style="text-align:right;">
-1084
+180
 </td>
 <td style="text-align:right;">
-0.4893905
+0.5070423
 </td>
 </tr>
 <tr>
@@ -792,16 +1272,16 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400032
+24
 </td>
 <td style="text-align:right;">
 8532001
 </td>
 <td style="text-align:right;">
-1131
+175
 </td>
 <td style="text-align:right;">
-0.5106095
+0.4929577
 </td>
 </tr>
 <tr>
@@ -812,7 +1292,47 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400033
+25
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:right;">
+0.4596774
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+25
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+67
+</td>
+<td style="text-align:right;">
+0.5403226
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+26
 </td>
 <td style="text-align:right;">
 8507001
@@ -832,7 +1352,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400033
+26
 </td>
 <td style="text-align:right;">
 8532001
@@ -907,7 +1427,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-200031
+3
 </td>
 <td style="text-align:right;">
 1901
@@ -951,7 +1471,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-200033
+9
 </td>
 <td style="text-align:right;">
 1901
@@ -995,13 +1515,101 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-200032
+15
 </td>
 <td style="text-align:right;">
 1901
 </td>
 <td style="text-align:right;">
-263
+41
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.4274194
+</td>
+<td style="text-align:right;">
+0.4606464
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+25
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.4274194
+</td>
+<td style="text-align:right;">
+0.4606464
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+255
 </td>
 <td style="text-align:right;">
 0
@@ -1010,10 +1618,10 @@ Eunomia
 3
 </td>
 <td style="text-align:right;">
-0.3994490
+0.3980170
 </td>
 <td style="text-align:right;">
-0.3163975
+0.3159103
 </td>
 <td style="text-align:right;">
 0
@@ -1039,7 +1647,51 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-100031
+18
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+255
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.3980170
+</td>
+<td style="text-align:right;">
+0.3159103
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+8
 </td>
 <td style="text-align:right;">
 1901
@@ -1083,7 +1735,51 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-100033
+14
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+275
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.9549296
+</td>
+<td style="text-align:right;">
+0.4233403
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
 </td>
 <td style="text-align:right;">
 1901
@@ -1127,7 +1823,95 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-200000
+24
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+275
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.9577465
+</td>
+<td style="text-align:right;">
+0.4256226
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+296
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.4024096
+</td>
+<td style="text-align:right;">
+0.3450454
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+21
 </td>
 <td style="text-align:right;">
 1901
@@ -1171,7 +1955,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400031
+10
 </td>
 <td style="text-align:right;">
 1901
@@ -1215,7 +1999,51 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-300000
+16
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+316
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.8183716
+</td>
+<td style="text-align:right;">
+0.4280688
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
 </td>
 <td style="text-align:right;">
 1901
@@ -1259,7 +2087,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400033
+4
 </td>
 <td style="text-align:right;">
 1901
@@ -1303,13 +2131,13 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-100032
+23
 </td>
 <td style="text-align:right;">
 1901
 </td>
 <td style="text-align:right;">
-683
+316
 </td>
 <td style="text-align:right;">
 0
@@ -1318,10 +2146,98 @@ Eunomia
 2
 </td>
 <td style="text-align:right;">
-0.5332438
+0.8204593
 </td>
 <td style="text-align:right;">
-0.3691960
+0.4299773
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+26
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+316
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.8204593
+</td>
+<td style="text-align:right;">
+0.4299773
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+660
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.5307958
+</td>
+<td style="text-align:right;">
+0.3688415
 </td>
 <td style="text-align:right;">
 0
@@ -1347,13 +2263,57 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400032
+17
 </td>
 <td style="text-align:right;">
 1901
 </td>
 <td style="text-align:right;">
-946
+660
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.5307958
+</td>
+<td style="text-align:right;">
+0.3688415
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+915
 </td>
 <td style="text-align:right;">
 0
@@ -1362,10 +2322,10 @@ Eunomia
 3
 </td>
 <td style="text-align:right;">
-0.4893905
+0.4872152
 </td>
 <td style="text-align:right;">
-0.3561536
+0.3557403
 </td>
 <td style="text-align:right;">
 0
@@ -1391,7 +2351,95 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-100000
+19
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+915
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.4872152
+</td>
+<td style="text-align:right;">
+0.3557403
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+935
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.6144444
+</td>
+<td style="text-align:right;">
+0.3867813
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+20
 </td>
 <td style="text-align:right;">
 1901
@@ -1435,7 +2483,51 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400000
+7
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+1231
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.5475285
+</td>
+<td style="text-align:right;">
+0.3777510
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+22
 </td>
 <td style="text-align:right;">
 1901
@@ -1479,7 +2571,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-200031
+9
 </td>
 <td style="text-align:right;">
 1002
@@ -1523,7 +2615,51 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-200033
+15
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+124
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+38.8709677
+</td>
+<td style="text-align:right;">
+3.4000663
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
 </td>
 <td style="text-align:right;">
 1002
@@ -1567,7 +2703,51 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-100031
+25
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+124
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+38.9758065
+</td>
+<td style="text-align:right;">
+3.4226973
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+8
 </td>
 <td style="text-align:right;">
 1002
@@ -1611,7 +2791,51 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-100033
+14
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+355
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+38.7746479
+</td>
+<td style="text-align:right;">
+3.2746121
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
 </td>
 <td style="text-align:right;">
 1002
@@ -1655,7 +2879,51 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400031
+24
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+355
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+38.9014085
+</td>
+<td style="text-align:right;">
+3.2449654
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+10
 </td>
 <td style="text-align:right;">
 1002
@@ -1699,7 +2967,51 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-300000
+16
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+479
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+38.7995825
+</td>
+<td style="text-align:right;">
+3.3042257
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
 </td>
 <td style="text-align:right;">
 1002
@@ -1743,7 +3055,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400033
+4
 </td>
 <td style="text-align:right;">
 1002
@@ -1787,13 +3099,101 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-200032
+23
 </td>
 <td style="text-align:right;">
 1002
 </td>
 <td style="text-align:right;">
-726
+479
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+38.9206681
+</td>
+<td style="text-align:right;">
+3.2884308
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+26
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+479
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+38.9206681
+</td>
+<td style="text-align:right;">
+3.2884308
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+706
 </td>
 <td style="text-align:right;">
 31
@@ -1802,10 +3202,10 @@ Eunomia
 46
 </td>
 <td style="text-align:right;">
-38.5137741
+38.5226629
 </td>
 <td style="text-align:right;">
-3.2604976
+3.2712236
 </td>
 <td style="text-align:right;">
 38
@@ -1831,7 +3231,95 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-200000
+18
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+706
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+38.5226629
+</td>
+<td style="text-align:right;">
+3.2712236
+</td>
+<td style="text-align:right;">
+38
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+830
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+38.5746988
+</td>
+<td style="text-align:right;">
+3.2910429
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+21
 </td>
 <td style="text-align:right;">
 1002
@@ -1875,13 +3363,13 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-100032
+11
 </td>
 <td style="text-align:right;">
 1002
 </td>
 <td style="text-align:right;">
-1489
+1445
 </td>
 <td style="text-align:right;">
 31
@@ -1890,10 +3378,10 @@ Eunomia
 47
 </td>
 <td style="text-align:right;">
-38.6165212
+38.6131488
 </td>
 <td style="text-align:right;">
-3.3301766
+3.3329496
 </td>
 <td style="text-align:right;">
 39
@@ -1919,7 +3407,95 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-100000
+17
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+1445
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+38.6131488
+</td>
+<td style="text-align:right;">
+3.3329496
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+1800
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+38.6450000
+</td>
+<td style="text-align:right;">
+3.3212435
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+20
 </td>
 <td style="text-align:right;">
 1002
@@ -1963,13 +3539,13 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400032
+13
 </td>
 <td style="text-align:right;">
 1002
 </td>
 <td style="text-align:right;">
-2215
+2151
 </td>
 <td style="text-align:right;">
 31
@@ -1978,10 +3554,10 @@ Eunomia
 47
 </td>
 <td style="text-align:right;">
-38.5828442
+38.5834496
 </td>
 <td style="text-align:right;">
-3.3071156
+3.3123287
 </td>
 <td style="text-align:right;">
 39
@@ -2007,7 +3583,95 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-400000
+19
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+2151
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+38.5834496
+</td>
+<td style="text-align:right;">
+3.3123287
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+2630
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+38.6228137
+</td>
+<td style="text-align:right;">
+3.3112779
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+22
 </td>
 <td style="text-align:right;">
 1002
@@ -2343,8 +4007,8 @@ previously specified:</p>
   |==========================================================            |  83%
   |                                                                            
   |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.066 secs</span></span>
-<span><span class="co">## Computing dechallenge rechallenge for 3 target ids and 1outcome ids took 0.131 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00906 secs</span></span>
+<span><span class="co">## Computing dechallenge rechallenge for 3 target ids and 1outcome ids took 0.0708 secs</span></span></code></pre>
 <p>If you would like to save the results you can use the function
 <code>saveDechallengeRechallengeAnalyses</code> and this can then be
 loaded using <code>loadDechallengeRechallengeAnalyses</code>.</p>
@@ -2450,8 +4114,8 @@ cases</p>
   |==========================================================            |  83%
   |                                                                            
   |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.104 secs</span></span>
-<span><span class="co">## Computing dechallenge failed case series for 3 target ids and 1outcome ids took 0.158 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0936 secs</span></span>
+<span><span class="co">## Computing dechallenge failed case series for 3 target IDs and 1 outcome IDs took 0.135 secs</span></span></code></pre>
 <p>The results are Andromeda objects that can we viewed using
 <code>dplyr</code>. There is just one table named
 rechallengeFailCaseSeries:</p>
@@ -2548,6 +4212,7 @@ specified:</p>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span>
 <span><span class="co">## Uploading #cohort_settings</span></span>
 <span><span class="co">## </span></span>
+<span><span class="co">## Inserting data took 0.00473 secs</span></span>
 <span><span class="co">## Computing time to event results</span></span></code></pre>
 <pre><code>## 
   |                                                                            
@@ -2584,8 +4249,8 @@ specified:</p>
   |==================================================================    |  94%
   |                                                                            
   |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0434 secs</span></span>
-<span><span class="co">## Computing time-to-event for T-O pairs took 0.158 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0428 secs</span></span>
+<span><span class="co">## Computing time-to-event for T-O pairs took 0.16 secs</span></span></code></pre>
 <p>If you would like to save the results you can use the function
 <code>saveTimeToEventAnalyses</code> and this can then be loaded using
 <code>loadTimeToEventAnalyses</code>.</p>
@@ -2989,7 +4654,7 @@ the saveDirectory. You can export the results as csv files using:</p>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">connectionDetailsT</span> <span class="op">&lt;-</span> <span class="fu">DatabaseConnector</span><span class="fu">::</span><span class="fu"><a href="https://ohdsi.github.io/DatabaseConnector/reference/createConnectionDetails.html" class="external-link">createConnectionDetails</a></span><span class="op">(</span></span>
 <span>  dbms <span class="op">=</span> <span class="st">'sqlite'</span>,</span>
-<span>  server <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,<span class="st">'example'</span>,<span class="st">'sqliteCharacterization'</span>, <span class="st">'sqlite'</span><span class="op">)</span></span>
+<span>  server <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,<span class="st">'example'</span>,<span class="st">'sqliteCharacterization'</span>, <span class="st">'sqlite.sqlite'</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/exportDatabaseToCsv.html">exportDatabaseToCsv</a></span><span class="op">(</span></span>
@@ -3020,7 +4685,7 @@ the saveDirectory. You can export the results as csv files using:</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

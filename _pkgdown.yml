@@ -87,6 +87,10 @@ reference:
       - createSqliteDatabase
       - createCharacterizationTables
       - exportDatabaseToCsv
-
+  - title: "Shiny App"
+    desc: >
+      Functions to interactively exlore the results from runCharacterizationAnalyses().
+    contents:
+      - viewCharacterization
 
 
