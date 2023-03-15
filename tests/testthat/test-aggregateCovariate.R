@@ -15,6 +15,43 @@ test_that("createAggregateCovariateSettings", {
   res <- createAggregateCovariateSettings(
     targetIds = targetIds,
     outcomeIds = outcomeIds,
+    minPriorObservation = 10,
+    riskWindowStart = 1, startAnchor = "cohort start",
+    riskWindowEnd = 365, endAnchor = "cohort start",
+    covariateSettings = covariateSettings
+  )
+
+  testthat::expect_equal(
+    res$targetIds,
+    targetIds
+  )
+  testthat::expect_equal(
+    res$covariateSettings,
+    covariateSettings
+  )
+
+  testthat::expect_equal(
+    res$minPriorObservation,
+    10
+  )
+})
+
+test_that("createAggregateCovariateSettingsList", {
+  targetIds <- sample(x = 100, size = sample(10, 1))
+  outcomeIds <- sample(x = 100, size = sample(10, 1))
+  covariateSettings1 <- FeatureExtraction::createCovariateSettings(
+    useDemographicsGender = T,
+    useDemographicsAge = T,
+    useCharlsonIndex = T
+  )
+  covariateSettings2 <- FeatureExtraction::createCovariateSettings(
+    useConditionOccurrenceAnyTimePrior = TRUE
+  )
+  covariateSettings <- list(covariateSettings1, covariateSettings2)
+
+  res <- createAggregateCovariateSettings(
+    targetIds = targetIds,
+    outcomeIds = outcomeIds,
     riskWindowStart = 1, startAnchor = "cohort start",
     riskWindowEnd = 365, endAnchor = "cohort start",
     covariateSettings = covariateSettings
@@ -42,6 +79,7 @@ test_that("computeAggregateCovariateAnalyses", {
   res <- createAggregateCovariateSettings(
     targetIds = targetIds,
     outcomeIds = outcomeIds,
+    minPriorObservation = 30,
     riskWindowStart = 1, startAnchor = "cohort start",
     riskWindowEnd = 5 * 365, endAnchor = "cohort start",
     covariateSettings = covariateSettings
@@ -59,7 +97,7 @@ test_that("computeAggregateCovariateAnalyses", {
 
   testthat::expect_true(inherits(agc, "CovariateData"))
   testthat::expect_true(length(unique(as.data.frame(agc$covariates)$cohortDefinitionId))
-  <= length(res$targetIds) * length(res$outcomeIds) * 3 + length(res$targetIds) + length(res$outcomeIds))
+  <= length(res$targetIds) * length(res$outcomeIds) * 6 + length(res$targetIds)*2 + length(res$outcomeIds)*2)
   testthat::expect_true(
     sum(names(agc) %in% c(
       "analysisRef",
@@ -71,6 +109,11 @@ test_that("computeAggregateCovariateAnalyses", {
     )) == 6
   )
 
+  testthat::expect_true(
+    nrow(as.data.frame(agc$cohortDetails)) ==
+    nrow(as.data.frame(agc$cohortCounts))
+  )
+
   # check cohortDetails
   testthat::expect_true(
     length(unique(as.data.frame(agc$cohortDetails)$cohortDefinitionId)) ==
@@ -78,7 +121,7 @@ test_that("computeAggregateCovariateAnalyses", {
   )
 
   testthat::expect_true(
-    nrow(as.data.frame(agc$cohortDetails)) == 13 # 4 T/Os, 3 TnO, 3 TnOc, 3 OnT
+    nrow(as.data.frame(agc$cohortDetails)) == 26 # 8 T/Os, 6 TnO, 6 TnOc, 6 OnT
   )
 
   # test saving/loading

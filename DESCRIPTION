@@ -1,8 +1,8 @@
 Package: Characterization
 Type: Package
 Title: Characterizations of Cohorts
-Version: 0.0.6
-Date: 2023-02-13
+Version: 0.1.0
+Date: 2023-03-13
 Authors@R: c(
 	person("Jenna", "Reps", , "reps@ohdsi.org", role = c("aut", "cre")),
 	person("Patrick", "Ryan", , "ryan@ohdsi.org", role = c("aut"))
@@ -25,15 +25,21 @@ Imports:
 	readr, 
 	rlang
 Suggests:
+  devtools,
 	testthat,
 	Eunomia,
 	kableExtra,
 	knitr,
 	markdown,
+	ResultModelManager,
+	ShinyAppBuilder,
+	shiny,
 	withr
 Remotes:
 	ohdsi/FeatureExtraction,
-	ohdsi/Eunomia
+	ohdsi/Eunomia,
+	ohdsi/ResultModelManager,
+	ohdsi/ShinyAppBuilder
 NeedsCompilation: no
 RoxygenNote: 7.2.3
 Encoding: UTF-8

@@ -18,6 +18,7 @@
 #'
 #' @param targetIds   A list of cohortIds for the target cohorts
 #' @param outcomeIds  A list of cohortIds for the outcome cohorts
+#' @param minPriorObservation The minimum time in the database a patient in the target cohorts must be observed prior to index
 #' @template timeAtRisk
 #' @param covariateSettings   An object created using \code{FeatureExtraction::createCovariateSettings}
 #'
@@ -28,6 +29,7 @@
 createAggregateCovariateSettings <- function(
   targetIds,
   outcomeIds,
+  minPriorObservation = 0,
   riskWindowStart = 1,
   startAnchor = 'cohort start',
   riskWindowEnd = 365,
@@ -57,10 +59,16 @@ createAggregateCovariateSettings <- function(
     endAnchor = endAnchor,
     errorMessages = errorMessages
   )
-  
+
   # check covariateSettings
   .checkCovariateSettings(
     covariateSettings = covariateSettings,
+    errorMessages = errorMessages
+  )
+
+  # check minPriorObservation
+  .checkMinPriorObservation(
+    minPriorObservation = minPriorObservation,
     errorMessages = errorMessages
   )
 
@@ -70,6 +78,7 @@ createAggregateCovariateSettings <- function(
   result <- list(
     targetIds = targetIds,
     outcomeIds = outcomeIds,
+    minPriorObservation = minPriorObservation,
     riskWindowStart = riskWindowStart,
     startAnchor = startAnchor,
     riskWindowEnd = riskWindowEnd ,
@@ -126,6 +135,7 @@ computeAggregateCovariateAnalyses <- function(
   createCohortsOfInterest(
     connection = connection,
     dbms = connectionDetails$dbms,
+    cdmDatabaseSchema = cdmDatabaseSchema,
     aggregateCovariateSettings,
     targetDatabaseSchema,
     targetTable,
@@ -135,16 +145,16 @@ computeAggregateCovariateAnalyses <- function(
   )
 
   ## get counts
-  sql <- 'select cohort_definition_id, count(*) N from #agg_cohorts group by cohort_definition_id;'
+  sql <- 'select cohort_definition_id, count(*) row_count, count(distinct subject_id) person_count from #agg_cohorts group by cohort_definition_id;'
   sql <- SqlRender::translate(
     sql = sql,
     targetDialect = connectionDetails$dbms
     )
   counts <- DatabaseConnector::querySql(
     connection = connection,
-    sql = sql
+    sql = sql,
+    snakeCaseToCamelCase = T,
   )
-  #print(counts) # testing
 
   message("Computing aggregate covariate results")
 
@@ -159,6 +169,8 @@ computeAggregateCovariateAnalyses <- function(
     cdmVersion = cdmVersion,
     aggregated = T
   )
+  # adding counts as a new table
+  result$cohortCounts <- counts
 
   # add databaseId and runId to each table in results
   # could add settings table with this and just have setting id
@@ -234,6 +246,7 @@ computeAggregateCovariateAnalyses <- function(
 
 createCohortsOfInterest <- function(
   connection,
+  cdmDatabaseSchema,
   dbms,
   aggregateCovariateSettings,
   targetDatabaseSchema,
@@ -247,6 +260,7 @@ createCohortsOfInterest <- function(
     sqlFilename = "createTargetOutcomeCombinations.sql",
     packageName = "Characterization",
     dbms = dbms,
+    cdm_database_schema = cdmDatabaseSchema,
     tempEmulationSchema = tempEmulationSchema,
     target_database_schema = targetDatabaseSchema,
     target_table = targetTable,
@@ -254,6 +268,7 @@ createCohortsOfInterest <- function(
     outcome_table = outcomeTable,
     target_ids = paste(aggregateCovariateSettings$targetIds, collapse = ',', sep = ','),
     outcome_ids = paste(aggregateCovariateSettings$outcomeIds, collapse = ',', sep = ','),
+    min_prior_observation = aggregateCovariateSettings$minPriorObservation,
     tar_start = aggregateCovariateSettings$riskWindowStart,
     tar_start_anchor = ifelse(
       aggregateCovariateSettings$startAnchor == 'cohort start',

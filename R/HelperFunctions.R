@@ -29,7 +29,7 @@
   connectionDetails,
   errorMessages
   ) {
-  if (is(connectionDetails, "connectionDetails")) {
+  if (inherits(connectionDetails, "connectionDetails")) {
   checkmate::assertClass(
     x = connectionDetails,
     classes = "connectionDetails",
@@ -65,7 +65,7 @@
     return()
   }
 
-  if(class(settings) == 'dechallengeRechallengeSettings'){
+  if(inherits(settings, 'dechallengeRechallengeSettings')){
     settings <- list(settings)
   }
 
@@ -99,7 +99,7 @@
     return()
   }
 
-  if(class(settings) == 'timeToEventSettings'){
+  if(inherits(settings,'timeToEventSettings')){
     settings <- list(settings)
   }
 
@@ -133,7 +133,7 @@
     return()
   }
 
-  if(class(settings) == 'aggregateCovariateSettings'){
+  if(inherits(settings,'aggregateCovariateSettings')){
     settings <- list(settings)
   }
 
@@ -231,13 +231,30 @@
 
 
 
-.checkCovariateSettings <- function(
-    covariateSettings,
+.checkCovariateSettings <- function(covariateSettings,
+                                    errorMessages) {
+  if (class(covariateSettings) == "covariateSettings") {
+    checkmate::assertClass(x = covariateSettings,
+                           classes = "covariateSettings",
+                           add = errorMessages)
+  } else {
+    for (j in (1:length(covariateSettings))) {
+      checkmate::assertClass(x = covariateSettings[[j]],
+                             classes = "covariateSettings",
+                             add = errorMessages)
+    }
+  }
+
+}
+
+.checkMinPriorObservation <- function(
+    minPriorObservation,
   errorMessages
 ) {
-  checkmate::assertClass(
-    x = covariateSettings,
-    classes = "covariateSettings",
+  checkmate::assertCount(
+    x = minPriorObservation,
+    null.ok = F,
+    .var.name = 'minPriorObservation',
     add = errorMessages
   )
 }
