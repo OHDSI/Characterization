@@ -241,3 +241,15 @@
     add = errorMessages
   )
 }
+
+.checkMinPriorObservation <- function(
+    minPriorObservation,
+  errorMessages
+) {
+  checkmate::assertCount(
+    x = minPriorObservation,
+    null.ok = F,
+    .var.name = 'minPriorObservation',
+    add = errorMessages
+  )
+}

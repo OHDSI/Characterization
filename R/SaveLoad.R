@@ -404,6 +404,38 @@ exportAggregateCovariateToCsv <- function(
 
     }
   )
+  # cohort details
+  Andromeda::batchApply(
+    tbl = result$cohortCounts,
+    fun = function(x) {
+
+      append <- file.exists(
+        file.path(
+          saveDirectory,
+          "cohort_counts.csv"
+        )
+      )
+
+      dat <- as.data.frame(
+        x %>%
+          dplyr::collect()
+      )
+
+      colnames(dat) <- SqlRender::camelCaseToSnakeCase(
+        string = colnames(dat)
+      )
+
+      readr::write_csv(
+        x = dat,
+        file = file.path(
+          saveDirectory,
+          "cohort_counts.csv"
+        ),
+        append = append
+      )
+
+    }
+  )
 
   # cohort details
   Andromeda::batchApply(
@@ -577,7 +609,8 @@ exportAggregateCovariateToCsv <- function(
         "analysis_ref.csv",
         "covariate_ref.csv",
         "covariates.csv",
-        "covariates_continuous.csv"
+        "covariates_continuous.csv",
+        "cohort_counts.csv"
       )
     )
   )
