@@ -289,6 +289,7 @@ on cd.target_cohort_id = tno.target_cohort_id
 and cd.outcome_cohort_id = tno.outcome_cohort_id
 and cd.cohort_type = 'firstOnT'
 
+
 union
 
 -- T without O
