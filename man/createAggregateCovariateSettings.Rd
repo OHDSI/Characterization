@@ -7,6 +7,7 @@
 createAggregateCovariateSettings(
   targetIds,
   outcomeIds,
+  minPriorObservation = 0,
   riskWindowStart = 1,
   startAnchor = "cohort start",
   riskWindowEnd = 365,
@@ -18,6 +19,8 @@ createAggregateCovariateSettings(
 \item{targetIds}{A list of cohortIds for the target cohorts}
 
 \item{outcomeIds}{A list of cohortIds for the outcome cohorts}
+
+\item{minPriorObservation}{The minimum time in the database a patient in the target cohorts must be observed prior to index}
 
 \item{riskWindowStart}{The start of the risk window (in days) relative to the `startAnchor`.}
 

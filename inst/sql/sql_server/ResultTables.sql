@@ -121,3 +121,11 @@ CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
     p_75_value float,
     p_90_value float
 );
+
+CREATE TABLE @my_schema.@table_prefixcohort_counts(
+    run_id int NOT NULL,
+    database_id varchar(100) NOT NULL,
+    cohort_definition_id int NOT NULL,
+    row_count int NOT NULL,
+    person_count int NOT NULL
+);
