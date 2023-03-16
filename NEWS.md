@@ -1,3 +1,8 @@
+Characterization 0.1.1
+======================
+
+Fixing bug where cohort_counts were not being saved in the database 
+
 Characterization 0.1.0
 ======================
 
