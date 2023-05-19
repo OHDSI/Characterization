@@ -4,12 +4,14 @@
 \alias{exportDechallengeRechallengeToCsv}
 \title{export the DechallengeRechallenge results as csv}
 \usage{
-exportDechallengeRechallengeToCsv(result, saveDirectory)
+exportDechallengeRechallengeToCsv(result, saveDirectory, minCellCount = 0)
 }
 \arguments{
 \item{result}{The output of running \code{computeDechallengeRechallengeAnalyses()}}
 
 \item{saveDirectory}{An directory location to save the results into}
+
+\item{minCellCount}{The minimum value that will be displayed in count columns}
 }
 \value{
 A string specifying the directory the csv results are saved to
