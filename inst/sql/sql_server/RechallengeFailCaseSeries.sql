@@ -17,7 +17,7 @@ select
   dc1.cohort_definition_id as target_cohort_definition_id,
   io1.cohort_definition_id as outcome_cohort_definition_id,
   dense_rank() over (partition by dc1.cohort_definition_id, io1.cohort_definition_id order by datediff(day, dc0.cohort_start_date, dc1.cohort_start_date), dc1.subject_id) as person_key,
-  {@show_subject_id}?{dc1.subject_id}:{NULL as subject_id},  --this is the field that we would want to allow parameter to make nullable or not export
+  {@show_subject_id}?{dc1.subject_id}:{CAST(NULL AS BIGINT) as subject_id},  --this is the field that we would want to allow parameter to make nullable or not export
   dc1.era_number as dechallenge_exposure_number,
   datediff(day, dc0.cohort_start_date, dc1.cohort_start_date) as dechallenge_exposure_start_date_offset,
   datediff(day, dc0.cohort_start_date, dc1.cohort_end_date) as dechallenge_exposure_end_date_offset,
