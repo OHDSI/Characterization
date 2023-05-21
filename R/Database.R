@@ -64,7 +64,9 @@ insertAndromedaToDatabase <- function(
     andromedaObject,
     tempEmulationSchema,
     bulkLoad = T,
-    tablePrefix = 'c_'
+    tablePrefix = 'c_',
+    minCellCount = 0,
+    minCellCountColumns = list()
 ){
   errorMessages <- checkmate::makeAssertCollection()
   .checkTablePrefix(
@@ -78,11 +80,19 @@ insertAndromedaToDatabase <- function(
   Andromeda::batchApply(
     tbl = andromedaObject,
     fun = function(x){
+
+      data <- as.data.frame(x %>% dplyr::collect()) # apply minCellCount
+      data <- removeMinCell(
+        data = data,
+        minCellCount = minCellCount,
+        minCellCountColumns = minCellCountColumns
+        )
+
       DatabaseConnector::insertTable(
         connection = connection,
         databaseSchema = databaseSchema,
         tableName = paste0(tablePrefix,tableName),
-        data = as.data.frame(x %>% dplyr::collect()),
+        data = data,
         dropTableIfExists = F,
         createTable = F,
         tempEmulationSchema = tempEmulationSchema,
@@ -95,6 +105,32 @@ insertAndromedaToDatabase <- function(
   return(TRUE)
 }
 
+removeMinCell <- function(
+    data,
+    minCellCount = 0,
+    minCellCountColumns = list()
+){
+  for(columns in minCellCountColumns){
+    ind <- apply(
+      X = data[,columns, drop = FALSE],
+      MARGIN = 1,
+      FUN = function(x) sum(x < minCellCount)>0
+    )
+
+    if(sum(ind) > 0 ){
+      ParallelLogger::logInfo(
+        paste0(
+          'Removing values less than ',
+          minCellCount,
+          ' from ',
+          paste(columns, collapse = ' and ')
+        )
+      )
+      data[ind, columns] <- -1
+    }
+  }
+  return(data)
+}
 
 
 

@@ -16,7 +16,8 @@ runCharacterizationAnalyses(
   saveDirectory,
   tablePrefix = "c_",
   databaseId = "1",
-  showSubjectId = F
+  showSubjectId = F,
+  minCellCount = 0
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ can be created}
 \item{databaseId}{The unqiue identifier for the cdm database}
 
 \item{showSubjectId}{Whether to include subjectId of failed rechallenge case series or hide}
+
+\item{minCellCount}{The minimum count value that is calculated}
 }
 \value{
 An sqlite database with the results is saved into the saveDirectory and a csv file named tacker.csv

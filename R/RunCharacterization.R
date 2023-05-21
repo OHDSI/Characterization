@@ -124,6 +124,7 @@ loadCharacterizationSettings <- function(
 #' @param tablePrefix A string to append the tables in the results
 #' @param databaseId The unqiue identifier for the cdm database
 #' @param showSubjectId  Whether to include subjectId of failed rechallenge case series or hide
+#' @param minCellCount  The minimum count value that is calculated
 #'
 #' @return
 #' An sqlite database with the results is saved into the saveDirectory and a csv file named tacker.csv
@@ -142,7 +143,8 @@ runCharacterizationAnalyses <- function(
     saveDirectory,
     tablePrefix = "c_",
     databaseId = "1",
-    showSubjectId = F
+    showSubjectId = F,
+    minCellCount = 0
 ) {
   # inputs checks
   errorMessages <- checkmate::makeAssertCollection()
@@ -218,7 +220,9 @@ runCharacterizationAnalyses <- function(
           databaseSchema = "main",
           tableName = "time_to_event",
           andromedaObject = result$timeToEvent,
-          tablePrefix = tablePrefix
+          tablePrefix = tablePrefix,
+          minCellCount = minCellCount,
+          minCellCountColumns = list('numEvents')
         )
       }
 
@@ -266,7 +270,15 @@ runCharacterizationAnalyses <- function(
           databaseSchema = "main",
           tableName = "dechallenge_rechallenge",
           andromedaObject = result$dechallengeRechallenge,
-          tablePrefix = tablePrefix
+          tablePrefix = tablePrefix,
+          minCellCount = minCellCount,
+          minCellCountColumns = list(
+              c('numEvents'),
+              c('dechallengeAttempt'),
+              c('dechallengeFail', 'dechallengeSuccess'),
+              c('rechallengeAttempt'),
+              c('rechallengeFail', 'rechallengeSuccess')
+              )
         )
       }
 
@@ -401,7 +413,11 @@ runCharacterizationAnalyses <- function(
             databaseSchema = "main",
             tableName = "covariates",
             andromedaObject = result$covariates,
-            tablePrefix = tablePrefix
+            tablePrefix = tablePrefix,
+            minCellCount = minCellCount,
+            minCellCountColumns = list(
+              c('sumValue') #c('SUM_VALUE') #AVERAGE_VALUE
+            )
           )
         }
 
@@ -411,7 +427,11 @@ runCharacterizationAnalyses <- function(
             databaseSchema = "main",
             tableName = "covariates_continuous",
             andromedaObject = result$covariatesContinuous,
-            tablePrefix = tablePrefix
+            tablePrefix = tablePrefix,
+            minCellCount = minCellCount,
+            minCellCountColumns = list(
+              c('countValue')
+            )
           )
         }
       }

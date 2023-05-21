@@ -4,12 +4,14 @@
 \alias{exportAggregateCovariateToCsv}
 \title{export the AggregateCovariate results as csv}
 \usage{
-exportAggregateCovariateToCsv(result, saveDirectory)
+exportAggregateCovariateToCsv(result, saveDirectory, minCellCount = 0)
 }
 \arguments{
 \item{result}{The output of running \code{computeAggregateCovariateAnalyses()}}
 
 \item{saveDirectory}{An directory location to save the results into}
+
+\item{minCellCount}{The minimum value that will be displayed in count columns}
 }
 \value{
 A string specifying the directory the csv results are saved to

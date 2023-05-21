@@ -47,6 +47,7 @@ saveTimeToEventAnalyses <- function(
 #'
 #' @param result  The output of running \code{computeTimeToEventAnalyses()}
 #' @template saveDirectory
+#' @param minCellCount  The minimum value that will be displayed in count columns
 #'
 #' @return
 #' A string specifying the directory the csv results are saved to
@@ -54,7 +55,8 @@ saveTimeToEventAnalyses <- function(
 #' @export
 exportTimeToEventToCsv <- function(
     result,
-    saveDirectory
+    saveDirectory,
+    minCellCount = 0
 ) {
   if (!dir.exists(saveDirectory)) {
     dir.create(
@@ -82,6 +84,11 @@ exportTimeToEventToCsv <- function(
       colnames(dat) <- SqlRender::camelCaseToSnakeCase(
         string = colnames(dat)
       )
+
+      if(sum(dat$NUM_EVENTS < minCellCount)>0){
+        ParallelLogger::logInfo(paste0('Removing NUM_EVENTS less than ', minCellCount))
+        dat$NUM_EVENTS[dat$NUM_EVENTS < minCellCount] <- -1
+      }
 
       readr::write_csv(
         x = dat,
@@ -196,6 +203,7 @@ loadRechallengeFailCaseSeriesAnalyses <- function(
 #'
 #' @param result  The output of running \code{computeDechallengeRechallengeAnalyses()}
 #' @template saveDirectory
+#' @param minCellCount  The minimum value that will be displayed in count columns
 #'
 #' @return
 #' A string specifying the directory the csv results are saved to
@@ -203,7 +211,8 @@ loadRechallengeFailCaseSeriesAnalyses <- function(
 #' @export
 exportDechallengeRechallengeToCsv <- function(
     result,
-    saveDirectory
+    saveDirectory,
+    minCellCount = 0
 ) {
 
   countN <- dplyr::pull(
@@ -228,6 +237,48 @@ exportDechallengeRechallengeToCsv <- function(
       colnames(dat) <- SqlRender::camelCaseToSnakeCase(
         string = colnames(dat)
       )
+
+      removeInd <- dat$NUM_EVENTS < minCellCount
+      if(sum(removeInd) > 0){
+        ParallelLogger::logInfo(paste0('Removing NUM_EVENTS counts less than ', minCellCount))
+        if(sum(removeInd) > 0){
+            dat$NUM_CASES[removeInd] <- -1
+          }
+      }
+
+      removeInd <- dat$DECHALLENGE_ATTEMPT < minCellCount
+      if(sum(removeInd) > 0){
+        ParallelLogger::logInfo(paste0('Removing DECHALLENGE_ATTEMPT counts less than ', minCellCount))
+        if(sum(removeInd) > 0){
+          dat$DECHALLENGE_ATTEMPT[removeInd] <- -1
+        }
+      }
+
+      removeInd <- dat$DECHALLENGE_FAIL < minCellCount | dat$DECHALLENGE_SUCCESS < minCellCount
+      if(sum(removeInd) > 0){
+        ParallelLogger::logInfo(paste0('Removing DECHALLENGE FAIL or SUCCESS counts less than ', minCellCount))
+        if(sum(removeInd) > 0){
+          dat$DECHALLENGE_FAIL[removeInd] <- -1
+          dat$DECHALLENGE_SUCCESS[removeInd] <- -1
+        }
+      }
+
+      removeInd <- dat$RECHALLENGE_ATTEMPT < minCellCount
+      if(sum(removeInd) > 0){
+        ParallelLogger::logInfo(paste0('Removing RECHALLENGE_ATTEMPT counts less than ', minCellCount))
+        if(sum(removeInd) > 0){
+          dat$RECHALLENGE_ATTEMPT[removeInd] <- -1
+        }
+      }
+
+      removeInd <- dat$RECHALLENGE_FAIL < minCellCount | dat$RECHALLENGE_SUCCESS < minCellCount
+      if(sum(removeInd) > 0){
+        ParallelLogger::logInfo(paste0('Removing RECHALLENGE FAIL or SUCCESS counts less than ', minCellCount))
+        if(sum(removeInd) > 0){
+          dat$RECHALLENGE_FAIL[removeInd] <- -1
+          dat$RECHALLENGE_SUCCESS[removeInd] <- -1
+        }
+      }
 
       readr::write_csv(
         x = dat,
@@ -359,6 +410,7 @@ loadAggregateCovariateAnalyses <- function(
 #'
 #' @param result  The output of running \code{computeAggregateCovariateAnalyses()}
 #' @template saveDirectory
+#' @param minCellCount  The minimum value that will be displayed in count columns
 #'
 #' @return
 #' A string specifying the directory the csv results are saved to
@@ -366,7 +418,8 @@ loadAggregateCovariateAnalyses <- function(
 #' @export
 exportAggregateCovariateToCsv <- function(
     result,
-    saveDirectory
+    saveDirectory,
+    minCellCount = 0
 ) {
   if (!dir.exists(saveDirectory)) {
     dir.create(saveDirectory, recursive = T)
@@ -557,6 +610,15 @@ exportAggregateCovariateToCsv <- function(
         string = colnames(dat)
       )
 
+      removeInd <- dat$SUM_VALUE < minCellCount
+      if(sum(removeInd) > 0){
+        ParallelLogger::logInfo(paste0('Removing SUM_VALUE counts less than ', minCellCount))
+        if(sum(removeInd) > 0){
+          dat$SUM_VALUE[removeInd] <- -1
+          dat$AVERAGE_VALUE[removeInd] <- -1
+        }
+      }
+
       readr::write_csv(
         x = dat,
         file = file.path(
@@ -589,6 +651,14 @@ exportAggregateCovariateToCsv <- function(
       colnames(dat) <- SqlRender::camelCaseToSnakeCase(
         string = colnames(dat)
       )
+
+      removeInd <- dat$COUNT_VALUE < minCellCount
+      if(sum(removeInd) > 0){
+        ParallelLogger::logInfo(paste0('Removing COUNT_VALUE counts less than ', minCellCount))
+        if(sum(removeInd) > 0){
+          dat$COUNT_VALUE[removeInd] <- -1
+        }
+      }
 
       readr::write_csv(
         x = dat,
