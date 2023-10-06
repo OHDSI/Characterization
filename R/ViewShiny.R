@@ -144,21 +144,62 @@ viewChars <- function(
   connection <- ResultModelManager::ConnectionHandler$new(connectionDetails)
   databaseSettings$connectionDetailsSettings <- NULL
 
-  # set database settings into system variables
-  Sys.setenv("resultDatabaseDetails_characterization" = as.character(ParallelLogger::convertSettingsToJson(databaseSettings)))
 
-  config <- ParallelLogger::loadSettingsFromJson(
-    fileName = system.file(
-      'shinyConfig.json',
-      package = "Characterization"
+  if(utils::packageVersion('ShinyAppBuilder') < '1.2.0'){
+    #use old method
+    # set database settings into system variables
+    Sys.setenv("resultDatabaseDetails_characterization" = as.character(ParallelLogger::convertSettingsToJson(databaseSettings)))
+
+    config <- ParallelLogger::loadSettingsFromJson(
+      fileName = system.file(
+        'shinyConfig.json',
+        package = "Characterization"
+      )
     )
-  )
 
-  if(!testApp){
-    ShinyAppBuilder::viewShiny(config = config, connection = connection)
+    if(!testApp){
+      ShinyAppBuilder::viewShiny(
+        config = config,
+        connection = connection
+      )
+    } else{
+      ShinyAppBuilder::createShinyApp(config = config, connection = connection)
+    }
+
   } else{
-    ShinyAppBuilder::createShinyApp(config = config, connection = connection)
+    # use new method
+
+    config <- ParallelLogger::loadSettingsFromJson(
+      fileName = system.file(
+        'shinyConfigUpdate.json',
+        package = "Characterization"
+      )
+    )
+    databaseSettings$cTablePrefix = databaseSettings$tablePrefix
+    databaseSettings$cgTablePrefix = databaseSettings$cohortTablePrefix
+    databaseSettings$databaseTable = 'DATABASE_META_DATA'
+    databaseSettings$databaseTablePrefix = ''
+    databaseSettings$iTablePrefix = databaseSettings$incidenceTablePrefix
+    databaseSettings$cgTable <- "cohort_definition"
+
+    if(!testApp){
+      ShinyAppBuilder::viewShiny(
+        config = config,
+        connection = connection,
+        resultDatabaseSettings = databaseSettings
+      )
+    } else{
+      ShinyAppBuilder::createShinyApp(
+        config = config,
+        connection = connection,
+        resultDatabaseSettings = databaseSettings
+        )
+
+    }
+
   }
+
+
 }
 
 

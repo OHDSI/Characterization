@@ -1,3 +1,8 @@
+Characterization 0.1.2
+======================
+Fixing bug where first outcome was still all outcomes 
+Updating shiny app to work with old and new ShinyAppBuilder
+
 Characterization 0.1.1
 ======================
 

@@ -1,0 +1,26 @@
+{
+  "shinyModules": [
+    {
+      "id": "about",
+      "tabName": "About",
+      "tabText": "About",
+      "shinyModulePackage": "OhdsiShinyModules",
+      "uiFunction": "aboutViewer",
+      "serverFunction": "aboutServer",
+      "infoBoxFile": "aboutHelperFile()",
+      "icon": "info",
+      "order": 1
+    },
+    {
+      "id": "characterization",
+      "tabName": "Characterization",
+      "tabText": "Characterization",
+      "shinyModulePackage": "OhdsiShinyModules",
+      "uiFunction": "characterizationViewer",
+      "serverFunction": "characterizationServer",
+      "infoBoxFile": "characterizationHelperFile()",
+      "icon": "chart-line",
+      "order": 2
+    }
+  ]
+}
