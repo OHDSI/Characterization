@@ -32,7 +32,7 @@ where cohort_definition_id in
 drop table if exists #outcomes_agg_first;
 select * into #outcomes_agg_first
 from (select *,
-row_number() over(partition by subject_id, cohort_definition_id, cohort_start_date order by cohort_start_date asc) as rn
+row_number() over(partition by subject_id, cohort_definition_id order by cohort_start_date asc) as rn
 from #outcomes_agg
 ) as o
 where o.rn = 1
