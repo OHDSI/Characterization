@@ -7,7 +7,7 @@
 exportDatabaseToCsv(
   connectionDetails,
   resultSchema,
-  targetDialect,
+  targetDialect = NULL,
   tablePrefix = "c_",
   filePrefix = NULL,
   tempEmulationSchema = NULL,
@@ -21,7 +21,7 @@ function \code{connect} in the
 
 \item{resultSchema}{The name of the database schema that the result tables will be created.}
 
-\item{targetDialect}{The database management system being used}
+\item{targetDialect}{DEPRECATED: derived from \code{connectionDetails}.}
 
 \item{tablePrefix}{The table prefix to apply to the characterization result tables}
 
