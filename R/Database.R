@@ -324,7 +324,7 @@ exportDatabaseToCsv <- function(
     resultSet <- DatabaseConnector::dbSendQuery(connection, sql)
     tryCatch({
       first <- TRUE
-      while (!DatabaseConnector::dbHasCompleted(resultSet)) {
+      while (first || !DatabaseConnector::dbHasCompleted(resultSet)) {
         result <- DatabaseConnector::dbFetch(resultSet, n = maxRowCount)
         result <- formatDouble(result)
 
