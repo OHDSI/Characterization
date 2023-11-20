@@ -86,7 +86,7 @@ insertAndromedaToDatabase <- function(
         data = data,
         minCellCount = minCellCount,
         minCellCountColumns = minCellCountColumns
-        )
+      )
 
       DatabaseConnector::insertTable(
         connection = connection,
@@ -335,7 +335,6 @@ exportDatabaseToCsv <- function(
             dplyr::filter(.data$average_value >= minMeanCovariateValue)
         }
         result <- formatDouble(result)
-
         # save the results as a csv
         readr::write_csv(
           x = result,
