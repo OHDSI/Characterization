@@ -351,16 +351,17 @@ exportDatabaseToCsv <- function(
       snakeCaseToCamelCase = F
     ))
 
-    inds <- floor(countN/maxRowCount)
-    tableAppend = F
-    pb = utils::txtProgressBar(min = 0, max = countN, initial = 0)
+    if(countN > 0){
+      inds <- floor(countN/maxRowCount)
+      tableAppend = F
+      pb = utils::txtProgressBar(min = 0, max = countN, initial = 0)
 
-    for(i in 1:length(inds)){
+      for(i in 1:length(inds)){
 
-      startRow <- (i-1)*maxRowCount + 1
-      endRow <- min(i*maxRowCount, countN)
+        startRow <- (i-1)*maxRowCount + 1
+        endRow <- min(i*maxRowCount, countN)
 
-    sql <- "select @cnames from
+        sql <- "select @cnames from
     (select *,
     ROW_NUMBER() OVER(ORDER BY @cnames) AS row
     from @resultSchema.@appendtotable@tablename
@@ -368,38 +369,66 @@ exportDatabaseToCsv <- function(
     where
     temp.row >= @start_row and
     temp.row <= @end_row;"
-    sql <- SqlRender::render(
-      sql = sql,
-      resultSchema = resultSchema,
-      appendtotable = tablePrefix,
-      tablename = table,
-      cnames = paste(cnames, collapse = ','),
-      start_row = startRow,
-      end_row = endRow
-    )
-    sql <- SqlRender::translate(
-      sql = sql,
-      targetDialect = targetDialect,
-      tempEmulationSchema = tempEmulationSchema
-    )
-    result <- DatabaseConnector::querySql(
-      connection = connection,
-      sql = sql,
-      snakeCaseToCamelCase = F
-    )
-    result <- formatDouble(result)
+        sql <- SqlRender::render(
+          sql = sql,
+          resultSchema = resultSchema,
+          appendtotable = tablePrefix,
+          tablename = table,
+          cnames = paste(cnames, collapse = ','),
+          start_row = startRow,
+          end_row = endRow
+        )
+        sql <- SqlRender::translate(
+          sql = sql,
+          targetDialect = targetDialect,
+          tempEmulationSchema = tempEmulationSchema
+        )
+        result <- DatabaseConnector::querySql(
+          connection = connection,
+          sql = sql,
+          snakeCaseToCamelCase = F
+        )
+        result <- formatDouble(result)
 
-    # save the results as a csv
-    readr::write_csv(
-      x = result,
-      file = file.path(saveDirectory, paste0(tolower(filePrefix), table,'.csv')),
-      append = tableAppend
-    )
-    tableAppend = T
-    utils::setTxtProgressBar(pb,endRow)
+        # save the results as a csv
+        readr::write_csv(
+          x = result,
+          file = file.path(saveDirectory, paste0(tolower(filePrefix), table,'.csv')),
+          append = tableAppend
+        )
+        tableAppend = T
+        utils::setTxtProgressBar(pb,endRow)
 
+      }
+      close(pb)
+    } else{
+      sql <- "select * from
+      @resultSchema.@appendtotable@tablename;"
+      sql <- SqlRender::render(
+        sql = sql,
+        resultSchema = resultSchema,
+        appendtotable = tablePrefix,
+        tablename = table
+      )
+      sql <- SqlRender::translate(
+        sql = sql,
+        targetDialect = targetDialect,
+        tempEmulationSchema = tempEmulationSchema
+      )
+      result <- DatabaseConnector::querySql(
+        connection = connection,
+        sql = sql,
+        snakeCaseToCamelCase = F
+      )
+      result <- formatDouble(result)
+
+      # save the results as a csv
+      readr::write_csv(
+        x = result,
+        file = file.path(saveDirectory, paste0(tolower(filePrefix), table,'.csv')),
+        append = tableAppend
+      )
     }
-    close(pb)
   }
 
   invisible(saveDirectory)
