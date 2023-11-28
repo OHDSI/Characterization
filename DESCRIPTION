@@ -40,7 +40,7 @@ Remotes:
 	ohdsi/Eunomia,
 	ohdsi/ResultModelManager,
 	ohdsi/ShinyAppBuilder,
-	ohdsi/DatabaseConnector@develop
+	ohdsi/DatabaseConnector
 NeedsCompilation: no
 RoxygenNote: 7.2.3
 Encoding: UTF-8
