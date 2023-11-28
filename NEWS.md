@@ -1,3 +1,9 @@
+Characterization 0.1.3
+======================
+Optimized aggregate features to remove T and not Os (as these can be calculated using T and T and Os) - requires latest shiny app though
+Optimized database extraction to csv
+
+
 Characterization 0.1.2
 ======================
 Fixing bug where first outcome was still all outcomes 
