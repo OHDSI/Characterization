@@ -10,7 +10,7 @@ drop table if exists #targets_agg;
 select * into #targets_agg
 from
 (select *,
-row_number() over(partition by subject_id, cohort_definition_id, cohort_start_date order by cohort_start_date asc) as rn
+row_number() over(partition by subject_id, cohort_definition_id order by cohort_start_date asc) as rn
 from @target_database_schema.@target_table
 where cohort_definition_id in
 (@target_ids)
@@ -69,16 +69,16 @@ CROSS JOIN
 
 union
 
-select distinct
-t.cohort_definition_id as target_cohort_id,
-o.cohort_definition_id as outcome_cohort_id,
-'TnOc' as cohort_type
-from
-(select distinct cohort_definition_id from #targets_agg) as t
-CROSS JOIN
-(select distinct cohort_definition_id from #outcomes_agg) as o
+--select distinct
+--t.cohort_definition_id as target_cohort_id,
+--o.cohort_definition_id as outcome_cohort_id,
+--'TnOc' as cohort_type
+--from
+--(select distinct cohort_definition_id from #targets_agg) as t
+--CROSS JOIN
+--(select distinct cohort_definition_id from #outcomes_agg) as o
 
-union
+--union
 
 select distinct
 t.cohort_definition_id as target_cohort_id,
@@ -102,16 +102,16 @@ CROSS JOIN
 
 union
 
-select distinct
-t.cohort_definition_id as target_cohort_id,
-o.cohort_definition_id as outcome_cohort_id,
-'TnfirstOc' as cohort_type
-from
-(select distinct cohort_definition_id from #targets_agg) as t
-CROSS JOIN
-(select distinct cohort_definition_id from #outcomes_agg) as o
+--select distinct
+--t.cohort_definition_id as target_cohort_id,
+--o.cohort_definition_id as outcome_cohort_id,
+--'TnfirstOc' as cohort_type
+--from
+--(select distinct cohort_definition_id from #targets_agg) as t
+--CROSS JOIN
+--(select distinct cohort_definition_id from #outcomes_agg) as o
 
-union
+--union
 
 select distinct
 t.cohort_definition_id as target_cohort_id,
@@ -191,39 +191,39 @@ o.cohort_start_date >= dateadd(day, @tar_start, t.@tar_start_anchor);
 
 
 -- 2) get all the people without the outcome in TAR
-drop table if exists #target_nooutcome;
-select
-t.subject_id,
-t.cohort_start_date,
-t.cohort_end_date,
-t.cohort_definition_id as target_cohort_id,
-o.cohort_definition_id as outcome_cohort_id
-into #target_nooutcome
-from #targets_agg t
-CROSS JOIN
-( select distinct cohort_definition_id from #outcomes_agg) o
-left outer join #target_with_outcome two
-on t.cohort_definition_id = two.target_cohort_id
-and t.subject_id = two.subject_id
-and o.cohort_definition_id = two.outcome_cohort_id
-where two.subject_id IS NULL;
+--drop table if exists #target_nooutcome;
+--select
+--t.subject_id,
+--t.cohort_start_date,
+--t.cohort_end_date,
+--t.cohort_definition_id as target_cohort_id,
+--o.cohort_definition_id as outcome_cohort_id
+--into #target_nooutcome
+--from #targets_agg t
+--CROSS JOIN
+--( select distinct cohort_definition_id from #outcomes_agg) o
+--left outer join #target_with_outcome two
+--on t.cohort_definition_id = two.target_cohort_id
+--and t.subject_id = two.subject_id
+--and o.cohort_definition_id = two.outcome_cohort_id
+--where two.subject_id IS NULL;
 
-drop table if exists #target_noout_f;
-select
-t.subject_id,
-t.cohort_start_date,
-t.cohort_end_date,
-t.cohort_definition_id as target_cohort_id,
-o.cohort_definition_id as outcome_cohort_id
-into #target_noout_f
-from #targets_agg t
-CROSS JOIN
-( select distinct cohort_definition_id from #outcomes_agg) o
-left outer join #target_outcome_f two
-on t.cohort_definition_id = two.target_cohort_id
-and t.subject_id = two.subject_id
-and o.cohort_definition_id = two.outcome_cohort_id
-where two.subject_id IS NULL;
+--drop table if exists #target_noout_f;
+--select
+--t.subject_id,
+--t.cohort_start_date,
+--t.cohort_end_date,
+--t.cohort_definition_id as target_cohort_id,
+--o.cohort_definition_id as outcome_cohort_id
+--into #target_noout_f
+--from #targets_agg t
+--CROSS JOIN
+--( select distinct cohort_definition_id from #outcomes_agg) o
+--left outer join #target_outcome_f two
+--on t.cohort_definition_id = two.target_cohort_id
+--and t.subject_id = two.subject_id
+--and o.cohort_definition_id = two.outcome_cohort_id
+--where two.subject_id IS NULL;
 
 -- Final: select into #agg_cohorts
 
@@ -294,33 +294,33 @@ union
 
 -- T without O
 
-select
-tnoc.subject_id,
-tnoc.cohort_start_date,
-tnoc.cohort_end_date,
-cd.cohort_definition_id
-from #target_nooutcome tnoc
-INNER JOIN #cohort_details cd
-on cd.target_cohort_id = tnoc.target_cohort_id
-and cd.outcome_cohort_id = tnoc.outcome_cohort_id
-and cd.cohort_type = 'TnOc'
+--select
+--tnoc.subject_id,
+--tnoc.cohort_start_date,
+--tnoc.cohort_end_date,
+--cd.cohort_definition_id
+--from #target_nooutcome tnoc
+--INNER JOIN #cohort_details cd
+--on cd.target_cohort_id = tnoc.target_cohort_id
+--and cd.outcome_cohort_id = tnoc.outcome_cohort_id
+--and cd.cohort_type = 'TnOc'
 
-union
+--union
 
 -- T without first O
 
-select
-tnoc.subject_id,
-tnoc.cohort_start_date,
-tnoc.cohort_end_date,
-cd.cohort_definition_id
-from #target_noout_f tnoc
-INNER JOIN #cohort_details cd
-on cd.target_cohort_id = tnoc.target_cohort_id
-and cd.outcome_cohort_id = tnoc.outcome_cohort_id
-and cd.cohort_type = 'TnfirstOc'
+--select
+--tnoc.subject_id,
+--tnoc.cohort_start_date,
+--tnoc.cohort_end_date,
+--cd.cohort_definition_id
+--from #target_noout_f tnoc
+--INNER JOIN #cohort_details cd
+--on cd.target_cohort_id = tnoc.target_cohort_id
+--and cd.outcome_cohort_id = tnoc.outcome_cohort_id
+--and cd.cohort_type = 'TnfirstOc'
 
-union
+--union
 
 -- Ts and Os
 

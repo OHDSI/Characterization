@@ -97,7 +97,7 @@ test_that("computeAggregateCovariateAnalyses", {
 
   testthat::expect_true(inherits(agc, "CovariateData"))
   testthat::expect_true(length(unique(as.data.frame(agc$covariates)$cohortDefinitionId))
-  <= length(res$targetIds) * length(res$outcomeIds) * 6 + length(res$targetIds)*2 + length(res$outcomeIds)*2)
+  <= length(res$targetIds) * length(res$outcomeIds) * 4 + length(res$targetIds)*2 + length(res$outcomeIds)*2)
   testthat::expect_true(
     sum(names(agc) %in% c(
       "analysisRef",
@@ -121,7 +121,7 @@ test_that("computeAggregateCovariateAnalyses", {
   )
 
   testthat::expect_true(
-    nrow(as.data.frame(agc$cohortDetails)) == 26 # 8 T/Os, 6 TnO, 6 TnOc, 6 OnT
+    nrow(as.data.frame(agc$cohortDetails)) == 20 # 8 T/Os, 6 TnO, 0 TnOc, 6 OnT
   )
 
   # test saving/loading

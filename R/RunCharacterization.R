@@ -273,7 +273,7 @@ runCharacterizationAnalyses <- function(
           tablePrefix = tablePrefix,
           minCellCount = minCellCount,
           minCellCountColumns = list(
-              c('numEvents'),
+              c('numCases'),
               c('dechallengeAttempt'),
               c('dechallengeFail', 'dechallengeSuccess'),
               c('rechallengeAttempt'),

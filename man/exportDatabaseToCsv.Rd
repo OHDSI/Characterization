@@ -7,11 +7,12 @@
 exportDatabaseToCsv(
   connectionDetails,
   resultSchema,
-  targetDialect,
+  targetDialect = NULL,
   tablePrefix = "c_",
   filePrefix = NULL,
   tempEmulationSchema = NULL,
-  saveDirectory
+  saveDirectory,
+  minMeanCovariateValue = 0.001
 )
 }
 \arguments{
@@ -21,7 +22,7 @@ function \code{connect} in the
 
 \item{resultSchema}{The name of the database schema that the result tables will be created.}
 
-\item{targetDialect}{The database management system being used}
+\item{targetDialect}{DEPRECATED: derived from \code{connectionDetails}.}
 
 \item{tablePrefix}{The table prefix to apply to the characterization result tables}
 
@@ -30,6 +31,10 @@ function \code{connect} in the
 \item{tempEmulationSchema}{The temp schema used when the database management system is oracle}
 
 \item{saveDirectory}{The directory to save the csv results}
+
+\item{minMeanCovariateValue}{The minimum mean covariate value (i.e. the minimum proportion for
+binary covariates) for a covariate to be included in covariate table.
+Other covariates are removed to save space.}
 }
 \value{
 csv file per table into the saveDirectory

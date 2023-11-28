@@ -86,7 +86,7 @@ insertAndromedaToDatabase <- function(
         data = data,
         minCellCount = minCellCount,
         minCellCountColumns = minCellCountColumns
-        )
+      )
 
       DatabaseConnector::insertTable(
         connection = connection,
@@ -255,11 +255,14 @@ createCharacterizationTables <- function(
 #'                                     function \code{connect} in the
 #'                                     \code{DatabaseConnector} package.
 #' @param resultSchema                 The name of the database schema that the result tables will be created.
-#' @param targetDialect                The database management system being used
+#' @param targetDialect                DEPRECATED: derived from \code{connectionDetails}.
 #' @param tablePrefix                  The table prefix to apply to the characterization result tables
 #' @param filePrefix                   The prefix to apply to the files
 #' @param tempEmulationSchema          The temp schema used when the database management system is oracle
 #' @param saveDirectory                The directory to save the csv results
+#' @param minMeanCovariateValue        The minimum mean covariate value (i.e. the minimum proportion for
+#'                                     binary covariates) for a covariate to be included in covariate table.
+#'                                     Other covariates are removed to save space.
 #'
 #' @return
 #' csv file per table into the saveDirectory
@@ -268,11 +271,12 @@ createCharacterizationTables <- function(
 exportDatabaseToCsv <- function(
     connectionDetails,
     resultSchema,
-    targetDialect,
+    targetDialect = NULL,
     tablePrefix = "c_",
     filePrefix = NULL,
     tempEmulationSchema = NULL,
-    saveDirectory
+    saveDirectory,
+    minMeanCovariateValue = 0.001
 ){
 
   errorMessages <- checkmate::makeAssertCollection()
@@ -282,6 +286,9 @@ exportDatabaseToCsv <- function(
     errorMessages = errorMessages
   )
   checkmate::reportAssertions(errorMessages)
+  if (!is.null(targetDialect)) {
+    warning("The targetDialect argument is deprecated")
+  }
 
   if (is.null(filePrefix)) {
     filePrefix = ''
@@ -303,37 +310,44 @@ exportDatabaseToCsv <- function(
     )
   }
 
+  # max number of rows extracted at a time
+  maxRowCount <- 1e6
+
   # get the table names using the function in uploadToDatabase.R
   tables <- getResultTables()
 
   # extract result per table
   for(table in tables){
-    sql <- "select * from @resultSchema.@appendtotable@tablename"
+    sql <- "select * from @resultSchema.@appendtotable@tablename;"
     sql <- SqlRender::render(
       sql = sql,
       resultSchema = resultSchema,
       appendtotable = tablePrefix,
       tablename = table
     )
-    sql <- SqlRender::translate(
-      sql = sql,
-      targetDialect = targetDialect,
-      tempEmulationSchema = tempEmulationSchema
-    )
-    result <- DatabaseConnector::querySql(
-      connection = connection,
-      sql = sql,
-      snakeCaseToCamelCase = F
-    )
-    result <- formatDouble(result)
-
-    # save the results as a csv
-    readr::write_csv(
-      x = result,
-      file = file.path(saveDirectory, paste0(tolower(filePrefix), table,'.csv'))
-    )
+    resultSet <- DatabaseConnector::dbSendQuery(connection, sql)
+    tryCatch({
+      first <- TRUE
+      while (first || !DatabaseConnector::dbHasCompleted(resultSet)) {
+        result <- DatabaseConnector::dbFetch(resultSet, n = maxRowCount)
+        if (table == "covariates" && minMeanCovariateValue > 0) {
+          result <- result %>%
+            dplyr::filter(.data$average_value >= minMeanCovariateValue)
+        }
+        result <- formatDouble(result)
+        # save the results as a csv
+        readr::write_csv(
+          x = result,
+          file = file.path(saveDirectory, paste0(tolower(filePrefix), table,'.csv')),
+          append = !first
+        )
+        first <- FALSE
+      }
+    },
+    finally = {
+      DatabaseConnector::dbClearResult(resultSet)
+    })
   }
-
   invisible(saveDirectory)
 }
 
