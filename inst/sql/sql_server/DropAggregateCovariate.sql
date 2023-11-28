@@ -21,12 +21,6 @@ DROP TABLE #target_with_outcome;
 TRUNCATE TABLE #target_outcome_f;
 DROP TABLE #target_outcome_f;
 
-TRUNCATE TABLE #target_nooutcome;
-DROP TABLE #target_nooutcome;
-
-TRUNCATE TABLE #target_noout_f;
-DROP TABLE #target_noout_f;
-
 TRUNCATE TABLE #agg_cohorts;
 DROP TABLE #agg_cohorts;
 
