@@ -345,6 +345,7 @@ exportDatabaseToCsv <- function(
           append = !first
         )
         first <- FALSE
+        i <- i + 1
       }
     },
     finally = {
