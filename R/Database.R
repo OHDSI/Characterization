@@ -331,7 +331,7 @@ exportDatabaseToCsv <- function(
       first <- TRUE
       i <- 1
       while (first || !DatabaseConnector::dbHasCompleted(resultSet)) {
-        message(paste0("  -- Rows ", i, " to ", maxRowCount*i))
+        message(paste0("  -- Rows ", (i-1)*maxRowCount, " to ", maxRowCount*i))
         result <- DatabaseConnector::dbFetch(resultSet, n = maxRowCount)
         if (table == "covariates" && minMeanCovariateValue > 0) {
           result <- result %>%
