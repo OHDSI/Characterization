@@ -328,9 +328,8 @@ exportDatabaseToCsv <- function(
     )
     resultSet <- DatabaseConnector::dbSendQuery(connection, sql)
     tryCatch({
-      first <- TRUE
       i <- 1
-      while (first || !DatabaseConnector::dbHasCompleted(resultSet)) {
+      while (i == 1 || !DatabaseConnector::dbHasCompleted(resultSet)) {
         start <- format(x = (i-1)*maxRowCount+1, scientific = F, big.mark = ",")
         end <- format(x = maxRowCount*i, scientific = F, big.mark = ",")
         message(paste0("  -- Rows ", start, " to ", end))
@@ -344,9 +343,8 @@ exportDatabaseToCsv <- function(
         readr::write_csv(
           x = result,
           file = file.path(saveDirectory, paste0(tolower(filePrefix), table,'.csv')),
-          append = !first
+          append = (i > 1)
         )
-        first <- FALSE
         i <- i + 1
       }
     },
