@@ -1,3 +1,7 @@
+Characterization 0.1.4
+======================
+Added extra error logging
+
 Characterization 0.1.3
 ======================
 Optimized aggregate features to remove T and not Os (as these can be calculated using T and T and Os) - requires latest shiny app though
