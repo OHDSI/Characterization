@@ -197,7 +197,7 @@ runCharacterizationAnalyses <- function(
           )
         },
         error = function(e) {
-          message(e);
+          message(paste0("ERROR in time-to-event analysis: ", e$message));
           return(NULL)
         }
       )
@@ -247,7 +247,7 @@ runCharacterizationAnalyses <- function(
           )
         },
         error = function(e) {
-          message(e);
+          message(paste0("ERROR in dechallenge rechallenge analysis: ", e$message));
           return(NULL)
         }
       )
@@ -300,13 +300,13 @@ runCharacterizationAnalyses <- function(
           )
         },
         error = function(e) {
-          message(e);
+          message(paste0("ERROR in rechallenge failed case analysis: ", e$message));
           return(NULL)
         }
       )
 
       if (!is.null(result)) {
-        # log that run was sucessful
+        # log that run was successful
         readr::write_csv(
           x = data.frame(
             analysis_type = "rechallengeFailCaseSeries",
@@ -350,13 +350,14 @@ runCharacterizationAnalyses <- function(
           )
         },
         error = function(e) {
+          message(paste0("ERROR in aggregate covariate analyses: ", e$message));
           message(e);
           return(NULL)
         }
       )
 
       if (!is.null(result)) {
-        # log that run was sucessful
+        # log that run was successful
         readr::write_csv(
           x = data.frame(
             analysis_type = "aggregateCovariates",

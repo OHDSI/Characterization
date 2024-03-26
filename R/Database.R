@@ -318,6 +318,7 @@ exportDatabaseToCsv <- function(
 
   # extract result per table
   for(table in tables){
+    message(paste0("Exporting ", table))
     sql <- "select * from @resultSchema.@appendtotable@tablename;"
     sql <- SqlRender::render(
       sql = sql,
@@ -327,8 +328,11 @@ exportDatabaseToCsv <- function(
     )
     resultSet <- DatabaseConnector::dbSendQuery(connection, sql)
     tryCatch({
-      first <- TRUE
-      while (first || !DatabaseConnector::dbHasCompleted(resultSet)) {
+      i <- 1
+      while (i == 1 || !DatabaseConnector::dbHasCompleted(resultSet)) {
+        start <- format(x = (i-1)*maxRowCount+1, scientific = F, big.mark = ",")
+        end <- format(x = maxRowCount*i, scientific = F, big.mark = ",")
+        message(paste0("  -- Rows ", start, " to ", end))
         result <- DatabaseConnector::dbFetch(resultSet, n = maxRowCount)
         if (table == "covariates" && minMeanCovariateValue > 0) {
           result <- result %>%
@@ -339,10 +343,13 @@ exportDatabaseToCsv <- function(
         readr::write_csv(
           x = result,
           file = file.path(saveDirectory, paste0(tolower(filePrefix), table,'.csv')),
-          append = !first
+          append = (i > 1)
         )
-        first <- FALSE
+        i <- i + 1
       }
+    },
+    error = function(e) {
+      message(paste0("ERROR in export to csv: ", e$message));
     },
     finally = {
       DatabaseConnector::dbClearResult(resultSet)
