@@ -274,7 +274,7 @@ exportDatabaseToCsv <- function(
     targetDialect = NULL,
     tablePrefix = "c_",
     filePrefix = NULL,
-    tempEmulationSchema = NULL,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     saveDirectory,
     minMeanCovariateValue = 0.001
 ){
@@ -329,7 +329,7 @@ exportDatabaseToCsv <- function(
     )
     sql <- SqlRender::translate(
       sql = sql,
-      targetDialect = targetDialect,
+      targetDialect = connectionDetails$dbms,
       tempEmulationSchema = tempEmulationSchema
     )
     countN <- DatabaseConnector::querySql(
@@ -348,7 +348,7 @@ exportDatabaseToCsv <- function(
     )
     sql <- SqlRender::translate(
       sql = sql,
-      targetDialect = targetDialect,
+      targetDialect = connectionDetails$dbms,
       tempEmulationSchema = tempEmulationSchema
     )
     cnames <- colnames(DatabaseConnector::querySql(
@@ -385,7 +385,7 @@ exportDatabaseToCsv <- function(
       )
       sql <- SqlRender::translate(
         sql = sql,
-        targetDialect = targetDialect,
+        targetDialect = connectionDetails$dbms,
         tempEmulationSchema = tempEmulationSchema
       )
       result <- DatabaseConnector::querySql(
