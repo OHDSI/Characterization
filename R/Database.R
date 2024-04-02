@@ -406,8 +406,13 @@ exportDatabaseToCsv <- function(
         append = tableAppend
       )
       tableAppend = T
-      utils::setTxtProgressBar(pb,endRow)
-
+      # NOTE: Handling progresss bar per note on txtProgressBar
+      # above. Otherwise the progress bar doesn't show that it completed.
+      if (endRow == countN) {
+        utils::setTxtProgressBar(pb,countN + 1)
+      } else {
+        utils::setTxtProgressBar(pb,endRow)
+      }
     }
     close(pb)
   }
