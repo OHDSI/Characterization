@@ -359,7 +359,11 @@ exportDatabaseToCsv <- function(
 
     inds <- floor(countN/maxRowCount)
     tableAppend = F
-    pb = utils::txtProgressBar(min = 0, max = countN, initial = 0)
+    # NOTE: If the table has 0 rows (countN == 0),
+    # then setting the txtProgressBar will fail since
+    # min < max. So, setting max = countN+1 for this
+    # reason.
+    pb = utils::txtProgressBar(min = 0, max = countN+1, initial = 0)
 
     for(i in 1:length(inds)){
 
