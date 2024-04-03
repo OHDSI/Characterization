@@ -1,3 +1,7 @@
+Characterization 0.1.5
+======================
+Changed export to csv approach to use batch export from SQLite (#41)
+
 Characterization 0.1.4
 ======================
 Added extra error logging

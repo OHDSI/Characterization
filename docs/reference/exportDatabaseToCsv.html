@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -81,11 +81,12 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">exportDatabaseToCsv</span><span class="op">(</span></span>
 <span>  <span class="va">connectionDetails</span>,</span>
 <span>  <span class="va">resultSchema</span>,</span>
-<span>  <span class="va">targetDialect</span>,</span>
+<span>  targetDialect <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tablePrefix <span class="op">=</span> <span class="st">"c_"</span>,</span>
 <span>  filePrefix <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  tempEmulationSchema <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">saveDirectory</span></span>
+<span>  tempEmulationSchema <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"sqlRenderTempEmulationSchema"</span><span class="op">)</span>,</span>
+<span>  <span class="va">saveDirectory</span>,</span>
+<span>  minMeanCovariateValue <span class="op">=</span> <span class="fl">0.001</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -102,7 +103,7 @@ function <code>connect</code> in the
 
 
 <dt>targetDialect</dt>
-<dd><p>The database management system being used</p></dd>
+<dd><p>DEPRECATED: derived from <code>connectionDetails</code>.</p></dd>
 
 
 <dt>tablePrefix</dt>
@@ -119,6 +120,12 @@ function <code>connect</code> in the
 
 <dt>saveDirectory</dt>
 <dd><p>The directory to save the csv results</p></dd>
+
+
+<dt>minMeanCovariateValue</dt>
+<dd><p>The minimum mean covariate value (i.e. the minimum proportion for
+binary covariates) for a covariate to be included in covariate table.
+Other covariates are removed to save space.</p></dd>
 
 </dl></div>
     <div id="value">

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -73,12 +73,28 @@
     </div>
 
     <div class="section level2">
+<h2 class="page-header" data-toc-text="0.1.5" id="characterization-015">Characterization 0.1.5<a class="anchor" aria-label="anchor" href="#characterization-015"></a></h2>
+<p>Changed export to csv approach to use batch export from SQLite (<a href="https://github.com/OHDSI/Characterization/issues/41" class="external-link">#41</a>)</p>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.1.4" id="characterization-014">Characterization 0.1.4<a class="anchor" aria-label="anchor" href="#characterization-014"></a></h2>
+<p>Added extra error logging</p>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.1.3" id="characterization-013">Characterization 0.1.3<a class="anchor" aria-label="anchor" href="#characterization-013"></a></h2>
+<p>Optimized aggregate features to remove T and not Os (as these can be calculated using T and T and Os) - requires latest shiny app though Optimized database extraction to csv</p>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.1.2" id="characterization-012">Characterization 0.1.2<a class="anchor" aria-label="anchor" href="#characterization-012"></a></h2>
+<p>Fixing bug where first outcome was still all outcomes Updating shiny app to work with old and new ShinyAppBuilder</p>
+</div>
+    <div class="section level2">
 <h2 class="page-header" data-toc-text="0.1.1" id="characterization-011">Characterization 0.1.1<a class="anchor" aria-label="anchor" href="#characterization-011"></a></h2>
 <p>Fixing bug where cohort_counts were not being saved in the database</p>
 </div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.1.0" id="characterization-010">Characterization 0.1.0<a class="anchor" aria-label="anchor" href="#characterization-010"></a></h2>
-<ul><li>added support to enable target cohorts with multiple cohort entries for the aggregate covariate analysis by restructing to first cohort entry and ensuring the subject has a user specified minPriorObservation days observation in the database at first entry and also perform analysis on first outcomes and any outcome that is recorded during TAR.</li>
+<ul><li>added support to enable target cohorts with multiple cohort entries for the aggregate covariate analysis by restricting to first cohort entry and ensuring the subject has a user specified minPriorObservation days observation in the database at first entry and also perform analysis on first outcomes and any outcome that is recorded during TAR.</li>
 <li>added shiny app</li>
 </ul></div>
     <div class="section level2">

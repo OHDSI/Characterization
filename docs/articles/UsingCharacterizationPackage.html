@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -97,7 +97,7 @@
       <h1 data-toc-skip>Using Characterization Package</h1>
                         <h4 data-toc-skip class="author">Jenna Reps</h4>
             
-            <h4 data-toc-skip class="date">2023-03-15</h4>
+            <h4 data-toc-skip class="date">2024-04-03</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/HEAD/vignettes/UsingCharacterizationPackage.Rmd" class="external-link"><code>vignettes/UsingCharacterizationPackage.Rmd</code></a></small>
       <div class="hidden name"><code>UsingCharacterizationPackage.Rmd</code></div>
@@ -118,7 +118,7 @@ for various descriptive studies using OMOP CDM data. The
 Characterization package currently contains three different types of
 analyses:</p>
 <ul>
-<li>Aggreagate Covariates: this returns the mean feature value for a set
+<li>Aggregate Covariates: this returns the mean feature value for a set
 of features specified by the user for i) the Target cohort population,
 ii) the Outcome cohort population, iii) the Target population patients
 who had the outcome during some user specified time-at-risk and iv) the
@@ -131,7 +131,7 @@ whether the drug is restarted (a rechallenge occurs) and if so, whether
 the event starts again (a failed rechallenge). In this analysis, the
 Target cohorts are the drug users of interest and the Outcome cohorts
 are the medical events you wish to see whether the drug may cause. The
-user must also specify how close in time a drug msut be stopped after
+user must also specify how close in time a drug must be stopped after
 the outcome to be considered a dechallenge and how close in time an
 Outcome must occur after restarting the drug to be considered a failed
 rechallenge).</li>
@@ -159,34 +159,18 @@ with the simulated data ready to be used.</p>
 <code class="sourceCode R"><span><span class="va">connectionDetails</span> <span class="op">&lt;-</span> <span class="fu">Eunomia</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Eunomia/man/getEunomiaConnectionDetails.html" class="external-link">getEunomiaConnectionDetails</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">Eunomia</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Eunomia/man/createCohorts.html" class="external-link">createCohorts</a></span><span class="op">(</span>connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span></code></pre>
-<pre><code>## Creating cohort: Celecoxib
-## 
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.00908 secs</span></span></code></pre>
-<pre><code>## Creating cohort: Diclofenac
-## 
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.00446 secs</span></span></code></pre>
-<pre><code>## Creating cohort: GiBleed
-## 
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.00896 secs</span></span></code></pre>
-<pre><code>## Creating cohort: NSAIDs
-## 
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0542 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Creating cohort: Celecoxib</span></span>
+<span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0152 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Creating cohort: Diclofenac</span></span>
+<span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0169 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Creating cohort: GiBleed</span></span>
+<span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0208 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Creating cohort: NSAIDs</span></span>
+<span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0579 secs</span></span></code></pre>
 <pre><code><span><span class="co">## Cohorts created in table main.cohort</span></span></code></pre>
 <pre><code><span><span class="co">##   cohortId       name</span></span>
 <span><span class="co">## 1        1  Celecoxib</span></span>
@@ -247,47 +231,47 @@ your own custom feature extraction code.</li>
 can use cohort ids 1,2 and 4 as the targetIds and cohort id 3 as the
 outcomeIds:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="va">exampleTargetIds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span>,<span class="fl">4</span><span class="op">)</span></span>
-<span>  <span class="va">exampleOutcomeIds</span> <span class="op">&lt;-</span> <span class="fl">3</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">exampleTargetIds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">exampleOutcomeIds</span> <span class="op">&lt;-</span> <span class="fl">3</span></span></code></pre></div>
 <p>If we want to get information on the sex assigned at birth, age at
 index and Charlson Comorbidity index we can create the settings using
 <code><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">FeatureExtraction::createCovariateSettings</a></code>:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="va">exampleCovariateSettings</span> <span class="op">&lt;-</span> <span class="fu">FeatureExtraction</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">createCovariateSettings</a></span><span class="op">(</span></span>
-<span>    useDemographicsGender <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>    useDemographicsAge <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>    useCharlsonIndex <span class="op">=</span> <span class="cn">T</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">exampleCovariateSettings</span> <span class="op">&lt;-</span> <span class="fu">FeatureExtraction</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">createCovariateSettings</a></span><span class="op">(</span></span>
+<span>  useDemographicsGender <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>  useDemographicsAge <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>  useCharlsonIndex <span class="op">=</span> <span class="cn">T</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>If we want to create the aggregate features for all our target
 cohorts, our outcome cohort and each target cohort restricted to those
 with a record of the outcome 1 day after target cohort start date until
 365 days after target cohort end date we can run:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="va">exampleAggregateCovariateSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createAggregateCovariateSettings.html">createAggregateCovariateSettings</a></span><span class="op">(</span></span>
-<span>    targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
-<span>    outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span>,</span>
-<span>    riskWindowStart <span class="op">=</span> <span class="fl">1</span>, startAnchor <span class="op">=</span> <span class="st">'cohort start'</span>,</span>
-<span>    riskWindowEnd <span class="op">=</span> <span class="fl">365</span>, endAnchor <span class="op">=</span> <span class="st">'cohort start'</span>,</span>
-<span>    covariateSettings <span class="op">=</span> <span class="va">exampleCovariateSettings</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">exampleAggregateCovariateSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createAggregateCovariateSettings.html">createAggregateCovariateSettings</a></span><span class="op">(</span></span>
+<span>  targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
+<span>  outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span>,</span>
+<span>  riskWindowStart <span class="op">=</span> <span class="fl">1</span>, startAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
+<span>  riskWindowEnd <span class="op">=</span> <span class="fl">365</span>, endAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
+<span>  covariateSettings <span class="op">=</span> <span class="va">exampleCovariateSettings</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Next we need to use the
 <code>exampleAggregateCovariateSettings</code> as the settings to
 <code>computeAggregateCovariateAnalyses</code>, we need to use the
 Eunomia connectionDetails and in Eunomia the OMOP CDM data and cohort
 table are in the ‘main’ schema. The cohort table name is ‘cohort’. The
-following code will apply the aggregative covariates analysis using the
+following code will apply the aggregated covariates analysis using the
 previously specified settings on the simulated Eunomia data:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">agc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeAggregateCovariateAnalyses.html">computeAggregateCovariateAnalyses</a></span><span class="op">(</span></span>
-<span>    connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
-<span>    cdmDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
-<span>    cdmVersion <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>    targetDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
-<span>    targetTable <span class="op">=</span> <span class="st">'cohort'</span>,</span>
-<span>    aggregateCovariateSettings <span class="op">=</span> <span class="va">exampleAggregateCovariateSettings</span>,</span>
-<span>    databaseId <span class="op">=</span> <span class="st">'Eunomia'</span>, </span>
-<span>    runId <span class="op">=</span> <span class="fl">1</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
+<span>  cdmDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  cdmVersion <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  aggregateCovariateSettings <span class="op">=</span> <span class="va">exampleAggregateCovariateSettings</span>,</span>
+<span>  databaseId <span class="op">=</span> <span class="st">"Eunomia"</span>,</span>
+<span>  runId <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>If you would like to save the results you can use the function
 <code>saveAggregateCovariateAnalyses</code> and this can then be loaded
 using <code>loadAggregateCovariateAnalyses</code>.</p>
@@ -297,11 +281,9 @@ using <code>loadAggregateCovariateAnalyses</code>.</p>
 <li>covariates:</li>
 </ul>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">covariates</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">covariates</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
-<pre><code><span><span class="co">## Warning in !is.null(rmarkdown::metadata$output) &amp;&amp; rmarkdown::metadata$output</span></span>
-<span><span class="co">## %in% : 'length(x) = 3 &gt; 1' in coercion to 'logical(1)'</span></span></code></pre>
+<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr>
 <th style="text-align:left;">
@@ -738,126 +720,6 @@ Eunomia
 8507001
 </td>
 <td style="text-align:right;">
-714
-</td>
-<td style="text-align:right;">
-0.4941176
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-731
-</td>
-<td style="text-align:right;">
-0.5058824
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-12
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-338
-</td>
-<td style="text-align:right;">
-0.4787535
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-12
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-368
-</td>
-<td style="text-align:right;">
-0.5212465
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-13
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-1052
-</td>
-<td style="text-align:right;">
-0.4890748
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-13
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-1099
-</td>
-<td style="text-align:right;">
-0.5109252
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-14
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
 180
 </td>
 <td style="text-align:right;">
@@ -872,7 +734,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-14
+11
 </td>
 <td style="text-align:right;">
 8532001
@@ -892,7 +754,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-15
+12
 </td>
 <td style="text-align:right;">
 8507001
@@ -912,7 +774,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-15
+12
 </td>
 <td style="text-align:right;">
 8532001
@@ -932,7 +794,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-16
+13
 </td>
 <td style="text-align:right;">
 8507001
@@ -952,7 +814,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-16
+13
 </td>
 <td style="text-align:right;">
 8532001
@@ -972,127 +834,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-17
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-714
-</td>
-<td style="text-align:right;">
-0.4941176
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-17
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-731
-</td>
-<td style="text-align:right;">
-0.5058824
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-18
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-338
-</td>
-<td style="text-align:right;">
-0.4787535
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-18
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-368
-</td>
-<td style="text-align:right;">
-0.5212465
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-1052
-</td>
-<td style="text-align:right;">
-0.4890748
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-1099
-</td>
-<td style="text-align:right;">
-0.5109252
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-20
+14
 </td>
 <td style="text-align:right;">
 8507001
@@ -1112,7 +854,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-20
+14
 </td>
 <td style="text-align:right;">
 8532001
@@ -1132,7 +874,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-21
+15
 </td>
 <td style="text-align:right;">
 8507001
@@ -1152,7 +894,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-21
+15
 </td>
 <td style="text-align:right;">
 8532001
@@ -1172,7 +914,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-22
+16
 </td>
 <td style="text-align:right;">
 8507001
@@ -1192,7 +934,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-22
+16
 </td>
 <td style="text-align:right;">
 8532001
@@ -1212,7 +954,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-23
+17
 </td>
 <td style="text-align:right;">
 8507001
@@ -1232,7 +974,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-23
+17
 </td>
 <td style="text-align:right;">
 8532001
@@ -1252,7 +994,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-24
+18
 </td>
 <td style="text-align:right;">
 8507001
@@ -1272,7 +1014,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-24
+18
 </td>
 <td style="text-align:right;">
 8532001
@@ -1292,7 +1034,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-25
+19
 </td>
 <td style="text-align:right;">
 8507001
@@ -1312,7 +1054,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-25
+19
 </td>
 <td style="text-align:right;">
 8532001
@@ -1332,7 +1074,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-26
+20
 </td>
 <td style="text-align:right;">
 8507001
@@ -1352,7 +1094,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-26
+20
 </td>
 <td style="text-align:right;">
 8532001
@@ -1369,10 +1111,10 @@ Eunomia
 <ul>
 <li>covariatesContinuous:</li>
 </ul>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">covariatesContinuous</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">covariatesContinuous</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
+<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr>
 <th style="text-align:left;">
@@ -1515,113 +1257,25 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-15
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.4274194
-</td>
-<td style="text-align:right;">
-0.4606464
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-25
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.4274194
-</td>
-<td style="text-align:right;">
-0.4606464
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 12
 </td>
 <td style="text-align:right;">
 1901
 </td>
 <td style="text-align:right;">
-255
+41
 </td>
 <td style="text-align:right;">
 0
 </td>
 <td style="text-align:right;">
-3
+2
 </td>
 <td style="text-align:right;">
-0.3980170
+0.4274194
 </td>
 <td style="text-align:right;">
-0.3159103
+0.4606464
 </td>
 <td style="text-align:right;">
 0
@@ -1647,25 +1301,25 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-18
+19
 </td>
 <td style="text-align:right;">
 1901
 </td>
 <td style="text-align:right;">
-255
+41
 </td>
 <td style="text-align:right;">
 0
 </td>
 <td style="text-align:right;">
-3
+2
 </td>
 <td style="text-align:right;">
-0.3980170
+0.4274194
 </td>
 <td style="text-align:right;">
-0.3159103
+0.4606464
 </td>
 <td style="text-align:right;">
 0
@@ -1735,7 +1389,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-14
+11
 </td>
 <td style="text-align:right;">
 1901
@@ -1823,7 +1477,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-24
+18
 </td>
 <td style="text-align:right;">
 1901
@@ -1911,7 +1565,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-21
+15
 </td>
 <td style="text-align:right;">
 1901
@@ -1999,7 +1653,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-16
+13
 </td>
 <td style="text-align:right;">
 1901
@@ -2131,145 +1785,13 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-23
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-316
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.8204593
-</td>
-<td style="text-align:right;">
-0.4299773
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-26
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-316
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.8204593
-</td>
-<td style="text-align:right;">
-0.4299773
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-660
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.5307958
-</td>
-<td style="text-align:right;">
-0.3688415
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 17
 </td>
 <td style="text-align:right;">
 1901
 </td>
 <td style="text-align:right;">
-660
+316
 </td>
 <td style="text-align:right;">
 0
@@ -2278,13 +1800,13 @@ Eunomia
 2
 </td>
 <td style="text-align:right;">
-0.5307958
+0.8204593
 </td>
 <td style="text-align:right;">
-0.3688415
+0.4299773
 </td>
 <td style="text-align:right;">
-0
+1
 </td>
 <td style="text-align:right;">
 0
@@ -2296,7 +1818,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-1
+2
 </td>
 </tr>
 <tr>
@@ -2307,28 +1829,28 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-13
+20
 </td>
 <td style="text-align:right;">
 1901
 </td>
 <td style="text-align:right;">
-915
+316
 </td>
 <td style="text-align:right;">
 0
 </td>
 <td style="text-align:right;">
-3
+2
 </td>
 <td style="text-align:right;">
-0.4872152
+0.8204593
 </td>
 <td style="text-align:right;">
-0.3557403
+0.4299773
 </td>
 <td style="text-align:right;">
-0
+1
 </td>
 <td style="text-align:right;">
 0
@@ -2340,51 +1862,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-915
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0.4872152
-</td>
-<td style="text-align:right;">
-0.3557403
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
+2
 </td>
 </tr>
 <tr>
@@ -2439,7 +1917,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-20
+14
 </td>
 <td style="text-align:right;">
 1901
@@ -2527,7 +2005,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-22
+16
 </td>
 <td style="text-align:right;">
 1901
@@ -2615,7 +2093,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-15
+12
 </td>
 <td style="text-align:right;">
 1002
@@ -2703,7 +2181,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-25
+19
 </td>
 <td style="text-align:right;">
 1002
@@ -2791,7 +2269,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-14
+11
 </td>
 <td style="text-align:right;">
 1002
@@ -2879,7 +2357,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-24
+18
 </td>
 <td style="text-align:right;">
 1002
@@ -2967,7 +2445,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-16
+13
 </td>
 <td style="text-align:right;">
 1002
@@ -3099,7 +2577,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-23
+17
 </td>
 <td style="text-align:right;">
 1002
@@ -3143,7 +2621,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-26
+20
 </td>
 <td style="text-align:right;">
 1002
@@ -3177,94 +2655,6 @@ Eunomia
 </td>
 <td style="text-align:right;">
 44
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-12
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-706
-</td>
-<td style="text-align:right;">
-31
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-38.5226629
-</td>
-<td style="text-align:right;">
-3.2712236
-</td>
-<td style="text-align:right;">
-38
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-18
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-706
-</td>
-<td style="text-align:right;">
-31
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-38.5226629
-</td>
-<td style="text-align:right;">
-3.2712236
-</td>
-<td style="text-align:right;">
-38
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-43
 </td>
 </tr>
 <tr>
@@ -3319,7 +2709,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-21
+15
 </td>
 <td style="text-align:right;">
 1002
@@ -3338,94 +2728,6 @@ Eunomia
 </td>
 <td style="text-align:right;">
 3.2816028
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-1445
-</td>
-<td style="text-align:right;">
-31
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-38.6131488
-</td>
-<td style="text-align:right;">
-3.3329496
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-17
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-1445
-</td>
-<td style="text-align:right;">
-31
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-38.6131488
-</td>
-<td style="text-align:right;">
-3.3329496
 </td>
 <td style="text-align:right;">
 39
@@ -3495,7 +2797,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-20
+14
 </td>
 <td style="text-align:right;">
 1002
@@ -3514,94 +2816,6 @@ Eunomia
 </td>
 <td style="text-align:right;">
 3.3192555
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-13
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-2151
-</td>
-<td style="text-align:right;">
-31
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-38.5834496
-</td>
-<td style="text-align:right;">
-3.3123287
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-2151
-</td>
-<td style="text-align:right;">
-31
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-38.5834496
-</td>
-<td style="text-align:right;">
-3.3123287
 </td>
 <td style="text-align:right;">
 39
@@ -3671,7 +2885,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-22
+16
 </td>
 <td style="text-align:right;">
 1002
@@ -3712,10 +2926,10 @@ Eunomia
 <ul>
 <li>covariateRef:</li>
 </ul>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">covariateRef</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">covariateRef</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
+<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr>
 <th style="text-align:left;">
@@ -3823,10 +3037,10 @@ age in years
 <ul>
 <li>analysisRef:</li>
 </ul>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">analysisRef</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">analysisRef</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
+<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr>
 <th style="text-align:left;">
@@ -3965,60 +3179,46 @@ table)</li>
 <p>Using the Eunomia data were we previous generated four cohorts, we
 can use cohort ids 1,2 and 4 as the targetIds and cohort id 3 as the
 outcomeIds:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="va">exampleTargetIds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span>,<span class="fl">4</span><span class="op">)</span></span>
-<span>  <span class="va">exampleOutcomeIds</span> <span class="op">&lt;-</span> <span class="fl">3</span></span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">exampleTargetIds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">exampleOutcomeIds</span> <span class="op">&lt;-</span> <span class="fl">3</span></span></code></pre></div>
 <p>If we want to create the dechallenge rechallenge for all our target
 cohorts and our outcome cohort with a 30 day dechallengeStopInterval and
 31 day dechallengeEvaluationWindow:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="va">exampleDechallengeRechallengeSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createDechallengeRechallengeSettings.html">createDechallengeRechallengeSettings</a></span><span class="op">(</span></span>
-<span>    targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
-<span>    outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span>,</span>
-<span>    dechallengeStopInterval <span class="op">=</span> <span class="fl">30</span>,</span>
-<span>    dechallengeEvaluationWindow <span class="op">=</span> <span class="fl">31</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">exampleDechallengeRechallengeSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createDechallengeRechallengeSettings.html">createDechallengeRechallengeSettings</a></span><span class="op">(</span></span>
+<span>  targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
+<span>  outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span>,</span>
+<span>  dechallengeStopInterval <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  dechallengeEvaluationWindow <span class="op">=</span> <span class="fl">31</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>We can then run the analysis on the Eunomia data using
 <code>computeDechallengeRechallengeAnalyses</code> and the settings
 previously specified:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeDechallengeRechallengeAnalyses.html">computeDechallengeRechallengeAnalyses</a></span><span class="op">(</span></span>
-<span>    connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
-<span>    targetDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
-<span>    targetTable <span class="op">=</span> <span class="st">'cohort'</span>,</span>
-<span>    dechallengeRechallengeSettings <span class="op">=</span> <span class="va">exampleDechallengeRechallengeSettings</span>,</span>
-<span>    databaseId <span class="op">=</span> <span class="st">'Eunomia'</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
+<span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  dechallengeRechallengeSettings <span class="op">=</span> <span class="va">exampleDechallengeRechallengeSettings</span>,</span>
+<span>  databaseId <span class="op">=</span> <span class="st">"Eunomia"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Inputs checked</span></span></code></pre>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span>
 <span><span class="co">## Computing dechallenge rechallenge results</span></span></code></pre>
-<pre><code>## 
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |============                                                          |  17%
-  |                                                                            
-  |=======================                                               |  33%
-  |                                                                            
-  |===================================                                   |  50%
-  |                                                                            
-  |===============================================                       |  67%
-  |                                                                            
-  |==========================================================            |  83%
-  |                                                                            
-  |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.00792 secs</span></span>
-<span><span class="co">## Computing dechallenge rechallenge for 3 target ids and 1outcome ids took 0.0625 secs</span></span></code></pre>
+<pre><code><span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |============                                                          |  17%  |                                                                              |=======================                                               |  33%  |                                                                              |===================================                                   |  50%  |                                                                              |===============================================                       |  67%  |                                                                              |==========================================================            |  83%  |                                                                              |======================================================================| 100%</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00758 secs</span></span>
+<span><span class="co">## Computing dechallenge rechallenge for 3 target ids and 1outcome ids took 0.165 secs</span></span></code></pre>
 <p>If you would like to save the results you can use the function
 <code>saveDechallengeRechallengeAnalyses</code> and this can then be
 loaded using <code>loadDechallengeRechallengeAnalyses</code>.</p>
 <p>The results are Andromeda objects that can we viewed using
 <code>dplyr</code>. There is just one table named
 dechallengeRechallenge:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dc</span><span class="op">$</span><span class="va">dechallengeRechallenge</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dc</span><span class="op">$</span><span class="va">dechallengeRechallenge</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
+<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr>
 <th style="text-align:right;">
@@ -4086,43 +3286,29 @@ pctRechallengeFail
 </table>
 <p>Next it is possible to computer and extract the failed rechallenge
 cases</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">failed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeRechallengeFailCaseSeriesAnalyses.html">computeRechallengeFailCaseSeriesAnalyses</a></span><span class="op">(</span></span>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
-<span>  targetDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
-<span>  targetTable <span class="op">=</span> <span class="st">'cohort'</span>,</span>
+<span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
 <span>  dechallengeRechallengeSettings <span class="op">=</span> <span class="va">exampleDechallengeRechallengeSettings</span>,</span>
-<span>  outcomeDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
-<span>  outcomeTable <span class="op">=</span> <span class="st">'cohort'</span>,</span>
-<span>  databaseId <span class="op">=</span> <span class="st">'Eunomia'</span></span>
+<span>  outcomeDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  outcomeTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  databaseId <span class="op">=</span> <span class="st">"Eunomia"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Inputs checked</span></span></code></pre>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span>
 <span><span class="co">## Computing dechallenge rechallenge results</span></span></code></pre>
-<pre><code>## 
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |============                                                          |  17%
-  |                                                                            
-  |=======================                                               |  33%
-  |                                                                            
-  |===================================                                   |  50%
-  |                                                                            
-  |===============================================                       |  67%
-  |                                                                            
-  |==========================================================            |  83%
-  |                                                                            
-  |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0925 secs</span></span>
-<span><span class="co">## Computing dechallenge failed case series for 3 target IDs and 1 outcome IDs took 0.133 secs</span></span></code></pre>
+<pre><code><span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |============                                                          |  17%  |                                                                              |=======================                                               |  33%  |                                                                              |===================================                                   |  50%  |                                                                              |===============================================                       |  67%  |                                                                              |==========================================================            |  83%  |                                                                              |======================================================================| 100%</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0748 secs</span></span>
+<span><span class="co">## Computing dechallenge failed case series for 3 target IDs and 1 outcome IDs took 0.219 secs</span></span></code></pre>
 <p>The results are Andromeda objects that can we viewed using
 <code>dplyr</code>. There is just one table named
 rechallengeFailCaseSeries:</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">failed</span><span class="op">$</span><span class="va">rechallengeFailCaseSeries</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">failed</span><span class="op">$</span><span class="va">rechallengeFailCaseSeries</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
+<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr>
 <th style="text-align:right;">
@@ -4192,75 +3378,41 @@ table)</li>
 <li>one or more outcomeIds (these must be pre-generated in a cohort
 table)</li>
 </ul>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="va">exampleTimeToEventSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createTimeToEventSettings.html">createTimeToEventSettings</a></span><span class="op">(</span></span>
-<span>    targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
-<span>    outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">exampleTimeToEventSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createTimeToEventSettings.html">createTimeToEventSettings</a></span><span class="op">(</span></span>
+<span>  targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
+<span>  outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>We can then run the analysis on the Eunomia data using
 <code>computeTimeToEventAnalyses</code> and the settings previously
 specified:</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tte</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeTimeToEventAnalyses.html">computeTimeToEventAnalyses</a></span><span class="op">(</span></span>
-<span>    connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
-<span>    cdmDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
-<span>    targetDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
-<span>    targetTable <span class="op">=</span> <span class="st">'cohort'</span>, </span>
-<span>    timeToEventSettings <span class="op">=</span>  <span class="va">exampleTimeToEventSettings</span>,</span>
-<span>    databaseId <span class="op">=</span> <span class="st">'Eunomia'</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
+<span>  cdmDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  timeToEventSettings <span class="op">=</span> <span class="va">exampleTimeToEventSettings</span>,</span>
+<span>  databaseId <span class="op">=</span> <span class="st">"Eunomia"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span>
 <span><span class="co">## Uploading #cohort_settings</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Inserting data took 0.0043 secs</span></span>
+<span><span class="co">## Inserting data took 0.00654 secs</span></span>
 <span><span class="co">## Computing time to event results</span></span></code></pre>
-<pre><code>## 
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |====                                                                  |   6%
-  |                                                                            
-  |=========                                                             |  12%
-  |                                                                            
-  |=============                                                         |  19%
-  |                                                                            
-  |==================                                                    |  25%
-  |                                                                            
-  |======================                                                |  31%
-  |                                                                            
-  |==========================                                            |  38%
-  |                                                                            
-  |===============================                                       |  44%
-  |                                                                            
-  |===================================                                   |  50%
-  |                                                                            
-  |=======================================                               |  56%
-  |                                                                            
-  |============================================                          |  62%
-  |                                                                            
-  |================================================                      |  69%
-  |                                                                            
-  |====================================================                  |  75%
-  |                                                                            
-  |=========================================================             |  81%
-  |                                                                            
-  |=============================================================         |  88%
-  |                                                                            
-  |==================================================================    |  94%
-  |                                                                            
-  |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0418 secs</span></span>
-<span><span class="co">## Computing time-to-event for T-O pairs took 0.145 secs</span></span></code></pre>
+<pre><code><span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   4%  |                                                                              |======                                                                |   8%  |                                                                              |=========                                                             |  12%  |                                                                              |============                                                          |  17%  |                                                                              |===============                                                       |  21%  |                                                                              |==================                                                    |  25%  |                                                                              |====================                                                  |  29%  |                                                                              |=======================                                               |  33%  |                                                                              |==========================                                            |  38%  |                                                                              |=============================                                         |  42%  |                                                                              |================================                                      |  46%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  54%  |                                                                              |=========================================                             |  58%  |                                                                              |============================================                          |  62%  |                                                                              |===============================================                       |  67%  |                                                                              |==================================================                    |  71%  |                                                                              |====================================================                  |  75%  |                                                                              |=======================================================               |  79%  |                                                                              |==========================================================            |  83%  |                                                                              |=============================================================         |  88%  |                                                                              |================================================================      |  92%  |                                                                              |===================================================================   |  96%  |                                                                              |======================================================================| 100%</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0462 secs</span></span>
+<span><span class="co">## Computing time-to-event for T-O pairs took 0.268 secs</span></span></code></pre>
 <p>If you would like to save the results you can use the function
 <code>saveTimeToEventAnalyses</code> and this can then be loaded using
 <code>loadTimeToEventAnalyses</code>.</p>
 <p>The results are Andromeda objects that can we viewed using
 <code>dplyr</code>. There is just one table named timeToEvent:</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tte</span><span class="op">$</span><span class="va">timeToEvent</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tte</span><span class="op">$</span><span class="va">timeToEvent</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/top_n.html" class="external-link">top_n</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
+<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Selecting by timeScale</span></span></code></pre>
 <table class="table">
 <thead><tr>
@@ -4613,56 +3765,56 @@ you can use <code>createCharacterizationSettings</code>. You need to
 input a list of each of the settings (or NULL if you do not want to run
 one type of analysis). To run all the analyses previously shown in one
 function:</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="va">characterizationSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCharacterizationSettings.html">createCharacterizationSettings</a></span><span class="op">(</span></span>
-<span>    timeToEventSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      <span class="va">exampleTimeToEventSettings</span></span>
-<span>      <span class="op">)</span>,</span>
-<span>    dechallengeRechallengeSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      <span class="va">exampleDechallengeRechallengeSettings</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    aggregateCovariateSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      <span class="va">exampleAggregateCovariateSettings</span></span>
-<span>      <span class="op">)</span></span>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">characterizationSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCharacterizationSettings.html">createCharacterizationSettings</a></span><span class="op">(</span></span>
+<span>  timeToEventSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="va">exampleTimeToEventSettings</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  dechallengeRechallengeSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="va">exampleDechallengeRechallengeSettings</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  aggregateCovariateSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="va">exampleAggregateCovariateSettings</span></span>
 <span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># save the settings using</span></span>
 <span><span class="fu"><a href="../reference/saveCharacterizationSettings.html">saveCharacterizationSettings</a></span><span class="op">(</span></span>
-<span>  settings <span class="op">=</span> <span class="va">characterizationSettings</span>, </span>
-<span>  saveDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">'saveSettings'</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
+<span>  settings <span class="op">=</span> <span class="va">characterizationSettings</span>,</span>
+<span>  saveDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"saveSettings"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># the settings can be loaded</span></span>
 <span><span class="va">characterizationSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/loadCharacterizationSettings.html">loadCharacterizationSettings</a></span><span class="op">(</span></span>
-<span>  saveDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">'saveSettings'</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
+<span>  saveDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"saveSettings"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/runCharacterizationAnalyses.html">runCharacterizationAnalyses</a></span><span class="op">(</span></span>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
-<span>  cdmDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
-<span>  targetDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
-<span>  targetTable <span class="op">=</span> <span class="st">'cohort'</span>,</span>
-<span>  outcomeDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
-<span>  outcomeTable <span class="op">=</span> <span class="st">'cohort'</span>,</span>
+<span>  cdmDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  outcomeDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  outcomeTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
 <span>  characterizationSettings <span class="op">=</span> <span class="va">characterizationSettings</span>,</span>
-<span>  saveDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">'example'</span><span class="op">)</span>,</span>
-<span>  tablePrefix <span class="op">=</span> <span class="st">'c_'</span>,</span>
-<span>  databaseId <span class="op">=</span> <span class="st">'1'</span></span>
+<span>  saveDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example"</span><span class="op">)</span>,</span>
+<span>  tablePrefix <span class="op">=</span> <span class="st">"c_"</span>,</span>
+<span>  databaseId <span class="op">=</span> <span class="st">"1"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This will create an SQLITE database with all the analyses saved into
 the saveDirectory. You can export the results as csv files using:</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">connectionDetailsT</span> <span class="op">&lt;-</span> <span class="fu">DatabaseConnector</span><span class="fu">::</span><span class="fu"><a href="https://ohdsi.github.io/DatabaseConnector/reference/createConnectionDetails.html" class="external-link">createConnectionDetails</a></span><span class="op">(</span></span>
-<span>  dbms <span class="op">=</span> <span class="st">'sqlite'</span>,</span>
-<span>  server <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,<span class="st">'example'</span>,<span class="st">'sqliteCharacterization'</span>, <span class="st">'sqlite.sqlite'</span><span class="op">)</span></span>
+<span>  dbms <span class="op">=</span> <span class="st">"sqlite"</span>,</span>
+<span>  server <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example"</span>, <span class="st">"sqliteCharacterization"</span>, <span class="st">"sqlite.sqlite"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/exportDatabaseToCsv.html">exportDatabaseToCsv</a></span><span class="op">(</span></span>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetailsT</span>,</span>
-<span>  resultSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
-<span>  targetDialect <span class="op">=</span> <span class="st">'sqlite'</span>,</span>
-<span>  tablePrefix <span class="op">=</span> <span class="st">'c_'</span>,</span>
-<span>  saveDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,<span class="st">'csv'</span><span class="op">)</span></span>
+<span>  resultSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  targetDialect <span class="op">=</span> <span class="st">"sqlite"</span>,</span>
+<span>  tablePrefix <span class="op">=</span> <span class="st">"c_"</span>,</span>
+<span>  saveDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"csv"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
