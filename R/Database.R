@@ -274,7 +274,7 @@ exportDatabaseToCsv <- function(
     targetDialect = NULL,
     tablePrefix = "c_",
     filePrefix = NULL,
-    tempEmulationSchema = NULL,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     saveDirectory,
     minMeanCovariateValue = 0.001
 ){
@@ -318,43 +318,105 @@ exportDatabaseToCsv <- function(
 
   # extract result per table
   for(table in tables){
-    message(paste0("Exporting ", table))
-    sql <- "select * from @resultSchema.@appendtotable@tablename;"
+    ParallelLogger::logInfo(paste0('Exporting rows from ', table, ' to csv file'))
+    # get row count and figure out number of loops
+    sql <- "select count(*) as N from @resultSchema.@appendtotable@tablename;"
     sql <- SqlRender::render(
       sql = sql,
       resultSchema = resultSchema,
       appendtotable = tablePrefix,
       tablename = table
     )
-    resultSet <- DatabaseConnector::dbSendQuery(connection, sql)
-    tryCatch({
-      i <- 1
-      while (i == 1 || !DatabaseConnector::dbHasCompleted(resultSet)) {
-        start <- format(x = (i-1)*maxRowCount+1, scientific = F, big.mark = ",")
-        end <- format(x = maxRowCount*i, scientific = F, big.mark = ",")
-        message(paste0("  -- Rows ", start, " to ", end))
-        result <- DatabaseConnector::dbFetch(resultSet, n = maxRowCount)
-        if (table == "covariates" && minMeanCovariateValue > 0) {
-          result <- result %>%
-            dplyr::filter(.data$average_value >= minMeanCovariateValue)
-        }
-        result <- formatDouble(result)
-        # save the results as a csv
-        readr::write_csv(
-          x = result,
-          file = file.path(saveDirectory, paste0(tolower(filePrefix), table,'.csv')),
-          append = (i > 1)
-        )
-        i <- i + 1
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = connectionDetails$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    )
+    countN <- DatabaseConnector::querySql(
+      connection = connection,
+      sql = sql,
+      snakeCaseToCamelCase = F
+    )$N
+
+    # get column names
+    sql <- "select * from @resultSchema.@appendtotable@tablename where 1=0;"
+    sql <- SqlRender::render(
+      sql = sql,
+      resultSchema = resultSchema,
+      appendtotable = tablePrefix,
+      tablename = table
+    )
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = connectionDetails$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    )
+    cnames <- colnames(DatabaseConnector::querySql(
+      connection = connection,
+      sql = sql,
+      snakeCaseToCamelCase = F
+    ))
+
+    inds <- floor(countN/maxRowCount)
+    tableAppend = F
+    # NOTE: If the table has 0 rows (countN == 0),
+    # then setting the txtProgressBar will fail since
+    # min < max. So, setting max = countN+1 for this
+    # reason.
+    pb = utils::txtProgressBar(min = 0, max = countN+1, initial = 0)
+
+    for(i in 1:length(inds)){
+
+      startRow <- (i-1)*maxRowCount + 1
+      endRow <- min(i*maxRowCount, countN)
+
+      sql <- "select @cnames from
+    (select *,
+    ROW_NUMBER() OVER(ORDER BY @cnames) AS row
+    from @resultSchema.@appendtotable@tablename
+    ) temp
+    where
+    temp.row >= @start_row and
+    temp.row <= @end_row;"
+      sql <- SqlRender::render(
+        sql = sql,
+        resultSchema = resultSchema,
+        appendtotable = tablePrefix,
+        tablename = table,
+        cnames = paste(cnames, collapse = ','),
+        start_row = startRow,
+        end_row = endRow
+      )
+      sql <- SqlRender::translate(
+        sql = sql,
+        targetDialect = connectionDetails$dbms,
+        tempEmulationSchema = tempEmulationSchema
+      )
+      result <- DatabaseConnector::querySql(
+        connection = connection,
+        sql = sql,
+        snakeCaseToCamelCase = F
+      )
+      result <- formatDouble(result)
+
+      # save the results as a csv
+      readr::write_csv(
+        x = result,
+        file = file.path(saveDirectory, paste0(tolower(filePrefix), table,'.csv')),
+        append = tableAppend
+      )
+      tableAppend = T
+      # NOTE: Handling progresss bar per note on txtProgressBar
+      # above. Otherwise the progress bar doesn't show that it completed.
+      if (endRow == countN) {
+        utils::setTxtProgressBar(pb,countN + 1)
+      } else {
+        utils::setTxtProgressBar(pb,endRow)
       }
-    },
-    error = function(e) {
-      message(paste0("ERROR in export to csv: ", e$message));
-    },
-    finally = {
-      DatabaseConnector::dbClearResult(resultSet)
-    })
+    }
+    close(pb)
   }
+
   invisible(saveDirectory)
 }
 
