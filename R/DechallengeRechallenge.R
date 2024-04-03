@@ -1,4 +1,4 @@
-# Copyright 2022 Observational Health Data Sciences and Informatics
+# Copyright 2024 Observational Health Data Sciences and Informatics
 #
 # This file is part of Characterization
 #
@@ -26,23 +26,21 @@
 #'
 #' @export
 createDechallengeRechallengeSettings <- function(
-  targetIds,
-  outcomeIds,
-  dechallengeStopInterval = 30,
-  dechallengeEvaluationWindow = 30
-){
-
+    targetIds,
+    outcomeIds,
+    dechallengeStopInterval = 30,
+    dechallengeEvaluationWindow = 30) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
   .checkCohortIds(
     cohortIds = targetIds,
-    type = 'target',
+    type = "target",
     errorMessages = errorMessages
-    )
+  )
   # check outcomeIds is a vector of int/double
   .checkCohortIds(
     cohortIds = outcomeIds,
-    type = 'outcome',
+    type = "outcome",
     errorMessages = errorMessages
   )
 
@@ -53,7 +51,7 @@ createDechallengeRechallengeSettings <- function(
     finite = TRUE,
     any.missing = FALSE,
     len = 1,
-    .var.name = 'dechallengeStopInterval',
+    .var.name = "dechallengeStopInterval",
     add = errorMessages
   )
 
@@ -64,7 +62,7 @@ createDechallengeRechallengeSettings <- function(
     finite = TRUE,
     any.missing = FALSE,
     len = 1,
-    .var.name = 'dechallengeEvaluationWindow',
+    .var.name = "dechallengeEvaluationWindow",
     add = errorMessages
   )
 
@@ -78,7 +76,7 @@ createDechallengeRechallengeSettings <- function(
     dechallengeEvaluationWindow = dechallengeEvaluationWindow
   )
 
-  class(result) <- 'dechallengeRechallengeSettings'
+  class(result) <- "dechallengeRechallengeSettings"
   return(result)
 }
 
@@ -95,45 +93,43 @@ createDechallengeRechallengeSettings <- function(
 #'
 #' @export
 computeDechallengeRechallengeAnalyses <- function(
-  connectionDetails = NULL,
-  targetDatabaseSchema,
-  targetTable,
-  outcomeDatabaseSchema = targetDatabaseSchema,
-  outcomeTable =  targetTable,
-  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-  dechallengeRechallengeSettings,
-  databaseId = 'database 1'
-) {
-
+    connectionDetails = NULL,
+    targetDatabaseSchema,
+    targetTable,
+    outcomeDatabaseSchema = targetDatabaseSchema,
+    outcomeTable = targetTable,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+    dechallengeRechallengeSettings,
+    databaseId = "database 1") {
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
     cohortDatabaseSchema = targetDatabaseSchema,
     cohortTable = targetTable,
-    type = 'target',
-    errorMessages =  errorMessages
-    )
+    type = "target",
+    errorMessages = errorMessages
+  )
   .checkCohortDetails(
     cohortDatabaseSchema = outcomeDatabaseSchema,
     cohortTable = outcomeTable,
-    type = 'outcome',
-    errorMessages =  errorMessages
+    type = "outcome",
+    errorMessages = errorMessages
   )
   .checkTempEmulationSchema(
     tempEmulationSchema = tempEmulationSchema,
-    errorMessages =  errorMessages
+    errorMessages = errorMessages
   )
   .checkDechallengeRechallengeSettings(
     settings = dechallengeRechallengeSettings,
-    errorMessages =  errorMessages
-    )
+    errorMessages = errorMessages
+  )
 
   valid <- checkmate::reportAssertions(
     collection = errorMessages
-    )
+  )
 
-  if(valid){
+  if (valid) {
     # inputs all pass if getting here
     message("Inputs checked")
 
@@ -144,7 +140,7 @@ computeDechallengeRechallengeAnalyses <- function(
     )
     on.exit(
       DatabaseConnector::disconnect(connection)
-      )
+    )
 
     message("Computing dechallenge rechallenge results")
     sql <- SqlRender::loadRenderTranslateSql(
@@ -157,8 +153,8 @@ computeDechallengeRechallengeAnalyses <- function(
       target_table = targetTable,
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
-      target_ids = paste(dechallengeRechallengeSettings$targetCohortDefinitionIds, sep='', collapse = ','),
-      outcome_ids = paste(dechallengeRechallengeSettings$outcomeCohortDefinitionIds, sep='', collapse = ','),
+      target_ids = paste(dechallengeRechallengeSettings$targetCohortDefinitionIds, sep = "", collapse = ","),
+      outcome_ids = paste(dechallengeRechallengeSettings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
       dechallenge_stop_interval = dechallengeRechallengeSettings$dechallengeStopInterval,
       dechallenge_evaluation_window = dechallengeRechallengeSettings$dechallengeEvaluationWindow
     )
@@ -167,17 +163,17 @@ computeDechallengeRechallengeAnalyses <- function(
       sql = sql
     )
 
-    sql <- 'select * from #challenge;'
+    sql <- "select * from #challenge;"
     sql <- SqlRender::translate(
       sql = sql,
-      targetDialect =  connection@dbms,
+      targetDialect = connection@dbms,
       tempEmulationSchema = tempEmulationSchema
     )
 
     result <- DatabaseConnector::querySqlToAndromeda(
       connection = connection,
       andromeda = Andromeda::andromeda(),
-      andromedaTableName = 'dechallengeRechallenge',
+      andromedaTableName = "dechallengeRechallenge",
       sql = sql,
       snakeCaseToCamelCase = TRUE
     )
@@ -200,7 +196,7 @@ computeDechallengeRechallengeAnalyses <- function(
       paste0(
         "Computing dechallenge rechallenge for ",
         length(dechallengeRechallengeSettings$targetCohortDefinitionIds), " target ids and ",
-        length(dechallengeRechallengeSettings$outcomeCohortDefinitionIds),"outcome ids took ",
+        length(dechallengeRechallengeSettings$outcomeCohortDefinitionIds), "outcome ids took ",
         signif(delta, 3), " ",
         attr(delta, "units")
       )
@@ -225,44 +221,42 @@ computeDechallengeRechallengeAnalyses <- function(
 #'
 #' @export
 computeRechallengeFailCaseSeriesAnalyses <- function(
-  connectionDetails = NULL,
-  targetDatabaseSchema,
-  targetTable,
-  outcomeDatabaseSchema = targetDatabaseSchema,
-  outcomeTable =  targetTable,
-  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-  dechallengeRechallengeSettings,
-  databaseId = 'database 1',
-  showSubjectId = F
-) {
-
+    connectionDetails = NULL,
+    targetDatabaseSchema,
+    targetTable,
+    outcomeDatabaseSchema = targetDatabaseSchema,
+    outcomeTable = targetTable,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+    dechallengeRechallengeSettings,
+    databaseId = "database 1",
+    showSubjectId = F) {
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
     cohortDatabaseSchema = targetDatabaseSchema,
     cohortTable = targetTable,
-    type = 'target',
-    errorMessages =  errorMessages
+    type = "target",
+    errorMessages = errorMessages
   )
   .checkCohortDetails(
     cohortDatabaseSchema = outcomeDatabaseSchema,
     cohortTable = outcomeTable,
-    type = 'outcome',
-    errorMessages =  errorMessages
+    type = "outcome",
+    errorMessages = errorMessages
   )
   .checkTempEmulationSchema(
     tempEmulationSchema = tempEmulationSchema,
-    errorMessages =  errorMessages
+    errorMessages = errorMessages
   )
   .checkDechallengeRechallengeSettings(
     settings = dechallengeRechallengeSettings,
-    errorMessages =  errorMessages
+    errorMessages = errorMessages
   )
 
   valid <- checkmate::reportAssertions(errorMessages)
 
-  if(valid){
+  if (valid) {
     # inputs all pass if getting here
     message("Inputs checked")
 
@@ -273,7 +267,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     )
     on.exit(
       DatabaseConnector::disconnect(connection)
-      )
+    )
 
     message("Computing dechallenge rechallenge results")
     sql <- SqlRender::loadRenderTranslateSql(
@@ -286,8 +280,8 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       target_table = targetTable,
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
-      target_ids = paste(dechallengeRechallengeSettings$targetCohortDefinitionIds, sep='', collapse = ','),
-      outcome_ids = paste(dechallengeRechallengeSettings$outcomeCohortDefinitionIds, sep='', collapse = ','),
+      target_ids = paste(dechallengeRechallengeSettings$targetCohortDefinitionIds, sep = "", collapse = ","),
+      outcome_ids = paste(dechallengeRechallengeSettings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
       dechallenge_stop_interval = dechallengeRechallengeSettings$dechallengeStopInterval,
       dechallenge_evaluation_window = dechallengeRechallengeSettings$dechallengeEvaluationWindow,
       show_subject_id = showSubjectId
@@ -297,17 +291,17 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       sql = sql
     )
 
-    sql <- 'select * from #fail_case_series;'
+    sql <- "select * from #fail_case_series;"
     sql <- SqlRender::translate(
       sql = sql,
-      targetDialect =  connection@dbms,
+      targetDialect = connection@dbms,
       tempEmulationSchema = tempEmulationSchema
     )
 
     result <- DatabaseConnector::querySqlToAndromeda(
       connection = connection,
       andromeda = Andromeda::andromeda(),
-      andromedaTableName = 'rechallengeFailCaseSeries',
+      andromedaTableName = "rechallengeFailCaseSeries",
       sql = sql,
       snakeCaseToCamelCase = TRUE
     )
@@ -330,7 +324,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       paste0(
         "Computing dechallenge failed case series for ",
         length(dechallengeRechallengeSettings$targetCohortDefinitionIds), " target IDs and ",
-        length(dechallengeRechallengeSettings$outcomeCohortDefinitionIds)," outcome IDs took ",
+        length(dechallengeRechallengeSettings$outcomeCohortDefinitionIds), " outcome IDs took ",
         signif(delta, 3), " ",
         attr(delta, "units")
       )

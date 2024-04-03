@@ -12,7 +12,7 @@ saveCharacterizationSettings(settings, fileName)
 \item{fileName}{The location to save the json settings}
 }
 \value{
-Returns the location of the drectory containing the json settings
+Returns the location of the directory containing the json settings
 }
 \description{
 This function converts the settings into a json object and saves it

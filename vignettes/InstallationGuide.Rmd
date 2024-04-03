@@ -29,7 +29,7 @@ output:
 -->
 
 # Introduction
-This vignette describes how you need to install the Observational Health Data Sciencs and Informatics (OHDSI) [`Characterization`](http://github.com/OHDSI/Characterization) package under Windows, Mac, and Linux.
+This vignette describes how you need to install the Observational Health Data Sciences and Informatics (OHDSI) [`Characterization`](http://github.com/OHDSI/Characterization) package under Windows, Mac, and Linux.
 
 # Software Prerequisites
 
@@ -53,7 +53,7 @@ Under Mac and Linux the OHDSI Characterization package requires installing:
 # Installing the Package
 The preferred way to install the package is by using `remotes`, which will automatically install the latest release and all the latest dependencies.
 
-If you do not want the official release you could install the bleading edge version of the package (latest develop branch).
+If you do not want the official release you could install the bleeding edge version of the package (latest develop branch).
 
 Note that the latest develop branch could contain bugs, please report them to us if you experience problems.
 
@@ -73,7 +73,7 @@ http://github.com/OHDSI/Characterization/issues
 
 The list below provides solutions for some common issues:
 
-1. If you have an error when trying to install a package in R saying **'Dependancy X not available ...'** then this can sometimes be fixed by running `install.packages('X')` and then once that completes trying to reinstall the package that had the error.
+1. If you have an error when trying to install a package in R saying **'Dependency X not available ...'** then this can sometimes be fixed by running `install.packages('X')` and then once that completes trying to reinstall the package that had the error.
 
 2. I have found that using the github `remotes`` to install packages can be impacted if you have **multiple R sessions** open as one session with a library open can cause the library to be locked and this can prevent an install of a package that depends on that library.
 

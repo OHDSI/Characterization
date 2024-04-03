@@ -1,6 +1,6 @@
 # @file Database.R
 #
-# Copyright 2022 Observational Health Data Sciences and Informatics
+# Copyright 2024 Observational Health Data Sciences and Informatics
 #
 # This file is part of Characterization
 #
@@ -30,15 +30,13 @@
 #'
 #' @export
 createSqliteDatabase <- function(
-    sqliteLocation = tempdir()
-){
-
+    sqliteLocation = tempdir()) {
   sqliteLocation <- file.path(
     sqliteLocation,
-    'sqliteCharacterization'
+    "sqliteCharacterization"
   )
 
-  if(!dir.exists(sqliteLocation )){
+  if (!dir.exists(sqliteLocation)) {
     dir.create(
       path = sqliteLocation,
       recursive = T
@@ -46,8 +44,8 @@ createSqliteDatabase <- function(
   }
 
   connectionDetails <- DatabaseConnector::createConnectionDetails(
-    dbms = 'sqlite',
-    server = file.path(sqliteLocation, 'sqlite.sqlite')
+    dbms = "sqlite",
+    server = file.path(sqliteLocation, "sqlite.sqlite")
   )
   connection <- DatabaseConnector::connect(
     connectionDetails = connectionDetails
@@ -64,10 +62,9 @@ insertAndromedaToDatabase <- function(
     andromedaObject,
     tempEmulationSchema,
     bulkLoad = T,
-    tablePrefix = 'c_',
+    tablePrefix = "c_",
     minCellCount = 0,
-    minCellCountColumns = list()
-){
+    minCellCountColumns = list()) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkTablePrefix(
     tablePrefix = tablePrefix,
@@ -75,12 +72,11 @@ insertAndromedaToDatabase <- function(
   )
   checkmate::reportAssertions(errorMessages)
 
-  message('Inserting Andromeda table into database table ', tablePrefix, tableName)
+  message("Inserting Andromeda table into database table ", tablePrefix, tableName)
 
   Andromeda::batchApply(
     tbl = andromedaObject,
-    fun = function(x){
-
+    fun = function(x) {
       data <- as.data.frame(x %>% dplyr::collect()) # apply minCellCount
       data <- removeMinCell(
         data = data,
@@ -91,7 +87,7 @@ insertAndromedaToDatabase <- function(
       DatabaseConnector::insertTable(
         connection = connection,
         databaseSchema = databaseSchema,
-        tableName = paste0(tablePrefix,tableName),
+        tableName = paste0(tablePrefix, tableName),
         data = data,
         dropTableIfExists = F,
         createTable = F,
@@ -108,22 +104,21 @@ insertAndromedaToDatabase <- function(
 removeMinCell <- function(
     data,
     minCellCount = 0,
-    minCellCountColumns = list()
-){
-  for(columns in minCellCountColumns){
+    minCellCountColumns = list()) {
+  for (columns in minCellCountColumns) {
     ind <- apply(
-      X = data[,columns, drop = FALSE],
+      X = data[, columns, drop = FALSE],
       MARGIN = 1,
-      FUN = function(x) sum(x < minCellCount)>0
+      FUN = function(x) sum(x < minCellCount) > 0
     )
 
-    if(sum(ind) > 0 ){
+    if (sum(ind) > 0) {
       ParallelLogger::logInfo(
         paste0(
-          'Removing values less than ',
+          "Removing values less than ",
           minCellCount,
-          ' from ',
-          paste(columns, collapse = ' and ')
+          " from ",
+          paste(columns, collapse = " and ")
         )
       )
       data[ind, columns] <- -1
@@ -158,12 +153,11 @@ removeMinCell <- function(
 createCharacterizationTables <- function(
     conn,
     resultSchema,
-    targetDialect = 'postgresql',
+    targetDialect = "postgresql",
     deleteExistingTables = T,
     createTables = T,
-    tablePrefix = 'c_',
-    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
-){
+    tablePrefix = "c_",
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkTablePrefix(
     tablePrefix = tablePrefix,
@@ -172,8 +166,8 @@ createCharacterizationTables <- function(
   checkmate::reportAssertions(errorMessages)
 
 
-  if(deleteExistingTables){
-    message('Deleting existing tables')
+  if (deleteExistingTables) {
+    message("Deleting existing tables")
     tables <- getResultTables()
     tables <- paste0(tablePrefix, tables)
 
@@ -184,9 +178,9 @@ createCharacterizationTables <- function(
       )
     )
 
-    for(tb in tables){
-      if(tb %in% alltables){
-        sql <- 'DELETE FROM @my_schema.@table'
+    for (tb in tables) {
+      if (tb %in% alltables) {
+        sql <- "DELETE FROM @my_schema.@table"
         sql <- SqlRender::render(
           sql = sql,
           my_schema = resultSchema,
@@ -202,7 +196,7 @@ createCharacterizationTables <- function(
           sql = sql
         )
 
-        sql <- 'DROP TABLE @my_schema.@table'
+        sql <- "DROP TABLE @my_schema.@table"
         sql <- SqlRender::render(
           sql = sql,
           my_schema = resultSchema,
@@ -218,13 +212,11 @@ createCharacterizationTables <- function(
           sql = sql
         )
       }
-
     }
-
   }
 
-  if(createTables){
-    ParallelLogger::logInfo('Creating characterization results tables')
+  if (createTables) {
+    ParallelLogger::logInfo("Creating characterization results tables")
     renderedSql <- SqlRender::loadRenderTranslateSql(
       sqlFilename = "ResultTables.sql",
       packageName = "Characterization",
@@ -241,7 +233,6 @@ createCharacterizationTables <- function(
 
     # add database migration here in the future
   }
-
 }
 
 #' Exports all tables in the result database to csv files
@@ -276,9 +267,7 @@ exportDatabaseToCsv <- function(
     filePrefix = NULL,
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     saveDirectory,
-    minMeanCovariateValue = 0.001
-){
-
+    minMeanCovariateValue = 0.001) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
   .checkTablePrefix(
@@ -291,7 +280,7 @@ exportDatabaseToCsv <- function(
   }
 
   if (is.null(filePrefix)) {
-    filePrefix = ''
+    filePrefix <- ""
   }
 
   # connect to result database
@@ -303,7 +292,7 @@ exportDatabaseToCsv <- function(
   )
 
   # create the folder to save the csv files
-  if(!dir.exists(saveDirectory)){
+  if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
       recursive = T
@@ -317,8 +306,8 @@ exportDatabaseToCsv <- function(
   tables <- getResultTables()
 
   # extract result per table
-  for(table in tables){
-    ParallelLogger::logInfo(paste0('Exporting rows from ', table, ' to csv file'))
+  for (table in tables) {
+    ParallelLogger::logInfo(paste0("Exporting rows from ", table, " to csv file"))
     # get row count and figure out number of loops
     sql <- "select count(*) as N from @resultSchema.@appendtotable@tablename;"
     sql <- SqlRender::render(
@@ -357,18 +346,17 @@ exportDatabaseToCsv <- function(
       snakeCaseToCamelCase = F
     ))
 
-    inds <- floor(countN/maxRowCount)
-    tableAppend = F
+    inds <- floor(countN / maxRowCount)
+    tableAppend <- F
     # NOTE: If the table has 0 rows (countN == 0),
     # then setting the txtProgressBar will fail since
     # min < max. So, setting max = countN+1 for this
     # reason.
-    pb = utils::txtProgressBar(min = 0, max = countN+1, initial = 0)
+    pb <- utils::txtProgressBar(min = 0, max = countN + 1, initial = 0)
 
-    for(i in 1:length(inds)){
-
-      startRow <- (i-1)*maxRowCount + 1
-      endRow <- min(i*maxRowCount, countN)
+    for (i in 1:length(inds)) {
+      startRow <- (i - 1) * maxRowCount + 1
+      endRow <- min(i * maxRowCount, countN)
 
       sql <- "select @cnames from
     (select *,
@@ -383,7 +371,7 @@ exportDatabaseToCsv <- function(
         resultSchema = resultSchema,
         appendtotable = tablePrefix,
         tablename = table,
-        cnames = paste(cnames, collapse = ','),
+        cnames = paste(cnames, collapse = ","),
         start_row = startRow,
         end_row = endRow
       )
@@ -402,16 +390,16 @@ exportDatabaseToCsv <- function(
       # save the results as a csv
       readr::write_csv(
         x = result,
-        file = file.path(saveDirectory, paste0(tolower(filePrefix), table,'.csv')),
+        file = file.path(saveDirectory, paste0(tolower(filePrefix), table, ".csv")),
         append = tableAppend
       )
-      tableAppend = T
+      tableAppend <- T
       # NOTE: Handling progresss bar per note on txtProgressBar
       # above. Otherwise the progress bar doesn't show that it completed.
       if (endRow == countN) {
-        utils::setTxtProgressBar(pb,countN + 1)
+        utils::setTxtProgressBar(pb, countN + 1)
       } else {
-        utils::setTxtProgressBar(pb,endRow)
+        utils::setTxtProgressBar(pb, endRow)
       }
     }
     close(pb)
@@ -420,14 +408,14 @@ exportDatabaseToCsv <- function(
   invisible(saveDirectory)
 }
 
-getResultTables <- function(){
+getResultTables <- function() {
   return(
     unique(
       readr::read_csv(
         file = system.file(
-          'settings',
-          'resultsDataModelSpecification.csv',
-          package = 'Characterization'
+          "settings",
+          "resultsDataModelSpecification.csv",
+          package = "Characterization"
         ),
         show_col_types = FALSE
       )$table_name
@@ -446,4 +434,3 @@ formatDouble <- function(x, scientific = F, ...) {
 
   return(x)
 }
-
