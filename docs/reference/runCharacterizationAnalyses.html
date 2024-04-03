@@ -18,7 +18,7 @@ the characterization settings and the directory to save the results to"><!-- mat
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -92,7 +92,8 @@ the characterization settings and the directory to save the results to</p>
 <span>  <span class="va">saveDirectory</span>,</span>
 <span>  tablePrefix <span class="op">=</span> <span class="st">"c_"</span>,</span>
 <span>  databaseId <span class="op">=</span> <span class="st">"1"</span>,</span>
-<span>  showSubjectId <span class="op">=</span> <span class="cn">F</span></span>
+<span>  showSubjectId <span class="op">=</span> <span class="cn">F</span>,</span>
+<span>  minCellCount <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -145,11 +146,15 @@ can be created</p></dd>
 
 
 <dt>databaseId</dt>
-<dd><p>The unqiue identifier for the cdm database</p></dd>
+<dd><p>The unique identifier for the cdm database</p></dd>
 
 
 <dt>showSubjectId</dt>
 <dd><p>Whether to include subjectId of failed rechallenge case series or hide</p></dd>
+
+
+<dt>minCellCount</dt>
+<dd><p>The minimum count value that is calculated</p></dd>
 
 </dl></div>
     <div id="value">

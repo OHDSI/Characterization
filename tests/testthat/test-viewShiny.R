@@ -1,22 +1,21 @@
 context("ViewShiny")
 
 # create a folder with results for the shiny app
-resultLocation <- file.path(tempdir(), 'shinyResults')
-if(!dir.exists(resultLocation)){
+resultLocation <- file.path(tempdir(), "shinyResults")
+if (!dir.exists(resultLocation)) {
   dir.create(resultLocation, recursive = T)
 }
 
 test_that("is_installed", {
-  testthat::expect_equal(is_installed('FeatureExtraction'), T)
-  testthat::expect_equal(is_installed('MadeUp4u834t3f'), F)
+  testthat::expect_equal(is_installed("FeatureExtraction"), T)
+  testthat::expect_equal(is_installed("MadeUp4u834t3f"), F)
 })
 
 test_that("ensure_installed", {
-  testthat::expect_equal(ensure_installed('FeatureExtraction'), NULL)
+  testthat::expect_equal(ensure_installed("FeatureExtraction"), NULL)
 })
 
 test_that("prepareCharacterizationShiny works", {
-
   targetIds <- c(1, 2, 4)
   outcomeIds <- c(3)
 
@@ -89,41 +88,39 @@ test_that("prepareCharacterizationShiny works", {
     databaseId = "1"
   )
 
-settings <- prepareCharacterizationShiny(
+  settings <- prepareCharacterizationShiny(
     resultLocation = resultLocation,
     cohortDefinitionSet = NULL
-)
-
-testthat::expect_true(settings$schema == 'main')
-testthat::expect_true(settings$tablePrefix == 'c_')
-testthat::expect_true(settings$cohortTablePrefix == 'cg_')
-testthat::expect_true(settings$incidenceTablePrefix == 'i_')
-testthat::expect_true(settings$databaseTable == 'DATABASE_META_DATA')
-
-connectionDetailsTest <- do.call(
-  what = DatabaseConnector::createConnectionDetails,
-  args = list(
-    dbms = 'sqlite',
-    server = file.path(resultLocation, 'sqliteCharacterization', 'sqlite.sqlite')
   )
-)
-conTest <- DatabaseConnector::connect(connectionDetailsTest)
-tables <- tolower(
-  DatabaseConnector::getTableNames(
-    connection = conTest,
-    databaseSchema = 'main'
+
+  testthat::expect_true(settings$schema == "main")
+  testthat::expect_true(settings$tablePrefix == "c_")
+  testthat::expect_true(settings$cohortTablePrefix == "cg_")
+  testthat::expect_true(settings$incidenceTablePrefix == "i_")
+  testthat::expect_true(settings$databaseTable == "DATABASE_META_DATA")
+
+  connectionDetailsTest <- do.call(
+    what = DatabaseConnector::createConnectionDetails,
+    args = list(
+      dbms = "sqlite",
+      server = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
     )
-)
+  )
+  conTest <- DatabaseConnector::connect(connectionDetailsTest)
+  tables <- tolower(
+    DatabaseConnector::getTableNames(
+      connection = conTest,
+      databaseSchema = "main"
+    )
+  )
 
-# make sure the extra tables are added
-testthat::expect_true('cg_cohort_definition' %in% tables)
-testthat::expect_true('database_meta_data' %in% tables)
-testthat::expect_true('i_incidence_summary' %in% tables)
-
+  # make sure the extra tables are added
+  testthat::expect_true("cg_cohort_definition" %in% tables)
+  testthat::expect_true("database_meta_data" %in% tables)
+  testthat::expect_true("i_incidence_summary" %in% tables)
 })
 
 test_that("shiny app works", {
-
   settings <- prepareCharacterizationShiny(
     resultLocation = resultLocation,
     cohortDefinitionSet = NULL
@@ -134,16 +131,13 @@ test_that("shiny app works", {
     testApp = T
   )
 
-shiny::testServer(
-  app = app,
-  args = list(
-  ),
-  expr = {
-
-    testthat::expect_equal(runServer[['About']],0)
-    session$setInputs(menu = 'About')
-    testthat::expect_equal(runServer[['About']],1)
-
-  })
-
+  shiny::testServer(
+    app = app,
+    args = list(),
+    expr = {
+      testthat::expect_equal(runServer[["About"]], 0)
+      session$setInputs(menu = "About")
+      testthat::expect_equal(runServer[["About"]], 1)
+    }
+  )
 })

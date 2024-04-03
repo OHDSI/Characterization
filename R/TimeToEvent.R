@@ -1,4 +1,4 @@
-# Copyright 2022 Observational Health Data Sciences and Informatics
+# Copyright 2024 Observational Health Data Sciences and Informatics
 #
 # This file is part of Characterization
 #
@@ -24,22 +24,20 @@
 #'
 #' @export
 createTimeToEventSettings <- function(
-  targetIds,
-  outcomeIds
-){
-
+    targetIds,
+    outcomeIds) {
   # check indicationIds
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
   .checkCohortIds(
     cohortIds = targetIds,
-    type = 'target',
+    type = "target",
     errorMessages = errorMessages
   )
   # check outcomeIds is a vector of int/double
   .checkCohortIds(
     cohortIds = outcomeIds,
-    type = 'outcome',
+    type = "outcome",
     errorMessages = errorMessages
   )
   checkmate::reportAssertions(errorMessages)
@@ -51,7 +49,7 @@ createTimeToEventSettings <- function(
     outcomeIds = outcomeIds
   )
 
-  class(result) <- 'timeToEventSettings'
+  class(result) <- "timeToEventSettings"
   return(result)
 }
 
@@ -69,35 +67,33 @@ createTimeToEventSettings <- function(
 #'
 #' @export
 computeTimeToEventAnalyses <- function(
-  connectionDetails = NULL,
-  targetDatabaseSchema,
-  targetTable,
-  outcomeDatabaseSchema = targetDatabaseSchema,
-  outcomeTable = targetTable,
-  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-  cdmDatabaseSchema,
-  timeToEventSettings,
-  databaseId = 'database 1'
-) {
-
+    connectionDetails = NULL,
+    targetDatabaseSchema,
+    targetTable,
+    outcomeDatabaseSchema = targetDatabaseSchema,
+    outcomeTable = targetTable,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+    cdmDatabaseSchema,
+    timeToEventSettings,
+    databaseId = "database 1") {
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
     cohortDatabaseSchema = targetDatabaseSchema,
     cohortTable = targetTable,
-    type = 'target',
-    errorMessages =  errorMessages
+    type = "target",
+    errorMessages = errorMessages
   )
   .checkCohortDetails(
     cohortDatabaseSchema = outcomeDatabaseSchema,
     cohortTable = outcomeTable,
-    type = 'outcome',
-    errorMessages =  errorMessages
+    type = "outcome",
+    errorMessages = errorMessages
   )
   .checkTempEmulationSchema(
     tempEmulationSchema = tempEmulationSchema,
-    errorMessages =  errorMessages
+    errorMessages = errorMessages
   )
   .checkTimeToEventSettings(
     settings = timeToEventSettings,
@@ -106,7 +102,7 @@ computeTimeToEventAnalyses <- function(
 
   valid <- checkmate::reportAssertions(errorMessages)
 
-  if(valid){
+  if (valid) {
     start <- Sys.time()
 
     connection <- DatabaseConnector::connect(
@@ -114,7 +110,7 @@ computeTimeToEventAnalyses <- function(
     )
     on.exit(
       DatabaseConnector::disconnect(connection)
-      )
+    )
 
     # upload table to #cohort_settings
     message("Uploading #cohort_settings")
@@ -155,10 +151,10 @@ computeTimeToEventAnalyses <- function(
       sql = sql
     )
 
-    sql <- 'select * from #two_tte_summary;'
+    sql <- "select * from #two_tte_summary;"
     sql <- SqlRender::translate(
       sql = sql,
-      targetDialect =  connection@dbms,
+      targetDialect = connection@dbms,
       tempEmulationSchema = tempEmulationSchema
     )
 
@@ -166,7 +162,7 @@ computeTimeToEventAnalyses <- function(
       connection = connection,
       sql = sql,
       andromeda = Andromeda::andromeda(),
-      andromedaTableName = 'timeToEvent',
+      andromedaTableName = "timeToEvent",
       snakeCaseToCamelCase = TRUE
     )
 

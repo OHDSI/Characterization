@@ -68,7 +68,7 @@ covariates,average_value,float,Y,N,N,N,The average value
 covariates_continuous,database_id,varchar(100),Y,Y,N,N,The database identifier
 covariates_continuous,run_id,int,Y,Y,N,N,The run identifier
 covariates_continuous,cohort_definition_id,bigint,Y,Y,N,N,The cohort definition id
-covariates_continuous,covariate_id,int,Y,Y,N,N,The covariate identifier
+covariates_continuous,covariate_id,bigint,Y,Y,N,N,The covariate identifier
 covariates_continuous,count_value,int,Y,N,N,N,The count value
 covariates_continuous,min_value,float,Y,N,N,N,The min value
 covariates_continuous,max_value,float,Y,N,N,N,The max value

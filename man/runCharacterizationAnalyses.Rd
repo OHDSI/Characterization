@@ -47,7 +47,7 @@ can be created}
 
 \item{tablePrefix}{A string to append the tables in the results}
 
-\item{databaseId}{The unqiue identifier for the cdm database}
+\item{databaseId}{The unique identifier for the cdm database}
 
 \item{showSubjectId}{Whether to include subjectId of failed rechallenge case series or hide}
 

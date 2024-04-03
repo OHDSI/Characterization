@@ -99,7 +99,7 @@ test_that("computeTimeToEventSettings", {
 
   tte2 <- loadTimeToEventAnalyses(tempFile)
 
-  testthat::expect_equal(dplyr::collect(tte$timeToEvent ), dplyr::collect(tte2$timeToEvent))
+  testthat::expect_equal(dplyr::collect(tte$timeToEvent), dplyr::collect(tte2$timeToEvent))
 
   # test csv export
   tempFolder <- tempfile("exportToCsv")
@@ -110,7 +110,7 @@ test_that("computeTimeToEventSettings", {
     saveDirectory = tempFolder
   )
 
-  testthat::expect_true(file.exists(file.path(tempFolder,"time_to_event.csv")))
+  testthat::expect_true(file.exists(file.path(tempFolder, "time_to_event.csv")))
 
   # check it saved correctly and uses snake case
   res <- readr::read_csv(
