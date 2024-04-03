@@ -27,27 +27,25 @@
 #'
 #' @export
 createAggregateCovariateSettings <- function(
-  targetIds,
-  outcomeIds,
-  minPriorObservation = 0,
-  riskWindowStart = 1,
-  startAnchor = 'cohort start',
-  riskWindowEnd = 365,
-  endAnchor = 'cohort start',
-  covariateSettings
-){
-
+    targetIds,
+    outcomeIds,
+    minPriorObservation = 0,
+    riskWindowStart = 1,
+    startAnchor = "cohort start",
+    riskWindowEnd = 365,
+    endAnchor = "cohort start",
+    covariateSettings) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
   .checkCohortIds(
     cohortIds = targetIds,
-    type = 'target',
+    type = "target",
     errorMessages = errorMessages
   )
   # check outcomeIds is a vector of int/double
   .checkCohortIds(
     cohortIds = outcomeIds,
-    type = 'outcome',
+    type = "outcome",
     errorMessages = errorMessages
   )
 
@@ -81,12 +79,12 @@ createAggregateCovariateSettings <- function(
     minPriorObservation = minPriorObservation,
     riskWindowStart = riskWindowStart,
     startAnchor = startAnchor,
-    riskWindowEnd = riskWindowEnd ,
+    riskWindowEnd = riskWindowEnd,
     endAnchor = endAnchor,
     covariateSettings = covariateSettings
   )
 
-  class(result) <- 'aggregateCovariateSettings'
+  class(result) <- "aggregateCovariateSettings"
   return(result)
 }
 
@@ -106,19 +104,17 @@ createAggregateCovariateSettings <- function(
 #'
 #' @export
 computeAggregateCovariateAnalyses <- function(
-  connectionDetails = NULL,
-  cdmDatabaseSchema,
-  cdmVersion = 5,
-  targetDatabaseSchema,
-  targetTable,
-  outcomeDatabaseSchema = targetDatabaseSchema, # remove
-  outcomeTable =  targetTable,  # remove
-  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-  aggregateCovariateSettings,
-  databaseId = 'database 1',
-  runId = 1
-) {
-
+    connectionDetails = NULL,
+    cdmDatabaseSchema,
+    cdmVersion = 5,
+    targetDatabaseSchema,
+    targetTable,
+    outcomeDatabaseSchema = targetDatabaseSchema, # remove
+    outcomeTable = targetTable, # remove
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+    aggregateCovariateSettings,
+    databaseId = "database 1",
+    runId = 1) {
   # check inputs
 
   start <- Sys.time()
@@ -128,7 +124,7 @@ computeAggregateCovariateAnalyses <- function(
   )
   on.exit(
     DatabaseConnector::disconnect(connection)
-    )
+  )
 
   # select T, O, create TnO, TnOc, Onprior T
   # into temp table #agg_cohorts
@@ -145,11 +141,11 @@ computeAggregateCovariateAnalyses <- function(
   )
 
   ## get counts
-  sql <- 'select cohort_definition_id, count(*) row_count, count(distinct subject_id) person_count from #agg_cohorts group by cohort_definition_id;'
+  sql <- "select cohort_definition_id, count(*) row_count, count(distinct subject_id) person_count from #agg_cohorts group by cohort_definition_id;"
   sql <- SqlRender::translate(
     sql = sql,
     targetDialect = connectionDetails$dbms
-    )
+  )
   counts <- DatabaseConnector::querySql(
     connection = connection,
     sql = sql,
@@ -162,7 +158,7 @@ computeAggregateCovariateAnalyses <- function(
     connection = connection,
     oracleTempSchema = tempEmulationSchema,
     cdmDatabaseSchema = cdmDatabaseSchema,
-    cohortTable = '#agg_cohorts',
+    cohortTable = "#agg_cohorts",
     cohortTableIsTemp = T,
     cohortId = -1,
     covariateSettings = aggregateCovariateSettings$covariateSettings,
@@ -176,7 +172,7 @@ computeAggregateCovariateAnalyses <- function(
   # could add settings table with this and just have setting id
   # as single extra column?
 
-  for(tableName in names(result)){
+  for (tableName in names(result)) {
     result[[tableName]] <- result[[tableName]] %>%
       dplyr::mutate(
         runId = !!runId,
@@ -185,16 +181,16 @@ computeAggregateCovariateAnalyses <- function(
       dplyr::relocate(
         "databaseId",
         "runId"
-        )
+      )
   }
 
-# cohort details:
+  # cohort details:
 
   result$cohortDetails <- DatabaseConnector::querySql(
     connection = connection,
     sql = SqlRender::translate(
-    sql = " select * from #cohort_details;",
-    targetDialect = connectionDetails$dbms
+      sql = " select * from #cohort_details;",
+      targetDialect = connectionDetails$dbms
     ),
     snakeCaseToCamelCase = T
   ) %>%
@@ -218,14 +214,14 @@ computeAggregateCovariateAnalyses <- function(
   )
 
   result$settings <- data.frame(
-      runId = runId,
-      databaseId = databaseId,
-      covariateSettingJson = covariateSettingsJson,
-      riskWindowStart = aggregateCovariateSettings$riskWindowStart,
-      startAnchor = aggregateCovariateSettings$startAnchor,
-      riskWindowEnd = aggregateCovariateSettings$riskWindowEnd ,
-      endAnchor = aggregateCovariateSettings$endAnchor
-    )
+    runId = runId,
+    databaseId = databaseId,
+    covariateSettingJson = covariateSettingsJson,
+    riskWindowStart = aggregateCovariateSettings$riskWindowStart,
+    startAnchor = aggregateCovariateSettings$startAnchor,
+    riskWindowEnd = aggregateCovariateSettings$riskWindowEnd,
+    endAnchor = aggregateCovariateSettings$endAnchor
+  )
 
   sql <- SqlRender::loadRenderTranslateSql(
     sqlFilename = "DropAggregateCovariate.sql",
@@ -245,17 +241,15 @@ computeAggregateCovariateAnalyses <- function(
 
 
 createCohortsOfInterest <- function(
-  connection,
-  cdmDatabaseSchema,
-  dbms,
-  aggregateCovariateSettings,
-  targetDatabaseSchema,
-  targetTable,
-  outcomeDatabaseSchema,
-  outcomeTable,
-  tempEmulationSchema
-){
-
+    connection,
+    cdmDatabaseSchema,
+    dbms,
+    aggregateCovariateSettings,
+    targetDatabaseSchema,
+    targetTable,
+    outcomeDatabaseSchema,
+    outcomeTable,
+    tempEmulationSchema) {
   sql <- SqlRender::loadRenderTranslateSql(
     sqlFilename = "createTargetOutcomeCombinations.sql",
     packageName = "Characterization",
@@ -266,21 +260,21 @@ createCohortsOfInterest <- function(
     target_table = targetTable,
     outcome_database_schema = outcomeDatabaseSchema,
     outcome_table = outcomeTable,
-    target_ids = paste(aggregateCovariateSettings$targetIds, collapse = ',', sep = ','),
-    outcome_ids = paste(aggregateCovariateSettings$outcomeIds, collapse = ',', sep = ','),
+    target_ids = paste(aggregateCovariateSettings$targetIds, collapse = ",", sep = ","),
+    outcome_ids = paste(aggregateCovariateSettings$outcomeIds, collapse = ",", sep = ","),
     min_prior_observation = aggregateCovariateSettings$minPriorObservation,
     tar_start = aggregateCovariateSettings$riskWindowStart,
     tar_start_anchor = ifelse(
-      aggregateCovariateSettings$startAnchor == 'cohort start',
-      'cohort_start_date',
-      'cohort_end_date'
-      ),
+      aggregateCovariateSettings$startAnchor == "cohort start",
+      "cohort_start_date",
+      "cohort_end_date"
+    ),
     tar_end = aggregateCovariateSettings$riskWindowEnd,
     tar_end_anchor = ifelse(
-      aggregateCovariateSettings$endAnchor == 'cohort start',
-      'cohort_start_date',
-      'cohort_end_date'
-      )
+      aggregateCovariateSettings$endAnchor == "cohort start",
+      "cohort_start_date",
+      "cohort_end_date"
+    )
   )
 
   DatabaseConnector::executeSql(
@@ -289,5 +283,4 @@ createCohortsOfInterest <- function(
     progressBar = FALSE,
     reportOverallTime = FALSE
   )
-
 }

@@ -15,25 +15,23 @@
 # limitations under the License.
 
 .checkConnection <- function(
-  connection,
-  errorMessages
-  ) {
+    connection,
+    errorMessages) {
   checkmate::assertClass(
     x = connection,
     classes = "DatabaseConnectorConnection",
     add = errorMessages
-    )
+  )
 }
 
 .checkConnectionDetails <- function(
-  connectionDetails,
-  errorMessages
-  ) {
+    connectionDetails,
+    errorMessages) {
   if (inherits(connectionDetails, "connectionDetails")) {
-  checkmate::assertClass(
-    x = connectionDetails,
-    classes = "connectionDetails",
-    add = errorMessages
+    checkmate::assertClass(
+      x = connectionDetails,
+      classes = "connectionDetails",
+      add = errorMessages
     )
   } else {
     checkmate::assertClass(
@@ -41,48 +39,42 @@
       classes = "ConnectionDetails",
       add = errorMessages
     )
-
   }
 }
 
 .checkDechallengeRechallengeSettings <- function(
-  settings,
-  errorMessages
-  ) {
+    settings,
+    errorMessages) {
   checkmate::assertClass(
     x = settings,
     classes = "dechallengeRechallengeSettings",
     add = errorMessages
-    )
+  )
 }
 
 .checkDechallengeRechallengeSettingsList <- function(
-  settings,
-  errorMessages
-) {
-
-  if(is.null(settings)){
+    settings,
+    errorMessages) {
+  if (is.null(settings)) {
     return()
   }
 
-  if(inherits(settings, 'dechallengeRechallengeSettings')){
+  if (inherits(settings, "dechallengeRechallengeSettings")) {
     settings <- list(settings)
   }
 
-  lapply(settings, function(x){
+  lapply(settings, function(x) {
     checkmate::assertClass(
       x = x,
       classes = "dechallengeRechallengeSettings",
       add = errorMessages
     )
-  }
-  )
+  })
 }
 
 .checkTimeToEventSettings <- function(
-  settings,
-  errorMessages
-) {
+    settings,
+    errorMessages) {
   checkmate::assertClass(
     x = settings,
     classes = "timeToEventSettings",
@@ -91,32 +83,28 @@
 }
 
 .checkTimeToEventSettingsList <- function(
-  settings,
-  errorMessages
-) {
-
-  if(is.null(settings)){
+    settings,
+    errorMessages) {
+  if (is.null(settings)) {
     return()
   }
 
-  if(inherits(settings,'timeToEventSettings')){
+  if (inherits(settings, "timeToEventSettings")) {
     settings <- list(settings)
   }
 
-  lapply(settings, function(x){
+  lapply(settings, function(x) {
     checkmate::assertClass(
       x = x,
       classes = "timeToEventSettings",
       add = errorMessages
     )
-  }
-  )
+  })
 }
 
 .checkAggregateCovariateSettings <- function(
-  settings,
-  errorMessages
-) {
+    settings,
+    errorMessages) {
   checkmate::assertClass(
     x = settings,
     classes = "aggregateCovariateSettings",
@@ -125,32 +113,28 @@
 }
 
 .checkAggregateCovariateSettingsList <- function(
-  settings,
-  errorMessages
-) {
-
-  if(is.null(settings)){
+    settings,
+    errorMessages) {
+  if (is.null(settings)) {
     return()
   }
 
-  if(inherits(settings,'aggregateCovariateSettings')){
+  if (inherits(settings, "aggregateCovariateSettings")) {
     settings <- list(settings)
   }
 
-  lapply(settings, function(x){
+  lapply(settings, function(x) {
     checkmate::assertClass(
       x = x,
       classes = "aggregateCovariateSettings",
       add = errorMessages
     )
-  }
-  )
+  })
 }
 
 .checkCharacterizationSettings <- function(
-  settings,
-  errorMessages
-) {
+    settings,
+    errorMessages) {
   checkmate::assertClass(
     x = settings,
     classes = "characterizationSettings",
@@ -158,45 +142,42 @@
   )
 }
 
-.checkCohortDetails<- function(
-  cohortDatabaseSchema,
-  cohortTable,
-  type = 'cohort',
-  errorMessages
-  ) {
+.checkCohortDetails <- function(
+    cohortDatabaseSchema,
+    cohortTable,
+    type = "cohort",
+    errorMessages) {
   checkmate::assertCharacter(
     x = cohortDatabaseSchema,
     len = 1,
     add = errorMessages,
-    .var.name = paste0(type, 'DatabaseSchema')
-    )
+    .var.name = paste0(type, "DatabaseSchema")
+  )
   checkmate::assertCharacter(
     x = cohortTable,
     len = 1,
     add = errorMessages,
-    .var.name = paste0(type, 'Table')
-    )
+    .var.name = paste0(type, "Table")
+  )
 }
 
 .checkCohortIds <- function(
-  cohortIds,
-  type = 'cohort',
-  errorMessages
-) {
+    cohortIds,
+    type = "cohort",
+    errorMessages) {
   checkmate::assertNumeric(
     x = cohortIds,
     add = errorMessages,
-    .var.name = paste0(type, 'Id')
+    .var.name = paste0(type, "Id")
   )
 }
 
 .checkTimeAtRisk <- function(
-  riskWindowStart,
-  startAnchor,
-  riskWindowEnd,
-  endAnchor,
-  errorMessages
-) {
+    riskWindowStart,
+    startAnchor,
+    riskWindowEnd,
+    endAnchor,
+    errorMessages) {
   checkmate::assertInt(riskWindowStart, add = errorMessages)
   checkmate::assertChoice(startAnchor, c("cohort start", "cohort end"), add = errorMessages)
   checkmate::assertInt(riskWindowEnd, add = errorMessages)
@@ -204,22 +185,20 @@
 }
 
 .checkTempEmulationSchema <- function(
-  tempEmulationSchema,
-  errorMessages
-  ) {
+    tempEmulationSchema,
+    errorMessages) {
   checkmate::assertCharacter(
     x = tempEmulationSchema,
     len = 1,
     null.ok = TRUE,
     add = errorMessages
-    )
+  )
 }
 
 
 .checkTablePrefix <- function(
     tablePrefix,
-    errorMessages
-) {
+    errorMessages) {
   checkmate::assertCharacter(
     pattern = "[a-zA-Z]_$",
     x = tablePrefix,
@@ -234,27 +213,29 @@
 .checkCovariateSettings <- function(covariateSettings,
                                     errorMessages) {
   if (class(covariateSettings) == "covariateSettings") {
-    checkmate::assertClass(x = covariateSettings,
-                           classes = "covariateSettings",
-                           add = errorMessages)
+    checkmate::assertClass(
+      x = covariateSettings,
+      classes = "covariateSettings",
+      add = errorMessages
+    )
   } else {
     for (j in (1:length(covariateSettings))) {
-      checkmate::assertClass(x = covariateSettings[[j]],
-                             classes = "covariateSettings",
-                             add = errorMessages)
+      checkmate::assertClass(
+        x = covariateSettings[[j]],
+        classes = "covariateSettings",
+        add = errorMessages
+      )
     }
   }
-
 }
 
 .checkMinPriorObservation <- function(
     minPriorObservation,
-  errorMessages
-) {
+    errorMessages) {
   checkmate::assertCount(
     x = minPriorObservation,
     null.ok = F,
-    .var.name = 'minPriorObservation',
+    .var.name = "minPriorObservation",
     add = errorMessages
   )
 }

@@ -172,5 +172,4 @@ test_that("runCharacterizationAnalyses", {
   testthat::expect_true(
     file.exists(file.path(tempFolder, "csv", "time_to_event.csv"))
   )
-
 })

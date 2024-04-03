@@ -16,9 +16,7 @@
 createCharacterizationSettings <- function(
     timeToEventSettings = NULL,
     dechallengeRechallengeSettings = NULL,
-    aggregateCovariateSettings = NULL
-)
-{
+    aggregateCovariateSettings = NULL) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkTimeToEventSettingsList(
     settings = timeToEventSettings,
@@ -72,8 +70,7 @@ createCharacterizationSettings <- function(
 #' @export
 saveCharacterizationSettings <- function(
     settings,
-    fileName
-) {
+    fileName) {
   ParallelLogger::saveSettingsToJson(
     object = settings,
     fileName = fileName
@@ -96,9 +93,7 @@ saveCharacterizationSettings <- function(
 #'
 #' @export
 loadCharacterizationSettings <- function(
-    fileName
-) {
-
+    fileName) {
   settings <- ParallelLogger::loadSettingsFromJson(
     fileName = fileName
   )
@@ -144,8 +139,7 @@ runCharacterizationAnalyses <- function(
     tablePrefix = "c_",
     databaseId = "1",
     showSubjectId = F,
-    minCellCount = 0
-) {
+    minCellCount = 0) {
   # inputs checks
   errorMessages <- checkmate::makeAssertCollection()
   .checkCharacterizationSettings(
@@ -155,10 +149,10 @@ runCharacterizationAnalyses <- function(
   .checkTablePrefix(
     tablePrefix = tablePrefix,
     errorMessages = errorMessages
-    )
+  )
   checkmate::reportAssertions(
     errorMessages
-    )
+  )
 
   # create the Database
   conn <- createSqliteDatabase(
@@ -166,7 +160,7 @@ runCharacterizationAnalyses <- function(
   )
   on.exit(
     DatabaseConnector::disconnect(conn)
-    )
+  )
 
   createCharacterizationTables(
     conn = conn,
@@ -179,7 +173,6 @@ runCharacterizationAnalyses <- function(
 
   if (!is.null(characterizationSettings$timeToEventSettings)) {
     for (i in 1:length(characterizationSettings$timeToEventSettings)) {
-
       message("Running time to event analysis ", i)
 
       result <- tryCatch(
@@ -197,7 +190,7 @@ runCharacterizationAnalyses <- function(
           )
         },
         error = function(e) {
-          message(paste0("ERROR in time-to-event analysis: ", e$message));
+          message(paste0("ERROR in time-to-event analysis: ", e$message))
           return(NULL)
         }
       )
@@ -222,10 +215,9 @@ runCharacterizationAnalyses <- function(
           andromedaObject = result$timeToEvent,
           tablePrefix = tablePrefix,
           minCellCount = minCellCount,
-          minCellCountColumns = list('numEvents')
+          minCellCountColumns = list("numEvents")
         )
       }
-
     }
   }
 
@@ -247,7 +239,7 @@ runCharacterizationAnalyses <- function(
           )
         },
         error = function(e) {
-          message(paste0("ERROR in dechallenge rechallenge analysis: ", e$message));
+          message(paste0("ERROR in dechallenge rechallenge analysis: ", e$message))
           return(NULL)
         }
       )
@@ -273,12 +265,12 @@ runCharacterizationAnalyses <- function(
           tablePrefix = tablePrefix,
           minCellCount = minCellCount,
           minCellCountColumns = list(
-              c('numCases'),
-              c('dechallengeAttempt'),
-              c('dechallengeFail', 'dechallengeSuccess'),
-              c('rechallengeAttempt'),
-              c('rechallengeFail', 'rechallengeSuccess')
-              )
+            c("numCases"),
+            c("dechallengeAttempt"),
+            c("dechallengeFail", "dechallengeSuccess"),
+            c("rechallengeAttempt"),
+            c("rechallengeFail", "rechallengeSuccess")
+          )
         )
       }
 
@@ -300,7 +292,7 @@ runCharacterizationAnalyses <- function(
           )
         },
         error = function(e) {
-          message(paste0("ERROR in rechallenge failed case analysis: ", e$message));
+          message(paste0("ERROR in rechallenge failed case analysis: ", e$message))
           return(NULL)
         }
       )
@@ -350,8 +342,8 @@ runCharacterizationAnalyses <- function(
           )
         },
         error = function(e) {
-          message(paste0("ERROR in aggregate covariate analyses: ", e$message));
-          message(e);
+          message(paste0("ERROR in aggregate covariate analyses: ", e$message))
+          message(e)
           return(NULL)
         }
       )
@@ -417,7 +409,7 @@ runCharacterizationAnalyses <- function(
             tablePrefix = tablePrefix,
             minCellCount = minCellCount,
             minCellCountColumns = list(
-              c('sumValue') #c('SUM_VALUE') #AVERAGE_VALUE
+              c("sumValue") # c('SUM_VALUE') #AVERAGE_VALUE
             )
           )
         }
@@ -431,7 +423,7 @@ runCharacterizationAnalyses <- function(
             tablePrefix = tablePrefix,
             minCellCount = minCellCount,
             minCellCountColumns = list(
-              c('countValue')
+              c("countValue")
             )
           )
         }
