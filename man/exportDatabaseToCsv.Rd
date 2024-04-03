@@ -10,7 +10,7 @@ exportDatabaseToCsv(
   targetDialect = NULL,
   tablePrefix = "c_",
   filePrefix = NULL,
-  tempEmulationSchema = NULL,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   saveDirectory,
   minMeanCovariateValue = 0.001
 )
