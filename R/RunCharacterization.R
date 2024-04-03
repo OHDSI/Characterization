@@ -65,7 +65,7 @@ createCharacterizationSettings <- function(
 #' @param fileName  The location to save the json settings
 #'
 #' @return
-#' Returns the location of the drectory containing the json settings
+#' Returns the location of the directory containing the json settings
 #'
 #' @export
 saveCharacterizationSettings <- function(
@@ -117,7 +117,7 @@ loadCharacterizationSettings <- function(
 #' @param characterizationSettings The study settings created using \code{createCharacterizationSettings}
 #' @param saveDirectory The location to save the results to
 #' @param tablePrefix A string to append the tables in the results
-#' @param databaseId The unqiue identifier for the cdm database
+#' @param databaseId The unique identifier for the cdm database
 #' @param showSubjectId  Whether to include subjectId of failed rechallenge case series or hide
 #' @param minCellCount  The minimum count value that is calculated
 #'

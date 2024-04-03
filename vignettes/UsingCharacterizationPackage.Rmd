@@ -31,8 +31,8 @@ output:
 # Introduction
 This vignette describes how you can use the Characterization package for various descriptive studies using OMOP CDM data. The Characterization package currently contains three different types of analyses:
 
-- Aggreagate Covariates: this returns the mean feature value for a set of features specified by the user for i) the Target cohort population, ii) the Outcome cohort population, iii) the Target population patients who had the outcome during some user specified time-at-risk and iv) the Target population patients who did not have the outcome during some user specified time-at-risk.
-- DechallengeRechallenge: this is mainly aimed at investigating whether a drug and event are causally related by seeing whether the drug is stopped close in time to the event occurrence (dechallenge) and then whether the drug is restarted (a rechallenge occurs) and if so, whether the event starts again (a failed rechallenge). In this analysis, the Target cohorts are the drug users of interest and the Outcome cohorts are the medical events you wish to see whether the drug may cause.  The user must also specify how close in time a drug msut be stopped after the outcome to be considered a dechallenge and how close in time an Outcome must occur after restarting the drug to be considered a failed rechallenge).
+- Aggregate Covariates: this returns the mean feature value for a set of features specified by the user for i) the Target cohort population, ii) the Outcome cohort population, iii) the Target population patients who had the outcome during some user specified time-at-risk and iv) the Target population patients who did not have the outcome during some user specified time-at-risk.
+- DechallengeRechallenge: this is mainly aimed at investigating whether a drug and event are causally related by seeing whether the drug is stopped close in time to the event occurrence (dechallenge) and then whether the drug is restarted (a rechallenge occurs) and if so, whether the event starts again (a failed rechallenge). In this analysis, the Target cohorts are the drug users of interest and the Outcome cohorts are the medical events you wish to see whether the drug may cause.  The user must also specify how close in time a drug must be stopped after the outcome to be considered a dechallenge and how close in time an Outcome must occur after restarting the drug to be considered a failed rechallenge).
 - Time-to-event: this returns descriptive results showing the timing between the target cohort and outcome.  This can help identify whether the outcome often precedes the target cohort or whether it generally comes after.
 
 # Setup
@@ -105,7 +105,7 @@ exampleAggregateCovariateSettings <- createAggregateCovariateSettings(
 )
 ```
 
-Next we need to use the `exampleAggregateCovariateSettings` as the settings to `computeAggregateCovariateAnalyses`, we need to use the Eunomia connectionDetails and in Eunomia the OMOP CDM data and cohort table are in the 'main' schema.  The cohort table name is 'cohort'.  The following code will apply the aggregative covariates analysis using the previously specified settings on the simulated Eunomia data:
+Next we need to use the `exampleAggregateCovariateSettings` as the settings to `computeAggregateCovariateAnalyses`, we need to use the Eunomia connectionDetails and in Eunomia the OMOP CDM data and cohort table are in the 'main' schema.  The cohort table name is 'cohort'.  The following code will apply the aggregated covariates analysis using the previously specified settings on the simulated Eunomia data:
 
 ```{r eval=TRUE,results='hide',error=FALSE,warning=FALSE,message=FALSE}
 agc <- computeAggregateCovariateAnalyses(
