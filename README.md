@@ -62,7 +62,7 @@ targetIds <- c(1,2,4)
       useDemographicsAge = T,
       useDemographicsRace = T
     )
-    )
+  )
 
   aggregateCovariateSettings2 <- createAggregateCovariateSettings(
     targetIds = targetIds,

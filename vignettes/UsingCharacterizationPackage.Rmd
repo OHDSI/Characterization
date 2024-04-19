@@ -93,7 +93,7 @@ exampleCovariateSettings <- FeatureExtraction::createCovariateSettings(
 )
 ```
 
-If we want to create the aggregate features for all our target cohorts, our outcome cohort and each target cohort restricted to those with a record of the outcome 1 day after target cohort start date until 365 days after target cohort end date we can run:
+If we want to create the aggregate features for all our target cohorts, our outcome cohort and each target cohort restricted to those with a record of the outcome 1 day after target cohort start date until 365 days after target cohort end date, excluding mean values below 0.01, we can run:
 
 ```{r eval=TRUE}
 exampleAggregateCovariateSettings <- createAggregateCovariateSettings(
@@ -101,7 +101,8 @@ exampleAggregateCovariateSettings <- createAggregateCovariateSettings(
   outcomeIds = exampleOutcomeIds,
   riskWindowStart = 1, startAnchor = "cohort start",
   riskWindowEnd = 365, endAnchor = "cohort start",
-  covariateSettings = exampleCovariateSettings
+  covariateSettings = exampleCovariateSettings,
+  minCharacterizationMean = 0.01
 )
 ```
 
