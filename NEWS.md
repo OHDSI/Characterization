@@ -1,3 +1,8 @@
+Characterization 0.2.0
+======================
+Updated dependency to FeatureExtraction (>= 3.5.0) to support minCharacterizationMean paramater.
+
+
 Characterization 0.1.5
 ======================
 Changed export to csv approach to use batch export from SQLite (#41)

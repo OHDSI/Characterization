@@ -12,7 +12,8 @@ createAggregateCovariateSettings(
   startAnchor = "cohort start",
   riskWindowEnd = 365,
   endAnchor = "cohort start",
-  covariateSettings
+  covariateSettings,
+  minCharacterizationMean = 0
 )
 }
 \arguments{
@@ -33,6 +34,10 @@ or `"cohort end"`.}
 or `"cohort end"`.}
 
 \item{covariateSettings}{An object created using \code{FeatureExtraction::createCovariateSettings}}
+
+\item{minCharacterizationMean}{The minimum mean value for characterization output. Values below this will be cut off from output. This
+will help reduce the file size of the characterization output, but will remove information
+on covariates that have very low values. The default is 0.}
 }
 \value{
 A list with the settings
