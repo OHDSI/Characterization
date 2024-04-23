@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -72,7 +72,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://ohdsi.github.io/Hades" class="external-link"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
+  <a href="https://ohdsi.github.io/Hades" class="external-link">hadesLogo</a>
 </li>
 <li>
   <a href="https://github.com/OHDSI/PatientLevelPrediction" class="external-link">
@@ -97,7 +97,7 @@
       <h1 data-toc-skip>Using Characterization Package</h1>
                         <h4 data-toc-skip class="author">Jenna Reps</h4>
             
-            <h4 data-toc-skip class="date">2024-04-03</h4>
+            <h4 data-toc-skip class="date">2024-04-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/HEAD/vignettes/UsingCharacterizationPackage.Rmd" class="external-link"><code>vignettes/UsingCharacterizationPackage.Rmd</code></a></small>
       <div class="hidden name"><code>UsingCharacterizationPackage.Rmd</code></div>
@@ -161,16 +161,16 @@ with the simulated data ready to be used.</p>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span></code></pre>
 <pre><code><span><span class="co">## Creating cohort: Celecoxib</span></span>
 <span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0152 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0138 secs</span></span></code></pre>
 <pre><code><span><span class="co">## Creating cohort: Diclofenac</span></span>
 <span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0169 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0122 secs</span></span></code></pre>
 <pre><code><span><span class="co">## Creating cohort: GiBleed</span></span>
 <span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0208 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0228 secs</span></span></code></pre>
 <pre><code><span><span class="co">## Creating cohort: NSAIDs</span></span>
 <span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0579 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0641 secs</span></span></code></pre>
 <pre><code><span><span class="co">## Cohorts created in table main.cohort</span></span></code></pre>
 <pre><code><span><span class="co">##   cohortId       name</span></span>
 <span><span class="co">## 1        1  Celecoxib</span></span>
@@ -245,14 +245,16 @@ index and Charlson Comorbidity index we can create the settings using
 <p>If we want to create the aggregate features for all our target
 cohorts, our outcome cohort and each target cohort restricted to those
 with a record of the outcome 1 day after target cohort start date until
-365 days after target cohort end date we can run:</p>
+365 days after target cohort end date, excluding mean values below 0.01,
+we can run:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exampleAggregateCovariateSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createAggregateCovariateSettings.html">createAggregateCovariateSettings</a></span><span class="op">(</span></span>
 <span>  targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
 <span>  outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span>,</span>
 <span>  riskWindowStart <span class="op">=</span> <span class="fl">1</span>, startAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
 <span>  riskWindowEnd <span class="op">=</span> <span class="fl">365</span>, endAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
-<span>  covariateSettings <span class="op">=</span> <span class="va">exampleCovariateSettings</span></span>
+<span>  covariateSettings <span class="op">=</span> <span class="va">exampleCovariateSettings</span>,</span>
+<span>  minCharacterizationMean <span class="op">=</span> <span class="fl">0.01</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Next we need to use the
 <code>exampleAggregateCovariateSettings</code> as the settings to
@@ -3207,8 +3209,8 @@ previously specified:</p>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span>
 <span><span class="co">## Computing dechallenge rechallenge results</span></span></code></pre>
 <pre><code><span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |============                                                          |  17%  |                                                                              |=======================                                               |  33%  |                                                                              |===================================                                   |  50%  |                                                                              |===============================================                       |  67%  |                                                                              |==========================================================            |  83%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.00758 secs</span></span>
-<span><span class="co">## Computing dechallenge rechallenge for 3 target ids and 1outcome ids took 0.165 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00901 secs</span></span>
+<span><span class="co">## Computing dechallenge rechallenge for 3 target ids and 1outcome ids took 0.138 secs</span></span></code></pre>
 <p>If you would like to save the results you can use the function
 <code>saveDechallengeRechallengeAnalyses</code> and this can then be
 loaded using <code>loadDechallengeRechallengeAnalyses</code>.</p>
@@ -3300,8 +3302,8 @@ cases</p>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span>
 <span><span class="co">## Computing dechallenge rechallenge results</span></span></code></pre>
 <pre><code><span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |============                                                          |  17%  |                                                                              |=======================                                               |  33%  |                                                                              |===================================                                   |  50%  |                                                                              |===============================================                       |  67%  |                                                                              |==========================================================            |  83%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0748 secs</span></span>
-<span><span class="co">## Computing dechallenge failed case series for 3 target IDs and 1 outcome IDs took 0.219 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0966 secs</span></span>
+<span><span class="co">## Computing dechallenge failed case series for 3 target IDs and 1 outcome IDs took 0.202 secs</span></span></code></pre>
 <p>The results are Andromeda objects that can we viewed using
 <code>dplyr</code>. There is just one table named
 rechallengeFailCaseSeries:</p>
@@ -3398,11 +3400,11 @@ specified:</p>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span>
 <span><span class="co">## Uploading #cohort_settings</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Inserting data took 0.00654 secs</span></span>
+<span><span class="co">## Inserting data took 0.00793 secs</span></span>
 <span><span class="co">## Computing time to event results</span></span></code></pre>
 <pre><code><span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   4%  |                                                                              |======                                                                |   8%  |                                                                              |=========                                                             |  12%  |                                                                              |============                                                          |  17%  |                                                                              |===============                                                       |  21%  |                                                                              |==================                                                    |  25%  |                                                                              |====================                                                  |  29%  |                                                                              |=======================                                               |  33%  |                                                                              |==========================                                            |  38%  |                                                                              |=============================                                         |  42%  |                                                                              |================================                                      |  46%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  54%  |                                                                              |=========================================                             |  58%  |                                                                              |============================================                          |  62%  |                                                                              |===============================================                       |  67%  |                                                                              |==================================================                    |  71%  |                                                                              |====================================================                  |  75%  |                                                                              |=======================================================               |  79%  |                                                                              |==========================================================            |  83%  |                                                                              |=============================================================         |  88%  |                                                                              |================================================================      |  92%  |                                                                              |===================================================================   |  96%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0462 secs</span></span>
-<span><span class="co">## Computing time-to-event for T-O pairs took 0.268 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0525 secs</span></span>
+<span><span class="co">## Computing time-to-event for T-O pairs took 0.22 secs</span></span></code></pre>
 <p>If you would like to save the results you can use the function
 <code>saveTimeToEventAnalyses</code> and this can then be loaded using
 <code>loadTimeToEventAnalyses</code>.</p>

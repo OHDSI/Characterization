@@ -21,6 +21,9 @@
 #' @param minPriorObservation The minimum time in the database a patient in the target cohorts must be observed prior to index
 #' @template timeAtRisk
 #' @param covariateSettings   An object created using \code{FeatureExtraction::createCovariateSettings}
+#' @param minCharacterizationMean The minimum mean value for characterization output. Values below this will be cut off from output. This
+#'                                will help reduce the file size of the characterization output, but will remove information
+#'                                on covariates that have very low values. The default is 0.
 #'
 #' @return
 #' A list with the settings
@@ -34,7 +37,8 @@ createAggregateCovariateSettings <- function(
     startAnchor = "cohort start",
     riskWindowEnd = 365,
     endAnchor = "cohort start",
-    covariateSettings) {
+    covariateSettings,
+    minCharacterizationMean = 0) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
   .checkCohortIds(
@@ -81,7 +85,8 @@ createAggregateCovariateSettings <- function(
     startAnchor = startAnchor,
     riskWindowEnd = riskWindowEnd,
     endAnchor = endAnchor,
-    covariateSettings = covariateSettings
+    covariateSettings = covariateSettings,
+    minCharacterizationMean = minCharacterizationMean
   )
 
   class(result) <- "aggregateCovariateSettings"
@@ -163,7 +168,8 @@ computeAggregateCovariateAnalyses <- function(
     cohortId = -1,
     covariateSettings = aggregateCovariateSettings$covariateSettings,
     cdmVersion = cdmVersion,
-    aggregated = T
+    aggregated = T,
+    minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
   )
   # adding counts as a new table
   result$cohortCounts <- counts
