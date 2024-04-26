@@ -218,8 +218,14 @@ computeAggregateCovariateAnalyses <- function(
   )
 
   message("Computing aggregate between covariate results")
-  # between
-  betweenCovariates <- getBetweenCovariateSettings(aggregateCovariateSettings$covariateSettings)
+  # between- 30 days after target index
+  betweenCovariates <- getCaseCovariateSettings(
+    covariateSettings = aggregateCovariateSettings$covariateSettings,
+    endDays = 30,
+    startDays = 0,
+    replacementType = 'LongTerm'
+  )
+
   resultBetween <- FeatureExtraction::getDbCovariateData(
     connection = connection,
     oracleTempSchema = tempEmulationSchema,
@@ -271,7 +277,13 @@ computeAggregateCovariateAnalyses <- function(
 
   # after
   message("Computing aggregate after covariate results")
-  afterCovariates <- getAfterCovariateSettings(aggregateCovariateSettings$covariateSettings)
+  # 1-year after outcome index
+  afterCovariates <-  getCaseCovariateSettings(
+    covariateSettings = aggregateCovariateSettings$covariateSettings,
+    endDays = 365,
+    startDays = 0,
+    replacementType = 'LongTerm'
+  )
 
   resultAfter <- FeatureExtraction::getDbCovariateData(
     connection = connection,
@@ -448,68 +460,56 @@ createCohortsOfInterest <- function(
 }
 
 
-getAfterCovariateSettings <- function(x){
-  settings <- names(x)
-  keep <- c("temporal", "temporalSequence",
-            "longTermStartDays", "mediumTermStartDays", "shortTermStartDays",
-            "endDays", "includedCovariateConceptIds", "addDescendantsToInclude",
-            "excludedCovariateConceptIds", "addDescendantsToExclude", "includedCovariateIds"
-  )
+getCaseCovariateSettings <- function(
+    covariateSettings,
+    endDays = 365,
+    startDays = 0,
+    replacementType = 'LongTerm'
+      ){
+  for(x in covariateSettings){
+    if(attr(x, 'fun') == "getDbDefaultCovariateData"){
+      settings <- names(x)
+      keep <- c("temporal", "temporalSequence",
+                "longTermStartDays", "mediumTermStartDays", "shortTermStartDays",
+                "endDays", "includedCovariateConceptIds", "addDescendantsToInclude",
+                "excludedCovariateConceptIds", "addDescendantsToExclude", "includedCovariateIds"
+      )
 
-  ind <- 1
-  types <- c()
-  for(i in 1:length(x)){
-    if(!names(x)[ind] %in% keep &
-       (length(grep('LongTerm', names(x)[1]))>0 |
-        length(grep('MediumTerm', names(x)[1]))>0 |
-        length(grep('ShortTerm', names(x)[1]))>0)
+      ind <- 1
+      types <- c()
+      for(i in 1:length(x)){
+        if(!names(x)[ind] %in% keep &
+           (length(grep('LongTerm', names(x)[1]))>0 |
+            length(grep('MediumTerm', names(x)[1]))>0 |
+            length(grep('ShortTerm', names(x)[1]))>0)
         ){
-      types <- unique(c(types, gsub('ShortTerm', '',gsub('MediumTerm', '',gsub('LongTerm', '', names(x)[ind])))))
-      x[[ind]] <- NULL
-    } else{
-      ind <- ind + 1
+          types <- unique(c(types, gsub('ShortTerm', '',gsub('MediumTerm', '',gsub('LongTerm', '', names(x)[ind])))))
+          x[[ind]] <- NULL
+        } else{
+          ind <- ind + 1
+        }
+      }
+      for(type in types){
+        x[[length(x) + 1]] <- TRUE
+        names(x)[length(x)] <- paste0(type, replacementType)
+      }
+      x$endDays <- endDays
+      x$longTermStartDays <- startDays
+      return(x)
     }
   }
-  for(type in types){
-    x[[length(x) + 1]] <- TRUE
-    names(x)[length(x)] <- paste0(type, 'LongTerm')
-  }
-  x$endDays <- 365
-  x$longTermStartDays <- 1
 
+  # else
+  x <- FeatureExtraction::createCovariateSettings(
+    useDemographicsTimeInCohort = T,
+    useConditionGroupEraShortTerm = T,
+    useDrugGroupEraShortTerm = T,
+    useVisitConceptCountShortTerm = T,
+    endDays = endDays,
+    shortTermStartDays = startDays
+    )
   return(x)
-}
 
-getBetweenCovariateSettings <- function(x){
-  settings <- names(x)
-  keep <- c("temporal", "temporalSequence",
-            "longTermStartDays", "mediumTermStartDays", "shortTermStartDays",
-            "endDays", "includedCovariateConceptIds", "addDescendantsToInclude",
-            "excludedCovariateConceptIds", "addDescendantsToExclude", "includedCovariateIds"
-  )
-
-  ind <- 1
-  types <- c()
-  for(i in 1:length(x)){
-    if(!names(x)[ind] %in% keep &
-       (length(grep('LongTerm', names(x)[1]))>0 |
-        length(grep('MediumTerm', names(x)[1]))>0 |
-        length(grep('ShortTerm', names(x)[1]))>0)
-    ){
-      types <- unique(c(types, gsub('ShortTerm', '',gsub('MediumTerm', '',gsub('LongTerm', '', names(x)[ind])))))
-      x[[ind]] <- NULL
-    } else{
-      ind <- ind + 1
-    }
-  }
-  for(type in types){
-    x[[length(x) + 1]] <- TRUE
-    names(x)[length(x)] <- paste0(type, 'LongTerm')
-  }
-  x$endDays <- 0
-  x$longTermStartDays <- 0
-
-  return(x)
 }
 
 hex_to_int = function(h) {
