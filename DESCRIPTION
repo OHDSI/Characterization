@@ -29,6 +29,7 @@ Imports:
 	rlang
 Suggests:
   devtools,
+  formatR,
 	testthat,
 	Eunomia,
 	kableExtra,
