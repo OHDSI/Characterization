@@ -1,3 +1,11 @@
+Characterization 0.3.0
+======================
+- Added new outcomeWashoutDays parameter to createAggregateCovariateSettings to remove outcome occurances that are continuations of a prior outcome occurrence
+- Changed the way cohort definition ids are created in createAggregateCovariateSettings to use hash of target id, outcome id and type.  This lets users combine different studies into a single result database.
+- Added database migration capability and created new migrations for the recent updates.
+
+
+
 Characterization 0.2.0
 ======================
 Updated dependency to FeatureExtraction (>= 3.5.0) to support minCharacterizationMean paramater.

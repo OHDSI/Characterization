@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
@@ -72,7 +72,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://ohdsi.github.io/Hades" class="external-link">hadesLogo</a>
+  <a href="https://ohdsi.github.io/Hades" class="external-link"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
 </li>
 <li>
   <a href="https://github.com/OHDSI/PatientLevelPrediction" class="external-link">
@@ -97,7 +97,7 @@
       <h1 data-toc-skip>Using Characterization Package</h1>
                         <h4 data-toc-skip class="author">Jenna Reps</h4>
             
-            <h4 data-toc-skip class="date">2024-04-19</h4>
+            <h4 data-toc-skip class="date">2024-04-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/HEAD/vignettes/UsingCharacterizationPackage.Rmd" class="external-link"><code>vignettes/UsingCharacterizationPackage.Rmd</code></a></small>
       <div class="hidden name"><code>UsingCharacterizationPackage.Rmd</code></div>
@@ -159,18 +159,34 @@ with the simulated data ready to be used.</p>
 <code class="sourceCode R"><span><span class="va">connectionDetails</span> <span class="op">&lt;-</span> <span class="fu">Eunomia</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Eunomia/man/getEunomiaConnectionDetails.html" class="external-link">getEunomiaConnectionDetails</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">Eunomia</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Eunomia/man/createCohorts.html" class="external-link">createCohorts</a></span><span class="op">(</span>connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span></code></pre>
-<pre><code><span><span class="co">## Creating cohort: Celecoxib</span></span>
-<span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0138 secs</span></span></code></pre>
-<pre><code><span><span class="co">## Creating cohort: Diclofenac</span></span>
-<span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0122 secs</span></span></code></pre>
-<pre><code><span><span class="co">## Creating cohort: GiBleed</span></span>
-<span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0228 secs</span></span></code></pre>
-<pre><code><span><span class="co">## Creating cohort: NSAIDs</span></span>
-<span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0641 secs</span></span></code></pre>
+<pre><code>## Creating cohort: Celecoxib
+## 
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00557 secs</span></span></code></pre>
+<pre><code>## Creating cohort: Diclofenac
+## 
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00487 secs</span></span></code></pre>
+<pre><code>## Creating cohort: GiBleed
+## 
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00951 secs</span></span></code></pre>
+<pre><code>## Creating cohort: NSAIDs
+## 
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0507 secs</span></span></code></pre>
 <pre><code><span><span class="co">## Cohorts created in table main.cohort</span></span></code></pre>
 <pre><code><span><span class="co">##   cohortId       name</span></span>
 <span><span class="co">## 1        1  Celecoxib</span></span>
@@ -286,6 +302,8 @@ using <code>loadAggregateCovariateAnalyses</code>.</p>
 <code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">covariates</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning in !is.null(rmarkdown::metadata$output) &amp;&amp; rmarkdown::metadata$output</span></span>
+<span><span class="co">## %in% : 'length(x) = 3 &gt; 1' in coercion to 'logical(1)'</span></span></code></pre>
 <table class="table">
 <thead><tr>
 <th style="text-align:left;">
@@ -316,87 +334,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-237
-</td>
-<td style="text-align:right;">
-0.4947808
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-242
-</td>
-<td style="text-align:right;">
-0.5052192
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-180
-</td>
-<td style="text-align:right;">
-0.5070423
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-175
-</td>
-<td style="text-align:right;">
-0.4929577
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-3
+170096739
 </td>
 <td style="text-align:right;">
 8507001
@@ -416,7 +354,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-3
+170096739
 </td>
 <td style="text-align:right;">
 8532001
@@ -436,7 +374,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-4
+1421450349
 </td>
 <td style="text-align:right;">
 8507001
@@ -456,7 +394,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-4
+1421450349
 </td>
 <td style="text-align:right;">
 8532001
@@ -476,87 +414,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-894
-</td>
-<td style="text-align:right;">
-0.4966667
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-906
-</td>
-<td style="text-align:right;">
-0.5033333
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-6
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-395
-</td>
-<td style="text-align:right;">
-0.4759036
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-6
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-435
-</td>
-<td style="text-align:right;">
-0.5240964
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-7
+1498088760
 </td>
 <td style="text-align:right;">
 8507001
@@ -576,7 +434,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-7
+1498088760
 </td>
 <td style="text-align:right;">
 8532001
@@ -596,7 +454,127 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-8
+2038349030
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+237
+</td>
+<td style="text-align:right;">
+0.4947808
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2038349030
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+242
+</td>
+<td style="text-align:right;">
+0.5052192
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2038795861
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+894
+</td>
+<td style="text-align:right;">
+0.4966667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2038795861
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+906
+</td>
+<td style="text-align:right;">
+0.5033333
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2246615035
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+395
+</td>
+<td style="text-align:right;">
+0.4759036
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2246615035
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+435
+</td>
+<td style="text-align:right;">
+0.5240964
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3945088378
 </td>
 <td style="text-align:right;">
 8507001
@@ -616,7 +594,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-8
+3945088378
 </td>
 <td style="text-align:right;">
 8532001
@@ -636,47 +614,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-9
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-57
-</td>
-<td style="text-align:right;">
-0.4596774
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-9
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-67
-</td>
-<td style="text-align:right;">
-0.5403226
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-10
+1810054421
 </td>
 <td style="text-align:right;">
 8507001
@@ -696,7 +634,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-10
+1810054421
 </td>
 <td style="text-align:right;">
 8532001
@@ -716,7 +654,47 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-11
+3451257159
+</td>
+<td style="text-align:right;">
+8507001
+</td>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:right;">
+0.4596774
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3451257159
+</td>
+<td style="text-align:right;">
+8532001
+</td>
+<td style="text-align:right;">
+67
+</td>
+<td style="text-align:right;">
+0.5403226
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4205858076
 </td>
 <td style="text-align:right;">
 8507001
@@ -736,7 +714,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-11
+4205858076
 </td>
 <td style="text-align:right;">
 8532001
@@ -756,7 +734,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-12
+1639865637
 </td>
 <td style="text-align:right;">
 8507001
@@ -776,7 +754,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-12
+1639865637
 </td>
 <td style="text-align:right;">
 8532001
@@ -796,7 +774,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-13
+2896235937
 </td>
 <td style="text-align:right;">
 8507001
@@ -816,7 +794,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-13
+2896235937
 </td>
 <td style="text-align:right;">
 8532001
@@ -836,167 +814,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-14
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-914
-</td>
-<td style="text-align:right;">
-0.4956616
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-14
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-930
-</td>
-<td style="text-align:right;">
-0.5043384
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-15
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-407
-</td>
-<td style="text-align:right;">
-0.4788235
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-15
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-443
-</td>
-<td style="text-align:right;">
-0.5211765
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-16
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-1321
-</td>
-<td style="text-align:right;">
-0.4903489
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-16
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-1373
-</td>
-<td style="text-align:right;">
-0.5096511
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-17
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-237
-</td>
-<td style="text-align:right;">
-0.4947808
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-17
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-242
-</td>
-<td style="text-align:right;">
-0.5052192
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-18
+3648795733
 </td>
 <td style="text-align:right;">
 8507001
@@ -1016,7 +834,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-18
+3648795733
 </td>
 <td style="text-align:right;">
 8532001
@@ -1026,86 +844,6 @@ Eunomia
 </td>
 <td style="text-align:right;">
 0.4929577
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-57
-</td>
-<td style="text-align:right;">
-0.4596774
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-67
-</td>
-<td style="text-align:right;">
-0.5403226
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-20
-</td>
-<td style="text-align:right;">
-8507001
-</td>
-<td style="text-align:right;">
-237
-</td>
-<td style="text-align:right;">
-0.4947808
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-20
-</td>
-<td style="text-align:right;">
-8532001
-</td>
-<td style="text-align:right;">
-242
-</td>
-<td style="text-align:right;">
-0.5052192
 </td>
 </tr>
 </tbody>
@@ -1113,7 +851,7 @@ Eunomia
 <ul>
 <li>covariatesContinuous:</li>
 </ul>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">covariatesContinuous</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -1171,7 +909,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-3
+170096739
 </td>
 <td style="text-align:right;">
 1901
@@ -1215,139 +953,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-9
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.4274194
-</td>
-<td style="text-align:right;">
-0.4606464
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-12
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.4274194
-</td>
-<td style="text-align:right;">
-0.4606464
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.4274194
-</td>
-<td style="text-align:right;">
-0.4606464
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-8
+3945088378
 </td>
 <td style="text-align:right;">
 1901
@@ -1391,139 +997,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-275
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.9549296
-</td>
-<td style="text-align:right;">
-0.4233403
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-275
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.9577465
-</td>
-<td style="text-align:right;">
-0.4256226
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-18
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-275
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.9577465
-</td>
-<td style="text-align:right;">
-0.4256226
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-6
+2246615035
 </td>
 <td style="text-align:right;">
 1901
@@ -1567,51 +1041,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-15
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-304
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0.4035294
-</td>
-<td style="text-align:right;">
-0.3446752
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-10
+2038349030
 </td>
 <td style="text-align:right;">
 1901
@@ -1655,51 +1085,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-13
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-316
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.8183716
-</td>
-<td style="text-align:right;">
-0.4280688
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
+1421450349
 </td>
 <td style="text-align:right;">
 1901
@@ -1743,139 +1129,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-316
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.8204593
-</td>
-<td style="text-align:right;">
-0.4299773
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-17
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-316
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.8204593
-</td>
-<td style="text-align:right;">
-0.4299773
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-20
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-316
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.8204593
-</td>
-<td style="text-align:right;">
-0.4299773
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-5
+2038795861
 </td>
 <td style="text-align:right;">
 1901
@@ -1919,51 +1173,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-14
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-958
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.6144252
-</td>
-<td style="text-align:right;">
-0.3865994
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-7
+1498088760
 </td>
 <td style="text-align:right;">
 1901
@@ -2007,51 +1217,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-16
-</td>
-<td style="text-align:right;">
-1901
-</td>
-<td style="text-align:right;">
-1262
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0.5478842
-</td>
-<td style="text-align:right;">
-0.3775118
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-9
+170096739
 </td>
 <td style="text-align:right;">
 1002
@@ -2095,139 +1261,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-12
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-124
-</td>
-<td style="text-align:right;">
-32
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-38.8709677
-</td>
-<td style="text-align:right;">
-3.4000663
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-44
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-124
-</td>
-<td style="text-align:right;">
-32
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-38.9758065
-</td>
-<td style="text-align:right;">
-3.4226973
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-44
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-124
-</td>
-<td style="text-align:right;">
-32
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-38.9758065
-</td>
-<td style="text-align:right;">
-3.4226973
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-44
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-8
+3945088378
 </td>
 <td style="text-align:right;">
 1002
@@ -2271,139 +1305,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-355
-</td>
-<td style="text-align:right;">
-32
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-38.7746479
-</td>
-<td style="text-align:right;">
-3.2746121
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-35
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-355
-</td>
-<td style="text-align:right;">
-32
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-38.9014085
-</td>
-<td style="text-align:right;">
-3.2449654
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-35
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-18
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-355
-</td>
-<td style="text-align:right;">
-32
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-38.9014085
-</td>
-<td style="text-align:right;">
-3.2449654
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-35
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-10
+2038349030
 </td>
 <td style="text-align:right;">
 1002
@@ -2447,51 +1349,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-13
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-479
-</td>
-<td style="text-align:right;">
-32
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-38.7995825
-</td>
-<td style="text-align:right;">
-3.3042257
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-44
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
+1421450349
 </td>
 <td style="text-align:right;">
 1002
@@ -2535,139 +1393,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-479
-</td>
-<td style="text-align:right;">
-32
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-38.9206681
-</td>
-<td style="text-align:right;">
-3.2884308
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-35
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-44
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-17
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-479
-</td>
-<td style="text-align:right;">
-32
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-38.9206681
-</td>
-<td style="text-align:right;">
-3.2884308
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-35
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-44
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-20
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-479
-</td>
-<td style="text-align:right;">
-32
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-38.9206681
-</td>
-<td style="text-align:right;">
-3.2884308
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-35
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-44
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-6
+2246615035
 </td>
 <td style="text-align:right;">
 1002
@@ -2711,51 +1437,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-15
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-850
-</td>
-<td style="text-align:right;">
-31
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-38.5658824
-</td>
-<td style="text-align:right;">
-3.2816028
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-5
+2038795861
 </td>
 <td style="text-align:right;">
 1002
@@ -2799,51 +1481,7 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-14
-</td>
-<td style="text-align:right;">
-1002
-</td>
-<td style="text-align:right;">
-1844
-</td>
-<td style="text-align:right;">
-31
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-38.6469631
-</td>
-<td style="text-align:right;">
-3.3192555
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-41
-</td>
-<td style="text-align:right;">
-43
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Eunomia
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-7
+1498088760
 </td>
 <td style="text-align:right;">
 1002
@@ -2887,25 +1525,157 @@ Eunomia
 1
 </td>
 <td style="text-align:right;">
-16
+3451257159
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.4274194
+</td>
+<td style="text-align:right;">
+0.4606464
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4205858076
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+275
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.9549296
+</td>
+<td style="text-align:right;">
+0.4233403
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1810054421
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+316
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.8183716
+</td>
+<td style="text-align:right;">
+0.4280688
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3451257159
 </td>
 <td style="text-align:right;">
 1002
 </td>
 <td style="text-align:right;">
-2694
+124
 </td>
 <td style="text-align:right;">
-31
+32
 </td>
 <td style="text-align:right;">
-47
+46
 </td>
 <td style="text-align:right;">
-38.6213808
+38.8709677
 </td>
 <td style="text-align:right;">
-3.3070275
+3.4000663
 </td>
 <td style="text-align:right;">
 39
@@ -2920,7 +1690,359 @@ Eunomia
 41
 </td>
 <td style="text-align:right;">
+44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4205858076
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+355
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+38.7746479
+</td>
+<td style="text-align:right;">
+3.2746121
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
 43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1810054421
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+479
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+38.7995825
+</td>
+<td style="text-align:right;">
+3.3042257
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1639865637
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.4274194
+</td>
+<td style="text-align:right;">
+0.4606464
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3648795733
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+277
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.9633803
+</td>
+<td style="text-align:right;">
+0.4245513
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2896235937
+</td>
+<td style="text-align:right;">
+1901
+</td>
+<td style="text-align:right;">
+318
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.8246347
+</td>
+<td style="text-align:right;">
+0.4290528
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1639865637
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+124
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+38.9758065
+</td>
+<td style="text-align:right;">
+3.4226973
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3648795733
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+355
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+38.9014085
+</td>
+<td style="text-align:right;">
+3.2449654
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eunomia
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2896235937
+</td>
+<td style="text-align:right;">
+1002
+</td>
+<td style="text-align:right;">
+479
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+38.9206681
+</td>
+<td style="text-align:right;">
+3.2884308
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+44
 </td>
 </tr>
 </tbody>
@@ -2928,7 +2050,7 @@ Eunomia
 <ul>
 <li>covariateRef:</li>
 </ul>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">covariateRef</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -3039,7 +2161,7 @@ age in years
 <ul>
 <li>analysisRef:</li>
 </ul>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">agc</span><span class="op">$</span><span class="va">analysisRef</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -3181,13 +2303,13 @@ table)</li>
 <p>Using the Eunomia data were we previous generated four cohorts, we
 can use cohort ids 1,2 and 4 as the targetIds and cohort id 3 as the
 outcomeIds:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exampleTargetIds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="va">exampleOutcomeIds</span> <span class="op">&lt;-</span> <span class="fl">3</span></span></code></pre></div>
 <p>If we want to create the dechallenge rechallenge for all our target
 cohorts and our outcome cohort with a 30 day dechallengeStopInterval and
 31 day dechallengeEvaluationWindow:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exampleDechallengeRechallengeSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createDechallengeRechallengeSettings.html">createDechallengeRechallengeSettings</a></span><span class="op">(</span></span>
 <span>  targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
 <span>  outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span>,</span>
@@ -3197,7 +2319,7 @@ cohorts and our outcome cohort with a 30 day dechallengeStopInterval and
 <p>We can then run the analysis on the Eunomia data using
 <code>computeDechallengeRechallengeAnalyses</code> and the settings
 previously specified:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeDechallengeRechallengeAnalyses.html">computeDechallengeRechallengeAnalyses</a></span><span class="op">(</span></span>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
 <span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
@@ -3208,16 +2330,30 @@ previously specified:</p>
 <pre><code><span><span class="co">## Inputs checked</span></span></code></pre>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span>
 <span><span class="co">## Computing dechallenge rechallenge results</span></span></code></pre>
-<pre><code><span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |============                                                          |  17%  |                                                                              |=======================                                               |  33%  |                                                                              |===================================                                   |  50%  |                                                                              |===============================================                       |  67%  |                                                                              |==========================================================            |  83%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.00901 secs</span></span>
-<span><span class="co">## Computing dechallenge rechallenge for 3 target ids and 1outcome ids took 0.138 secs</span></span></code></pre>
+<pre><code>## 
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |============                                                          |  17%
+  |                                                                            
+  |=======================                                               |  33%
+  |                                                                            
+  |===================================                                   |  50%
+  |                                                                            
+  |===============================================                       |  67%
+  |                                                                            
+  |==========================================================            |  83%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00665 secs</span></span>
+<span><span class="co">## Computing dechallenge rechallenge for 3 target ids and 1outcome ids took 0.0583 secs</span></span></code></pre>
 <p>If you would like to save the results you can use the function
 <code>saveDechallengeRechallengeAnalyses</code> and this can then be
 loaded using <code>loadDechallengeRechallengeAnalyses</code>.</p>
 <p>The results are Andromeda objects that can we viewed using
 <code>dplyr</code>. There is just one table named
 dechallengeRechallenge:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dc</span><span class="op">$</span><span class="va">dechallengeRechallenge</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -3288,7 +2424,7 @@ pctRechallengeFail
 </table>
 <p>Next it is possible to computer and extract the failed rechallenge
 cases</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">failed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeRechallengeFailCaseSeriesAnalyses.html">computeRechallengeFailCaseSeriesAnalyses</a></span><span class="op">(</span></span>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
 <span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
@@ -3301,13 +2437,27 @@ cases</p>
 <pre><code><span><span class="co">## Inputs checked</span></span></code></pre>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span>
 <span><span class="co">## Computing dechallenge rechallenge results</span></span></code></pre>
-<pre><code><span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |============                                                          |  17%  |                                                                              |=======================                                               |  33%  |                                                                              |===================================                                   |  50%  |                                                                              |===============================================                       |  67%  |                                                                              |==========================================================            |  83%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0966 secs</span></span>
-<span><span class="co">## Computing dechallenge failed case series for 3 target IDs and 1 outcome IDs took 0.202 secs</span></span></code></pre>
+<pre><code>## 
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |============                                                          |  17%
+  |                                                                            
+  |=======================                                               |  33%
+  |                                                                            
+  |===================================                                   |  50%
+  |                                                                            
+  |===============================================                       |  67%
+  |                                                                            
+  |==========================================================            |  83%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0953 secs</span></span>
+<span><span class="co">## Computing dechallenge failed case series for 3 target IDs and 1 outcome IDs took 0.141 secs</span></span></code></pre>
 <p>The results are Andromeda objects that can we viewed using
 <code>dplyr</code>. There is just one table named
 rechallengeFailCaseSeries:</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">failed</span><span class="op">$</span><span class="va">rechallengeFailCaseSeries</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kbl.html" class="external-link">kbl</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -3380,7 +2530,7 @@ table)</li>
 <li>one or more outcomeIds (these must be pre-generated in a cohort
 table)</li>
 </ul>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exampleTimeToEventSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createTimeToEventSettings.html">createTimeToEventSettings</a></span><span class="op">(</span></span>
 <span>  targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
 <span>  outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span></span>
@@ -3388,7 +2538,7 @@ table)</li>
 <p>We can then run the analysis on the Eunomia data using
 <code>computeTimeToEventAnalyses</code> and the settings previously
 specified:</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tte</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeTimeToEventAnalyses.html">computeTimeToEventAnalyses</a></span><span class="op">(</span></span>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
 <span>  cdmDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
@@ -3400,17 +2550,67 @@ specified:</p>
 <pre><code><span><span class="co">## Connecting using SQLite driver</span></span>
 <span><span class="co">## Uploading #cohort_settings</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## Inserting data took 0.00793 secs</span></span>
+<span><span class="co">## Inserting data took 0.00319 secs</span></span>
 <span><span class="co">## Computing time to event results</span></span></code></pre>
-<pre><code><span><span class="co">##   |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   4%  |                                                                              |======                                                                |   8%  |                                                                              |=========                                                             |  12%  |                                                                              |============                                                          |  17%  |                                                                              |===============                                                       |  21%  |                                                                              |==================                                                    |  25%  |                                                                              |====================                                                  |  29%  |                                                                              |=======================                                               |  33%  |                                                                              |==========================                                            |  38%  |                                                                              |=============================                                         |  42%  |                                                                              |================================                                      |  46%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  54%  |                                                                              |=========================================                             |  58%  |                                                                              |============================================                          |  62%  |                                                                              |===============================================                       |  67%  |                                                                              |==================================================                    |  71%  |                                                                              |====================================================                  |  75%  |                                                                              |=======================================================               |  79%  |                                                                              |==========================================================            |  83%  |                                                                              |=============================================================         |  88%  |                                                                              |================================================================      |  92%  |                                                                              |===================================================================   |  96%  |                                                                              |======================================================================| 100%</span></span></code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0525 secs</span></span>
-<span><span class="co">## Computing time-to-event for T-O pairs took 0.22 secs</span></span></code></pre>
+<pre><code>## 
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |===                                                                   |   4%
+  |                                                                            
+  |======                                                                |   8%
+  |                                                                            
+  |=========                                                             |  12%
+  |                                                                            
+  |============                                                          |  17%
+  |                                                                            
+  |===============                                                       |  21%
+  |                                                                            
+  |==================                                                    |  25%
+  |                                                                            
+  |====================                                                  |  29%
+  |                                                                            
+  |=======================                                               |  33%
+  |                                                                            
+  |==========================                                            |  38%
+  |                                                                            
+  |=============================                                         |  42%
+  |                                                                            
+  |================================                                      |  46%
+  |                                                                            
+  |===================================                                   |  50%
+  |                                                                            
+  |======================================                                |  54%
+  |                                                                            
+  |=========================================                             |  58%
+  |                                                                            
+  |============================================                          |  62%
+  |                                                                            
+  |===============================================                       |  67%
+  |                                                                            
+  |==================================================                    |  71%
+  |                                                                            
+  |====================================================                  |  75%
+  |                                                                            
+  |=======================================================               |  79%
+  |                                                                            
+  |==========================================================            |  83%
+  |                                                                            
+  |=============================================================         |  88%
+  |                                                                            
+  |================================================================      |  92%
+  |                                                                            
+  |===================================================================   |  96%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.0416 secs</span></span>
+<span><span class="co">## Computing time-to-event for T-O pairs took 0.146 secs</span></span></code></pre>
 <p>If you would like to save the results you can use the function
 <code>saveTimeToEventAnalyses</code> and this can then be loaded using
 <code>loadTimeToEventAnalyses</code>.</p>
 <p>The results are Andromeda objects that can we viewed using
 <code>dplyr</code>. There is just one table named timeToEvent:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tte</span><span class="op">$</span><span class="va">timeToEvent</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/top_n.html" class="external-link">top_n</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -3767,7 +2967,7 @@ you can use <code>createCharacterizationSettings</code>. You need to
 input a list of each of the settings (or NULL if you do not want to run
 one type of analysis). To run all the analyses previously shown in one
 function:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">characterizationSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCharacterizationSettings.html">createCharacterizationSettings</a></span><span class="op">(</span></span>
 <span>  timeToEventSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    <span class="va">exampleTimeToEventSettings</span></span>
@@ -3805,7 +3005,7 @@ function:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This will create an SQLITE database with all the analyses saved into
 the saveDirectory. You can export the results as csv files using:</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">connectionDetailsT</span> <span class="op">&lt;-</span> <span class="fu">DatabaseConnector</span><span class="fu">::</span><span class="fu"><a href="https://ohdsi.github.io/DatabaseConnector/reference/createConnectionDetails.html" class="external-link">createConnectionDetails</a></span><span class="op">(</span></span>
 <span>  dbms <span class="op">=</span> <span class="st">"sqlite"</span>,</span>
 <span>  server <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example"</span>, <span class="st">"sqliteCharacterization"</span>, <span class="st">"sqlite.sqlite"</span><span class="op">)</span></span>
@@ -3834,7 +3034,7 @@ the saveDirectory. You can export the results as csv files using:</p>
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Jenna Reps, Patrick Ryan.</p>
+<p>Developed by Jenna Reps, Patrick Ryan, Chris Knoll.</p>
 </div>
 
 <div class="pkgdown">

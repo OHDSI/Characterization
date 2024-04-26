@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
@@ -51,7 +51,7 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://ohdsi.github.io/Hades" class="external-link">hadesLogo</a>
+  <a href="https://ohdsi.github.io/Hades" class="external-link"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
 </li>
 <li>
   <a href="https://github.com/OHDSI/PatientLevelPrediction" class="external-link">
@@ -72,6 +72,12 @@
       <small>Source: <a href="https://github.com/OHDSI/Characterization/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.3.0" id="characterization-030">Characterization 0.3.0<a class="anchor" aria-label="anchor" href="#characterization-030"></a></h2>
+<ul><li>Added new outcomeWashoutDays parameter to createAggregateCovariateSettings to remove outcome occurances that are continuations of a prior outcome occurrence</li>
+<li>Changed the way cohort definition ids are created in createAggregateCovariateSettings to use hash of target id, outcome id and type. This lets users combine different studies into a single result database.</li>
+<li>Added database migration capability and created new migrations for the recent updates.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.2.0" id="characterization-020">Characterization 0.2.0<a class="anchor" aria-label="anchor" href="#characterization-020"></a></h2>
 <p>Updated dependency to FeatureExtraction (&gt;= 3.5.0) to support minCharacterizationMean paramater.</p>
@@ -115,7 +121,7 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Jenna Reps, Patrick Ryan.</p>
+  <p></p><p>Developed by Jenna Reps, Patrick Ryan, Chris Knoll.</p>
 </div>
 
 <div class="pkgdown">

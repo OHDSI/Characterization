@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
@@ -51,7 +51,7 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://ohdsi.github.io/Hades" class="external-link">hadesLogo</a>
+  <a href="https://ohdsi.github.io/Hades" class="external-link"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
 </li>
 <li>
   <a href="https://github.com/OHDSI/PatientLevelPrediction" class="external-link">
@@ -79,7 +79,7 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">createCharacterizationTables</span><span class="op">(</span></span>
-<span>  <span class="va">conn</span>,</span>
+<span>  <span class="va">connectionDetails</span>,</span>
 <span>  <span class="va">resultSchema</span>,</span>
 <span>  targetDialect <span class="op">=</span> <span class="st">"postgresql"</span>,</span>
 <span>  deleteExistingTables <span class="op">=</span> <span class="cn">T</span>,</span>
@@ -91,9 +91,9 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>conn</dt>
-<dd><p>A connection to a database created by using the
-function <code>connect</code> in the
+    <dl><dt>connectionDetails</dt>
+<dd><p>The connectionDetails to a database created by using the
+function <code>createConnectDetails</code> in the
 <code>DatabaseConnector</code> package.</p></dd>
 
 
@@ -140,7 +140,7 @@ function <code>connect</code> in the
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Jenna Reps, Patrick Ryan.</p>
+  <p></p><p>Developed by Jenna Reps, Patrick Ryan, Chris Knoll.</p>
 </div>
 
 <div class="pkgdown">

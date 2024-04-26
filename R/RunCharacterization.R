@@ -155,21 +155,23 @@ runCharacterizationAnalyses <- function(
   )
 
   # create the Database
-  conn <- createSqliteDatabase(
+  resultConnectionDetails <- createSqliteDatabase(
     sqliteLocation = saveDirectory
-  )
-  on.exit(
-    DatabaseConnector::disconnect(conn)
   )
 
   createCharacterizationTables(
-    conn = conn,
+    connectionDetails = resultConnectionDetails,
     resultSchema = "main",
     targetDialect = "sqlite",
     deleteExistingTables = T,
     createTables = T,
     tablePrefix = tablePrefix
   )
+
+  conn <- DatabaseConnector::connect(connectionDetails = resultConnectionDetails)
+    on.exit(
+      DatabaseConnector::disconnect(conn)
+    )
 
   if (!is.null(characterizationSettings$timeToEventSettings)) {
     for (i in 1:length(characterizationSettings$timeToEventSettings)) {
@@ -374,7 +376,11 @@ runCharacterizationAnalyses <- function(
           databaseSchema = "main",
           tableName = "cohort_counts",
           andromedaObject = result$cohortCounts,
-          tablePrefix = tablePrefix
+          tablePrefix = tablePrefix,
+          minCellCount = minCellCount,
+          minCellCountColumns = list(
+            c("rowCount")
+          )
         )
 
         insertAndromedaToDatabase(

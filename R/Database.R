@@ -47,11 +47,8 @@ createSqliteDatabase <- function(
     dbms = "sqlite",
     server = file.path(sqliteLocation, "sqlite.sqlite")
   )
-  connection <- DatabaseConnector::connect(
-    connectionDetails = connectionDetails
-  )
 
-  return(connection)
+  return(connectionDetails)
 }
 
 # move Andromeda to sqlite database
@@ -136,8 +133,8 @@ removeMinCell <- function(
 #' @details
 #' This function can be used to create (or delete) Characterization result tables
 #'
-#' @param conn                         A connection to a database created by using the
-#'                                     function \code{connect} in the
+#' @param connectionDetails            The connectionDetails to a database created by using the
+#'                                     function \code{createConnectDetails} in the
 #'                                     \code{DatabaseConnector} package.
 #' @param resultSchema                 The name of the database schema that the result tables will be created.
 #' @param targetDialect                The database management system being used
@@ -151,7 +148,7 @@ removeMinCell <- function(
 #'
 #' @export
 createCharacterizationTables <- function(
-    conn,
+    connectionDetails,
     resultSchema,
     targetDialect = "postgresql",
     deleteExistingTables = T,
@@ -165,6 +162,8 @@ createCharacterizationTables <- function(
   )
   checkmate::reportAssertions(errorMessages)
 
+  conn <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  on.exit(DatabaseConnector::disconnect(conn))
 
   if (deleteExistingTables) {
     message("Deleting existing tables")
@@ -232,7 +231,47 @@ createCharacterizationTables <- function(
     )
 
     # add database migration here in the future
+    migrateDataModel(
+      connectionDetails = connectionDetails,
+      databaseSchema = resultSchema,
+      tablePrefix = tablePrefix
+    )
   }
+}
+
+
+migrateDataModel <- function(connectionDetails, databaseSchema, tablePrefix = "") {
+  ParallelLogger::logInfo("Migrating data set")
+  migrator <- getDataMigrator(
+    connectionDetails = connectionDetails,
+    databaseSchema = databaseSchema,
+    tablePrefix = tablePrefix
+    )
+  migrator$executeMigrations()
+  migrator$finalize()
+
+  ParallelLogger::logInfo("Updating version number")
+  updateVersionSql <- SqlRender::loadRenderTranslateSql("UpdateVersionNumber.sql",
+                                                        packageName = utils::packageName(),
+                                                        database_schema = databaseSchema,
+                                                        table_prefix = tablePrefix,
+                                                        dbms = connectionDetails$dbms
+  )
+
+  connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection))
+  DatabaseConnector::executeSql(connection, updateVersionSql)
+}
+
+
+getDataMigrator <- function(connectionDetails, databaseSchema, tablePrefix = "") {
+  ResultModelManager::DataMigrationManager$new(
+    connectionDetails = connectionDetails,
+    databaseSchema = databaseSchema,
+    tablePrefix = tablePrefix,
+    migrationPath = "migrations",
+    packageName = utils::packageName()
+  )
 }
 
 #' Exports all tables in the result database to csv files
@@ -251,9 +290,6 @@ createCharacterizationTables <- function(
 #' @param filePrefix                   The prefix to apply to the files
 #' @param tempEmulationSchema          The temp schema used when the database management system is oracle
 #' @param saveDirectory                The directory to save the csv results
-#' @param minMeanCovariateValue        The minimum mean covariate value (i.e. the minimum proportion for
-#'                                     binary covariates) for a covariate to be included in covariate table.
-#'                                     Other covariates are removed to save space.
 #'
 #' @return
 #' csv file per table into the saveDirectory
@@ -266,8 +302,7 @@ exportDatabaseToCsv <- function(
     tablePrefix = "c_",
     filePrefix = NULL,
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-    saveDirectory,
-    minMeanCovariateValue = 0.001) {
+    saveDirectory) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
   .checkTablePrefix(

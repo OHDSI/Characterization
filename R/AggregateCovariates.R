@@ -18,7 +18,8 @@
 #'
 #' @param targetIds   A list of cohortIds for the target cohorts
 #' @param outcomeIds  A list of cohortIds for the outcome cohorts
-#' @param minPriorObservation The minimum time in the database a patient in the target cohorts must be observed prior to index
+#' @param minPriorObservation The minimum time (in days) in the database a patient in the target cohorts must be observed prior to index
+#' @param outcomeWashoutDays Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
 #' @template timeAtRisk
 #' @param covariateSettings   An object created using \code{FeatureExtraction::createCovariateSettings}
 #' @param minCharacterizationMean The minimum mean value for characterization output. Values below this will be cut off from output. This
@@ -33,12 +34,14 @@ createAggregateCovariateSettings <- function(
     targetIds,
     outcomeIds,
     minPriorObservation = 0,
+    outcomeWashoutDays = 0,
     riskWindowStart = 1,
     startAnchor = "cohort start",
     riskWindowEnd = 365,
     endAnchor = "cohort start",
     covariateSettings,
-    minCharacterizationMean = 0) {
+    minCharacterizationMean = 0
+    ) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
   .checkCohortIds(
@@ -74,6 +77,8 @@ createAggregateCovariateSettings <- function(
     errorMessages = errorMessages
   )
 
+  # add check for outcomeWashoutDays
+
   checkmate::reportAssertions(errorMessages)
 
   # create list
@@ -81,6 +86,7 @@ createAggregateCovariateSettings <- function(
     targetIds = targetIds,
     outcomeIds = outcomeIds,
     minPriorObservation = minPriorObservation,
+    outcomeWashoutDays = outcomeWashoutDays,
     riskWindowStart = riskWindowStart,
     startAnchor = startAnchor,
     riskWindowEnd = riskWindowEnd,
@@ -131,8 +137,28 @@ computeAggregateCovariateAnalyses <- function(
     DatabaseConnector::disconnect(connection)
   )
 
+
+  # creating cohort_details
+  message("Creating and inserting cohort details")
+  cohortDetails <- getCohortDetails(
+    targetIds = aggregateCovariateSettings$targetIds,
+    outcomeIds = aggregateCovariateSettings$outcomeIds
+    )
+  DatabaseConnector::insertTable(
+    data = cohortDetails,
+    camelCaseToSnakeCase = T,
+    connection = connection,
+    tableName =  '#cohort_details',
+    tempTable = T,
+    dropTableIfExists = T,
+    createTable = T,
+    progressBar = T
+    )
+
   # select T, O, create TnO, TnOc, Onprior T
   # into temp table #agg_cohorts
+  message("Computing aggregate covariate cohorts")
+  start <- Sys.time()
   createCohortsOfInterest(
     connection = connection,
     dbms = connectionDetails$dbms,
@@ -144,9 +170,20 @@ computeAggregateCovariateAnalyses <- function(
     outcomeTable,
     tempEmulationSchema
   )
-
+  completionTime <- Sys.time() - start
+  message(paste0('Computing aggregate covariate cohorts took ',round(completionTime,digits = 1), ' ', units(completionTime)))
   ## get counts
-  sql <- "select cohort_definition_id, count(*) row_count, count(distinct subject_id) person_count from #agg_cohorts group by cohort_definition_id;"
+  message("Extracting cohort counts")
+  sql <- "select
+  cohort_definition_id,
+  count(*) row_count,
+  count(distinct subject_id) person_count,
+  min(datediff(day, cohort_start_date, cohort_end_date)) min_exposure_time,
+  avg(datediff(day, cohort_start_date, cohort_end_date)) mean_exposure_time,
+  max(datediff(day, cohort_start_date, cohort_end_date)) max_exposure_time
+  from
+  (select * from #agg_cohorts_before union select * from #agg_cohorts_extras) temp
+  group by cohort_definition_id;"
   sql <- SqlRender::translate(
     sql = sql,
     targetDialect = connectionDetails$dbms
@@ -157,20 +194,127 @@ computeAggregateCovariateAnalyses <- function(
     snakeCaseToCamelCase = T,
   )
 
-  message("Computing aggregate covariate results")
+  message("Computing aggregate before covariate results")
 
   result <- FeatureExtraction::getDbCovariateData(
     connection = connection,
     oracleTempSchema = tempEmulationSchema,
     cdmDatabaseSchema = cdmDatabaseSchema,
-    cohortTable = "#agg_cohorts",
+    cohortTable = "#agg_cohorts_before",
     cohortTableIsTemp = T,
-    cohortId = -1,
+    cohortIds = -1,
     covariateSettings = aggregateCovariateSettings$covariateSettings,
     cdmVersion = cdmVersion,
     aggregated = T,
     minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
   )
+
+  message("Computing aggregate between covariate results")
+  # between
+  betweenCovariates <- getBetweenCovariateSettings(aggregateCovariateSettings$covariateSettings)
+  resultBetween <- FeatureExtraction::getDbCovariateData(
+    connection = connection,
+    oracleTempSchema = tempEmulationSchema,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortTable = "#agg_cohorts_between",
+    cohortTableIsTemp = T,
+    cohortIds = -1,
+    covariateSettings = betweenCovariates,
+    cdmVersion = cdmVersion,
+    aggregated = T,
+    minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
+  )
+
+  # add covariates to table
+  if(!is.null(result$covariates)){
+    if (!is.null(resultBetween$covariates)) {
+      Andromeda::appendToTable(
+        tbl = result$covariates,
+        data = resultBetween$covariates
+      )
+    }
+  } else{
+    if (!is.null(resultBetween$covariates)) {
+      result$covariates <- resultBetween$covariates
+    }
+  }
+
+  # covariatesContinuous
+  if(!is.null(result$covariatesContinuous)){
+    if (!is.null(resultBetween$covariatesContinuous)) {
+      Andromeda::appendToTable(
+        tbl = result$covariatesContinuous,
+        data = resultBetween$covariatesContinuous
+      )
+    }
+  } else{
+    if (!is.null(resultBetween$covariatesContinuous)) {
+      result$covariatesContinuous <- resultBetween$covariatesContinuous
+    }
+  }
+
+  # update covariateRef
+  result$covariateRef <- unique(
+    rbind(
+      as.data.frame(result$covariateRef),
+      as.data.frame(resultBetween$covariateRef)
+    )
+  )
+
+  # after
+  message("Computing aggregate after covariate results")
+  afterCovariates <- getAfterCovariateSettings(aggregateCovariateSettings$covariateSettings)
+
+  resultAfter <- FeatureExtraction::getDbCovariateData(
+    connection = connection,
+    oracleTempSchema = tempEmulationSchema,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortTable = "#agg_cohorts_after",
+    cohortTableIsTemp = T,
+    cohortIds = -1,
+    covariateSettings = afterCovariates,
+    cdmVersion = cdmVersion,
+    aggregated = T,
+    minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
+  )
+
+  if(!is.null(result$covariates)){
+    if (!is.null(resultAfter$covariates)) {
+      Andromeda::appendToTable(
+        tbl = result$covariates,
+        data = resultAfter$covariates
+      )
+    }
+  } else{
+    if (!is.null(resultAfter$covariates)) {
+      result$covariates <- resultAfter$covariates
+    }
+  }
+
+  # covariatesContinuous
+  if(!is.null(result$covariatesContinuous)){
+    if (!is.null(resultAfter$covariatesContinuous)) {
+      Andromeda::appendToTable(
+        tbl = result$covariatesContinuous,
+        data = resultAfter$covariatesContinuous
+      )
+    }
+  } else{
+    if (!is.null(resultAfter$covariatesContinuous)) {
+      result$covariatesContinuous <- resultAfter$covariatesContinuous
+    }
+  }
+
+
+  # update covariateRef
+  result$covariateRef <- unique(
+    rbind(
+      as.data.frame(result$covariateRef),
+      as.data.frame(resultAfter$covariateRef)
+    )
+  )
+
+
   # adding counts as a new table
   result$cohortCounts <- counts
 
@@ -226,7 +370,10 @@ computeAggregateCovariateAnalyses <- function(
     riskWindowStart = aggregateCovariateSettings$riskWindowStart,
     startAnchor = aggregateCovariateSettings$startAnchor,
     riskWindowEnd = aggregateCovariateSettings$riskWindowEnd,
-    endAnchor = aggregateCovariateSettings$endAnchor
+    endAnchor = aggregateCovariateSettings$endAnchor,
+    minPriorObservation = aggregateCovariateSettings$minPriorObservation,
+    outcomeWashoutDays = aggregateCovariateSettings$outcomeWashoutDays,
+    minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
   )
 
   sql <- SqlRender::loadRenderTranslateSql(
@@ -269,6 +416,7 @@ createCohortsOfInterest <- function(
     target_ids = paste(aggregateCovariateSettings$targetIds, collapse = ",", sep = ","),
     outcome_ids = paste(aggregateCovariateSettings$outcomeIds, collapse = ",", sep = ","),
     min_prior_observation = aggregateCovariateSettings$minPriorObservation,
+    outcome_washout_days = aggregateCovariateSettings$outcomeWashoutDays,
     tar_start = aggregateCovariateSettings$riskWindowStart,
     tar_start_anchor = ifelse(
       aggregateCovariateSettings$startAnchor == "cohort start",
@@ -289,4 +437,121 @@ createCohortsOfInterest <- function(
     progressBar = FALSE,
     reportOverallTime = FALSE
   )
+}
+
+
+getAfterCovariateSettings <- function(x){
+  settings <- names(x)
+  keep <- c("temporal", "temporalSequence",
+            "longTermStartDays", "mediumTermStartDays", "shortTermStartDays",
+            "endDays", "includedCovariateConceptIds", "addDescendantsToInclude",
+            "excludedCovariateConceptIds", "addDescendantsToExclude", "includedCovariateIds"
+  )
+
+  ind <- 1
+  types <- c()
+  for(i in 1:length(x)){
+    if(!names(x)[ind] %in% keep &
+       (length(grep('LongTerm', names(x)[1]))>0 |
+        length(grep('MediumTerm', names(x)[1]))>0 |
+        length(grep('ShortTerm', names(x)[1]))>0)
+        ){
+      types <- unique(c(types, gsub('ShortTerm', '',gsub('MediumTerm', '',gsub('LongTerm', '', names(x)[ind])))))
+      x[[ind]] <- NULL
+    } else{
+      ind <- ind + 1
+    }
+  }
+  for(type in types){
+    x[[length(x) + 1]] <- TRUE
+    names(x)[length(x)] <- paste0(type, 'LongTerm')
+  }
+  x$endDays <- 365
+  x$longTermStartDays <- 1
+
+  return(x)
+}
+
+getBetweenCovariateSettings <- function(x){
+  settings <- names(x)
+  keep <- c("temporal", "temporalSequence",
+            "longTermStartDays", "mediumTermStartDays", "shortTermStartDays",
+            "endDays", "includedCovariateConceptIds", "addDescendantsToInclude",
+            "excludedCovariateConceptIds", "addDescendantsToExclude", "includedCovariateIds"
+  )
+
+  ind <- 1
+  types <- c()
+  for(i in 1:length(x)){
+    if(!names(x)[ind] %in% keep &
+       (length(grep('LongTerm', names(x)[1]))>0 |
+        length(grep('MediumTerm', names(x)[1]))>0 |
+        length(grep('ShortTerm', names(x)[1]))>0)
+    ){
+      types <- unique(c(types, gsub('ShortTerm', '',gsub('MediumTerm', '',gsub('LongTerm', '', names(x)[ind])))))
+      x[[ind]] <- NULL
+    } else{
+      ind <- ind + 1
+    }
+  }
+  for(type in types){
+    x[[length(x) + 1]] <- TRUE
+    names(x)[length(x)] <- paste0(type, 'LongTerm')
+  }
+  x$endDays <- 0
+  x$longTermStartDays <- 0
+
+  return(x)
+}
+
+hex_to_int = function(h) {
+  xx = strsplit(tolower(h), "")[[1L]]
+  pos = match(xx, c(0L:9L, letters[1L:6L]))
+  sum((pos - 1L) * 16^(rev(seq_along(xx) - 1)))
+}
+
+hashInt <- function(T, O, type){
+  a <- digest::digest(
+    object = paste0(T,O,type),
+    algo='xxhash32',
+    seed=0
+    )
+  result <- hex_to_int(a)
+  return(result)
+}
+
+getCohortDetails <- function(
+    targetIds,
+    outcomeIds
+){
+  cohortDetails <- data.frame(
+    targetCohortId = c(rep(targetIds, 2), rep(0,2*length(outcomeIds))),
+    outcomeCohortId = c(rep(0,2*length(targetIds)), rep(outcomeIds, 2)),
+    cohortType = c(
+      rep('Tall', length(targetIds)),
+      rep('T', length(targetIds)),
+      rep('Oall', length(outcomeIds)),
+      rep('O', length(outcomeIds))
+    )
+  )
+  comboTypes <- c('TnObetween','OnT', 'TnOprior', 'TnO')
+  for(comboType in comboTypes){
+    cohortDetailsExtra <- as.data.frame(
+      merge(
+        targetIds,
+        outcomeIds)
+    )
+    colnames(cohortDetailsExtra) <- c('targetCohortId', 'outcomeCohortId')
+    cohortDetailsExtra$cohortType <- comboType
+    cohortDetails <- rbind(cohortDetails, cohortDetailsExtra)
+  }
+
+  cohortDetails$cohortDefinitionId <- apply(
+    cohortDetails,
+    1,
+    function(x){
+      hashInt(T = x[1], O = x[2], type = x[3])
+    }
+  )
+  return(cohortDetails)
 }

@@ -11,8 +11,7 @@ exportDatabaseToCsv(
   tablePrefix = "c_",
   filePrefix = NULL,
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-  saveDirectory,
-  minMeanCovariateValue = 0.001
+  saveDirectory
 )
 }
 \arguments{
@@ -31,10 +30,6 @@ function \code{connect} in the
 \item{tempEmulationSchema}{The temp schema used when the database management system is oracle}
 
 \item{saveDirectory}{The directory to save the csv results}
-
-\item{minMeanCovariateValue}{The minimum mean covariate value (i.e. the minimum proportion for
-binary covariates) for a covariate to be included in covariate table.
-Other covariates are removed to save space.}
 }
 \value{
 csv file per table into the saveDirectory

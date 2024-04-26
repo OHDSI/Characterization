@@ -86,6 +86,9 @@ settings,risk_window_start,int,Y,N,N,N,The risk window start
 settings,risk_window_end,int,Y,N,N,N,The risk window end
 settings,start_anchor,varchar(15),Y,N,N,N,The start anchor
 settings,end_anchor,varchar(15),Y,N,N,N,The end anchor
+settings,min_prior_observation,int,N,N,N,N,Minimum time observed before index
+settings,outcome_washout_days,int,N,N,N,N,Patients with outcome during washout are excluded
+settings,min_characterization_mean,float,N,N,N,N,Minimum fraction for feature extraction
 cohort_details,run_id,int,Y,Y,N,N,The run identifier
 cohort_details,database_id,varchar(100),Y,Y,N,N,The database identifier
 cohort_details,cohort_definition_id,int,Y,N,N,N,The study cohort id
@@ -97,6 +100,11 @@ cohort_counts,database_id,varchar(100),Y,Y,N,N,The database identifier
 cohort_counts,cohort_definition_id,int,Y,N,N,N,The study cohort id
 cohort_counts,row_count,int,Y,N,N,N,The number of rows in each cohort
 cohort_counts,person_count,int,Y,N,N,N,The number of distinct people in each cohort
-
+cohort_counts,min_exposure_time,bigint,N,N,N,N,Minimum exposure time across cohort
+cohort_counts,mean_exposure_time,bigint,N,N,N,N,Mean exposure time across cohort
+cohort_counts,max_exposure_time,bigint,N,N,N,N,Max exposure time across cohort
+migration,MIGRATION_FILE,varchar(100),N,N,N,N,migration files that have been run
+migration,MIGRATION_ORDER,int,N,N,N,N,migration files implementation order
+package_version,VERSION_NUMBER,varchar(10),N,N,N,N,version of characterization package
 
 
