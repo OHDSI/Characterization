@@ -52,6 +52,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
 
   dc <- computeDechallengeRechallengeAnalyses(
     connectionDetails = connectionDetails,
+    cdmDatabaseSchema = 'main', # added
     targetDatabaseSchema = "main",
     targetTable = "cohort",
     dechallengeRechallengeSettings = res,
@@ -158,6 +159,22 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
     camelCaseToSnakeCase = F
   )
 
+  # add observation period
+  obs <- data.frame(
+    person_id = c(1,1,2,2,3,4),
+    observation_period_start_date = c("2000-01-01", "2010-01-01","2000-01-01","2010-01-01","2000-01-01","2000-01-01"),
+    observation_period_end_date = c("2003-01-31", "2020-01-01","2003-01-01","2020-01-01","2003-01-31","2015-01-01")
+  )
+  DatabaseConnector::insertTable(
+    data = obs,
+    connection = con,
+    databaseSchema = "main",
+    tableName = "observation_period",
+    createTable = T,
+    dropTableIfExists = T,
+    camelCaseToSnakeCase = F
+  )
+
   res <- createDechallengeRechallengeSettings(
     targetIds = 1,
     outcomeIds = 2,
@@ -167,6 +184,7 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
 
   dc <- computeRechallengeFailCaseSeriesAnalyses(
     connectionDetails = connectionDetails,
+    cdmDatabaseSchema = 'main', # added
     targetDatabaseSchema = "main",
     targetTable = "cohort",
     dechallengeRechallengeSettings = res,

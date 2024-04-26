@@ -83,6 +83,7 @@ createDechallengeRechallengeSettings <- function(
 #' Compute dechallenge rechallenge study
 #'
 #' @template ConnectionDetails
+#' @param cdmDatabaseSchema   The OMOP CDM database schema used to create the cohorts
 #' @template TargetOutcomeTables
 #' @template TempEmulationSchema
 #' @param dechallengeRechallengeSettings   The settings for the timeToEvent study
@@ -94,6 +95,7 @@ createDechallengeRechallengeSettings <- function(
 #' @export
 computeDechallengeRechallengeAnalyses <- function(
     connectionDetails = NULL,
+    cdmDatabaseSchema,
     targetDatabaseSchema,
     targetTable,
     outcomeDatabaseSchema = targetDatabaseSchema,
@@ -144,7 +146,7 @@ computeDechallengeRechallengeAnalyses <- function(
 
     message("Computing dechallenge rechallenge results")
     sql <- SqlRender::loadRenderTranslateSql(
-      sqlFilename = "DechallengeRechallenge.sql",
+      sqlFilename = "DechallengeRechallengeObs.sql", # changed to Obs
       packageName = "Characterization",
       dbms = connection@dbms,
       tempEmulationSchema = tempEmulationSchema,
@@ -153,6 +155,7 @@ computeDechallengeRechallengeAnalyses <- function(
       target_table = targetTable,
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
+      cdm_database_schema = cdmDatabaseSchema, # added for observation period
       target_ids = paste(dechallengeRechallengeSettings$targetCohortDefinitionIds, sep = "", collapse = ","),
       outcome_ids = paste(dechallengeRechallengeSettings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
       dechallenge_stop_interval = dechallengeRechallengeSettings$dechallengeStopInterval,
@@ -210,6 +213,7 @@ computeDechallengeRechallengeAnalyses <- function(
 #' Compute fine the subjects that fail the dechallenge rechallenge study
 #'
 #' @template ConnectionDetails
+#' @param cdmDatabaseSchema   The OMOP CDM database schema used to create the cohorts
 #' @template TargetOutcomeTables
 #' @template TempEmulationSchema
 #' @param dechallengeRechallengeSettings   The settings for the timeToEvent study
@@ -222,6 +226,7 @@ computeDechallengeRechallengeAnalyses <- function(
 #' @export
 computeRechallengeFailCaseSeriesAnalyses <- function(
     connectionDetails = NULL,
+    cdmDatabaseSchema,
     targetDatabaseSchema,
     targetTable,
     outcomeDatabaseSchema = targetDatabaseSchema,
@@ -271,7 +276,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
 
     message("Computing dechallenge rechallenge results")
     sql <- SqlRender::loadRenderTranslateSql(
-      sqlFilename = "RechallengeFailCaseSeries.sql",
+      sqlFilename = "RechallengeFailCaseSeriesObs.sql", # added Obs
       packageName = "Characterization",
       dbms = connection@dbms,
       tempEmulationSchema = tempEmulationSchema,
@@ -280,6 +285,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       target_table = targetTable,
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
+      cdm_database_schema = cdmDatabaseSchema, # added for observation period
       target_ids = paste(dechallengeRechallengeSettings$targetCohortDefinitionIds, sep = "", collapse = ","),
       outcome_ids = paste(dechallengeRechallengeSettings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
       dechallenge_stop_interval = dechallengeRechallengeSettings$dechallengeStopInterval,

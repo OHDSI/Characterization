@@ -229,6 +229,7 @@ runCharacterizationAnalyses <- function(
         {
           computeDechallengeRechallengeAnalyses(
             connectionDetails = connectionDetails,
+            cdmDatabaseSchema = cdmDatabaseSchema, # added
             targetDatabaseSchema = targetDatabaseSchema,
             targetTable = targetTable,
             outcomeDatabaseSchema = outcomeDatabaseSchema,
@@ -281,6 +282,7 @@ runCharacterizationAnalyses <- function(
         {
           computeRechallengeFailCaseSeriesAnalyses(
             connectionDetails = connectionDetails,
+            cdmDatabaseSchema = cdmDatabaseSchema, # added
             targetDatabaseSchema = targetDatabaseSchema,
             targetTable = targetTable,
             outcomeDatabaseSchema = outcomeDatabaseSchema,
