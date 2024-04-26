@@ -48,6 +48,44 @@ test_that("createAggregateCovariateSettings", {
   )
 })
 
+test_that("error when using temporal features", {
+  targetIds <- sample(x = 100, size = sample(10, 1))
+  outcomeIds <- sample(x = 100, size = sample(10, 1))
+  temporalCovariateSettings <- FeatureExtraction::createDefaultTemporalCovariateSettings()
+
+  testthat::expect_error(
+    createAggregateCovariateSettings(
+      targetIds = targetIds,
+      outcomeIds = outcomeIds,
+      minPriorObservation = 10,
+      outcomeWashoutDays = 100,
+      riskWindowStart = 1, startAnchor = "cohort start",
+      riskWindowEnd = 365, endAnchor = "cohort start",
+      covariateSettings = temporalCovariateSettings,
+      minCharacterizationMean = 0.01
+    )
+  )
+
+  temporalCovariateSettings <- list(
+    FeatureExtraction::createDefaultCovariateSettings(),
+    FeatureExtraction::createDefaultTemporalCovariateSettings()
+  )
+
+  testthat::expect_error(
+    createAggregateCovariateSettings(
+      targetIds = targetIds,
+      outcomeIds = outcomeIds,
+      minPriorObservation = 10,
+      outcomeWashoutDays = 100,
+      riskWindowStart = 1, startAnchor = "cohort start",
+      riskWindowEnd = 365, endAnchor = "cohort start",
+      covariateSettings = temporalCovariateSettings,
+      minCharacterizationMean = 0.01
+    )
+  )
+
+})
+
 test_that("createAggregateCovariateSettingsList", {
   targetIds <- sample(x = 100, size = sample(10, 1))
   outcomeIds <- sample(x = 100, size = sample(10, 1))

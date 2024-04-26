@@ -1,7 +1,7 @@
 Package: Characterization
 Type: Package
 Title: Characterizations of Cohorts
-Version: 0.3.0
+Version: 0.3.1
 Date: 2024-04-25
 Authors@R: c(
 	person("Jenna", "Reps", , "reps@ohdsi.org", role = c("aut", "cre")),
@@ -42,8 +42,7 @@ Remotes:
 	ohdsi/FeatureExtraction,
 	ohdsi/Eunomia,
 	ohdsi/ResultModelManager,
-	ohdsi/ShinyAppBuilder,
-	ohdsi/DatabaseConnector
+	ohdsi/ShinyAppBuilder
 NeedsCompilation: no
 RoxygenNote: 7.3.1
 Encoding: UTF-8

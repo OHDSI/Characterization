@@ -1,3 +1,8 @@
+Characterization 0.3.1
+======================
+- Removed DatabaseConnector from Remotes in DESCRIPTION. Fixes GitHb issue 38.
+- Added check to covariateSettings input in createAggregateCovariateSettings to error if temporal is T
+
 Characterization 0.3.0
 ======================
 - Added new outcomeWashoutDays parameter to createAggregateCovariateSettings to remove outcome occurances that are continuations of a prior outcome occurrence

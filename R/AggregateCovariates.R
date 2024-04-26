@@ -71,6 +71,14 @@ createAggregateCovariateSettings <- function(
     errorMessages = errorMessages
   )
 
+  # check temporal is false
+  if(inherits(covariateSettings, 'covariateSettings')){
+    covariateSettings <- list(covariateSettings)
+  }
+  if(sum(unlist(lapply(covariateSettings, function(x){x$temporal})))>0){
+    stop('Temporal covariateSettings not supported by createAggregateCovariateSettings()')
+  }
+
   # check minPriorObservation
   .checkMinPriorObservation(
     minPriorObservation = minPriorObservation,
