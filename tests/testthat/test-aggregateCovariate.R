@@ -28,7 +28,7 @@ test_that("createAggregateCovariateSettings", {
     targetIds
   )
   testthat::expect_equal(
-    res$covariateSettings,
+    res$covariateSettings[[1]],
     covariateSettings
   )
 
