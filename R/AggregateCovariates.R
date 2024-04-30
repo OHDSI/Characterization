@@ -22,6 +22,8 @@
 #' @param outcomeWashoutDays Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
 #' @template timeAtRisk
 #' @param covariateSettings   An object created using \code{FeatureExtraction::createCovariateSettings}
+#' @param duringCovariateSettings An object created using \code{createDuringCovariateSettings}
+#' @param afterCovariateSettings An object created using \code{FeatureExtraction::createCovariateSettings}
 #' @param minCharacterizationMean The minimum mean value for characterization output. Values below this will be cut off from output. This
 #'                                will help reduce the file size of the characterization output, but will remove information
 #'                                on covariates that have very low values. The default is 0.
@@ -39,7 +41,45 @@ createAggregateCovariateSettings <- function(
     startAnchor = "cohort start",
     riskWindowEnd = 365,
     endAnchor = "cohort start",
-    covariateSettings,
+    covariateSettings = FeatureExtraction::createCovariateSettings(
+      useDemographicsGender = T,
+      useDemographicsAge = T,
+      useDemographicsAgeGroup = T,
+      useDemographicsRace = T,
+      useDemographicsEthnicity = T,
+      useDemographicsTimeInCohort = T,
+      useDemographicsPriorObservationTime = T,
+      useDemographicsPostObservationTime = T,
+      useConditionGroupEraLongTerm = T,
+      useDrugGroupEraLongTerm = T,
+      useProcedureOccurrenceLongTerm = T,
+      useMeasurementLongTerm = T,
+      useObservationLongTerm = T,
+      useDeviceExposureLongTerm = T,
+      useVisitConceptCountLongTerm = T,
+      endDays = -1,
+      longTermStartDays =  -365
+    ),
+    duringCovariateSettings = createDuringCovariateSettings(
+      useConditionGroupEraDuring = T,
+      useDrugGroupEraDuring = T,
+      useProcedureOccurrenceDuring = T,
+      useDeviceExposureDuring = T,
+      useMeasurementDuring = T,
+      useObservationDuring = T,
+      useVisitConceptCountDuring = T
+      ),
+    afterCovariateSettings = FeatureExtraction::createCovariateSettings(
+      useConditionGroupEraMediumTerm = T,
+      useDrugGroupEraMediumTerm = T,
+      useProcedureOccurrenceMediumTerm = T,
+      useMeasurementMediumTerm = T,
+      useObservationMediumTerm = T,
+      useDeviceExposureMediumTerm = T,
+      useVisitConceptCountMediumTerm = T,
+      endDays = 365,
+      mediumTermStartDays = 1,
+      ),
     minCharacterizationMean = 0
     ) {
   errorMessages <- checkmate::makeAssertCollection()
@@ -100,6 +140,8 @@ createAggregateCovariateSettings <- function(
     riskWindowEnd = riskWindowEnd,
     endAnchor = endAnchor,
     covariateSettings = covariateSettings,
+    duringCovariateSettings = duringCovariateSettings,
+    afterCovariateSettings = afterCovariateSettings,
     minCharacterizationMean = minCharacterizationMean
   )
 
@@ -218,14 +260,6 @@ computeAggregateCovariateAnalyses <- function(
   )
 
   message("Computing aggregate between covariate results")
-  # between- 30 days after target index
-  betweenCovariates <- getCaseCovariateSettings(
-    covariateSettings = aggregateCovariateSettings$covariateSettings,
-    endDays = 30,
-    startDays = 0,
-    replacementType = 'LongTerm'
-  )
-
   resultBetween <- FeatureExtraction::getDbCovariateData(
     connection = connection,
     oracleTempSchema = tempEmulationSchema,
@@ -233,7 +267,7 @@ computeAggregateCovariateAnalyses <- function(
     cohortTable = "#agg_cohorts_between",
     cohortTableIsTemp = T,
     cohortIds = -1,
-    covariateSettings = betweenCovariates,
+    covariateSettings = aggregateCovariateSettings$duringCovariateSettings,
     cdmVersion = cdmVersion,
     aggregated = T,
     minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
@@ -277,14 +311,6 @@ computeAggregateCovariateAnalyses <- function(
 
   # after
   message("Computing aggregate after covariate results")
-  # 1-year after outcome index
-  afterCovariates <-  getCaseCovariateSettings(
-    covariateSettings = aggregateCovariateSettings$covariateSettings,
-    endDays = 365,
-    startDays = 0,
-    replacementType = 'LongTerm'
-  )
-
   resultAfter <- FeatureExtraction::getDbCovariateData(
     connection = connection,
     oracleTempSchema = tempEmulationSchema,
@@ -292,7 +318,7 @@ computeAggregateCovariateAnalyses <- function(
     cohortTable = "#agg_cohorts_after",
     cohortTableIsTemp = T,
     cohortIds = -1,
-    covariateSettings = afterCovariates,
+    covariateSettings = aggregateCovariateSettings$afterCovariateSettings,
     cdmVersion = cdmVersion,
     aggregated = T,
     minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
@@ -383,10 +409,23 @@ computeAggregateCovariateAnalyses <- function(
     )
   )
 
+  duringCovariateSettingsJson <- as.character(
+    ParallelLogger::convertSettingsToJson(
+      aggregateCovariateSettings$duringCovariateSettings
+    )
+  )
+  afterCovariateSettingsJson <- as.character(
+    ParallelLogger::convertSettingsToJson(
+      aggregateCovariateSettings$afterCovariateSettings
+    )
+  )
+
   result$settings <- data.frame(
     runId = runId,
     databaseId = databaseId,
     covariateSettingJson = covariateSettingsJson,
+    duringCovariateSettingsJson = duringCovariateSettingsJson,
+    afterCovariateSettingsJson = afterCovariateSettingsJson,
     riskWindowStart = aggregateCovariateSettings$riskWindowStart,
     startAnchor = aggregateCovariateSettings$startAnchor,
     riskWindowEnd = aggregateCovariateSettings$riskWindowEnd,
@@ -457,59 +496,6 @@ createCohortsOfInterest <- function(
     progressBar = FALSE,
     reportOverallTime = FALSE
   )
-}
-
-
-getCaseCovariateSettings <- function(
-    covariateSettings,
-    endDays = 365,
-    startDays = 0,
-    replacementType = 'LongTerm'
-      ){
-  for(x in covariateSettings){
-    if(attr(x, 'fun') == "getDbDefaultCovariateData"){
-      settings <- names(x)
-      keep <- c("temporal", "temporalSequence",
-                "longTermStartDays", "mediumTermStartDays", "shortTermStartDays",
-                "endDays", "includedCovariateConceptIds", "addDescendantsToInclude",
-                "excludedCovariateConceptIds", "addDescendantsToExclude", "includedCovariateIds"
-      )
-
-      ind <- 1
-      types <- c()
-      for(i in 1:length(x)){
-        if(!names(x)[ind] %in% keep &
-           (length(grep('LongTerm', names(x)[1]))>0 |
-            length(grep('MediumTerm', names(x)[1]))>0 |
-            length(grep('ShortTerm', names(x)[1]))>0)
-        ){
-          types <- unique(c(types, gsub('ShortTerm', '',gsub('MediumTerm', '',gsub('LongTerm', '', names(x)[ind])))))
-          x[[ind]] <- NULL
-        } else{
-          ind <- ind + 1
-        }
-      }
-      for(type in types){
-        x[[length(x) + 1]] <- TRUE
-        names(x)[length(x)] <- paste0(type, replacementType)
-      }
-      x$endDays <- endDays
-      x$longTermStartDays <- startDays
-      return(x)
-    }
-  }
-
-  # else
-  x <- FeatureExtraction::createCovariateSettings(
-    useDemographicsTimeInCohort = T,
-    useConditionGroupEraShortTerm = T,
-    useDrugGroupEraShortTerm = T,
-    useVisitConceptCountShortTerm = T,
-    endDays = endDays,
-    shortTermStartDays = startDays
-    )
-  return(x)
-
 }
 
 hex_to_int = function(h) {

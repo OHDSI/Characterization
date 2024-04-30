@@ -43,6 +43,8 @@ reference:
     contents:
       - createAggregateCovariateSettings
       - computeAggregateCovariateAnalyses
+      - createDuringCovariateSettings
+      - getDbDuringCovariateData
   - title: "Dechallenge Rechallenge Analysis"
     desc: >
       For a given Target cohort (T) and Outcome cohort (O) find any occurrances of a dechallenge (when the T cohort stops close to when O started) and a rechallenge (when T restarts and O starts again)  This is useful for investigating causality between drugs and events.

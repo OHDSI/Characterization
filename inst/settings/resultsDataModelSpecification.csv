@@ -82,6 +82,8 @@ covariates_continuous,p_90_value,float,Y,N,N,N,The 90th percentile
 settings,run_id,int,Y,Y,N,N,The run identifier
 settings,database_id,varchar(100),Y,Y,N,N,The database identifier
 settings,covariate_setting_json,varchar,Y,N,N,N,The covariate settings JSON
+settings,during_covariate_setting_json,varchar,Y,N,N,N,The during covariate settings JSON
+settings,after_covariate_setting_json,varchar,Y,N,N,N,The after covariate settings JSON
 settings,risk_window_start,int,Y,N,N,N,The risk window start
 settings,risk_window_end,int,Y,N,N,N,The risk window end
 settings,start_anchor,varchar(15),Y,N,N,N,The start anchor

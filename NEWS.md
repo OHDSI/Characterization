@@ -2,6 +2,8 @@ Characterization 0.3.1
 ======================
 - Removed DatabaseConnector from Remotes in DESCRIPTION. Fixes GitHb issue 38.
 - Added check to covariateSettings input in createAggregateCovariateSettings to error if temporal is T
+- adding during cohort covariate settings
+- added two more covariate settings inputs to aggregate covariates
 
 Characterization 0.3.0
 ======================
