@@ -96,7 +96,7 @@ Create during covariate settings
 creates an object specifying how during covariates should be constructed from data in the CDM model.
 }
 \examples{
-settings <- createCovariateSettings(
+settings <- createDuringCovariateSettings(
    useConditionOccurrenceDuring = T,
    useConditionOccurrencePrimaryInpatientDuring = F,
    useConditionEraDuring = F,
