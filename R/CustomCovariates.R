@@ -50,7 +50,7 @@
 #' An object of type \code{covariateSettings}, to be used in other functions.
 #'
 #' @examples
-#' settings <- createCovariateSettings(
+#' settings <- createDuringCovariateSettings(
 #'    useConditionOccurrenceDuring = T,
 #'    useConditionOccurrencePrimaryInpatientDuring = F,
 #'    useConditionEraDuring = F,
@@ -149,7 +149,7 @@ getDbDuringCovariateData <- function(
     stop("Only aggregation supported")
   }
 
-  getDomainSettings <- read.csv(system.file('csv/PrespecAnalyses.csv', package = 'Characterization'))
+  getDomainSettings <- utils::read.csv(system.file('csv/PrespecAnalyses.csv', package = 'Characterization'))
 
 
   # create Tables
