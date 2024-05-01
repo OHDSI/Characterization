@@ -212,7 +212,7 @@
 
 .checkCovariateSettings <- function(covariateSettings,
                                     errorMessages) {
-  if (class(covariateSettings) == "covariateSettings") {
+  if (inherits(covariateSettings,"covariateSettings")) {
     checkmate::assertClass(
       x = covariateSettings,
       classes = "covariateSettings",

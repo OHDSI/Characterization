@@ -51,10 +51,10 @@
 #'
 #' @examples
 #' settings <- createDuringCovariateSettings(
-#'    useConditionOccurrenceDuring = T,
-#'    useConditionOccurrencePrimaryInpatientDuring = F,
-#'    useConditionEraDuring = F,
-#'    useConditionGroupEraDuring = F
+#'    useConditionOccurrenceDuring = TRUE,
+#'    useConditionOccurrencePrimaryInpatientDuring = FALSE,
+#'    useConditionEraDuring = FALSE,
+#'    useConditionGroupEraDuring = FALSE
 #' )
 #'
 #' @export
