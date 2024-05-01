@@ -10,6 +10,9 @@
     <loc>/articles/UsingCharacterizationPackage.html</loc>
   </url>
   <url>
+    <loc>/articles/UsingPackage.html</loc>
+  </url>
+  <url>
     <loc>/articles/index.html</loc>
   </url>
   <url>
@@ -52,6 +55,9 @@
     <loc>/reference/createDechallengeRechallengeSettings.html</loc>
   </url>
   <url>
+    <loc>/reference/createDuringCovariateSettings.html</loc>
+  </url>
+  <url>
     <loc>/reference/createSqliteDatabase.html</loc>
   </url>
   <url>
@@ -71,6 +77,9 @@
   </url>
   <url>
     <loc>/reference/exportTimeToEventToCsv.html</loc>
+  </url>
+  <url>
+    <loc>/reference/getDbDuringCovariateData.html</loc>
   </url>
   <url>
     <loc>/reference/index.html</loc>
