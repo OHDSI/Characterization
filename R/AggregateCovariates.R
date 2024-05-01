@@ -22,8 +22,9 @@
 #' @param outcomeWashoutDays Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
 #' @template timeAtRisk
 #' @param covariateSettings   An object created using \code{FeatureExtraction::createCovariateSettings}
-#' @param duringCovariateSettings An object created using \code{createDuringCovariateSettings}
-#' @param afterCovariateSettings An object created using \code{FeatureExtraction::createCovariateSettings}
+#' @param caseCovariateSettings An object created using \code{createDuringCovariateSettings}
+#' @param casePreTargetDuration    The number of days prior to case index we use for FeatureExtraction
+#' @param casePostOutcomeDuration    The number of days prior to case index we use for FeatureExtraction
 #' @param minCharacterizationMean The minimum mean value for characterization output. Values below this will be cut off from output. This
 #'                                will help reduce the file size of the characterization output, but will remove information
 #'                                on covariates that have very low values. The default is 0.
@@ -47,20 +48,31 @@ createAggregateCovariateSettings <- function(
       useDemographicsAgeGroup = T,
       useDemographicsRace = T,
       useDemographicsEthnicity = T,
+      useDemographicsIndexYear = T,
+      useDemographicsIndexMonth = T,
       useDemographicsTimeInCohort = T,
       useDemographicsPriorObservationTime = T,
       useDemographicsPostObservationTime = T,
       useConditionGroupEraLongTerm = T,
+      useDrugGroupEraOverlapping = T,
       useDrugGroupEraLongTerm = T,
       useProcedureOccurrenceLongTerm = T,
       useMeasurementLongTerm = T,
       useObservationLongTerm = T,
       useDeviceExposureLongTerm = T,
       useVisitConceptCountLongTerm = T,
-      endDays = -1,
-      longTermStartDays =  -365
+      useConditionGroupEraShortTerm = T,
+      useDrugGroupEraShortTerm = T,
+      useProcedureOccurrenceShortTerm = T,
+      useMeasurementShortTerm = T,
+      useObservationShortTerm = T,
+      useDeviceExposureShortTerm = T,
+      useVisitConceptCountShortTerm = T,
+      endDays = 0,
+      longTermStartDays =  -365,
+      shortTermStartDays = -30
     ),
-    duringCovariateSettings = createDuringCovariateSettings(
+    caseCovariateSettings = createDuringCovariateSettings(
       useConditionGroupEraDuring = T,
       useDrugGroupEraDuring = T,
       useProcedureOccurrenceDuring = T,
@@ -69,17 +81,8 @@ createAggregateCovariateSettings <- function(
       useObservationDuring = T,
       useVisitConceptCountDuring = T
       ),
-    afterCovariateSettings = FeatureExtraction::createCovariateSettings(
-      useConditionGroupEraMediumTerm = T,
-      useDrugGroupEraMediumTerm = T,
-      useProcedureOccurrenceMediumTerm = T,
-      useMeasurementMediumTerm = T,
-      useObservationMediumTerm = T,
-      useDeviceExposureMediumTerm = T,
-      useVisitConceptCountMediumTerm = T,
-      endDays = 365,
-      mediumTermStartDays = 1,
-      ),
+    casePreTargetDuration = 365,
+    casePostOutcomeDuration = 365,
     minCharacterizationMean = 0
     ) {
   errorMessages <- checkmate::makeAssertCollection()
@@ -140,8 +143,9 @@ createAggregateCovariateSettings <- function(
     riskWindowEnd = riskWindowEnd,
     endAnchor = endAnchor,
     covariateSettings = covariateSettings,
-    duringCovariateSettings = duringCovariateSettings,
-    afterCovariateSettings = afterCovariateSettings,
+    caseCovariateSettings = caseCovariateSettings,
+    casePreTargetDuration = casePreTargetDuration,
+    casePostOutcomeDuration = casePostOutcomeDuration,
     minCharacterizationMean = minCharacterizationMean
   )
 
@@ -259,15 +263,15 @@ computeAggregateCovariateAnalyses <- function(
     minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
   )
 
-  message("Computing aggregate between covariate results")
-  resultBetween <- FeatureExtraction::getDbCovariateData(
+  message("Computing case covariate results")
+  resultCase <- FeatureExtraction::getDbCovariateData(
     connection = connection,
     oracleTempSchema = tempEmulationSchema,
     cdmDatabaseSchema = cdmDatabaseSchema,
-    cohortTable = "#agg_cohorts_between",
+    cohortTable = "#agg_cohorts_cases",
     cohortTableIsTemp = T,
     cohortIds = -1,
-    covariateSettings = aggregateCovariateSettings$duringCovariateSettings,
+    covariateSettings = aggregateCovariateSettings$caseCovariateSettings,
     cdmVersion = cdmVersion,
     aggregated = T,
     minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
@@ -275,29 +279,29 @@ computeAggregateCovariateAnalyses <- function(
 
   # add covariates to table
   if(!is.null(result$covariates)){
-    if (!is.null(resultBetween$covariates)) {
+    if (!is.null(resultCase$covariates)) {
       Andromeda::appendToTable(
         tbl = result$covariates,
-        data = resultBetween$covariates
+        data = resultCase$covariates
       )
     }
   } else{
-    if (!is.null(resultBetween$covariates)) {
-      result$covariates <- resultBetween$covariates
+    if (!is.null(resultCase$covariates)) {
+      result$covariates <- resultCase$covariates
     }
   }
 
   # covariatesContinuous
   if(!is.null(result$covariatesContinuous)){
-    if (!is.null(resultBetween$covariatesContinuous)) {
+    if (!is.null(resultCase$covariatesContinuous)) {
       Andromeda::appendToTable(
         tbl = result$covariatesContinuous,
-        data = resultBetween$covariatesContinuous
+        data = resultCase$covariatesContinuous
       )
     }
   } else{
-    if (!is.null(resultBetween$covariatesContinuous)) {
-      result$covariatesContinuous <- resultBetween$covariatesContinuous
+    if (!is.null(resultCase$covariatesContinuous)) {
+      result$covariatesContinuous <- resultCase$covariatesContinuous
     }
   }
 
@@ -305,61 +309,17 @@ computeAggregateCovariateAnalyses <- function(
   result$covariateRef <- unique(
     rbind(
       as.data.frame(result$covariateRef),
-      as.data.frame(resultBetween$covariateRef)
+      as.data.frame(resultCase$covariateRef)
     )
   )
 
-  # after
-  message("Computing aggregate after covariate results")
-  resultAfter <- FeatureExtraction::getDbCovariateData(
-    connection = connection,
-    oracleTempSchema = tempEmulationSchema,
-    cdmDatabaseSchema = cdmDatabaseSchema,
-    cohortTable = "#agg_cohorts_after",
-    cohortTableIsTemp = T,
-    cohortIds = -1,
-    covariateSettings = aggregateCovariateSettings$afterCovariateSettings,
-    cdmVersion = cdmVersion,
-    aggregated = T,
-    minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
-  )
-
-  if(!is.null(result$covariates)){
-    if (!is.null(resultAfter$covariates)) {
-      Andromeda::appendToTable(
-        tbl = result$covariates,
-        data = resultAfter$covariates
-      )
-    }
-  } else{
-    if (!is.null(resultAfter$covariates)) {
-      result$covariates <- resultAfter$covariates
-    }
-  }
-
-  # covariatesContinuous
-  if(!is.null(result$covariatesContinuous)){
-    if (!is.null(resultAfter$covariatesContinuous)) {
-      Andromeda::appendToTable(
-        tbl = result$covariatesContinuous,
-        data = resultAfter$covariatesContinuous
-      )
-    }
-  } else{
-    if (!is.null(resultAfter$covariatesContinuous)) {
-      result$covariatesContinuous <- resultAfter$covariatesContinuous
-    }
-  }
-
-
-  # update covariateRef
-  result$covariateRef <- unique(
+  # update analysisRef
+  result$analysisRef <- unique(
     rbind(
-      as.data.frame(result$covariateRef),
-      as.data.frame(resultAfter$covariateRef)
+      as.data.frame(result$analysisRef),
+      as.data.frame(resultCase$analysisRef)
     )
   )
-
 
   # adding counts as a new table
   result$cohortCounts <- counts
@@ -409,14 +369,9 @@ computeAggregateCovariateAnalyses <- function(
     )
   )
 
-  duringCovariateSettingsJson <- as.character(
+  caseCovariateSettingsJson <- as.character(
     ParallelLogger::convertSettingsToJson(
       aggregateCovariateSettings$duringCovariateSettings
-    )
-  )
-  afterCovariateSettingsJson <- as.character(
-    ParallelLogger::convertSettingsToJson(
-      aggregateCovariateSettings$afterCovariateSettings
     )
   )
 
@@ -424,8 +379,9 @@ computeAggregateCovariateAnalyses <- function(
     runId = runId,
     databaseId = databaseId,
     covariateSettingJson = covariateSettingsJson,
-    duringCovariateSettingsJson = duringCovariateSettingsJson,
-    afterCovariateSettingsJson = afterCovariateSettingsJson,
+    caseCovariateSettingsJson = caseCovariateSettingsJson,
+    casePostOutcomeDuration = aggregateCovariateSettings$casePostOutcomeDuration,
+    casePreTargetDuration = aggregateCovariateSettings$casePreTargetDuration,
     riskWindowStart = aggregateCovariateSettings$riskWindowStart,
     startAnchor = aggregateCovariateSettings$startAnchor,
     riskWindowEnd = aggregateCovariateSettings$riskWindowEnd,
@@ -461,7 +417,8 @@ createCohortsOfInterest <- function(
     targetTable,
     outcomeDatabaseSchema,
     outcomeTable,
-    tempEmulationSchema) {
+    tempEmulationSchema
+    ) {
   sql <- SqlRender::loadRenderTranslateSql(
     sqlFilename = "createTargetOutcomeCombinations.sql",
     packageName = "Characterization",
@@ -476,6 +433,8 @@ createCohortsOfInterest <- function(
     outcome_ids = paste(aggregateCovariateSettings$outcomeIds, collapse = ",", sep = ","),
     min_prior_observation = aggregateCovariateSettings$minPriorObservation,
     outcome_washout_days = aggregateCovariateSettings$outcomeWashoutDays,
+    case_post_outcome_duration = aggregateCovariateSettings$casePostOutcomeDuration,
+    case_pre_target_duration = aggregateCovariateSettings$casePreTargetDuration,
     tar_start = aggregateCovariateSettings$riskWindowStart,
     tar_start_anchor = ifelse(
       aggregateCovariateSettings$startAnchor == "cohort start",

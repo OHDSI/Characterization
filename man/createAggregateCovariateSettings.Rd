@@ -15,23 +15,20 @@ createAggregateCovariateSettings(
   endAnchor = "cohort start",
   covariateSettings = FeatureExtraction::createCovariateSettings(useDemographicsGender =
     T, useDemographicsAge = T, useDemographicsAgeGroup = T, useDemographicsRace = T,
-    useDemographicsEthnicity = T, useDemographicsTimeInCohort = T,
-    useDemographicsPriorObservationTime = T, useDemographicsPostObservationTime = T,
-    useConditionGroupEraLongTerm = T, useDrugGroupEraLongTerm = T,
-    useProcedureOccurrenceLongTerm = T, useMeasurementLongTerm = T,
+    useDemographicsEthnicity = T, useDemographicsIndexYear = T, useDemographicsIndexMonth
+    = T, useDemographicsTimeInCohort = T, useDemographicsPriorObservationTime = T,
+    useDemographicsPostObservationTime = T, useConditionGroupEraLongTerm = T,
+    useDrugGroupEraOverlapping = T, useDrugGroupEraLongTerm = T,
+    useProcedureOccurrenceLongTerm = T, useMeasurementLongTerm = T, 
+    
     useObservationLongTerm = T, useDeviceExposureLongTerm = T,
-    useVisitConceptCountLongTerm = T, 
-     endDays = -1, longTermStartDays = -365),
-  duringCovariateSettings = createDuringCovariateSettings(useConditionGroupEraDuring = T,
+    useVisitConceptCountLongTerm = T, endDays = 0, longTermStartDays = -365),
+  caseCovariateSettings = createDuringCovariateSettings(useConditionGroupEraDuring = T,
     useDrugGroupEraDuring = T, useProcedureOccurrenceDuring = T, useDeviceExposureDuring
     = T, useMeasurementDuring = T, useObservationDuring = T, useVisitConceptCountDuring =
     T),
-  afterCovariateSettings =
-    FeatureExtraction::createCovariateSettings(useConditionGroupEraMediumTerm = T,
-    useDrugGroupEraMediumTerm = T, useProcedureOccurrenceMediumTerm = T,
-    useMeasurementMediumTerm = T, useObservationMediumTerm = T,
-    useDeviceExposureMediumTerm = T, useVisitConceptCountMediumTerm = T, endDays = 365,
-    mediumTermStartDays = 1, ),
+  casePreTargetDuration = 365,
+  casePostOutcomeDuration = 365,
   minCharacterizationMean = 0
 )
 }
@@ -56,9 +53,11 @@ or `"cohort end"`.}
 
 \item{covariateSettings}{An object created using \code{FeatureExtraction::createCovariateSettings}}
 
-\item{duringCovariateSettings}{An object created using \code{createDuringCovariateSettings}}
+\item{caseCovariateSettings}{An object created using \code{createDuringCovariateSettings}}
 
-\item{afterCovariateSettings}{An object created using \code{FeatureExtraction::createCovariateSettings}}
+\item{casePreTargetDuration}{The number of days prior to case index we use for FeatureExtraction}
+
+\item{casePostOutcomeDuration}{The number of days prior to case index we use for FeatureExtraction}
 
 \item{minCharacterizationMean}{The minimum mean value for characterization output. Values below this will be cut off from output. This
 will help reduce the file size of the characterization output, but will remove information

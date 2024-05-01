@@ -24,11 +24,8 @@ DROP TABLE #target_outcome_prior;
 TRUNCATE TABLE #agg_cohorts_before;
 DROP TABLE #agg_cohorts_before;
 
-TRUNCATE TABLE #agg_cohorts_between;
-DROP TABLE #agg_cohorts_between;
-
-TRUNCATE TABLE #agg_cohorts_after;
-DROP TABLE #agg_cohorts_after;
+TRUNCATE TABLE #agg_cohorts_cases;
+DROP TABLE #agg_cohorts_cases;
 
 TRUNCATE TABLE #agg_cohorts_extras;
 DROP TABLE #agg_cohorts_extras;

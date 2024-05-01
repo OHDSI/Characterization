@@ -155,36 +155,15 @@ and cd.cohort_type = 'O'
 
 ) temp_ts2;
 
-
-drop table if exists #agg_cohorts_after;
-select * into #agg_cohorts_after
-
-from
-(
--- cases indexed at O
-select
-tno.subject_id,
-tno.outcome_start_date as cohort_start_date,
-tno.outcome_end_date as cohort_end_date,
-cd.cohort_definition_id
-from #target_outcome_tar tno
-INNER JOIN #cohort_details cd
-on cd.target_cohort_id = tno.target_cohort_id
-and cd.outcome_cohort_id = tno.outcome_cohort_id
-and cd.cohort_type = 'OnT'
-
-) temp_ts2;
-
-
-drop table if exists #agg_cohorts_between;
-select * into #agg_cohorts_between
+drop table if exists #agg_cohorts_cases;
+select * into #agg_cohorts_cases
 
 from
 (
 -- cases with T start and O start as end
 select
 tno.subject_id,
-tno.cohort_start_date,
+dateadd(day, 1, tno.cohort_start_date) as cohort_start_date,
 tno.outcome_start_date as cohort_end_date,
 cd.cohort_definition_id
 from #target_outcome_tar tno
@@ -192,6 +171,34 @@ INNER JOIN #cohort_details cd
 on cd.target_cohort_id = tno.target_cohort_id
 and cd.outcome_cohort_id = tno.outcome_cohort_id
 and cd.cohort_type = 'TnObetween'
+
+union
+
+-- cases indexed at O
+select
+tno.subject_id,
+dateadd(day, 1, tno.outcome_start_date) as cohort_start_date,
+dateadd(day, @case_post_outcome_duration, tno.outcome_start_date) as cohort_end_date,
+cd.cohort_definition_id
+from #target_outcome_tar tno
+INNER JOIN #cohort_details cd
+on cd.target_cohort_id = tno.target_cohort_id
+and cd.outcome_cohort_id = tno.outcome_cohort_id
+and cd.cohort_type = 'OnT'
+
+union
+
+select
+tno.subject_id,
+dateadd(day, -@case_pre_target_duration, tno.cohort_start_date) as cohort_start_date,
+tno.cohort_start_date as cohort_end_date,
+cd.cohort_definition_id
+from #target_outcome_tar tno
+INNER JOIN #cohort_details cd
+on cd.target_cohort_id = tno.target_cohort_id
+and cd.outcome_cohort_id = tno.outcome_cohort_id
+and cd.cohort_type = 'TnO'
+
 
 ) temp_ts2;
 
