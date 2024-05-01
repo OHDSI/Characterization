@@ -22,7 +22,11 @@ createAggregateCovariateSettings(
     useProcedureOccurrenceLongTerm = T, useMeasurementLongTerm = T, 
     
     useObservationLongTerm = T, useDeviceExposureLongTerm = T,
-    useVisitConceptCountLongTerm = T, endDays = 0, longTermStartDays = -365),
+    useVisitConceptCountLongTerm = T, useConditionGroupEraShortTerm = T,
+    useDrugGroupEraShortTerm = T, useProcedureOccurrenceShortTerm = T,
+    useMeasurementShortTerm = T, useObservationShortTerm = T, useDeviceExposureShortTerm
+    = T, useVisitConceptCountShortTerm = T, endDays = 0, longTermStartDays = -365,
+    shortTermStartDays = -30),
   caseCovariateSettings = createDuringCovariateSettings(useConditionGroupEraDuring = T,
     useDrugGroupEraDuring = T, useProcedureOccurrenceDuring = T, useDeviceExposureDuring
     = T, useMeasurementDuring = T, useObservationDuring = T, useVisitConceptCountDuring =
