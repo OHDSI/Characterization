@@ -420,7 +420,7 @@ createCohortsOfInterest <- function(
     tempEmulationSchema
     ) {
   sql <- SqlRender::loadRenderTranslateSql(
-    sqlFilename = "createTargetOutcomeCombinations.sql",
+    sqlFilename = "CreateTargetOutcomeCombinations.sql",
     packageName = "Characterization",
     dbms = dbms,
     cdm_database_schema = cdmDatabaseSchema,
