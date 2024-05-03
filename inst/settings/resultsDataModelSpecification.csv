@@ -49,9 +49,9 @@ analysis_ref,run_id,int,Yes,Yes,No,No,The run identifier
 analysis_ref,analysis_id,int,Yes,Yes,No,No,The analysis identifier
 analysis_ref,analysis_name,varchar,Yes,No,No,No,The analysis name
 analysis_ref,domain_id,varchar,Yes,No,No,No,The domain id
-analysis_ref,start_daYes,int,Yes,No,No,No,The start day
-analysis_ref,end_daYes,int,Yes,No,No,No,The end day
-analysis_ref,is_binarYes,varchar(1),Yes,No,No,No,Is this a binary analysis
+analysis_ref,start_day,int,Yes,No,No,No,The start day
+analysis_ref,end_day,int,Yes,No,No,No,The end day
+analysis_ref,is_binary,varchar(1),Yes,No,No,No,Is this a binary analysis
 analysis_ref,missing_means_zero,varchar(1),Yes,No,No,No,Missing means zero
 covariate_ref,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 covariate_ref,run_id,int,Yes,Yes,No,No,The run identifier
