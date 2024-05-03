@@ -105,6 +105,3 @@ cohort_counts,person_count,int,Y,N,N,N,The number of distinct people in each coh
 cohort_counts,min_exposure_time,bigint,N,N,N,N,Minimum exposure time across cohort
 cohort_counts,mean_exposure_time,bigint,N,N,N,N,Mean exposure time across cohort
 cohort_counts,max_exposure_time,bigint,N,N,N,N,Max exposure time across cohort
-migration,migration_file,varchar(100),N,N,N,N,migration files that have been run
-migration,migration_order,int,N,N,N,N,migration files implementation order
-package_version,version_number,varchar(10),N,N,N,N,version of characterization package
