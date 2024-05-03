@@ -269,6 +269,7 @@ getDataMigrator <- function(connectionDetails, databaseSchema, tablePrefix = "")
     connectionDetails = connectionDetails,
     databaseSchema = databaseSchema,
     tablePrefix = tablePrefix,
+    packageTablePrefix = "c_",
     migrationPath = "migrations",
     packageName = utils::packageName()
   )
