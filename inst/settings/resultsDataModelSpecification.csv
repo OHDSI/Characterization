@@ -4,16 +4,16 @@ time_to_event,target_cohort_definition_id,bigint,Y,Y,N,N,The cohort definition i
 time_to_event,outcome_cohort_definition_id,bigint,Y,Y,N,N,The cohort definition id for the outcome cohort
 time_to_event,outcome_type,varchar(100),Y,Y,N,N,Is the outvome a first occurrence or repeat
 time_to_event,target_outcome_type,varchar(40),Y,Y,N,N,When does the outcome occur relative to target
-time_to_event,time_to_event,int,Y,N,N,N,The time (in days) from target index to outcome start
+time_to_event,time_to_event,int,Y,Y,N,N,The time (in days) from target index to outcome start
 time_to_event,num_events,int,Y,N,N,N,Number of events that occur during the specified time to event
-time_to_event,time_scale,varchar(20),Y,N,N,N,time scale for the number of events
+time_to_event,time_scale,varchar(20),Y,Y,N,N,time scale for the number of events
 rechallenge_fail_case_series,database_id,varchar(100),Y,Y,N,N,The database identifier
-rechallenge_fail_case_series,dechallenge_stop_interval,int,Y,N,N,N,The time period that É
-rechallenge_fail_case_series,dechallenge_evaluation_window,int,Y,N,N,N,The time period that É
+rechallenge_fail_case_series,dechallenge_stop_interval,int,Y,Y,N,N,The time period that É
+rechallenge_fail_case_series,dechallenge_evaluation_window,int,Y,Y,N,N,The time period that É
 rechallenge_fail_case_series,target_cohort_definition_id,bigint,Y,Y,N,N,The cohort definition id for the target cohort
 rechallenge_fail_case_series,outcome_cohort_definition_id,bigint,Y,Y,N,N,The cohort definition id for the outcome cohort
 rechallenge_fail_case_series,person_key,int,Y,Y,N,N,The dense rank for the patient (an identifier that is not the same as the database)
-rechallenge_fail_case_series,subject_id,bigint,Y,N,N,N,The person identifier for the failed case series (optional)
+rechallenge_fail_case_series,subject_id,bigint,N,N,N,N,The person identifier for the failed case series (optional)
 rechallenge_fail_case_series,dechallenge_exposure_number,int,Y,N,N,N,The number of times a dechallenge has occurred
 rechallenge_fail_case_series,dechallenge_exposure_start_date_offset,int,Y,N,N,N,The offset for the dechallenge start (number of days after index)
 rechallenge_fail_case_series,dechallenge_exposure_end_date_offset,int,Y,N,N,N,The offset for the dechallenge end (number of days after index)
@@ -93,18 +93,18 @@ settings,outcome_washout_days,int,N,N,N,N,Patients with outcome during washout a
 settings,min_characterization_mean,float,N,N,N,N,Minimum fraction for feature extraction
 cohort_details,run_id,int,Y,Y,N,N,The run identifier
 cohort_details,database_id,varchar(100),Y,Y,N,N,The database identifier
-cohort_details,cohort_definition_id,int,Y,N,N,N,The study cohort id
+cohort_details,cohort_definition_id,int,Y,Y,N,N,The study cohort id
 cohort_details,cohort_type,varchar(10),Y,N,N,N,The cohort type
 cohort_details,target_cohort_id,int,Y,N,N,N,The target cohort id
 cohort_details,outcome_cohort_id,int,Y,N,N,N,The outcome cohort id
 cohort_counts,run_id,int,Y,Y,N,N,The run identifier
 cohort_counts,database_id,varchar(100),Y,Y,N,N,The database identifier
-cohort_counts,cohort_definition_id,int,Y,N,N,N,The study cohort id
+cohort_counts,cohort_definition_id,int,Y,Y,N,N,The study cohort id
 cohort_counts,row_count,int,Y,N,N,N,The number of rows in each cohort
 cohort_counts,person_count,int,Y,N,N,N,The number of distinct people in each cohort
 cohort_counts,min_exposure_time,bigint,N,N,N,N,Minimum exposure time across cohort
 cohort_counts,mean_exposure_time,bigint,N,N,N,N,Mean exposure time across cohort
 cohort_counts,max_exposure_time,bigint,N,N,N,N,Max exposure time across cohort
-migration,migration_file,varchar(100),N,Y,N,N,migration files that have been run
-migration,migration_order,int,N,Y,N,N,migration files implementation order
-package_version,version_number,varchar(10),N,Y,N,N,version of characterization package
+migration,migration_file,varchar(100),N,N,N,N,migration files that have been run
+migration,migration_order,int,N,N,N,N,migration files implementation order
+package_version,version_number,varchar(10),N,N,N,N,version of characterization package
