@@ -105,6 +105,3 @@ cohort_counts,person_count,int,Yes,No,No,No,The number of distinct people in eac
 cohort_counts,min_exposure_time,bigint,No,No,No,No,Minimum exposure time across cohort
 cohort_counts,mean_exposure_time,bigint,No,No,No,No,Mean exposure time across cohort
 cohort_counts,max_exposure_time,bigint,No,No,No,No,Max exposure time across cohort
-migration,migration_file,varchar(100),No,Yes,No,No,migration files that have been run
-migration,migration_order,int,No,No,No,No,migration files implementation order
-package_version,version_number,varchar(10),No,Yes,No,No,version of characterization package

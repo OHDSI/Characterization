@@ -446,14 +446,17 @@ exportDatabaseToCsv <- function(
 getResultTables <- function() {
   return(
     unique(
-      readr::read_csv(
-        file = system.file(
-          "settings",
-          "resultsDataModelSpecification.csv",
-          package = "Characterization"
-        ),
-        show_col_types = FALSE
-      )$table_name
+      c(
+        readr::read_csv(
+          file = system.file(
+            "settings",
+            "resultsDataModelSpecification.csv",
+            package = "Characterization"
+          ),
+          show_col_types = FALSE
+        )$table_name,
+        'migration', 'package_version'
+      )
     )
   )
 }
