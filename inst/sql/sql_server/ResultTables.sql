@@ -29,7 +29,9 @@ CREATE TABLE @my_schema.@table_prefixrechallenge_fail_case_series (
     rechallenge_exposure_end_date_offset int NOT NULL,
     rechallenge_outcome_number int NOT NULL,
     rechallenge_outcome_start_date_offset int NOT NULL,
-    PRIMARY KEY (database_id, dechallenge_stop_interval,dechallenge_evaluation_window, target_cohort_definition_id, outcome_cohort_definition_id, person_key)
+    PRIMARY KEY (database_id, dechallenge_stop_interval,dechallenge_evaluation_window, target_cohort_definition_id,
+    outcome_cohort_definition_id, person_key, dechallenge_exposure_number, dechallenge_outcome_number,
+    rechallenge_exposure_number, rechallenge_outcome_number)
 );
 
 CREATE TABLE @my_schema.@table_prefixdechallenge_rechallenge (
@@ -53,7 +55,8 @@ CREATE TABLE @my_schema.@table_prefixdechallenge_rechallenge (
     pct_rechallenge_attempt float,
     pct_rechallenge_success float,
     pct_rechallenge_fail float,
-    PRIMARY KEY (database_id, dechallenge_stop_interval, dechallenge_evaluation_window, target_cohort_definition_id, outcome_cohort_definition_id)
+    PRIMARY KEY (database_id, dechallenge_stop_interval, dechallenge_evaluation_window, target_cohort_definition_id,
+    outcome_cohort_definition_id)
 );
 
 

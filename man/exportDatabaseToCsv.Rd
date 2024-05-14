@@ -11,7 +11,8 @@ exportDatabaseToCsv(
   tablePrefix = "c_",
   filePrefix = NULL,
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-  saveDirectory
+  saveDirectory,
+  maxRowCount = 1e+06
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ function \code{connect} in the
 \item{tempEmulationSchema}{The temp schema used when the database management system is oracle}
 
 \item{saveDirectory}{The directory to save the csv results}
+
+\item{maxRowCount}{Max number of rows extracted at a time}
 }
 \value{
 csv file per table into the saveDirectory

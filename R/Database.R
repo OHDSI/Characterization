@@ -290,6 +290,7 @@ getDataMigrator <- function(connectionDetails, databaseSchema, tablePrefix = "")
 #' @param filePrefix                   The prefix to apply to the files
 #' @param tempEmulationSchema          The temp schema used when the database management system is oracle
 #' @param saveDirectory                The directory to save the csv results
+#' @param maxRowCount                  Max number of rows extracted at a time
 #'
 #' @return
 #' csv file per table into the saveDirectory
@@ -302,7 +303,9 @@ exportDatabaseToCsv <- function(
     tablePrefix = "c_",
     filePrefix = NULL,
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-    saveDirectory) {
+    saveDirectory,
+    maxRowCount = 1e6
+    ) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
   .checkTablePrefix(
@@ -334,8 +337,6 @@ exportDatabaseToCsv <- function(
     )
   }
 
-  # max number of rows extracted at a time
-  maxRowCount <- 1e6
 
   # get the table names using the function in uploadToDatabase.R
   tables <- getResultTables()
