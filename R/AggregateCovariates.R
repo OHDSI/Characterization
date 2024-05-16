@@ -99,14 +99,16 @@ createAggregateCovariateSettings <- function(
     errorMessages = errorMessages
   )
 
-  # check TAR
-  .checkTimeAtRisk(
-    riskWindowStart = riskWindowStart,
-    startAnchor = startAnchor,
-    riskWindowEnd = riskWindowEnd,
-    endAnchor = endAnchor,
-    errorMessages = errorMessages
-  )
+  # check TAR - EFF edit
+  for(i in 1:length(riskWindowStart)){
+    .checkTimeAtRisk(
+      riskWindowStart = riskWindowStart[i],
+      startAnchor = startAnchor[i],
+      riskWindowEnd = riskWindowEnd[i],
+      endAnchor = endAnchor[i],
+      errorMessages = errorMessages
+    )
+  }
 
   # check covariateSettings
   .checkCovariateSettings(
@@ -198,6 +200,19 @@ computeAggregateCovariateAnalyses <- function(
     targetIds = aggregateCovariateSettings$targetIds,
     outcomeIds = aggregateCovariateSettings$outcomeIds
     )
+
+  # for each time-at-risk get case details
+  for(i in 1:length(aggregateCovariateSettings$riskWindowStart)){
+    cohortDetails <- rbind(
+      cohortDetails,
+      getCaseDetails(
+        targetIds = aggregateCovariateSettings$targetIds,
+        outcomeIds = aggregateCovariateSettings$outcomeIds,
+        timeAtRiskId = i
+      ))
+  }
+
+
   DatabaseConnector::insertTable(
     data = cohortDetails,
     camelCaseToSnakeCase = T,
@@ -371,7 +386,7 @@ computeAggregateCovariateAnalyses <- function(
 
   caseCovariateSettingsJson <- as.character(
     ParallelLogger::convertSettingsToJson(
-      aggregateCovariateSettings$duringCovariateSettings
+      aggregateCovariateSettings$caseCovariateSettings
     )
   )
 
@@ -382,13 +397,19 @@ computeAggregateCovariateAnalyses <- function(
     caseCovariateSettingsJson = caseCovariateSettingsJson,
     casePostOutcomeDuration = aggregateCovariateSettings$casePostOutcomeDuration,
     casePreTargetDuration = aggregateCovariateSettings$casePreTargetDuration,
-    riskWindowStart = aggregateCovariateSettings$riskWindowStart,
-    startAnchor = aggregateCovariateSettings$startAnchor,
-    riskWindowEnd = aggregateCovariateSettings$riskWindowEnd,
-    endAnchor = aggregateCovariateSettings$endAnchor,
     minPriorObservation = aggregateCovariateSettings$minPriorObservation,
     outcomeWashoutDays = aggregateCovariateSettings$outcomeWashoutDays,
     minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
+  )
+
+  result$timeAtRisk <- data.frame(
+    runId = runId,
+    databaseId = databaseId,
+    timeAtRiskId = 1:length(aggregateCovariateSettings$riskWindowStart),
+    riskWindowStart = aggregateCovariateSettings$riskWindowStart,
+    startAnchor = aggregateCovariateSettings$startAnchor,
+    riskWindowEnd = aggregateCovariateSettings$riskWindowEnd,
+    endAnchor = aggregateCovariateSettings$endAnchor
   )
 
   sql <- SqlRender::loadRenderTranslateSql(
@@ -419,8 +440,10 @@ createCohortsOfInterest <- function(
     outcomeTable,
     tempEmulationSchema
     ) {
+
+  # first create Ts and Os calling RestrictCohorts.sql
   sql <- SqlRender::loadRenderTranslateSql(
-    sqlFilename = "CreateTargetOutcomeCombinations.sql",
+    sqlFilename = "RestrictCohorts.sql",
     packageName = "Characterization",
     dbms = dbms,
     cdm_database_schema = cdmDatabaseSchema,
@@ -432,21 +455,7 @@ createCohortsOfInterest <- function(
     target_ids = paste(aggregateCovariateSettings$targetIds, collapse = ",", sep = ","),
     outcome_ids = paste(aggregateCovariateSettings$outcomeIds, collapse = ",", sep = ","),
     min_prior_observation = aggregateCovariateSettings$minPriorObservation,
-    outcome_washout_days = aggregateCovariateSettings$outcomeWashoutDays,
-    case_post_outcome_duration = aggregateCovariateSettings$casePostOutcomeDuration,
-    case_pre_target_duration = aggregateCovariateSettings$casePreTargetDuration,
-    tar_start = aggregateCovariateSettings$riskWindowStart,
-    tar_start_anchor = ifelse(
-      aggregateCovariateSettings$startAnchor == "cohort start",
-      "cohort_start_date",
-      "cohort_end_date"
-    ),
-    tar_end = aggregateCovariateSettings$riskWindowEnd,
-    tar_end_anchor = ifelse(
-      aggregateCovariateSettings$endAnchor == "cohort start",
-      "cohort_start_date",
-      "cohort_end_date"
-    )
+    outcome_washout_days = aggregateCovariateSettings$outcomeWashoutDays
   )
 
   DatabaseConnector::executeSql(
@@ -455,6 +464,41 @@ createCohortsOfInterest <- function(
     progressBar = FALSE,
     reportOverallTime = FALSE
   )
+
+
+  # now create the cases per TAR
+  for(i in 1:length(aggregateCovariateSettings$riskWindowStart)){
+    sql <- SqlRender::loadRenderTranslateSql(
+      sqlFilename = "CreateCases.sql",
+      packageName = "Characterization",
+      dbms = dbms,
+      tempEmulationSchema = tempEmulationSchema,
+      tar_start = aggregateCovariateSettings$riskWindowStart[i],
+      tar_start_anchor = ifelse(
+        aggregateCovariateSettings$startAnchor[i] == "cohort start",
+        "cohort_start_date",
+        "cohort_end_date"
+      ),
+      tar_end = aggregateCovariateSettings$riskWindowEnd[i],
+      tar_end_anchor = ifelse(
+        aggregateCovariateSettings$endAnchor[i] == "cohort start",
+        "cohort_start_date",
+        "cohort_end_date"
+      ),
+      time_at_risk_id = i,
+      first = i==1,
+      case_post_outcome_duration = aggregateCovariateSettings$casePostOutcomeDuration,
+      case_pre_target_duration = aggregateCovariateSettings$casePreTargetDuration
+    )
+
+    DatabaseConnector::executeSql(
+      connection = connection,
+      sql = sql,
+      progressBar = FALSE,
+      reportOverallTime = FALSE
+    )
+  }
+
 }
 
 hex_to_int = function(h) {
@@ -485,9 +529,11 @@ getCohortDetails <- function(
       rep('T', length(targetIds)),
       rep('Oall', length(outcomeIds)),
       rep('O', length(outcomeIds))
-    )
+    ),
+    timeAtRiskId = 0
   )
-  comboTypes <- c('TnObetween','OnT', 'TnOprior', 'TnO')
+
+  comboTypes <- 'TnOprior'
   for(comboType in comboTypes){
     cohortDetailsExtra <- as.data.frame(
       merge(
@@ -496,8 +542,10 @@ getCohortDetails <- function(
     )
     colnames(cohortDetailsExtra) <- c('targetCohortId', 'outcomeCohortId')
     cohortDetailsExtra$cohortType <- comboType
+    cohortDetailsExtra$timeAtRiskId <- 0
     cohortDetails <- rbind(cohortDetails, cohortDetailsExtra)
   }
+
 
   cohortDetails$cohortDefinitionId <- apply(
     cohortDetails,
@@ -508,3 +556,36 @@ getCohortDetails <- function(
   )
   return(cohortDetails)
 }
+
+getCaseDetails <- function(
+    targetIds,
+    outcomeIds,
+    timeAtRiskId
+){
+
+  cohortDetails <- c()
+
+  comboTypes <- c('TnObetween','OnT', 'TnO')
+  for(comboType in comboTypes){
+    cohortDetailsExtra <- as.data.frame(
+      merge(
+        targetIds,
+        outcomeIds)
+    )
+    colnames(cohortDetailsExtra) <- c('targetCohortId', 'outcomeCohortId')
+    cohortDetailsExtra$cohortType <- comboType
+    cohortDetailsExtra$timeAtRiskId <- timeAtRiskId
+    cohortDetails <- rbind(cohortDetails, cohortDetailsExtra)
+  }
+
+  cohortDetails$cohortDefinitionId <- apply(
+    cohortDetails,
+    1,
+    function(x){
+      hashInt(T = x[1], O = x[2], type = paste0(x[3], timeAtRiskId))
+    }
+  )
+  return(cohortDetails)
+}
+
+

@@ -374,6 +374,14 @@ runCharacterizationAnalyses <- function(
         insertAndromedaToDatabase(
           connection = conn,
           databaseSchema = "main",
+          tableName = "time_to_event",
+          andromedaObject = result$timeToEvent,
+          tablePrefix = tablePrefix
+        )
+
+        insertAndromedaToDatabase(
+          connection = conn,
+          databaseSchema = "main",
           tableName = "cohort_counts",
           andromedaObject = result$cohortCounts,
           tablePrefix = tablePrefix,

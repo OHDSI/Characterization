@@ -84,15 +84,19 @@ settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 settings,covariate_setting_json,varchar,Yes,No,No,No,The covariate settings JSON
 settings,during_covariate_setting_json,varchar,Yes,No,No,No,The during covariate settings JSON
 settings,after_covariate_setting_json,varchar,Yes,No,No,No,The after covariate settings JSON
-settings,risk_window_start,int,Yes,No,No,No,The risk window start
-settings,risk_window_end,int,Yes,No,No,No,The risk window end
-settings,start_anchor,varchar(15),Yes,No,No,No,The start anchor
-settings,end_anchor,varchar(15),Yes,No,No,No,The end anchor
 settings,min_prior_observation,int,No,No,No,No,Minimum time observed before index
 settings,outcome_washout_days,int,No,No,No,No,Patients with outcome during washout are excluded
 settings,min_characterization_mean,float,No,No,No,No,Minimum fraction for feature extraction
+time_at_risk,run_id,int,Yes,Yes,No,No,The run identifier
+time_at_risk,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+time_at_risk,time_at_risk_id,int,Yes,Yes,No,No,The identifier for the time-at-risk
+time_at_risk,risk_window_start,int,No,No,No,No,The risk window start
+time_at_risk,risk_window_end,int,No,No,No,No,The risk window end
+time_at_risk,start_anchor,varchar(15),No,No,No,No,The start anchor
+time_at_risk,end_anchor,varchar(15),No,No,No,No,The end anchor
 cohort_details,run_id,int,Yes,Yes,No,No,The run identifier
 cohort_details,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+cohort_details,time_at_risk_id,int,Yes,Yes,No,No,The identifier for the time-at-risk
 cohort_details,cohort_definition_id,int,Yes,Yes,No,No,The study cohort id
 cohort_details,cohort_type,varchar(10),Yes,No,No,No,The cohort type
 cohort_details,target_cohort_id,int,Yes,No,No,No,The target cohort id

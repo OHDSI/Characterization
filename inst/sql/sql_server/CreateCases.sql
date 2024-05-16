@@ -23,7 +23,7 @@ and
 o.cohort_start_date >= dateadd(day, @tar_start, t.@tar_start_anchor);
 
 -- add the TnO for specific TAR
-insert into into #agg_cohorts_before
+insert into #agg_cohorts_before
 select *
 from
 (
