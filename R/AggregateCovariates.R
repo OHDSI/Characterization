@@ -407,8 +407,8 @@ computeAggregateCovariateAnalyses <- function(
     databaseId = databaseId,
     timeAtRiskId = 1:length(aggregateCovariateSettings$riskWindowStart),
     riskWindowStart = aggregateCovariateSettings$riskWindowStart,
-    startAnchor = aggregateCovariateSettings$startAnchor,
     riskWindowEnd = aggregateCovariateSettings$riskWindowEnd,
+    startAnchor = aggregateCovariateSettings$startAnchor,
     endAnchor = aggregateCovariateSettings$endAnchor
   )
 

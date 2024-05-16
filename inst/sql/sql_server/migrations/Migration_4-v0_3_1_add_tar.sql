@@ -12,7 +12,7 @@ database_id VARCHAR(100),
 time_at_risk_id INT,
 risk_window_start INT,
 risk_window_end INT,
-start_anchor VARCHAR(15)
+start_anchor VARCHAR(15),
 end_anchor VARCHAR(15)
 );
 
