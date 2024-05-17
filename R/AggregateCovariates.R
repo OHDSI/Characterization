@@ -213,7 +213,7 @@ computeAggregateCovariateAnalyses <- function(
     )
 
   # check cohortDefinitionIds are unique
-  if(sum(table(cohortDetails$cohortDefinitionIds> 1)) != 0){
+  if(sum(table(cohortDetails$cohortDefinitionIds)> 1) != 0){
     stop('Unique constrain on cohortDefinitionIds failed')
   }
 
