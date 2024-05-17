@@ -134,6 +134,17 @@ createAggregateCovariateSettings <- function(
 
   checkmate::reportAssertions(errorMessages)
 
+  # check unique Ts and Os
+  if(length(targetIds) != length(unique(targetIds))){
+    message('targetIds have duplicates - making unique')
+    targetIds <- unique(targetIds)
+  }
+  if(length(outcomeIds) != length(unique(outcomeIds))){
+    message('outcomeIds have duplicates - making unique')
+    outcomeIds <- unique(outcomeIds)
+  }
+
+
   # create list
   result <- list(
     targetIds = targetIds,
@@ -200,6 +211,11 @@ computeAggregateCovariateAnalyses <- function(
     targetIds = aggregateCovariateSettings$targetIds,
     outcomeIds = aggregateCovariateSettings$outcomeIds
     )
+
+  # check cohortDefinitionIds are unique
+  if(sum(table(cohortDetails$cohortDefinitionIds> 1)) != 0){
+    stop('Unique constrain on cohortDefinitionIds failed')
+  }
 
   # for each time-at-risk get case details
   for(i in 1:length(aggregateCovariateSettings$riskWindowStart)){
