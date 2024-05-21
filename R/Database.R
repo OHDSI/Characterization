@@ -165,17 +165,23 @@ createCharacterizationTables <- function(
   conn <- DatabaseConnector::connect(connectionDetails = connectionDetails)
   on.exit(DatabaseConnector::disconnect(conn))
 
+  alltables <- tolower(
+    DatabaseConnector::getTableNames(
+      connection = conn,
+      databaseSchema = resultSchema
+    )
+  )
+  tables <- getResultTables()
+  tables <- paste0(tablePrefix, tables)
+
+  # adding this to not create tables if all tables esist
+  if(sum(tables %in% alltables) == length(tables) & !deleteExistingTables){
+    message('All tables exist so no need to recreate')
+    createTables <- FALSE
+  }
+
   if (deleteExistingTables) {
     message("Deleting existing tables")
-    tables <- getResultTables()
-    tables <- paste0(tablePrefix, tables)
-
-    alltables <- tolower(
-      DatabaseConnector::getTableNames(
-        connection = conn,
-        databaseSchema = resultSchema
-      )
-    )
 
     for (tb in tables) {
       if (tb %in% alltables) {

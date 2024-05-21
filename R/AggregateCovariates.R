@@ -195,6 +195,9 @@ computeAggregateCovariateAnalyses <- function(
     runId = 1) {
   # check inputs
 
+  # create a unique execution id using the runId - moved to runChar
+  #runId <- hashInt(settings = aggregateCovariateSettings)
+
   start <- Sys.time()
 
   connection <- DatabaseConnector::connect(
@@ -212,11 +215,6 @@ computeAggregateCovariateAnalyses <- function(
     outcomeIds = aggregateCovariateSettings$outcomeIds
     )
 
-  # check cohortDefinitionIds are unique
-  if(sum(table(cohortDetails$cohortDefinitionIds)> 1) != 0){
-    stop('Unique constrain on cohortDefinitionIds failed')
-  }
-
   # for each time-at-risk get case details
   for(i in 1:length(aggregateCovariateSettings$riskWindowStart)){
     cohortDetails <- rbind(
@@ -226,6 +224,14 @@ computeAggregateCovariateAnalyses <- function(
         outcomeIds = aggregateCovariateSettings$outcomeIds,
         timeAtRiskId = i
       ))
+  }
+
+  # using row_id for unique cohort id for FE
+  cohortDetails$cohortDefinitionId <- 1:nrow(cohortDetails)
+
+  # check cohortDefinitionIds are unique
+  if(sum(table(cohortDetails$cohortDefinitionIds)> 1) != 0){
+    stop('Unique constrain on cohortDefinitionIds failed')
   }
 
 
@@ -517,21 +523,6 @@ createCohortsOfInterest <- function(
 
 }
 
-hex_to_int = function(h) {
-  xx = strsplit(tolower(h), "")[[1L]]
-  pos = match(xx, c(0L:9L, letters[1L:6L]))
-  sum((pos - 1L) * 16^(rev(seq_along(xx) - 1)))
-}
-
-hashInt <- function(T, O, type){
-  a <- digest::digest(
-    object = paste0(T,O,type),
-    algo='xxhash32',
-    seed=0
-    )
-  result <- hex_to_int(a)
-  return(result)
-}
 
 getCohortDetails <- function(
     targetIds,
@@ -562,14 +553,6 @@ getCohortDetails <- function(
     cohortDetails <- rbind(cohortDetails, cohortDetailsExtra)
   }
 
-
-  cohortDetails$cohortDefinitionId <- apply(
-    cohortDetails,
-    1,
-    function(x){
-      hashInt(T = x[1], O = x[2], type = x[3])
-    }
-  )
   return(cohortDetails)
 }
 
@@ -594,14 +577,21 @@ getCaseDetails <- function(
     cohortDetails <- rbind(cohortDetails, cohortDetailsExtra)
   }
 
-  cohortDetails$cohortDefinitionId <- apply(
-    cohortDetails,
-    1,
-    function(x){
-      hashInt(T = x[1], O = x[2], type = paste0(x[3], timeAtRiskId))
-    }
-  )
   return(cohortDetails)
 }
 
+hex_to_int = function(h) {
+  xx = strsplit(tolower(h), "")[[1L]]
+  pos = match(xx, c(0L:9L, letters[1L:6L]))
+  sum((pos - 1L) * 16^(rev(seq_along(xx) - 1)))
+}
 
+hashInt <- function(settings){
+  a <- digest::digest(
+    object = settings,
+    algo='xxhash32',
+    seed=0
+  )
+  result <- hex_to_int(a)
+  return(result)
+}
