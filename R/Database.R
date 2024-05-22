@@ -396,7 +396,7 @@ exportDatabaseToCsv <- function(
     # reason.
     pb <- utils::txtProgressBar(min = 0, max = countN + 1, initial = 0)
 
-    for (i in 1:length(inds)) {
+    for (i in 1:inds) {
       startRow <- (i - 1) * maxRowCount + 1
       endRow <- min(i * maxRowCount, countN)
 
