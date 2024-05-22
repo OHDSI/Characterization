@@ -12,7 +12,7 @@ exportDatabaseToCsv(
   filePrefix = NULL,
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   saveDirectory,
-  minMeanCovariateValue = 0.001
+  maxRowCount = 1e+06
 )
 }
 \arguments{
@@ -32,9 +32,7 @@ function \code{connect} in the
 
 \item{saveDirectory}{The directory to save the csv results}
 
-\item{minMeanCovariateValue}{The minimum mean covariate value (i.e. the minimum proportion for
-binary covariates) for a covariate to be included in covariate table.
-Other covariates are removed to save space.}
+\item{maxRowCount}{Max number of rows extracted at a time}
 }
 \value{
 csv file per table into the saveDirectory

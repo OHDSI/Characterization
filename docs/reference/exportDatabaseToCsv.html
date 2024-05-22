@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1</span>
       </span>
     </div>
 
@@ -44,14 +44,14 @@
       <a href="../articles/InstallationGuide.html">Characterization Installation Guide</a>
     </li>
     <li>
-      <a href="../articles/UsingCharacterizationPackage.html">Using Characterization Package</a>
+      <a href="../articles/UsingPackage.html">Using Characterization Package</a>
     </li>
   </ul></li>
 <li>
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://ohdsi.github.io/Hades" class="external-link">hadesLogo</a>
+  <a href="https://ohdsi.github.io/Hades" class="external-link"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
 </li>
 <li>
   <a href="https://github.com/OHDSI/PatientLevelPrediction" class="external-link">
@@ -85,8 +85,7 @@
 <span>  tablePrefix <span class="op">=</span> <span class="st">"c_"</span>,</span>
 <span>  filePrefix <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tempEmulationSchema <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"sqlRenderTempEmulationSchema"</span><span class="op">)</span>,</span>
-<span>  <span class="va">saveDirectory</span>,</span>
-<span>  minMeanCovariateValue <span class="op">=</span> <span class="fl">0.001</span></span>
+<span>  <span class="va">saveDirectory</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -121,12 +120,6 @@ function <code>connect</code> in the
 <dt>saveDirectory</dt>
 <dd><p>The directory to save the csv results</p></dd>
 
-
-<dt>minMeanCovariateValue</dt>
-<dd><p>The minimum mean covariate value (i.e. the minimum proportion for
-binary covariates) for a covariate to be included in covariate table.
-Other covariates are removed to save space.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -147,7 +140,7 @@ Other covariates are removed to save space.</p></dd>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Jenna Reps, Patrick Ryan.</p>
+  <p></p><p>Developed by Jenna Reps, Patrick Ryan, Chris Knoll.</p>
 </div>
 
 <div class="pkgdown">

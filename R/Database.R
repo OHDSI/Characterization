@@ -47,11 +47,8 @@ createSqliteDatabase <- function(
     dbms = "sqlite",
     server = file.path(sqliteLocation, "sqlite.sqlite")
   )
-  connection <- DatabaseConnector::connect(
-    connectionDetails = connectionDetails
-  )
 
-  return(connection)
+  return(connectionDetails)
 }
 
 # move Andromeda to sqlite database
@@ -136,8 +133,8 @@ removeMinCell <- function(
 #' @details
 #' This function can be used to create (or delete) Characterization result tables
 #'
-#' @param conn                         A connection to a database created by using the
-#'                                     function \code{connect} in the
+#' @param connectionDetails            The connectionDetails to a database created by using the
+#'                                     function \code{createConnectDetails} in the
 #'                                     \code{DatabaseConnector} package.
 #' @param resultSchema                 The name of the database schema that the result tables will be created.
 #' @param targetDialect                The database management system being used
@@ -151,7 +148,7 @@ removeMinCell <- function(
 #'
 #' @export
 createCharacterizationTables <- function(
-    conn,
+    connectionDetails,
     resultSchema,
     targetDialect = "postgresql",
     deleteExistingTables = T,
@@ -165,18 +162,26 @@ createCharacterizationTables <- function(
   )
   checkmate::reportAssertions(errorMessages)
 
+  conn <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  on.exit(DatabaseConnector::disconnect(conn))
+
+  alltables <- tolower(
+    DatabaseConnector::getTableNames(
+      connection = conn,
+      databaseSchema = resultSchema
+    )
+  )
+  tables <- getResultTables()
+  tables <- paste0(tablePrefix, tables)
+
+  # adding this to not create tables if all tables esist
+  if(sum(tables %in% alltables) == length(tables) & !deleteExistingTables){
+    message('All tables exist so no need to recreate')
+    createTables <- FALSE
+  }
 
   if (deleteExistingTables) {
     message("Deleting existing tables")
-    tables <- getResultTables()
-    tables <- paste0(tablePrefix, tables)
-
-    alltables <- tolower(
-      DatabaseConnector::getTableNames(
-        connection = conn,
-        databaseSchema = resultSchema
-      )
-    )
 
     for (tb in tables) {
       if (tb %in% alltables) {
@@ -232,7 +237,47 @@ createCharacterizationTables <- function(
     )
 
     # add database migration here in the future
+    migrateDataModel(
+      connectionDetails = connectionDetails,
+      databaseSchema = resultSchema,
+      tablePrefix = tablePrefix
+    )
   }
+}
+
+
+migrateDataModel <- function(connectionDetails, databaseSchema, tablePrefix = "") {
+  ParallelLogger::logInfo("Migrating data set")
+  migrator <- getDataMigrator(
+    connectionDetails = connectionDetails,
+    databaseSchema = databaseSchema,
+    tablePrefix = tablePrefix
+    )
+  migrator$executeMigrations()
+  migrator$finalize()
+
+  ParallelLogger::logInfo("Updating version number")
+  updateVersionSql <- SqlRender::loadRenderTranslateSql("UpdateVersionNumber.sql",
+                                                        packageName = utils::packageName(),
+                                                        database_schema = databaseSchema,
+                                                        table_prefix = tablePrefix,
+                                                        dbms = connectionDetails$dbms
+  )
+
+  connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection))
+  DatabaseConnector::executeSql(connection, updateVersionSql)
+}
+
+
+getDataMigrator <- function(connectionDetails, databaseSchema, tablePrefix = "") {
+  ResultModelManager::DataMigrationManager$new(
+    connectionDetails = connectionDetails,
+    databaseSchema = databaseSchema,
+    tablePrefix = tablePrefix,
+    migrationPath = "migrations",
+    packageName = utils::packageName()
+  )
 }
 
 #' Exports all tables in the result database to csv files
@@ -251,9 +296,7 @@ createCharacterizationTables <- function(
 #' @param filePrefix                   The prefix to apply to the files
 #' @param tempEmulationSchema          The temp schema used when the database management system is oracle
 #' @param saveDirectory                The directory to save the csv results
-#' @param minMeanCovariateValue        The minimum mean covariate value (i.e. the minimum proportion for
-#'                                     binary covariates) for a covariate to be included in covariate table.
-#'                                     Other covariates are removed to save space.
+#' @param maxRowCount                  Max number of rows extracted at a time
 #'
 #' @return
 #' csv file per table into the saveDirectory
@@ -267,7 +310,8 @@ exportDatabaseToCsv <- function(
     filePrefix = NULL,
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     saveDirectory,
-    minMeanCovariateValue = 0.001) {
+    maxRowCount = 1e6
+    ) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
   .checkTablePrefix(
@@ -299,8 +343,6 @@ exportDatabaseToCsv <- function(
     )
   }
 
-  # max number of rows extracted at a time
-  maxRowCount <- 1e6
 
   # get the table names using the function in uploadToDatabase.R
   tables <- getResultTables()
@@ -354,7 +396,7 @@ exportDatabaseToCsv <- function(
     # reason.
     pb <- utils::txtProgressBar(min = 0, max = countN + 1, initial = 0)
 
-    for (i in 1:length(inds)) {
+    for (i in 1:inds) {
       startRow <- (i - 1) * maxRowCount + 1
       endRow <- min(i * maxRowCount, countN)
 
@@ -411,14 +453,17 @@ exportDatabaseToCsv <- function(
 getResultTables <- function() {
   return(
     unique(
-      readr::read_csv(
-        file = system.file(
-          "settings",
-          "resultsDataModelSpecification.csv",
-          package = "Characterization"
-        ),
-        show_col_types = FALSE
-      )$table_name
+      c(
+        readr::read_csv(
+          file = system.file(
+            "settings",
+            "resultsDataModelSpecification.csv",
+            package = "Characterization"
+          ),
+          show_col_types = FALSE
+        )$table_name,
+        'migration', 'package_version'
+      )
     )
   )
 }

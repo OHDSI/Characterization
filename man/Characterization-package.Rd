@@ -23,6 +23,7 @@ Useful links:
 Authors:
 \itemize{
   \item Patrick Ryan \email{ryan@ohdsi.org}
+  \item Chris Knoll \email{knoll@ohdsi.org}
 }
 
 }

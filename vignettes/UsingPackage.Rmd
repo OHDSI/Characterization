@@ -124,11 +124,12 @@ agc <- computeAggregateCovariateAnalyses(
 If you would like to save the results you can use the function `saveAggregateCovariateAnalyses` and this can then be loaded using `loadAggregateCovariateAnalyses`.
 
 The results are Andromeda objects that can we viewed using `dplyr`.  There are four tables:
- 
-- covariates:
+
+- covariates (only showing 10 rows):
 ```{r eval=TRUE}
 agc$covariates %>%
   collect() %>%
+  slice(1L:10) %>%
   kableExtra::kbl()
 ```
 
@@ -152,6 +153,7 @@ agc$analysisRef %>%
   collect() %>%
   kableExtra::kbl()
 ```
+
 
 ## Dechallenge Rechallenge
 

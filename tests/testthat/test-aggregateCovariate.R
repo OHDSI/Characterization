@@ -16,9 +16,11 @@ test_that("createAggregateCovariateSettings", {
     targetIds = targetIds,
     outcomeIds = outcomeIds,
     minPriorObservation = 10,
+    outcomeWashoutDays = 100,
     riskWindowStart = 1, startAnchor = "cohort start",
     riskWindowEnd = 365, endAnchor = "cohort start",
-    covariateSettings = covariateSettings
+    covariateSettings = covariateSettings,
+    minCharacterizationMean = 0.01
   )
 
   testthat::expect_equal(
@@ -26,7 +28,7 @@ test_that("createAggregateCovariateSettings", {
     targetIds
   )
   testthat::expect_equal(
-    res$covariateSettings,
+    res$covariateSettings[[1]],
     covariateSettings
   )
 
@@ -34,6 +36,54 @@ test_that("createAggregateCovariateSettings", {
     res$minPriorObservation,
     10
   )
+
+  testthat::expect_equal(
+    res$outcomeWashoutDays,
+    100
+  )
+
+  testthat::expect_equal(
+    res$minCharacterizationMean,
+    0.01
+  )
+})
+
+test_that("error when using temporal features", {
+  targetIds <- sample(x = 100, size = sample(10, 1))
+  outcomeIds <- sample(x = 100, size = sample(10, 1))
+  temporalCovariateSettings <- FeatureExtraction::createDefaultTemporalCovariateSettings()
+
+  testthat::expect_error(
+    createAggregateCovariateSettings(
+      targetIds = targetIds,
+      outcomeIds = outcomeIds,
+      minPriorObservation = 10,
+      outcomeWashoutDays = 100,
+      riskWindowStart = 1, startAnchor = "cohort start",
+      riskWindowEnd = 365, endAnchor = "cohort start",
+      covariateSettings = temporalCovariateSettings,
+      minCharacterizationMean = 0.01
+    )
+  )
+
+  temporalCovariateSettings <- list(
+    FeatureExtraction::createDefaultCovariateSettings(),
+    FeatureExtraction::createDefaultTemporalCovariateSettings()
+  )
+
+  testthat::expect_error(
+    createAggregateCovariateSettings(
+      targetIds = targetIds,
+      outcomeIds = outcomeIds,
+      minPriorObservation = 10,
+      outcomeWashoutDays = 100,
+      riskWindowStart = 1, startAnchor = "cohort start",
+      riskWindowEnd = 365, endAnchor = "cohort start",
+      covariateSettings = temporalCovariateSettings,
+      minCharacterizationMean = 0.01
+    )
+  )
+
 })
 
 test_that("createAggregateCovariateSettingsList", {
@@ -80,9 +130,11 @@ test_that("computeAggregateCovariateAnalyses", {
     targetIds = targetIds,
     outcomeIds = outcomeIds,
     minPriorObservation = 30,
+    outcomeWashoutDays = 1,
     riskWindowStart = 1, startAnchor = "cohort start",
     riskWindowEnd = 5 * 365, endAnchor = "cohort start",
-    covariateSettings = covariateSettings
+    covariateSettings = covariateSettings,
+    minCharacterizationMean = 0.01
   )
 
   agc <- computeAggregateCovariateAnalyses(
@@ -94,10 +146,9 @@ test_that("computeAggregateCovariateAnalyses", {
     aggregateCovariateSettings = res
   )
 
-
   testthat::expect_true(inherits(agc, "CovariateData"))
   testthat::expect_true(length(unique(as.data.frame(agc$covariates)$cohortDefinitionId))
-  <= length(res$targetIds) * length(res$outcomeIds) * 4 + length(res$targetIds) * 2 + length(res$outcomeIds) * 2)
+  <= length(res$targetIds) * length(res$outcomeIds) * 4 + length(res$targetIds) * 1 + length(res$outcomeIds) * 1)
   testthat::expect_true(
     sum(names(agc) %in% c(
       "analysisRef",
@@ -109,9 +160,11 @@ test_that("computeAggregateCovariateAnalyses", {
     )) == 6
   )
 
+  # check cohortCounts is done for all except TnObetween and OnT
+  # missing TnOprior as not in eunomia
   testthat::expect_true(
-    nrow(as.data.frame(agc$cohortDetails)) ==
-      nrow(as.data.frame(agc$cohortCounts))
+    nrow(as.data.frame(agc$cohortDetails)) >=
+      (nrow(as.data.frame(agc$cohortCounts))+6)
   )
 
   # check cohortDetails
@@ -121,7 +174,7 @@ test_that("computeAggregateCovariateAnalyses", {
   )
 
   testthat::expect_true(
-    nrow(as.data.frame(agc$cohortDetails)) == 20 # 8 T/Os, 6 TnO, 0 TnOc, 6 OnT
+    nrow(as.data.frame(agc$cohortDetails)) == 20 # 8 T/Os, 3 TnO, 0 TnOc, 3 OnT, 3 TnOprior, 3 TnObetween
   )
 
   # test saving/loading
