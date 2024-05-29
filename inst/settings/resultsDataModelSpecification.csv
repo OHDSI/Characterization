@@ -45,7 +45,7 @@ dechallenge_rechallenge,pct_rechallenge_attempt,float,Yes,No,No,No,The percentag
 dechallenge_rechallenge,pct_rechallenge_success,float,Yes,No,No,No,The percentage of rechallenge success
 dechallenge_rechallenge,pct_rechallenge_fail,float,Yes,No,No,No,The percentage of rechallenge fails
 analysis_ref,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-analysis_ref,run_id,int,Yes,Yes,No,No,The run identifier
+analysis_ref,setting_id,int,Yes,Yes,No,No,The run identifier
 analysis_ref,analysis_id,int,Yes,Yes,No,No,The analysis identifier
 analysis_ref,analysis_name,varchar,Yes,No,No,No,The analysis name
 analysis_ref,domain_id,varchar,Yes,No,No,No,The domain id
@@ -54,20 +54,25 @@ analysis_ref,end_day,int,Yes,No,No,No,The end day
 analysis_ref,is_binary,varchar(1),Yes,No,No,No,Is this a binary analysis
 analysis_ref,missing_means_zero,varchar(1),Yes,No,No,No,Missing means zero
 covariate_ref,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-covariate_ref,run_id,int,Yes,Yes,No,No,The run identifier
+covariate_ref,setting_id,int,Yes,Yes,No,No,The run identifier
 covariate_ref,covariate_id,bigint,Yes,Yes,No,No,The covariate identifier
 covariate_ref,covariate_name,varchar,Yes,No,No,No,The covariate name
 covariate_ref,analysis_id,int,Yes,No,No,No,The analysis identifier
 covariate_ref,concept_id,bigint,Yes,No,No,No,The concept identifier
 covariates,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-covariates,run_id,int,Yes,Yes,No,No,The run identifier
-covariates,cohort_definition_id,int,Yes,Yes,No,No,The cohort definition id
+covariates,setting_id,int,Yes,Yes,No,No,The run identifier
+covariates,cohort_type,varchar(10),Yes,Yes,No,No,The cohort type
+covariates,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
+covariates,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
+covariates,min_characterization_mean,float,No,Yes,No,No,Minimum fraction for feature extraction
 covariates,covariate_id,bigint,Yes,Yes,No,No,The covaraite id
 covariates,sum_value,int,Yes,No,No,No,The sum value
 covariates,average_value,float,Yes,No,No,No,The average value
 covariates_continuous,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-covariates_continuous,run_id,int,Yes,Yes,No,No,The run identifier
-covariates_continuous,cohort_definition_id,bigint,Yes,Yes,No,No,The cohort definition id
+covariates_continuous,setting_id,int,Yes,Yes,No,No,The run identifier
+covariates_continuous,cohort_type,varchar(10),Yes,Yes,No,No,The cohort type
+covariates_continuous,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
+covariates_continuous,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
 covariates_continuous,covariate_id,bigint,Yes,Yes,No,No,The covariate identifier
 covariates_continuous,count_value,int,Yes,No,No,No,The count value
 covariates_continuous,min_value,float,Yes,No,No,No,The min value
@@ -79,31 +84,33 @@ covariates_continuous,p_10_value,float,Yes,No,No,No,The 10th percentile
 covariates_continuous,p_25_value,float,Yes,No,No,No,The 25th percentile
 covariates_continuous,p_75_value,float,Yes,No,No,No,The 75th percentile
 covariates_continuous,p_90_value,float,Yes,No,No,No,The 90th percentile
-settings,run_id,int,Yes,Yes,No,No,The run identifier
+settings,setting_id,int,Yes,Yes,No,No,The run identifier
 settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 settings,covariate_setting_json,varchar,Yes,No,No,No,The covariate settings JSON
-settings,during_covariate_setting_json,varchar,Yes,No,No,No,The during covariate settings JSON
-settings,after_covariate_setting_json,varchar,Yes,No,No,No,The after covariate settings JSON
+settings,case_covariate_setting_json,varchar,Yes,No,No,No,The during covariate settings JSON
 settings,min_prior_observation,int,No,No,No,No,Minimum time observed before index
 settings,outcome_washout_days,int,No,No,No,No,Patients with outcome during washout are excluded
-settings,min_characterization_mean,float,No,No,No,No,Minimum fraction for feature extraction
-time_at_risk,run_id,int,Yes,Yes,No,No,The run identifier
-time_at_risk,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-time_at_risk,time_at_risk_id,int,Yes,Yes,No,No,The identifier for the time-at-risk
-time_at_risk,risk_window_start,int,No,No,No,No,The risk window start
-time_at_risk,risk_window_end,int,No,No,No,No,The risk window end
-time_at_risk,start_anchor,varchar(15),No,No,No,No,The start anchor
-time_at_risk,end_anchor,varchar(15),No,No,No,No,The end anchor
-cohort_details,run_id,int,Yes,Yes,No,No,The run identifier
+settings,risk_window_start,int,No,No,No,No,The risk window start
+settings,risk_window_end,int,No,No,No,No,The risk window end
+settings,start_anchor,varchar(15),No,No,No,No,The start anchor
+settings,end_anchor,varchar(15),No,No,No,No,The end anchor
+settings,case_pre_target_duration,int,No,No,No,No,How far to look back before index for case features
+settings,case_post_outcome_duration,int,No,No,No,No,How far to look forward after outcome for case features
 cohort_details,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-cohort_details,time_at_risk_id,int,Yes,Yes,No,No,The identifier for the time-at-risk
-cohort_details,cohort_definition_id,int,Yes,Yes,No,No,The study cohort id
-cohort_details,cohort_type,varchar(10),Yes,No,No,No,The cohort type
-cohort_details,target_cohort_id,int,Yes,No,No,No,The target cohort id
-cohort_details,outcome_cohort_id,int,Yes,No,No,No,The outcome cohort id
-cohort_counts,run_id,int,Yes,Yes,No,No,The run identifier
+cohort_details,setting_id,int,Yes,Yes,No,No,The run identifier
+cohort_details,cohort_type,varchar(10),Yes,Yes,No,No,The cohort type
+cohort_details,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
+cohort_details,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
 cohort_counts,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-cohort_counts,cohort_definition_id,int,Yes,Yes,No,No,The study cohort id
+cohort_counts,cohort_type,varchar(10),Yes,Yes,No,No,The cohort type
+cohort_counts,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
+cohort_counts,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
+cohort_counts,risk_window_start,int,No,Yes,No,No,The risk window start
+cohort_counts,risk_window_end,int,No,Yes,No,No,The risk window end
+cohort_counts,start_anchor,varchar(15),No,Yes,No,No,The start anchor
+cohort_counts,end_anchor,varchar(15),No,Yes,No,No,The end anchor
+cohort_counts,min_prior_observation,int,No,Yes,No,No,Minimum time observed before index
+cohort_counts,outcome_washout_days,int,No,Yes,No,No,Patients with outcome during washout are excluded
 cohort_counts,row_count,int,Yes,No,No,No,The number of rows in each cohort
 cohort_counts,person_count,int,Yes,No,No,No,The number of distinct people in each cohort
 cohort_counts,min_exposure_time,bigint,No,No,No,No,Minimum exposure time across cohort

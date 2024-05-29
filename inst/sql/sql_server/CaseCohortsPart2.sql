@@ -39,7 +39,7 @@ INNER JOIN #cohort_details cd
 on cd.target_cohort_id = tno.target_cohort_id
 and cd.outcome_cohort_id = tno.outcome_cohort_id
 and cd.cohort_type = 'TnO'
-and cd.time_at_risk_id = @time_at_risk_id
+and cd.setting_id = @setting_id
 
 ) temp_ts2;
 
@@ -58,7 +58,7 @@ INNER JOIN #cohort_details cd
 on cd.target_cohort_id = tno.target_cohort_id
 and cd.outcome_cohort_id = tno.outcome_cohort_id
 and cd.cohort_type = 'TnObetween'
-and cd.time_at_risk_id = @time_at_risk_id
+and cd.setting_id = @setting_id
 
 union
 
@@ -73,7 +73,7 @@ INNER JOIN #cohort_details cd
 on cd.target_cohort_id = tno.target_cohort_id
 and cd.outcome_cohort_id = tno.outcome_cohort_id
 and cd.cohort_type = 'OnT'
-and cd.time_at_risk_id = @time_at_risk_id
+and cd.setting_id = @setting_id
 
 union
 
@@ -87,7 +87,7 @@ INNER JOIN #cohort_details cd
 on cd.target_cohort_id = tno.target_cohort_id
 and cd.outcome_cohort_id = tno.outcome_cohort_id
 and cd.cohort_type = 'TnO'
-and cd.time_at_risk_id = @time_at_risk_id
+and cd.setting_id = @setting_id
 
 ) temp_ts2;
 

@@ -62,29 +62,33 @@ CREATE TABLE @my_schema.@table_prefixdechallenge_rechallenge (
 
 -- covariateSettings
 CREATE TABLE @my_schema.@table_prefixsettings (
-    run_id int NOT NULL,
+    setting_id int NOT NULL,
     database_id varchar(100) NOT NULL,
     covariate_setting_json varchar(MAX),
+    case_covariate_setting_json varchar(MAX),
+    min_prior_observation int,
+    outcome_washout_days int,
     risk_window_start int,
     start_anchor varchar(15),
     risk_window_end int,
     end_anchor varchar(15),
-    PRIMARY KEY (run_id, database_id)
+    case_pre_target_duration int,
+    case_post_outcome_duration int,
+    PRIMARY KEY (setting_id, database_id)
 );
 
 -- added this table
 CREATE TABLE @my_schema.@table_prefixcohort_details (
-    run_id int NOT NULL,
+    setting_id int NOT NULL,
     database_id varchar(100) NOT NULL,
-    cohort_definition_id bigint NOT NULL,
     target_cohort_id int,
     outcome_cohort_id int,
     cohort_type varchar(10),
-    PRIMARY KEY (run_id, database_id,cohort_definition_id)
+    PRIMARY KEY (setting_id, database_id,target_cohort_id,outcome_cohort_id,cohort_type)
 );
 
 CREATE TABLE @my_schema.@table_prefixanalysis_ref (
-    run_id int NOT NULL,
+    setting_id int NOT NULL,
     database_id varchar(100) NOT NULL,
     analysis_id int NOT NULL,
     analysis_name varchar(max) NOT NULL,
@@ -93,33 +97,38 @@ CREATE TABLE @my_schema.@table_prefixanalysis_ref (
     end_day int,
     is_binary varchar(1),
     missing_means_zero varchar(1),
-    PRIMARY KEY (database_id, run_id, analysis_id )
+    PRIMARY KEY (database_id, setting_id, analysis_id)
 );
 
 CREATE TABLE @my_schema.@table_prefixcovariate_ref (
-    run_id int NOT NULL,
+    setting_id int NOT NULL,
     database_id varchar(100) NOT NULL,
     covariate_id bigint NOT NULL,
     covariate_name varchar(max) NOT NULL,
     analysis_id int NOT NULL,
     concept_id bigint,
-    PRIMARY KEY (database_id, run_id, covariate_id)
+    PRIMARY KEY (database_id, setting_id, covariate_id)
 );
 
 CREATE TABLE @my_schema.@table_prefixcovariates (
-    run_id int NOT NULL,
+    setting_id int NOT NULL,
     database_id varchar(100) NOT NULL,
-    cohort_definition_id bigint NOT NULL,
+    target_cohort_id int,
+    outcome_cohort_id int,
+    cohort_type varchar(10),
     covariate_id bigint NOT NULL,
     sum_value int NOT NULL,
     average_value float NOT NULL,
-    PRIMARY KEY (database_id, run_id, cohort_definition_id, covariate_id)
+    min_characterization_mean float,
+    PRIMARY KEY (database_id, setting_id, target_cohort_id, outcome_cohort_id, cohort_type , covariate_id)
 );
 
 CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
-    run_id int NOT NULL,
+    setting_id int NOT NULL,
     database_id varchar(100) NOT NULL,
-    cohort_definition_id bigint NOT NULL,
+    target_cohort_id int,
+    outcome_cohort_id int,
+    cohort_type varchar(10),
     covariate_id bigint NOT NULL,
     count_value int NOT NULL,
     min_value float,
@@ -131,14 +140,26 @@ CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
     p_25_value float,
     p_75_value float,
     p_90_value float,
-    PRIMARY KEY (database_id, run_id, cohort_definition_id, covariate_id)
+    PRIMARY KEY (database_id, setting_id, target_cohort_id, outcome_cohort_id, cohort_type , covariate_id)
 );
 
 CREATE TABLE @my_schema.@table_prefixcohort_counts(
-    run_id int NOT NULL,
     database_id varchar(100) NOT NULL,
-    cohort_definition_id bigint NOT NULL,
+    target_cohort_id int,
+    outcome_cohort_id int,
+    cohort_type varchar(10),
+    min_prior_observation int,
+    outcome_washout_days int,
+    risk_window_start int,
+    start_anchor varchar(15),
+    risk_window_end int,
+    end_anchor varchar(15),
     row_count int NOT NULL,
     person_count int NOT NULL,
-    PRIMARY KEY (run_id, database_id, cohort_definition_id)
+    min_exposure_time int,
+    mean_exposure_time int,
+    max_exposure_time int,
+    PRIMARY KEY (database_id, target_cohort_id,outcome_cohort_id,
+    cohort_type, min_prior_observation, outcome_washout_days,
+    risk_window_start, start_anchor, risk_window_end, end_anchor)
 );

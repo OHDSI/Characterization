@@ -25,9 +25,6 @@
 #' @param caseCovariateSettings An object created using \code{createDuringCovariateSettings}
 #' @param casePreTargetDuration    The number of days prior to case index we use for FeatureExtraction
 #' @param casePostOutcomeDuration    The number of days prior to case index we use for FeatureExtraction
-#' @param minCharacterizationMean The minimum mean value for characterization output. Values below this will be cut off from output. This
-#'                                will help reduce the file size of the characterization output, but will remove information
-#'                                on covariates that have very low values. The default is 0.
 #'
 #' @return
 #' A list with the settings
@@ -82,8 +79,7 @@ createAggregateCovariateSettings <- function(
       useVisitConceptCountDuring = T
       ),
     casePreTargetDuration = 365,
-    casePostOutcomeDuration = 365,
-    minCharacterizationMean = 0
+    casePostOutcomeDuration = 365
     ) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
@@ -158,8 +154,7 @@ createAggregateCovariateSettings <- function(
     covariateSettings = covariateSettings,
     caseCovariateSettings = caseCovariateSettings,
     casePreTargetDuration = casePreTargetDuration,
-    casePostOutcomeDuration = casePostOutcomeDuration,
-    minCharacterizationMean = minCharacterizationMean
+    casePostOutcomeDuration = casePostOutcomeDuration
   )
 
   class(result) <- "aggregateCovariateSettings"
@@ -175,7 +170,17 @@ createAggregateCovariateSettings <- function(
 #' @template TempEmulationSchema
 #' @param aggregateCovariateSettings   The settings for the AggregateCovariate study
 #' @param databaseId Unique identifier for the database (string)
-#' @param runId  Unique identifier for the tar and covariate setting
+#' @param outputFolder The location to save the results as csv files
+#' @param runId  (depreciated) Unique identifier for the covariate setting
+#' @param threads The number of threads to run in parallel
+#' @param incrementalFile (optional) A file that tracks completed studies
+#' @param minCharacterizationMean The minimum mean value for characterization output. Values below this will be cut off from output. This
+#'                                will help reduce the file size of the characterization output, but will remove information
+#'                                on covariates that have very low values. The default is 0.
+#' @param runExtractTfeatures        Whether to extract the target cohort features
+#' @param runExtractOfeatures        Whether to extract the outcome cohort features
+#' @param runExtractCaseFeatures    Whether to extract the case cohort features
+#' @param settingIds     (not recommended to use) User can specify the lookup ids for the settings
 #'
 #' @return
 #' The descriptive results for each target cohort in the settings.
@@ -192,406 +197,258 @@ computeAggregateCovariateAnalyses <- function(
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     aggregateCovariateSettings,
     databaseId = "database 1",
-    runId = 1) {
+    outputFolder = file.path(getwd(),'characterization_results'),
+    runId = 1, # not needed
+    threads = 1,
+    incrementalFile = NULL,
+    minCharacterizationMean = 0,
+    runExtractTfeatures = T,
+    runExtractOfeatures = T,
+    runExtractCaseFeatures = T,
+    settingIds = NULL
+    ) {
   # check inputs
 
-  # create a unique execution id using the runId - moved to runChar
-  #runId <- hashInt(settings = aggregateCovariateSettings)
-
   start <- Sys.time()
 
-  connection <- DatabaseConnector::connect(
-    connectionDetails = connectionDetails
-  )
-  on.exit(
-    DatabaseConnector::disconnect(connection)
-  )
-
-
-  # creating cohort_details
-  message("Creating and inserting cohort details")
-  cohortDetails <- getCohortDetails(
-    targetIds = aggregateCovariateSettings$targetIds,
-    outcomeIds = aggregateCovariateSettings$outcomeIds
-    )
-
-  # for each time-at-risk get case details
-  for(i in 1:length(aggregateCovariateSettings$riskWindowStart)){
-    cohortDetails <- rbind(
-      cohortDetails,
-      getCaseDetails(
-        targetIds = aggregateCovariateSettings$targetIds,
-        outcomeIds = aggregateCovariateSettings$outcomeIds,
-        timeAtRiskId = i
-      ))
+  # if not a list of aggregateCovariateSettings make it one
+  if(!inherits(aggregateCovariateSettings, 'list')){
+    aggregateCovariateSettings <- list(aggregateCovariateSettings)
   }
 
-  # using row_id for unique cohort id for FE
+  # create covariateSetting lookups
+  #=================================
+  covariateSettingsList <- extractCovariateList(aggregateCovariateSettings)
+  caseCovariateSettingsList <- extractCaseCovariateList(aggregateCovariateSettings)
+
+  #=================================
+
+  # extract the combinations of
+  # T,O,type, tar, washout, min prior obs, case prior, case post
+  # case settings, covariate settings, cov hash, case cov hash
+  cohortDetails <- do.call(
+    what = 'rbind',
+    args = lapply(
+    X = aggregateCovariateSettings,
+    FUN = extractCombinationSettings,
+    caseCovariateSettingsList = caseCovariateSettingsList,
+    covariateSettingsList = covariateSettingsList
+      )
+    )
+
+  #remove redundancy
+  cohortDetails <- unique(cohortDetails)
+
+  # get settings
+  settingColumns <- c(
+    'minPriorObservation', 'outcomeWashoutDays',
+    'casePreTargetDuration', 'casePostOutcomeDuration',
+    'riskWindowStart','startAnchor',
+    'riskWindowEnd','endAnchor',
+    'covariateSettingsHash', 'caseCovariateSettingsHash'
+  )
+  settings <- unique(cohortDetails[,settingColumns])
+  if(is.null(settingIds)){
+    settings$settingId <- 1:nrow(settings)
+  } else{
+    if(nrow(settings) == settingIds){
+    settings$settingId <- settingIds
+    } else{
+      stop('SettingsIds input but wrong length')
+    }
+  }
+  # add settingId to cohortDetails
+  cohortDetails <- merge(
+    x = cohortDetails,
+    y = settings,
+    by = settingColumns
+  )
+
+  # save settings, cohort_details
+  saveSettings(
+    outputFolder = outputFolder,
+    cohortDetails = cohortDetails,
+    databaseId = databaseId,
+    covariateSettingsList = covariateSettingsList,
+    caseCovariateSettingsList = caseCovariateSettingsList
+    )
+
+
+  # add cohortDefinitionId
   cohortDetails$cohortDefinitionId <- 1:nrow(cohortDetails)
 
-  # check cohortDefinitionIds are unique
-  if(sum(table(cohortDetails$cohortDefinitionIds)> 1) != 0){
-    stop('Unique constrain on cohortDefinitionIds failed')
-  }
-
-
-  DatabaseConnector::insertTable(
-    data = cohortDetails,
-    camelCaseToSnakeCase = T,
-    connection = connection,
-    tableName =  '#cohort_details',
-    tempTable = T,
-    dropTableIfExists = T,
-    createTable = T,
-    progressBar = T
-    )
-
-  # select T, O, create TnO, TnOc, Onprior T
-  # into temp table #agg_cohorts
-  message("Computing aggregate covariate cohorts")
-  start <- Sys.time()
-  createCohortsOfInterest(
-    connection = connection,
-    dbms = connectionDetails$dbms,
-    cdmDatabaseSchema = cdmDatabaseSchema,
-    aggregateCovariateSettings,
-    targetDatabaseSchema,
-    targetTable,
-    outcomeDatabaseSchema,
-    outcomeTable,
-    tempEmulationSchema
-  )
-  completionTime <- Sys.time() - start
-  message(paste0('Computing aggregate covariate cohorts took ',round(completionTime,digits = 1), ' ', units(completionTime)))
-  ## get counts
-  message("Extracting cohort counts")
-  sql <- "select
-  cohort_definition_id,
-  count(*) row_count,
-  count(distinct subject_id) person_count,
-  min(datediff(day, cohort_start_date, cohort_end_date)) min_exposure_time,
-  avg(datediff(day, cohort_start_date, cohort_end_date)) mean_exposure_time,
-  max(datediff(day, cohort_start_date, cohort_end_date)) max_exposure_time
-  from
-  (select * from #agg_cohorts_before union select * from #agg_cohorts_extras) temp
-  group by cohort_definition_id;"
-  sql <- SqlRender::translate(
-    sql = sql,
-    targetDialect = connectionDetails$dbms
-  )
-  counts <- DatabaseConnector::querySql(
-    connection = connection,
-    sql = sql,
-    snakeCaseToCamelCase = T,
-  )
-
-  message("Computing aggregate before covariate results")
-
-  result <- FeatureExtraction::getDbCovariateData(
-    connection = connection,
-    oracleTempSchema = tempEmulationSchema,
-    cdmDatabaseSchema = cdmDatabaseSchema,
-    cohortTable = "#agg_cohorts_before",
-    cohortTableIsTemp = T,
-    cohortIds = -1,
-    covariateSettings = aggregateCovariateSettings$covariateSettings,
-    cdmVersion = cdmVersion,
-    aggregated = T,
-    minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
-  )
-
-  message("Computing case covariate results")
-  resultCase <- FeatureExtraction::getDbCovariateData(
-    connection = connection,
-    oracleTempSchema = tempEmulationSchema,
-    cdmDatabaseSchema = cdmDatabaseSchema,
-    cohortTable = "#agg_cohorts_cases",
-    cohortTableIsTemp = T,
-    cohortIds = -1,
-    covariateSettings = aggregateCovariateSettings$caseCovariateSettings,
-    cdmVersion = cdmVersion,
-    aggregated = T,
-    minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
-  )
-
-  # add covariates to table
-  if(!is.null(result$covariates)){
-    if (!is.null(resultCase$covariates)) {
-      Andromeda::appendToTable(
-        tbl = result$covariates,
-        data = resultCase$covariates
+  # if running incremental remove previously executed
+  # analyses
+  if(!is.null(incrementalFile)){
+    if(file.exists(incrementalFile)){
+      executedDetails <- loadIncremental(incrementalFile)
+      cohortDetails <- removeExecuted(
+        cohortDetails = cohortDetails,
+        executedDetails = executedDetails
       )
     }
+  }
+
+  # stop if results already exist
+  if(nrow(cohortDetails) == 0){
+    message('All results have been previosuly executed')
   } else{
-    if (!is.null(resultCase$covariates)) {
-      result$covariates <- resultCase$covariates
+
+    # add folder Id
+    cohortDetails <- addFolderId(
+      cohortDetails = cohortDetails,
+      outputFolder = file.path(outputFolder,'execution'),
+      threads = threads
+    )
+
+    # RUN ANALYSES
+    message('Creating new cluster')
+    cluster <- ParallelLogger::makeCluster(
+      numberOfThreads = threads,
+      singleThreadToMain = T,
+      setAndromedaTempFolder = T
+    )
+
+    # 1) get the T and folders to get jobs run in parallel
+    if(runExtractTfeatures){
+      start <- Sys.time()
+      ind <- cohortDetails$cohortType %in% c('Target','Tall')
+      if( sum(ind) > 0 ){
+        message('Running target cohort features')
+        runs <- unique(cohortDetails$folderId[ind])
+        inputList <- lapply(
+          X = runs,
+          FUN = function(folderId){
+            list(
+              connectionDetails = connectionDetails,
+              cdmDatabaseSchema = cdmDatabaseSchema,
+              cohortDetails = cohortDetails[cohortDetails$folderId == folderId,],
+              covariateSettingsList = covariateSettingsList,
+              targetDatabaseSchema = targetDatabaseSchema,
+              targetTable = targetTable,
+              tempEmulationSchema = tempEmulationSchema,
+              minCharacterizationMean = minCharacterizationMean,
+              cdmVersion = cdmVersion,
+              databaseId = databaseId,
+              incrementalFile = incrementalFile
+            )
+          }
+        )
+
+        ParallelLogger::clusterApply(
+          cluster = cluster,
+          x = inputList,
+          fun = extractTargetFeatures
+        )
+        end <- Sys.time() - start
+        message(
+          paste0(
+            'Extracting target cohort features took ',
+            round(end, digits = 2), ' ',
+            units(end)
+          )
+        )
+      }
     }
-  }
 
-  # covariatesContinuous
-  if(!is.null(result$covariatesContinuous)){
-    if (!is.null(resultCase$covariatesContinuous)) {
-      Andromeda::appendToTable(
-        tbl = result$covariatesContinuous,
-        data = resultCase$covariatesContinuous
-      )
+    # 2) get the outcomes and folders to get jobs run in parallel
+    if(runExtractOfeatures){
+      start <- Sys.time()
+      ind <- cohortDetails$cohortType %in% c('Outcome','Oall')
+      if( sum(ind) > 0 ){
+        message('Running outcome cohort features')
+        runs <- unique(cohortDetails$folderId[ind])
+        inputList <- lapply(
+          X = runs,
+          FUN = function(folderId){
+            list(
+              connectionDetails = connectionDetails,
+              cdmDatabaseSchema = cdmDatabaseSchema,
+              cohortDetails = cohortDetails[cohortDetails$folderId == folderId,],
+              covariateSettingsList = covariateSettingsList,
+              outcomeDatabaseSchema = outcomeDatabaseSchema,
+              outcomeTable = outcomeTable,
+              tempEmulationSchema = tempEmulationSchema,
+              minCharacterizationMean = minCharacterizationMean,
+              cdmVersion = cdmVersion,
+              databaseId = databaseId,
+              incrementalFile = incrementalFile
+            )
+          }
+        )
+
+        ParallelLogger::clusterApply(
+          cluster = cluster,
+          x = inputList,
+          fun = extractOutcomeFeatures
+        )
+        end <- Sys.time() - start
+        message(
+          paste0(
+            'Extracting outcome cohort features took ',
+            round(end, digits = 2), ' ',
+            units(end)
+          )
+        )
+      }
     }
-  } else{
-    if (!is.null(resultCase$covariatesContinuous)) {
-      result$covariatesContinuous <- resultCase$covariatesContinuous
+
+
+    # 3) get the cases and folders to get jobs run in parallel
+    if(runExtractCaseFeatures){
+      start <- Sys.time()
+      ind <- !cohortDetails$cohortType %in% c('Outcome','Oall', 'Target', 'Tall')
+      if( sum(ind) > 0 ){
+        message('Running case cohort features')
+        runs <- unique(cohortDetails$folderId[ind])
+        inputList <- lapply(
+          X = runs,
+          FUN = function(folderId){
+            list(
+              connectionDetails = connectionDetails,
+              cdmDatabaseSchema = cdmDatabaseSchema,
+              cohortDetails = cohortDetails[cohortDetails$folderId == folderId,],
+              covariateSettingsList = covariateSettingsList,
+              caseCovariateSettingsList = caseCovariateSettingsList,
+              targetDatabaseSchema = targetDatabaseSchema,
+              targetTable = targetTable,
+              outcomeDatabaseSchema = outcomeDatabaseSchema,
+              outcomeTable = outcomeTable,
+              tempEmulationSchema = tempEmulationSchema,
+              minCharacterizationMean = minCharacterizationMean,
+              cdmVersion = cdmVersion,
+              databaseId = databaseId,
+              incrementalFile = incrementalFile
+            )
+          }
+        )
+
+        ParallelLogger::clusterApply(
+          cluster = cluster,
+          x = inputList,
+          fun = extractCaseFeatures
+        )
+        end <- Sys.time() - start
+        message(
+          paste0(
+            'Extracting case cohort features took ',
+            round(end, digits = 2), ' ',
+            units(end)
+          )
+        )
+      }
     }
+
+    # finish cluster
+    message('Stopping cluster')
+    ParallelLogger::stopCluster(cluster = cluster)
   }
-
-  # update covariateRef
-  result$covariateRef <- unique(
-    rbind(
-      as.data.frame(result$covariateRef),
-      as.data.frame(resultCase$covariateRef)
-    )
+  # combine csvs into one
+  message('Aggregating csv files')
+  aggregateCsvs(
+    outputFolder = outputFolder
   )
 
-  # update analysisRef
-  result$analysisRef <- unique(
-    rbind(
-      as.data.frame(result$analysisRef),
-      as.data.frame(resultCase$analysisRef)
-    )
-  )
-
-  # adding counts as a new table
-  result$cohortCounts <- counts
-
-  # add databaseId and runId to each table in results
-  # could add settings table with this and just have setting id
-  # as single extra column?
-
-  for (tableName in names(result)) {
-    result[[tableName]] <- result[[tableName]] %>%
-      dplyr::mutate(
-        runId = !!runId,
-        databaseId = !!databaseId
-      ) %>%
-      dplyr::relocate(
-        "databaseId",
-        "runId"
-      )
-  }
-
-  # cohort details:
-
-  result$cohortDetails <- DatabaseConnector::querySql(
-    connection = connection,
-    sql = SqlRender::translate(
-      sql = " select * from #cohort_details;",
-      targetDialect = connectionDetails$dbms
-    ),
-    snakeCaseToCamelCase = T
-  ) %>%
-    dplyr::mutate(
-      runId = !!runId,
-      databaseId = !!databaseId
-    ) %>%
-    dplyr::relocate(
-      "databaseId",
-      "runId"
-    )
-
-  # settings:
-  # run_id, database_id, covariate_setting_json,
-  # riskWindowStart, startAnchor, riskWindowEnd, endAnchor
-
-  covariateSettingsJson <- as.character(
-    ParallelLogger::convertSettingsToJson(
-      aggregateCovariateSettings$covariateSettings
-    )
-  )
-
-  caseCovariateSettingsJson <- as.character(
-    ParallelLogger::convertSettingsToJson(
-      aggregateCovariateSettings$caseCovariateSettings
-    )
-  )
-
-  result$settings <- data.frame(
-    runId = runId,
-    databaseId = databaseId,
-    covariateSettingJson = covariateSettingsJson,
-    caseCovariateSettingsJson = caseCovariateSettingsJson,
-    casePostOutcomeDuration = aggregateCovariateSettings$casePostOutcomeDuration,
-    casePreTargetDuration = aggregateCovariateSettings$casePreTargetDuration,
-    minPriorObservation = aggregateCovariateSettings$minPriorObservation,
-    outcomeWashoutDays = aggregateCovariateSettings$outcomeWashoutDays,
-    minCharacterizationMean = aggregateCovariateSettings$minCharacterizationMean
-  )
-
-  result$timeAtRisk <- data.frame(
-    runId = runId,
-    databaseId = databaseId,
-    timeAtRiskId = 1:length(aggregateCovariateSettings$riskWindowStart),
-    riskWindowStart = aggregateCovariateSettings$riskWindowStart,
-    riskWindowEnd = aggregateCovariateSettings$riskWindowEnd,
-    startAnchor = aggregateCovariateSettings$startAnchor,
-    endAnchor = aggregateCovariateSettings$endAnchor
-  )
-
-  sql <- SqlRender::loadRenderTranslateSql(
-    sqlFilename = "DropAggregateCovariate.sql",
-    packageName = "Characterization",
-    dbms = connectionDetails$dbms,
-    tempEmulationSchema = tempEmulationSchema
-  )
-
-  DatabaseConnector::executeSql(
-    connection = connection,
-    sql = sql, progressBar = FALSE,
-    reportOverallTime = FALSE
-  )
-
-  return(result)
+  return(invisible(NULL))
 }
 
-
-createCohortsOfInterest <- function(
-    connection,
-    cdmDatabaseSchema,
-    dbms,
-    aggregateCovariateSettings,
-    targetDatabaseSchema,
-    targetTable,
-    outcomeDatabaseSchema,
-    outcomeTable,
-    tempEmulationSchema
-    ) {
-
-  # first create Ts and Os calling RestrictCohorts.sql
-  sql <- SqlRender::loadRenderTranslateSql(
-    sqlFilename = "RestrictCohorts.sql",
-    packageName = "Characterization",
-    dbms = dbms,
-    cdm_database_schema = cdmDatabaseSchema,
-    tempEmulationSchema = tempEmulationSchema,
-    target_database_schema = targetDatabaseSchema,
-    target_table = targetTable,
-    outcome_database_schema = outcomeDatabaseSchema,
-    outcome_table = outcomeTable,
-    target_ids = paste(aggregateCovariateSettings$targetIds, collapse = ",", sep = ","),
-    outcome_ids = paste(aggregateCovariateSettings$outcomeIds, collapse = ",", sep = ","),
-    min_prior_observation = aggregateCovariateSettings$minPriorObservation,
-    outcome_washout_days = aggregateCovariateSettings$outcomeWashoutDays
-  )
-
-  DatabaseConnector::executeSql(
-    connection = connection,
-    sql = sql,
-    progressBar = FALSE,
-    reportOverallTime = FALSE
-  )
-
-
-  # now create the cases per TAR
-  for(i in 1:length(aggregateCovariateSettings$riskWindowStart)){
-    sql <- SqlRender::loadRenderTranslateSql(
-      sqlFilename = "CreateCases.sql",
-      packageName = "Characterization",
-      dbms = dbms,
-      tempEmulationSchema = tempEmulationSchema,
-      tar_start = aggregateCovariateSettings$riskWindowStart[i],
-      tar_start_anchor = ifelse(
-        aggregateCovariateSettings$startAnchor[i] == "cohort start",
-        "cohort_start_date",
-        "cohort_end_date"
-      ),
-      tar_end = aggregateCovariateSettings$riskWindowEnd[i],
-      tar_end_anchor = ifelse(
-        aggregateCovariateSettings$endAnchor[i] == "cohort start",
-        "cohort_start_date",
-        "cohort_end_date"
-      ),
-      time_at_risk_id = i,
-      first = i==1,
-      case_post_outcome_duration = aggregateCovariateSettings$casePostOutcomeDuration,
-      case_pre_target_duration = aggregateCovariateSettings$casePreTargetDuration
-    )
-
-    DatabaseConnector::executeSql(
-      connection = connection,
-      sql = sql,
-      progressBar = FALSE,
-      reportOverallTime = FALSE
-    )
-  }
-
-}
-
-
-getCohortDetails <- function(
-    targetIds,
-    outcomeIds
-){
-  cohortDetails <- data.frame(
-    targetCohortId = c(rep(targetIds, 2), rep(0,2*length(outcomeIds))),
-    outcomeCohortId = c(rep(0,2*length(targetIds)), rep(outcomeIds, 2)),
-    cohortType = c(
-      rep('Tall', length(targetIds)),
-      rep('T', length(targetIds)),
-      rep('Oall', length(outcomeIds)),
-      rep('O', length(outcomeIds))
-    ),
-    timeAtRiskId = 0
-  )
-
-  comboTypes <- 'TnOprior'
-  for(comboType in comboTypes){
-    cohortDetailsExtra <- as.data.frame(
-      merge(
-        targetIds,
-        outcomeIds)
-    )
-    colnames(cohortDetailsExtra) <- c('targetCohortId', 'outcomeCohortId')
-    cohortDetailsExtra$cohortType <- comboType
-    cohortDetailsExtra$timeAtRiskId <- 0
-    cohortDetails <- rbind(cohortDetails, cohortDetailsExtra)
-  }
-
-  return(cohortDetails)
-}
-
-getCaseDetails <- function(
-    targetIds,
-    outcomeIds,
-    timeAtRiskId
-){
-
-  cohortDetails <- c()
-
-  comboTypes <- c('TnObetween','OnT', 'TnO')
-  for(comboType in comboTypes){
-    cohortDetailsExtra <- as.data.frame(
-      merge(
-        targetIds,
-        outcomeIds)
-    )
-    colnames(cohortDetailsExtra) <- c('targetCohortId', 'outcomeCohortId')
-    cohortDetailsExtra$cohortType <- comboType
-    cohortDetailsExtra$timeAtRiskId <- timeAtRiskId
-    cohortDetails <- rbind(cohortDetails, cohortDetailsExtra)
-  }
-
-  return(cohortDetails)
-}
-
-hex_to_int = function(h) {
-  xx = strsplit(tolower(h), "")[[1L]]
-  pos = match(xx, c(0L:9L, letters[1L:6L]))
-  sum((pos - 1L) * 16^(rev(seq_along(xx) - 1)))
-}
-
-hashInt <- function(settings){
-  a <- digest::digest(
-    object = settings,
-    algo='xxhash32',
-    seed=0
-  )
-  result <- hex_to_int(a)
-  return(result)
-}

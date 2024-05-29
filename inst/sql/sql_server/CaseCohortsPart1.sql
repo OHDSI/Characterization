@@ -75,7 +75,7 @@ from
 (
 
 -- targets with O prior during washout
-select
+select distinct
 tno.subject_id,
 tno.cohort_start_date,
 tno.cohort_end_date,
@@ -85,77 +85,6 @@ INNER JOIN #cohort_details cd
 on cd.target_cohort_id = tno.target_cohort_id
 and cd.outcome_cohort_id = tno.outcome_cohort_id
 and cd.cohort_type = 'TnOprior'
-
-union
-
-select distinct * from (
-
--- targets with restrictions
-
-select
-t.subject_id,
-t.cohort_start_date,
-t.cohort_end_date,
-cd.cohort_definition_id
-from #targets_inclusions as t
-INNER JOIN #cohort_details cd
-on cd.target_cohort_id = t.cohort_definition_id
-and cd.cohort_type = 'T'
-
-union
-
--- outcomes with restrictions
-select
-o.subject_id,
-o.cohort_start_date,
-o.cohort_end_date,
-cd.cohort_definition_id
-from #outcomes_washout as o
-INNER JOIN #cohort_details cd
-on cd.outcome_cohort_id = o.cohort_definition_id
-and cd.cohort_type = 'O'
-
-) temp_ts
-
-) temp_ts2;
-
-
-
--- add extra cohorts
-drop table if exists #agg_cohorts_extras;
-select * into #agg_cohorts_extras
-
-from
-(
-
-select distinct * from (
-
--- targets with restrictions
-
-select
-t.subject_id,
-t.cohort_start_date,
-t.cohort_end_date,
-cd.cohort_definition_id
-from #targets_inclusions as t
-INNER JOIN #cohort_details cd
-on cd.target_cohort_id = t.cohort_definition_id
-and cd.cohort_type = 'Tall'
-
-union
-
--- outcomes with restrictions
-select
-o.subject_id,
-o.cohort_start_date,
-o.cohort_end_date,
-cd.cohort_definition_id
-from #outcomes_washout as o
-INNER JOIN #cohort_details cd
-on cd.outcome_cohort_id = o.cohort_definition_id
-and cd.cohort_type = 'Oall'
-
-) temp_ts
 
 ) temp_ts2;
 
