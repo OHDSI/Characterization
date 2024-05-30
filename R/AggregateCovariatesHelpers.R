@@ -235,31 +235,20 @@ return(colNames )
 }
 
 removeExecuted <- function(
-  cohortDetails,
-  executedDetails
+    cohortDetails,
+    executedDetails
 ){
-
+  message('Finding completed analyses')
   colNames <- incrementalColumns()
 
   for(colName in colNames){
     class(executedDetails[,colName]) <- class(cohortDetails[,colName])
   }
 
-  resultExists <- unlist(
-    lapply(1:nrow(cohortDetails),
-           function(i){
-             sum(unlist(lapply(
-               X = 1:nrow(executedDetails),
-               FUN = function(j){
-                 identical(
-                   paste0(cohortDetails[i,colNames], collapse = '_'),
-                   paste0(executedDetails[j,colNames], collapse = '_')
-                 )
-               }
-             ))) > 0
-           }
-    )
-  )
+  cdIds <- apply(cohortDetails, 1, function(x) paste0(x[colNames], collapse = '_'))
+  edIds <- apply(executedDetails, 1, function(x) paste0(x[colNames], collapse = '_'))
+
+  resultExists <- cdIds %in% edIds
 
   message(paste0(sum(resultExists), ' analyses already generated'))
   message(paste0(sum(!resultExists), ' analyses left'))

@@ -216,6 +216,19 @@ computeAggregateCovariateAnalyses <- function(
     aggregateCovariateSettings <- list(aggregateCovariateSettings)
   }
 
+  # check that covariateSettings are identical across aggregateCovariateSettings
+  if(length(aggregateCovariateSettings)>1){
+    if(sum(unlist(lapply(2:length(aggregateCovariateSettings),
+                         function(i){
+                           identical(
+                             aggregateCovariateSettings[[1]]$covariateSettings,
+                             aggregateCovariateSettings[[i]]$covariateSettings
+                           )
+                         }))) != (length(aggregateCovariateSettings)-1)){
+      stop('Cannot have different covariate settings')
+    }
+  }
+
   # create covariateSetting lookups
   #=================================
   covariateSettingsList <- extractCovariateList(aggregateCovariateSettings)
@@ -277,6 +290,14 @@ computeAggregateCovariateAnalyses <- function(
   # add cohortDefinitionId
   cohortDetails$cohortDefinitionId <- 1:nrow(cohortDetails)
 
+  # add folder Id before incremental so folders the same
+  # each time
+  cohortDetails <- addFolderId(
+    cohortDetails = cohortDetails,
+    outputFolder = file.path(outputFolder,'execution'),
+    threads = threads
+  )
+
   # if running incremental remove previously executed
   # analyses
   if(!is.null(incrementalFile)){
@@ -293,13 +314,6 @@ computeAggregateCovariateAnalyses <- function(
   if(nrow(cohortDetails) == 0){
     message('All results have been previosuly executed')
   } else{
-
-    # add folder Id
-    cohortDetails <- addFolderId(
-      cohortDetails = cohortDetails,
-      outputFolder = file.path(outputFolder,'execution'),
-      threads = threads
-    )
 
     # RUN ANALYSES
     message('Creating new cluster')
