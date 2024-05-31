@@ -52,22 +52,25 @@ extractCombinationSettings <- function(
     identical(csl,x$caseCovariateSettings)
   })))
 
-  # create T/O settings agnostic to TAR
+  # create T/O settings agnostic to TAR - TODO split T/O to prevent dup Ts
   cohortDetails <- data.frame(
-    targetCohortId = c(rep(x$targetIds, 2), rep(0,2*length(x$outcomeIds))),
-    outcomeCohortId = c(rep(0,2*length(x$targetIds)), rep(x$outcomeIds, 2)),
+    targetCohortId = c(rep(x$targetIds, 2), rep(x$outcomeIds, 2)),
+    #targetCohortId = c(rep(x$targetIds, 2), rep(0,2*length(x$outcomeIds))),
+    outcomeCohortId = 0,#c(rep(0,2*length(x$targetIds)), rep(x$outcomeIds, 2)),
     cohortType = c(
       rep('Tall', length(x$targetIds)),
       rep('Target', length(x$targetIds)),
-      rep('Oall', length(x$outcomeIds)),
-      rep('Outcome', length(x$outcomeIds))
+      rep('Tall', length(x$outcomeIds)),
+      rep('Target', length(x$outcomeIds))
+      #rep('Oall', length(x$outcomeIds)),
+      #rep('Outcome', length(x$outcomeIds))
     ),
     riskWindowStart = NA,
     startAnchor = NA,
     riskWindowEnd = NA,
     endAnchor = NA,
     minPriorObservation = x$minPriorObservation,
-    outcomeWashoutDays = x$outcomeWashoutDays,
+    outcomeWashoutDays = NA, #x$outcomeWashoutDays,
     covariateSettingsHash = covariateSettingsHash,
     covariateSettingsId = covariateSettingsId,
     caseCovariateSettingsHash = NA,
@@ -76,6 +79,7 @@ extractCombinationSettings <- function(
     casePostOutcomeDuration = NA
   )
 
+  # do we want Oall with washout done seperately?
 
   # full join T and O
   temp <- merge(
