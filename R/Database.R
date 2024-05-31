@@ -388,15 +388,17 @@ exportDatabaseToCsv <- function(
       snakeCaseToCamelCase = F
     ))
 
-    inds <- floor(countN / maxRowCount)
+    inds <- ceiling(countN / maxRowCount)
     tableAppend <- F
     # NOTE: If the table has 0 rows (countN == 0),
     # then setting the txtProgressBar will fail since
     # min < max. So, setting max = countN+1 for this
     # reason.
-    pb <- utils::txtProgressBar(min = 0, max = countN + 1, initial = 0)
+    pb <- utils::txtProgressBar(min = 0, max = inds, initial = 0)
 
-    for (i in 1:length(inds)) {
+    message(paste0("There are ", inds, " batches for ", countN, " rows."))
+
+    for (i in 1:inds) {
       startRow <- (i - 1) * maxRowCount + 1
       endRow <- min(i * maxRowCount, countN)
 
@@ -436,13 +438,7 @@ exportDatabaseToCsv <- function(
         append = tableAppend
       )
       tableAppend <- T
-      # NOTE: Handling progresss bar per note on txtProgressBar
-      # above. Otherwise the progress bar doesn't show that it completed.
-      if (endRow == countN) {
-        utils::setTxtProgressBar(pb, countN + 1)
-      } else {
-        utils::setTxtProgressBar(pb, endRow)
-      }
+      utils::setTxtProgressBar(pb, i)
     }
     close(pb)
   }
