@@ -101,16 +101,16 @@ cohort_details,setting_id,int,Yes,Yes,No,No,The run identifier
 cohort_details,cohort_type,varchar(10),Yes,Yes,No,No,The cohort type
 cohort_details,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
 cohort_details,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
-cohort_counts,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-cohort_counts,cohort_type,varchar(10),Yes,Yes,No,No,The cohort type
-cohort_counts,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
-cohort_counts,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
-cohort_counts,risk_window_start,int,No,Yes,No,No,The risk window start
-cohort_counts,risk_window_end,int,No,Yes,No,No,The risk window end
-cohort_counts,start_anchor,varchar(15),No,Yes,No,No,The start anchor
-cohort_counts,end_anchor,varchar(15),No,Yes,No,No,The end anchor
-cohort_counts,min_prior_observation,int,No,Yes,No,No,Minimum time observed before index
-cohort_counts,outcome_washout_days,int,No,Yes,No,No,Patients with outcome during washout are excluded
+cohort_counts,database_id,varchar(100),Yes,No,No,No,The database identifier
+cohort_counts,cohort_type,varchar(10),Yes,No,No,No,The cohort type
+cohort_counts,target_cohort_id,int,Yes,No,No,No,The target cohort id
+cohort_counts,outcome_cohort_id,int,Yes,No,No,No,The outcome cohort id
+cohort_counts,risk_window_start,int,No,No,No,No,The risk window start
+cohort_counts,risk_window_end,int,No,No,No,No,The risk window end
+cohort_counts,start_anchor,varchar(15),No,No,No,No,The start anchor
+cohort_counts,end_anchor,varchar(15),No,No,No,No,The end anchor
+cohort_counts,min_prior_observation,int,No,No,No,No,Minimum time observed before index
+cohort_counts,outcome_washout_days,int,No,No,No,No,Patients with outcome during washout are excluded
 cohort_counts,row_count,int,Yes,No,No,No,The number of rows in each cohort
 cohort_counts,person_count,int,Yes,No,No,No,The number of distinct people in each cohort
 cohort_counts,min_exposure_time,bigint,No,No,No,No,Minimum exposure time across cohort
