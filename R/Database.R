@@ -75,7 +75,7 @@ insertResultsToDatabase <- function(
     ){
   specLoc <- system.file('settings', 'resultsDataModelSpecification.csv',
                          package = 'Characterization')
-  specs <- read.csv(specLoc)
+  specs <- utils::read.csv(specLoc)
   colnames(specs) <- SqlRender::snakeCaseToCamelCase(colnames(specs))
   ResultModelManager::uploadResults(
     connectionDetails = connectionDetails,

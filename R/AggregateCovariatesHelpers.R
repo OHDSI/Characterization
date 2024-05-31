@@ -280,7 +280,7 @@ loadIncremental <- function(
     incrementalFile
 ){
   # check columns?
-result <- read.csv(incrementalFile)
+result <- utils::read.csv(incrementalFile)
 class(result$startAnchor) <- 'character'
 class(result$endAnchor) <- 'character'
 class(result$covariateSettingsHash) <- 'character'
