@@ -1,3 +1,10 @@
+Characterization 1.0.0
+======================
+- Added parallelization in the aggregate covariates analysis
+- Extact all results as csv files 
+- Removed sqlite result creation
+- now using ResultModelManager to upload results into database
+
 Characterization 0.3.1
 ======================
 - Removed DatabaseConnector from Remotes in DESCRIPTION. Fixes GitHb issue 38.

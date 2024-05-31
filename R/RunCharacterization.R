@@ -120,6 +120,9 @@ loadCharacterizationSettings <- function(
 #' @param databaseId The unique identifier for the cdm database
 #' @param showSubjectId  Whether to include subjectId of failed rechallenge case series or hide
 #' @param minCellCount  The minimum count value that is calculated
+#' @param incremental If TRUE then skip previously executed analyses that completed
+#' @param threads    The number of threads to use when running aggregate covariates
+#' @param minCharacterizationMean The minimum mean threshold to extract when running aggregate covariates
 #'
 #' @return
 #' An sqlite database with the results is saved into the saveDirectory and a csv file named tacker.csv
@@ -139,7 +142,11 @@ runCharacterizationAnalyses <- function(
     tablePrefix = "c_",
     databaseId = "1",
     showSubjectId = F,
-    minCellCount = 0) {
+    minCellCount = 0,
+    incremental = T,
+    threads = 1,
+    minCharacterizationMean = 0.01
+    ) {
   # inputs checks
   errorMessages <- checkmate::makeAssertCollection()
   .checkCharacterizationSettings(
@@ -154,31 +161,13 @@ runCharacterizationAnalyses <- function(
     errorMessages
   )
 
-  # create the Database
-  resultConnectionDetails <- createSqliteDatabase(
-    sqliteLocation = saveDirectory
-  )
-
-  createCharacterizationTables(
-    connectionDetails = resultConnectionDetails,
-    resultSchema = "main",
-    targetDialect = "sqlite",
-    deleteExistingTables = F, # using incremental now
-    createTables = T,
-    tablePrefix = tablePrefix
-  )
-
-  conn <- DatabaseConnector::connect(connectionDetails = resultConnectionDetails)
-    on.exit(
-      DatabaseConnector::disconnect(conn)
-    )
-
     # load completed runs if file is present
     completedRuns <- tryCatch(
       {readr::read_csv(file.path(saveDirectory, "tracker.csv"), show_col_types = FALSE)},
       error = function(e){return(data.frame(
         completedRuns = -1,
-        analysis_type = 'None'
+        analysis_type = 'None',
+        run_id = 1
       ))}
     )
 
@@ -186,9 +175,19 @@ runCharacterizationAnalyses <- function(
     for (i in 1:length(characterizationSettings$timeToEventSettings)) {
       message("Running time to event analysis ", i)
 
-      runId <- hashInt(characterizationSettings$timeToEventSettings[[i]])
+      runId <- i
+
+      if(incremental){
       # check whether result already run - do we want to keep loaded or have this as a saved object?
-      done <- sum(runId %in% completedRuns$run_id) > 0
+      done <- sum(runId %in% as.vector(completedRuns %>%
+                    dplyr::filter(
+                      .data$analysis_type == 'timeToEvent'
+                      ) %>%
+                    dplyr::select("run_id"))
+                  ) > 0
+      } else{
+        done <- FALSE
+      }
 
       if(!done){
 
@@ -203,7 +202,9 @@ runCharacterizationAnalyses <- function(
             tempEmulationSchema = tempEmulationSchema,
             cdmDatabaseSchema = cdmDatabaseSchema,
             timeToEventSettings = characterizationSettings$timeToEventSettings[[i]],
-            databaseId = databaseId
+            databaseId = databaseId,
+            outputFolder = file.path(saveDirectory,'results'),
+            minCellCount = minCellCount
           )
         },
         error = function(e) {
@@ -224,16 +225,6 @@ runCharacterizationAnalyses <- function(
           file = file.path(saveDirectory, "tracker.csv"),
           append = file.exists(file.path(saveDirectory, "tracker.csv"))
         )
-
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = "main",
-          tableName = "time_to_event",
-          andromedaObject = result$timeToEvent,
-          tablePrefix = tablePrefix,
-          minCellCount = minCellCount,
-          minCellCountColumns = list("numEvents")
-        )
       }
       } else{
         message('Results exist for setting - Skipping')
@@ -245,9 +236,19 @@ runCharacterizationAnalyses <- function(
     for (i in 1:length(characterizationSettings$dechallengeRechallengeSettings)) {
       ParallelLogger::logInfo(paste0("Running dechallenge rechallenge analysis ", i))
 
-      runId <- hashInt(characterizationSettings$dechallengeRechallengeSettings[[i]])
+      runId <- i
       # check whether result already run - do we want to keep loaded or have this as a saved object?
-      done <- sum(runId %in% completedRuns$run_id & completedRuns$analysis_type == "dechallengeRechallenge") > 0
+      if(incremental){
+        # check whether result already run - do we want to keep loaded or have this as a saved object?
+        done <- sum(runId %in% as.vector(completedRuns %>%
+                      dplyr::filter(
+                        .data$analysis_type == 'dechallengeRechallenge'
+                      ) %>%
+                      dplyr::select("run_id"))
+        ) > 0
+      } else{
+        done <- FALSE
+      }
 
       if(!done){
 
@@ -261,7 +262,9 @@ runCharacterizationAnalyses <- function(
             outcomeTable = outcomeTable,
             tempEmulationSchema = tempEmulationSchema,
             dechallengeRechallengeSettings = characterizationSettings$dechallengeRechallengeSettings[[i]],
-            databaseId = databaseId
+            databaseId = databaseId,
+            outputFolder = file.path(saveDirectory,'results'),
+            minCellCount = minCellCount
           )
         },
         error = function(e) {
@@ -282,22 +285,6 @@ runCharacterizationAnalyses <- function(
           file = file.path(saveDirectory, "tracker.csv"),
           append = file.exists(file.path(saveDirectory, "tracker.csv"))
         )
-
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = "main",
-          tableName = "dechallenge_rechallenge",
-          andromedaObject = result$dechallengeRechallenge,
-          tablePrefix = tablePrefix,
-          minCellCount = minCellCount,
-          minCellCountColumns = list(
-            c("numCases"),
-            c("dechallengeAttempt"),
-            c("dechallengeFail", "dechallengeSuccess"),
-            c("rechallengeAttempt"),
-            c("rechallengeFail", "rechallengeSuccess")
-          )
-        )
       }
       } else{
         message('Results exist - Skipping')
@@ -305,7 +292,19 @@ runCharacterizationAnalyses <- function(
 
       # run failed analysis
       message("Running rechallenge failed case analysis ", i)
-      done <- sum(runId %in% completedRuns$run_id & completedRuns$analysis_type == "rechallengeFailCaseSeries") > 0
+
+      if(incremental){
+        # check whether result already run - do we want to keep loaded or have this as a saved object?
+        done <- sum(runId %in% as.vector(completedRuns %>%
+                      dplyr::filter(
+                        .data$analysis_type == 'rechallengeFailCaseSeries'
+                      ) %>%
+                      dplyr::select("run_id"))
+        ) > 0
+      } else{
+        done <- FALSE
+      }
+
       if(!done){
 
       result <- tryCatch(
@@ -319,7 +318,9 @@ runCharacterizationAnalyses <- function(
             tempEmulationSchema = tempEmulationSchema,
             dechallengeRechallengeSettings = characterizationSettings$dechallengeRechallengeSettings[[i]],
             databaseId = databaseId,
-            showSubjectId = showSubjectId
+            showSubjectId = showSubjectId,
+            outputFolder = file.path(saveDirectory,'results'),
+            minCellCount = minCellCount
           )
         },
         error = function(e) {
@@ -340,14 +341,6 @@ runCharacterizationAnalyses <- function(
           file = file.path(saveDirectory, "tracker.csv"),
           append = file.exists(file.path(saveDirectory, "tracker.csv"))
         )
-
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = "main",
-          tableName = "rechallenge_fail_case_series",
-          andromedaObject = result$rechallengeFailCaseSeries,
-          tablePrefix = tablePrefix
-        )
       }
       } else{
         message('Results exist - Skipping')
@@ -359,12 +352,20 @@ runCharacterizationAnalyses <- function(
   if (!is.null(characterizationSettings$aggregateCovariateSettings)) {
     ParallelLogger::logInfo("Running aggregate covariate analyses")
 
-    for (i in 1:length(characterizationSettings$aggregateCovariateSettings)) {
-
-      runId <- hashInt(characterizationSettings$aggregateCovariateSettings[[i]])
+      runId <- 1
 
       # check whether result already run - do we want to keep loaded or have this as a saved object?
-      done <- sum(runId %in% completedRuns$run_id) > 0
+      if(incremental){
+        # check whether result already run - do we want to keep loaded or have this as a saved object?
+        done <- sum(runId %in% as.vector(completedRuns %>%
+                      dplyr::filter(
+                        .data$analysis_type == 'aggregateCovariates'
+                      ) %>%
+                      dplyr::select("run_id"))
+        ) > 0
+      } else{
+        done <- FALSE
+      }
 
       if(!done){
         result <- tryCatch(
@@ -377,9 +378,13 @@ runCharacterizationAnalyses <- function(
               outcomeDatabaseSchema = outcomeDatabaseSchema,
               outcomeTable = outcomeTable,
               tempEmulationSchema = tempEmulationSchema,
-              aggregateCovariateSettings = characterizationSettings$aggregateCovariateSettings[[i]],
+              aggregateCovariateSettings = characterizationSettings$aggregateCovariateSettings,
               databaseId = databaseId,
-              runId = runId
+              runId = runId,
+              threads = threads,
+              minCharacterizationMean = minCharacterizationMean,
+              outputFolder = saveDirectory,
+              incrementalFile = ifelse(incremental, file.path(saveDirectory, 'executed.csv'), NULL)
             )
           },
           error = function(e) {
@@ -402,90 +407,11 @@ runCharacterizationAnalyses <- function(
             append = file.exists(file.path(saveDirectory, "tracker.csv"))
           )
 
-          insertAndromedaToDatabase(
-            connection = conn,
-            databaseSchema = "main",
-            tableName = "settings",
-            andromedaObject = result$settings,
-            tablePrefix = tablePrefix
-          )
-
-          insertAndromedaToDatabase(
-            connection = conn,
-            databaseSchema = "main",
-            tableName = "time_at_risk",
-            andromedaObject = result$timeAtRisk,
-            tablePrefix = tablePrefix
-          )
-
-          insertAndromedaToDatabase(
-            connection = conn,
-            databaseSchema = "main",
-            tableName = "cohort_counts",
-            andromedaObject = result$cohortCounts,
-            tablePrefix = tablePrefix,
-            minCellCount = minCellCount,
-            minCellCountColumns = list(
-              c("rowCount")
-            )
-          )
-
-          insertAndromedaToDatabase(
-            connection = conn,
-            databaseSchema = "main",
-            tableName = "cohort_details",
-            andromedaObject = result$cohortDetails,
-            tablePrefix = tablePrefix
-          )
-
-          insertAndromedaToDatabase(
-            connection = conn,
-            databaseSchema = "main",
-            tableName = "analysis_ref",
-            andromedaObject = result$analysisRef,
-            tablePrefix = tablePrefix
-          )
-          insertAndromedaToDatabase(
-            connection = conn,
-            databaseSchema = "main",
-            tableName = "covariate_ref",
-            andromedaObject = result$covariateRef,
-            tablePrefix = tablePrefix
-          )
-
-          if (!is.null(result$covariates)) {
-            insertAndromedaToDatabase(
-              connection = conn,
-              databaseSchema = "main",
-              tableName = "covariates",
-              andromedaObject = result$covariates,
-              tablePrefix = tablePrefix,
-              minCellCount = minCellCount,
-              minCellCountColumns = list(
-                c("sumValue") # c('SUM_VALUE') #AVERAGE_VALUE
-              )
-            )
-          }
-
-          if (!is.null(result$covariatesContinuous)) {
-            insertAndromedaToDatabase(
-              connection = conn,
-              databaseSchema = "main",
-              tableName = "covariates_continuous",
-              andromedaObject = result$covariatesContinuous,
-              tablePrefix = tablePrefix,
-              minCellCount = minCellCount,
-              minCellCountColumns = list(
-                c("countValue")
-              )
-            )
-          }
         }
 
       } else{
         message('Results Exist - Skipping run')
       } # skip if done
-    }
   }
 
 

@@ -61,6 +61,8 @@ createTimeToEventSettings <- function(
 #' @param cdmDatabaseSchema The database schema containing the OMOP CDM data
 #' @param timeToEventSettings   The settings for the timeToEvent study
 #' @param databaseId An identifier for the database (string)
+#' @param outputFolder A directory to save the results as csv files
+#' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
 #'
 #' @return
 #' An \code{Andromeda::andromeda()} object containing the time to event results.
@@ -75,7 +77,10 @@ computeTimeToEventAnalyses <- function(
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     cdmDatabaseSchema,
     timeToEventSettings,
-    databaseId = "database 1") {
+    databaseId = "database 1",
+    outputFolder = file.path(getwd(),'results'),
+    minCellCount = 0
+    ) {
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
@@ -191,6 +196,14 @@ computeTimeToEventAnalyses <- function(
       )
     )
 
-    return(result)
+    # add the csv export here
+    message('exporting to csv file')
+    exportTimeToEventToCsv(
+      result = result,
+      saveDirectory = outputFolder,
+      minCellCount = minCellCount
+    )
+
+    return(invisible(TRUE))
   }
 }

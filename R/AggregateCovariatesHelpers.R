@@ -799,70 +799,81 @@ exportAndromedaToCsv <- function(
 
   # analysis_ref and covariate_ref
   # add database_id and setting_id
-  Andromeda::batchApply(
-    tbl =   andromeda$covariateRef,
-    fun = function(x){
-      data <- merge(x, ids)
-      colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-      if(file.exists(file.path(saveLocation, 'covariate_ref.csv'))){
-        append <- T
-      } else{
-        append = F
-      }
-      readr::write_csv(data, file = file.path(saveLocation, 'covariate_ref.csv'), append = append)
-    },
-    batchSize = batchSize
+  if(!is.null(andromeda$analysisRef)){
+    Andromeda::batchApply(
+      tbl =   andromeda$analysisRef,
+      fun = function(x){
+        data <- merge(x, ids)
+        colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
+        if(file.exists(file.path(saveLocation, 'analysis_ref.csv'))){
+          append <- T
+        } else{
+          append = F
+        }
+        readr::write_csv(data, file = file.path(saveLocation, 'analysis_ref.csv'), append = append)
+      },
+      batchSize = batchSize
     )
-  Andromeda::batchApply(
-    tbl =   andromeda$analysisRef,
-    fun = function(x){
-      data <- merge(x, ids)
-      colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-      if(file.exists(file.path(saveLocation, 'analysis_ref.csv'))){
-        append <- T
-      } else{
-        append = F
-      }
-      readr::write_csv(data, file = file.path(saveLocation, 'analysis_ref.csv'), append = append)
-    },
-    batchSize = batchSize
+  }
+
+  if(!is.null(andromeda$covariateRef)){
+    Andromeda::batchApply(
+      tbl =   andromeda$covariateRef,
+      fun = function(x){
+        data <- merge(x, ids)
+        colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
+        if(file.exists(file.path(saveLocation, 'covariate_ref.csv'))){
+          append <- T
+        } else{
+          append = F
+        }
+        readr::write_csv(data, file = file.path(saveLocation, 'covariate_ref.csv'), append = append)
+      },
+      batchSize = batchSize
     )
+  }
 
   # covariates and covariate_continuous
   extras <- cohortDetails[, c('cohortDefinitionId','settingId', 'targetCohortId', 'outcomeCohortId', 'cohortType')]
   extras$databaseId  <- databaseId
   extras$minCharacterizationMean <- minCharacterizationMean
+
   # add database_id, setting_id, target_cohort_id, outcome_cohort_id and cohort_type
-  Andromeda::batchApply(
-    tbl =   andromeda$covariates,
-    fun = function(x){
-      data <- merge(x, extras, by = 'cohortDefinitionId')
-      data <- data %>% dplyr::select(-"cohortDefinitionId")
-      colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-      if(file.exists(file.path(saveLocation, 'covariates.csv'))){
-        append <- T
-      } else{
-        append = F
-      }
-      readr::write_csv(data, file = file.path(saveLocation, 'covariates.csv'), append = append)
-    },
-    batchSize = batchSize
-  )
-  Andromeda::batchApply(
-    tbl =   andromeda$covariatesContinuous,
-    fun = function(x){
-      data <- merge(x, extras %>% dplyr::select(-"minCharacterizationMean"), by = 'cohortDefinitionId')
-      data <- data %>% dplyr::select(-"cohortDefinitionId")
-      colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-      if(file.exists(file.path(saveLocation, 'covariates_continuous.csv'))){
-        append <- T
-      } else{
-        append = F
-      }
-      readr::write_csv(data, file = file.path(saveLocation, 'covariates_continuous.csv'), append = append)
-    },
-    batchSize = batchSize
-  )
+  if(!is.null(andromeda$covariates)){
+    Andromeda::batchApply(
+      tbl =   andromeda$covariates,
+      fun = function(x){
+        data <- merge(x, extras, by = 'cohortDefinitionId')
+        data <- data %>% dplyr::select(-"cohortDefinitionId")
+        colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
+        if(file.exists(file.path(saveLocation, 'covariates.csv'))){
+          append <- T
+        } else{
+          append = F
+        }
+        readr::write_csv(data, file = file.path(saveLocation, 'covariates.csv'), append = append)
+      },
+      batchSize = batchSize
+    )
+  }
+
+  if(!is.null(andromeda$covariatesContinuous)){
+    Andromeda::batchApply(
+      tbl =   andromeda$covariatesContinuous,
+      fun = function(x){
+        data <- merge(x, extras %>% dplyr::select(-"minCharacterizationMean"), by = 'cohortDefinitionId')
+        data <- data %>% dplyr::select(-"cohortDefinitionId")
+        colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
+        if(file.exists(file.path(saveLocation, 'covariates_continuous.csv'))){
+          append <- T
+        } else{
+          append = F
+        }
+        readr::write_csv(data, file = file.path(saveLocation, 'covariates_continuous.csv'), append = append)
+      },
+      batchSize = batchSize
+    )
+  }
 
   # cohort_counts:
   if(!is.null(counts)){

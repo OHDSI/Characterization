@@ -87,6 +87,8 @@ createDechallengeRechallengeSettings <- function(
 #' @template TempEmulationSchema
 #' @param dechallengeRechallengeSettings   The settings for the timeToEvent study
 #' @param databaseId An identifier for the database (string)
+#' @param outputFolder A directory to save the results as csv files
+#' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
 #'
 #' @return
 #' An \code{Andromeda::andromeda()} object containing the dechallenge rechallenge results
@@ -100,7 +102,10 @@ computeDechallengeRechallengeAnalyses <- function(
     outcomeTable = targetTable,
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     dechallengeRechallengeSettings,
-    databaseId = "database 1") {
+    databaseId = "database 1",
+    outputFolder = file.path(getwd(),'results'),
+    minCellCount = 0
+    ) {
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
@@ -202,7 +207,15 @@ computeDechallengeRechallengeAnalyses <- function(
       )
     )
 
-    return(result)
+    # export results to csv
+    message('exporting to csv file')
+    exportDechallengeRechallengeToCsv(
+      result = result,
+      saveDirectory = outputFolder,
+      minCellCount = minCellCount
+    )
+
+    return(invisible(TRUE))
   }
 }
 
@@ -215,6 +228,8 @@ computeDechallengeRechallengeAnalyses <- function(
 #' @param dechallengeRechallengeSettings   The settings for the timeToEvent study
 #' @param databaseId An identifier for the database (string)
 #' @param showSubjectId if F then subject_ids are hidden (recommended if sharing results)
+#' @param outputFolder A directory to save the results as csv files
+#' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
 #'
 #' @return
 #' An \code{Andromeda::andromeda()} object with the case series details of the failed rechallenge
@@ -229,7 +244,10 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     dechallengeRechallengeSettings,
     databaseId = "database 1",
-    showSubjectId = F) {
+    showSubjectId = F,
+    outputFolder = file.path(getwd(),'results'),
+    minCellCount = 0
+    ){
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
@@ -330,6 +348,13 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       )
     )
 
-    return(result)
+    # add the csv export here
+    message('exporting to csv file')
+    exportRechallengeFailCaseSeriesToCsv(
+      result = result,
+      saveDirectory = outputFolder
+    )
+
+    return(invisible(TRUE))
   }
 }

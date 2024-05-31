@@ -30,97 +30,57 @@ test_that("computeTimeToEventSettings", {
     outcomeIds = outcomeIds
   )
 
-  tte <- computeTimeToEventAnalyses(
+  tteFolder <- tempfile("tte")
+
+  computeTimeToEventAnalyses(
     connectionDetails = connectionDetails,
     cdmDatabaseSchema = "main",
     targetDatabaseSchema = "main",
     targetTable = "cohort",
-    timeToEventSettings = res
+    timeToEventSettings = res,
+    outputFolder = tteFolder,
+    databaseId = 'tte_test'
   )
 
-  testthat::expect_true(class(tte) == "Andromeda")
-  testthat::expect_true(names(tte) == "timeToEvent")
+  testthat::expect_true(file.exists(file.path(tteFolder, "time_to_event.csv")))
+
+  tte <- readr::read_csv(
+    file = file.path(tteFolder,'time_to_event.csv'),
+    show_col_types = F
+    )
+
+  testthat::expect_true(nrow(tte) == 160)
+  testthat::expect_true("database_id" %in% colnames(tte))
+  testthat::expect_true(tte$database_id[1] ==  'tte_test')
 
   testthat::expect_true(
-    nrow(
+    length(
       unique(
-        tte$timeToEvent %>%
-          dplyr::collect() %>%
-          dplyr::select("targetCohortDefinitionId")
+        tte$target_cohort_definition_id
       )
     ) <= length(targetIds)
   )
   testthat::expect_true(
     sum(unique(
-      tte$timeToEvent %>%
-        dplyr::collect() %>%
-        dplyr::select("targetCohortDefinitionId")
-    )$targetCohortDefinitionId %in% targetIds) ==
-      nrow(unique(
-        tte$timeToEvent %>%
-          dplyr::collect() %>%
-          dplyr::select("targetCohortDefinitionId")
-      ))
+      tte$target_cohort_definition_id
+    ) %in% targetIds) ==
+      length(unique(tte$target_cohort_definition_id))
   )
 
 
   testthat::expect_true(
-    nrow(
+    length(
       unique(
-        tte$timeToEvent %>%
-          dplyr::collect() %>%
-          dplyr::select("outcomeCohortDefinitionId")
+        tte$outcome_cohort_definition_id
       )
     ) <= length(outcomeIds)
   )
   testthat::expect_true(
-    sum(unique(
-      tte$timeToEvent %>%
-        dplyr::collect() %>%
-        dplyr::select("outcomeCohortDefinitionId")
-    )$outcomeCohortDefinitionId %in% outcomeIds) ==
-      nrow(unique(
-        tte$timeToEvent %>%
-          dplyr::collect() %>%
-          dplyr::select("outcomeCohortDefinitionId")
-      ))
+    sum(
+      unique(tte$outcome_cohort_definition_id)
+      %in% outcomeIds
+      ) ==
+      length(unique(tte$outcome_cohort_definition_id))
   )
 
-  # saving
-  tempFile <- tempfile(fileext = ".zip")
-  on.exit(unlink(tempFile))
-
-  saveTimeToEventAnalyses(
-    result = tte,
-    fileName = tempFile
-  )
-
-  testthat::expect_true(file.exists(tempFile))
-
-  tte2 <- loadTimeToEventAnalyses(tempFile)
-
-  testthat::expect_equal(dplyr::collect(tte$timeToEvent), dplyr::collect(tte2$timeToEvent))
-
-  # test csv export
-  tempFolder <- tempfile("exportToCsv")
-  on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
-
-  exportTimeToEventToCsv(
-    result = tte,
-    saveDirectory = tempFolder
-  )
-
-  testthat::expect_true(file.exists(file.path(tempFolder, "time_to_event.csv")))
-
-  # check it saved correctly and uses snake case
-  res <- readr::read_csv(
-    file =
-      file.path(
-        tempFolder,
-        "time_to_event.csv"
-      ),
-    col_names = T
-  )
-  testthat::expect_true(nrow(res) == 160)
-  testthat::expect_true(colnames(res)[1] == "database_id")
 })

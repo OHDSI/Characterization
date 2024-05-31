@@ -13,7 +13,9 @@ computeTimeToEventAnalyses(
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   cdmDatabaseSchema,
   timeToEventSettings,
-  databaseId = "database 1"
+  databaseId = "database 1",
+  outputFolder = file.path(getwd(), "results"),
+  minCellCount = 0
 )
 }
 \arguments{
@@ -41,6 +43,10 @@ can be created}
 \item{timeToEventSettings}{The settings for the timeToEvent study}
 
 \item{databaseId}{An identifier for the database (string)}
+
+\item{outputFolder}{A directory to save the results as csv files}
+
+\item{minCellCount}{The minimum cell value to display, values less than this will be replaced by -1}
 }
 \value{
 An \code{Andromeda::andromeda()} object containing the time to event results.

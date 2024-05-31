@@ -463,6 +463,6 @@ computeAggregateCovariateAnalyses <- function(
     outputFolder = outputFolder
   )
 
-  return(invisible(NULL))
+  return(invisible(TRUE))
 }
 

@@ -13,7 +13,9 @@ computeRechallengeFailCaseSeriesAnalyses(
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   dechallengeRechallengeSettings,
   databaseId = "database 1",
-  showSubjectId = F
+  showSubjectId = F,
+  outputFolder = file.path(getwd(), "results"),
+  minCellCount = 0
 )
 }
 \arguments{
@@ -41,6 +43,10 @@ can be created}
 \item{databaseId}{An identifier for the database (string)}
 
 \item{showSubjectId}{if F then subject_ids are hidden (recommended if sharing results)}
+
+\item{outputFolder}{A directory to save the results as csv files}
+
+\item{minCellCount}{The minimum cell value to display, values less than this will be replaced by -1}
 }
 \value{
 An \code{Andromeda::andromeda()} object with the case series details of the failed rechallenge

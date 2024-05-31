@@ -15,7 +15,15 @@ computeAggregateCovariateAnalyses(
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   aggregateCovariateSettings,
   databaseId = "database 1",
-  runId = 1
+  outputFolder = file.path(getwd(), "characterization_results"),
+  runId = 1,
+  threads = 1,
+  incrementalFile = NULL,
+  minCharacterizationMean = 0,
+  runExtractTfeatures = T,
+  runExtractOfeatures = T,
+  runExtractCaseFeatures = T,
+  settingIds = NULL
 )
 }
 \arguments{
@@ -46,7 +54,25 @@ can be created}
 
 \item{databaseId}{Unique identifier for the database (string)}
 
-\item{runId}{Unique identifier for the tar and covariate setting}
+\item{outputFolder}{The location to save the results as csv files}
+
+\item{runId}{(depreciated) Unique identifier for the covariate setting}
+
+\item{threads}{The number of threads to run in parallel}
+
+\item{incrementalFile}{(optional) A file that tracks completed studies}
+
+\item{minCharacterizationMean}{The minimum mean value for characterization output. Values below this will be cut off from output. This
+will help reduce the file size of the characterization output, but will remove information
+on covariates that have very low values. The default is 0.}
+
+\item{runExtractTfeatures}{Whether to extract the target cohort features}
+
+\item{runExtractOfeatures}{Whether to extract the outcome cohort features}
+
+\item{runExtractCaseFeatures}{Whether to extract the case cohort features}
+
+\item{settingIds}{(not recommended to use) User can specify the lookup ids for the settings}
 }
 \value{
 The descriptive results for each target cohort in the settings.

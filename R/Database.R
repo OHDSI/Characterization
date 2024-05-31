@@ -51,53 +51,45 @@ createSqliteDatabase <- function(
   return(connectionDetails)
 }
 
-# move Andromeda to sqlite database
-insertAndromedaToDatabase <- function(
-    connection,
-    databaseSchema,
-    tableName,
-    andromedaObject,
-    tempEmulationSchema,
-    bulkLoad = T,
-    tablePrefix = "c_",
-    minCellCount = 0,
-    minCellCountColumns = list()) {
-  errorMessages <- checkmate::makeAssertCollection()
-  .checkTablePrefix(
+#' Upload the results into a result database
+#' @description
+#' This function uploads results in csv format into a result database
+#'
+#' @details
+#' Calls ResultModelManager uploadResults function to upload the csv files
+#'
+#' @param connectionDetails    The connection details to the result database
+#' @param schema               The schema for the result database
+#' @param resultsFolder        The folder containing the csv results
+#' @param tablePrefix          A prefix to append to the result tables for the characterization results
+#'
+#' @return
+#' Returns the connection to the sqlite database
+#'
+#' @export
+insertResultsToDatabase <- function(
+    connectionDetails,
+    schema,
+    resultsFolder,
+    tablePrefix = 'c_'
+    ){
+  specLoc <- system.file('settings', 'resultsDataModelSpecification.csv',
+                         package = 'Characterization')
+  specs <- read.csv(specLoc)
+  colnames(specs) <- SqlRender::snakeCaseToCamelCase(colnames(specs))
+  ResultModelManager::uploadResults(
+    connectionDetails = connectionDetails,
+    schema = schema,
+    resultsFolder = resultsFolder,
     tablePrefix = tablePrefix,
-    errorMessages = errorMessages
-  )
-  checkmate::reportAssertions(errorMessages)
-
-  message("Inserting Andromeda table into database table ", tablePrefix, tableName)
-
-  Andromeda::batchApply(
-    tbl = andromedaObject,
-    fun = function(x) {
-      data <- as.data.frame(x %>% dplyr::collect()) # apply minCellCount
-      data <- removeMinCell(
-        data = data,
-        minCellCount = minCellCount,
-        minCellCountColumns = minCellCountColumns
-      )
-
-      DatabaseConnector::insertTable(
-        connection = connection,
-        databaseSchema = databaseSchema,
-        tableName = paste0(tablePrefix, tableName),
-        data = data,
-        dropTableIfExists = F,
-        createTable = F,
-        tempEmulationSchema = tempEmulationSchema,
-        bulkLoad = bulkLoad,
-        camelCaseToSnakeCase = T
-      )
-    }
+    specifications = specs,
+    purgeSiteDataBeforeUploading = F
   )
 
-  return(TRUE)
+  return(invisible(NULL))
 }
 
+## TODO add this into the csv exporting
 removeMinCell <- function(
     data,
     minCellCount = 0,
@@ -123,7 +115,6 @@ removeMinCell <- function(
   }
   return(data)
 }
-
 
 
 #' Create the results tables to store characterization results into a database
@@ -278,176 +269,6 @@ getDataMigrator <- function(connectionDetails, databaseSchema, tablePrefix = "")
     migrationPath = "migrations",
     packageName = utils::packageName()
   )
-}
-
-#' Exports all tables in the result database to csv files
-#' @description
-#' This function extracts the database tables into csv files
-#'
-#' @details
-#' This function extracts the database tables into csv files
-#'
-#' @param connectionDetails         The connection details to input into the
-#'                                     function \code{connect} in the
-#'                                     \code{DatabaseConnector} package.
-#' @param resultSchema                 The name of the database schema that the result tables will be created.
-#' @param targetDialect                DEPRECATED: derived from \code{connectionDetails}.
-#' @param tablePrefix                  The table prefix to apply to the characterization result tables
-#' @param filePrefix                   The prefix to apply to the files
-#' @param tempEmulationSchema          The temp schema used when the database management system is oracle
-#' @param saveDirectory                The directory to save the csv results
-#' @param maxRowCount                  Max number of rows extracted at a time
-#'
-#' @return
-#' csv file per table into the saveDirectory
-#'
-#' @export
-exportDatabaseToCsv <- function(
-    connectionDetails,
-    resultSchema,
-    targetDialect = NULL,
-    tablePrefix = "c_",
-    filePrefix = NULL,
-    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-    saveDirectory,
-    maxRowCount = 1e6
-    ) {
-  errorMessages <- checkmate::makeAssertCollection()
-  .checkConnectionDetails(connectionDetails, errorMessages)
-  .checkTablePrefix(
-    tablePrefix = tablePrefix,
-    errorMessages = errorMessages
-  )
-  checkmate::reportAssertions(errorMessages)
-  if (!is.null(targetDialect)) {
-    warning("The targetDialect argument is deprecated")
-  }
-
-  if (is.null(filePrefix)) {
-    filePrefix <- ""
-  }
-
-  # connect to result database
-  connection <- DatabaseConnector::connect(
-    connectionDetails = connectionDetails
-  )
-  on.exit(
-    DatabaseConnector::disconnect(connection)
-  )
-
-  # create the folder to save the csv files
-  if (!dir.exists(saveDirectory)) {
-    dir.create(
-      path = saveDirectory,
-      recursive = T
-    )
-  }
-
-
-  # get the table names using the function in uploadToDatabase.R
-  tables <- getResultTables()
-
-  # extract result per table
-  for (table in tables) {
-    ParallelLogger::logInfo(paste0("Exporting rows from ", table, " to csv file"))
-    # get row count and figure out number of loops
-    sql <- "select count(*) as N from @resultSchema.@appendtotable@tablename;"
-    sql <- SqlRender::render(
-      sql = sql,
-      resultSchema = resultSchema,
-      appendtotable = tablePrefix,
-      tablename = table
-    )
-    sql <- SqlRender::translate(
-      sql = sql,
-      targetDialect = connectionDetails$dbms,
-      tempEmulationSchema = tempEmulationSchema
-    )
-    countN <- DatabaseConnector::querySql(
-      connection = connection,
-      sql = sql,
-      snakeCaseToCamelCase = F
-    )$N
-
-    # get column names
-    sql <- "select * from @resultSchema.@appendtotable@tablename where 1=0;"
-    sql <- SqlRender::render(
-      sql = sql,
-      resultSchema = resultSchema,
-      appendtotable = tablePrefix,
-      tablename = table
-    )
-    sql <- SqlRender::translate(
-      sql = sql,
-      targetDialect = connectionDetails$dbms,
-      tempEmulationSchema = tempEmulationSchema
-    )
-    cnames <- colnames(DatabaseConnector::querySql(
-      connection = connection,
-      sql = sql,
-      snakeCaseToCamelCase = F
-    ))
-
-    inds <- floor(countN / maxRowCount)
-    tableAppend <- F
-    # NOTE: If the table has 0 rows (countN == 0),
-    # then setting the txtProgressBar will fail since
-    # min < max. So, setting max = countN+1 for this
-    # reason.
-    pb <- utils::txtProgressBar(min = 0, max = countN + 1, initial = 0)
-
-    for (i in 1:inds) {
-      startRow <- (i - 1) * maxRowCount + 1
-      endRow <- min(i * maxRowCount, countN)
-
-      sql <- "select @cnames from
-    (select *,
-    ROW_NUMBER() OVER(ORDER BY @cnames) AS row
-    from @resultSchema.@appendtotable@tablename
-    ) temp
-    where
-    temp.row >= @start_row and
-    temp.row <= @end_row;"
-      sql <- SqlRender::render(
-        sql = sql,
-        resultSchema = resultSchema,
-        appendtotable = tablePrefix,
-        tablename = table,
-        cnames = paste(cnames, collapse = ","),
-        start_row = startRow,
-        end_row = endRow
-      )
-      sql <- SqlRender::translate(
-        sql = sql,
-        targetDialect = connectionDetails$dbms,
-        tempEmulationSchema = tempEmulationSchema
-      )
-      result <- DatabaseConnector::querySql(
-        connection = connection,
-        sql = sql,
-        snakeCaseToCamelCase = F
-      )
-      result <- formatDouble(result)
-
-      # save the results as a csv
-      readr::write_csv(
-        x = result,
-        file = file.path(saveDirectory, paste0(tolower(filePrefix), table, ".csv")),
-        append = tableAppend
-      )
-      tableAppend <- T
-      # NOTE: Handling progresss bar per note on txtProgressBar
-      # above. Otherwise the progress bar doesn't show that it completed.
-      if (endRow == countN) {
-        utils::setTxtProgressBar(pb, countN + 1)
-      } else {
-        utils::setTxtProgressBar(pb, endRow)
-      }
-    }
-    close(pb)
-  }
-
-  invisible(saveDirectory)
 }
 
 getResultTables <- function() {

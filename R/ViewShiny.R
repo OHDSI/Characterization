@@ -4,17 +4,18 @@
 #' This is a shiny app for viewing interactive plots and tables
 #' @details
 #' Input is the output of ...
-#' @param resultLocation   The location of the results
+#' @param resultFolder   The location of the csv results
 #' @param cohortDefinitionSet  The cohortDefinitionSet extracted using webAPI
 #' @return
 #' Opens a shiny app for interactively viewing the results
 #'
 #' @export
 viewCharacterization <- function(
-    resultLocation,
-    cohortDefinitionSet = NULL) {
+    resultFolder,
+    cohortDefinitionSet = NULL
+    ) {
   databaseSettings <- prepareCharacterizationShiny(
-    resultLocation = resultLocation,
+    resultFolder = resultFolder,
     cohortDefinitionSet = cohortDefinitionSet
   )
 
@@ -22,20 +23,41 @@ viewCharacterization <- function(
 }
 
 prepareCharacterizationShiny <- function(
-    resultLocation,
-    cohortDefinitionSet) {
-  server <- file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
+    resultFolder,
+    cohortDefinitionSet,
+    sqliteLocation = file.path(tempdir(), 'results.sqlite')
+    ) {
 
-  connectionDetailsSettings <- list(
+  if(!dir.exists(dirname(sqliteLocation))){
+    dir.create(dirname(sqliteLocation), recursive = T)
+  }
+
+  # create sqlite connection
+  server <- sqliteLocation
+  connectionDetails <- DatabaseConnector::createConnectionDetails(
     dbms = "sqlite",
     server = server
   )
 
-  connectionDetails <- do.call(
-    what = DatabaseConnector::createConnectionDetails,
-    args = connectionDetailsSettings
+  # create the tables
+  createCharacterizationTables(
+    connectionDetails = connectionDetails,
+    resultSchema = "main",
+    targetDialect = "sqlite",
+    deleteExistingTables = T,
+    createTables = T,
+    tablePrefix = 'c_'
   )
 
+  # upload the results
+  insertResultsToDatabase(
+    connectionDetails = connectionDetails,
+    schema = 'main',
+    resultsFolder = resultFolder,
+    tablePrefix = 'c_'
+  )
+
+  # add extra tables (cohorts and databases)
   con <- DatabaseConnector::connect(connectionDetails)
   on.exit(DatabaseConnector::disconnect(con))
 
@@ -86,41 +108,15 @@ prepareCharacterizationShiny <- function(
     )
   }
 
-  if (!"i_incidence_summary" %in% tables) {
-    x <- c(
-      "refId", "databaseId", "sourceName",
-      "targetCohortDefinitionId", "targetName", "tarId",
-      "tarStartWith", "tarStartOffset", "tarEndWith", "tarEndOffset",
-      "subgroupId", "subgroupName",
-      "outcomeId", "outcomeCohortDefinitionId", "outcomeName",
-      "clean_window",
-      "ageId", "ageGroupName",
-      "genderId", "genderName",
-      "startYear", "personsAtRiskPe", "personsAtRisk",
-      "personDaysPe", "personDays",
-      "personOutcomesPe", "personOutcomes",
-      "outcomesPe", "outcomes",
-      "incidenceProportionP100p",
-      "incidenceRateP100py"
-    )
-    df <- data.frame(matrix(ncol = length(x), nrow = 0))
-    colnames(df) <- x
-
-    DatabaseConnector::insertTable(
-      connection = con,
-      databaseSchema = "main",
-      tableName = "i_incidence_summary",
-      data = df,
-      camelCaseToSnakeCase = T
-    )
-  }
-
+  # create the settings for the database
   databaseSettings <- list(
-    connectionDetailsSettings = connectionDetailsSettings,
+    connectionDetailsSettings = list(
+      dbms = "sqlite",
+      server = server
+    ),
     schema = "main",
     tablePrefix = "c_",
     cohortTablePrefix = "cg_",
-    incidenceTablePrefix = "i_",
     databaseTable = "DATABASE_META_DATA"
   )
 
@@ -139,7 +135,6 @@ viewChars <- function(
   )
   connection <- ResultModelManager::ConnectionHandler$new(connectionDetails)
   databaseSettings$connectionDetailsSettings <- NULL
-
 
   if (utils::packageVersion("ShinyAppBuilder") < "1.2.0") {
     # use old method
@@ -174,7 +169,7 @@ viewChars <- function(
     databaseSettings$cgTablePrefix <- databaseSettings$cohortTablePrefix
     databaseSettings$databaseTable <- "DATABASE_META_DATA"
     databaseSettings$databaseTablePrefix <- ""
-    databaseSettings$iTablePrefix <- databaseSettings$incidenceTablePrefix
+    #databaseSettings$iTablePrefix <- databaseSettings$incidenceTablePrefix
     databaseSettings$cgTable <- "cohort_definition"
 
     if (!testApp) {

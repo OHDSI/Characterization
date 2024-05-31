@@ -17,7 +17,10 @@ runCharacterizationAnalyses(
   tablePrefix = "c_",
   databaseId = "1",
   showSubjectId = F,
-  minCellCount = 0
+  minCellCount = 0,
+  incremental = T,
+  threads = 1,
+  minCharacterizationMean = 0.01
 )
 }
 \arguments{
@@ -52,6 +55,12 @@ can be created}
 \item{showSubjectId}{Whether to include subjectId of failed rechallenge case series or hide}
 
 \item{minCellCount}{The minimum count value that is calculated}
+
+\item{incremental}{If TRUE then skip previously executed analyses that completed}
+
+\item{threads}{The number of threads to use when running aggregate covariates}
+
+\item{minCharacterizationMean}{The minimum mean threshold to extract when running aggregate covariates}
 }
 \value{
 An sqlite database with the results is saved into the saveDirectory and a csv file named tacker.csv

@@ -12,15 +12,21 @@ test_that("createAggregateCovariateSettings", {
     useCharlsonIndex = T
   )
 
+  caseCovariateSettings <- createDuringCovariateSettings(
+    useConditionOccurrenceDuring = T
+  )
+
   res <- createAggregateCovariateSettings(
     targetIds = targetIds,
     outcomeIds = outcomeIds,
     minPriorObservation = 10,
     outcomeWashoutDays = 100,
-    riskWindowStart = 1, startAnchor = "cohort start",
-    riskWindowEnd = 365, endAnchor = "cohort start",
+    riskWindowStart = 2, startAnchor = "cohort end",
+    riskWindowEnd = 363, endAnchor = "cohort end",
     covariateSettings = covariateSettings,
-    minCharacterizationMean = 0.01
+    caseCovariateSettings = caseCovariateSettings,
+    casePreTargetDuration = 180,
+    casePostOutcomeDuration = 120
   )
 
   testthat::expect_equal(
@@ -43,9 +49,34 @@ test_that("createAggregateCovariateSettings", {
   )
 
   testthat::expect_equal(
-    res$minCharacterizationMean,
-    0.01
+    res$riskWindowStart,2
   )
+  testthat::expect_equal(
+    res$startAnchor, "cohort end"
+  )
+  testthat::expect_equal(
+    res$riskWindowEnd,363
+  )
+  testthat::expect_equal(
+    res$endAnchor,"cohort end"
+  )
+
+  testthat::expect_equal(
+    res$caseCovariateSettings,
+    caseCovariateSettings
+  )
+
+  testthat::expect_equal(
+    res$casePreTargetDuration,
+    180
+  )
+
+  testthat::expect_equal(
+    res$casePostOutcomeDuration,
+    120
+  )
+
+
 })
 
 test_that("error when using temporal features", {
@@ -125,6 +156,9 @@ test_that("computeAggregateCovariateAnalyses", {
     useDemographicsAge = T,
     useCharlsonIndex = T
   )
+  caseCovariateSettings <- createDuringCovariateSettings(
+    useConditionOccurrenceDuring = T
+  )
 
   res <- createAggregateCovariateSettings(
     targetIds = targetIds,
@@ -134,78 +168,121 @@ test_that("computeAggregateCovariateAnalyses", {
     riskWindowStart = 1, startAnchor = "cohort start",
     riskWindowEnd = 5 * 365, endAnchor = "cohort start",
     covariateSettings = covariateSettings,
-    minCharacterizationMean = 0.01
+    caseCovariateSettings = caseCovariateSettings
   )
 
-  agc <- computeAggregateCovariateAnalyses(
+  tempFolder1 <- tempfile("runAggregate1")
+  on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
+
+  computeAggregateCovariateAnalyses(
     connectionDetails = connectionDetails,
     cdmDatabaseSchema = "main",
     cdmVersion = 5,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
-    aggregateCovariateSettings = res
+    aggregateCovariateSettings = res,
+    minCharacterizationMean = 0.01,
+    databaseId = 'madeup',
+    outputFolder = tempFolder1
+  )
+  # check incremental does not run
+  testthat::expect_true(sum(c('results','execution') %in% dir(tempFolder1)) == length(dir(tempFolder1)))
+
+  tempFolder2 <- tempfile("runAggregate2")
+  on.exit(unlink(tempFolder2, recursive = TRUE), add = TRUE)
+
+  computeAggregateCovariateAnalyses(
+    connectionDetails = connectionDetails,
+    cdmDatabaseSchema = "main",
+    cdmVersion = 5,
+    targetDatabaseSchema = "main",
+    targetTable = "cohort",
+    aggregateCovariateSettings = res,
+    minCharacterizationMean = 0.01,
+    databaseId = 'madeup',
+    outputFolder = tempFolder2,
+    incrementalFile = file.path(tempFolder2,'executed.csv')
+  )
+  # check incremental does run
+  testthat::expect_true(sum(c('executed.csv','results','execution') %in% dir(tempFolder2)) == 3)
+
+  # make sure the execution logs all the completed runs
+  executed <- readr::read_csv(file.path(tempFolder2,'executed.csv'), show_col_types = F)
+  nrowExpected <- length(targetIds)*2 + length(outcomeIds)*2 + 4*length(targetIds)*length(outcomeIds)
+  testthat::expect_true(nrow(executed) == nrowExpected)
+
+  # check one execution folder where we have all results
+  resultFiles <- dir(file.path(tempFolder2, 'execution', 'T_1_30'))
+  testthat::expect_true(
+    sum(resultFiles %in% c(
+      "analysis_ref.csv",
+      "covariate_ref.csv",
+      "covariates.csv",
+      "covariates_continuous.csv"
+    )) == 4
   )
 
-  testthat::expect_true(inherits(agc, "CovariateData"))
-  testthat::expect_true(length(unique(as.data.frame(agc$covariates)$cohortDefinitionId))
-  <= length(res$targetIds) * length(res$outcomeIds) * 4 + length(res$targetIds) * 1 + length(res$outcomeIds) * 1)
+  # make sure the files are written
+  resultFiles <- dir(file.path(tempFolder2, 'results'))
   testthat::expect_true(
-    sum(names(agc) %in% c(
-      "analysisRef",
-      "covariateRef",
-      "covariates",
-      "covariatesContinuous",
-      "settings",
-      "cohortDetails"
+    sum(resultFiles %in% c(
+      "analysis_ref.csv",
+      "covariate_ref.csv",
+      "covariates.csv",
+      "covariates_continuous.csv",
+      "settings.csv",
+      "cohort_details.csv"
     )) == 6
   )
 
-  # check cohortCounts is done for all except TnObetween and OnT
-  # missing TnOprior as not in eunomia
-  testthat::expect_true(
-    nrow(as.data.frame(agc$cohortDetails)) >=
-      (nrow(as.data.frame(agc$cohortCounts))+6)
+  # check cohortCounts is done for all
+  cohortDetails <- readr::read_csv(
+    file.path(tempFolder2, 'results', 'cohort_details.csv'),
+    show_col_types = F
   )
-
-  # check cohortDetails
   testthat::expect_true(
-    length(unique(as.data.frame(agc$cohortDetails)$cohortDefinitionId)) ==
-      nrow(as.data.frame(agc$cohortDetails))
+    nrow(unique(cohortDetails)) == nrow(cohortDetails)
   )
-
   testthat::expect_true(
-    nrow(as.data.frame(agc$cohortDetails)) == 20 # 8 T/Os, 3 TnO, 0 TnOc, 3 OnT, 3 TnOprior, 3 TnObetween
-  )
-
-  # test saving/loading
-  tempFile <- tempfile(fileext = ".zip")
-  on.exit(unlink(tempFile))
-
-  saveAggregateCovariateAnalyses(
-    result = agc,
-    fileName = tempFile
+    nrow(executed) == nrow(cohortDetails)
   )
 
   testthat::expect_true(
-    file.exists(tempFile)
+    nrow(as.data.frame(cohortDetails)) == 20 # 8 T/Os, 3 TnO, 0 TnOc, 3 OnT, 3 TnOprior, 3 TnObetween
   )
 
-  agc2 <- loadAggregateCovariateAnalyses(
-    fileName = tempFile
-  )
-
-  testthat::expect_equal(dplyr::collect(agc$covariates), dplyr::collect(agc2$covariates))
-  testthat::expect_equal(dplyr::collect(agc$covariatesContinuous), dplyr::collect(agc2$covariatesContinuous))
-
-  # test exporting to csv
-  tempFolder <- tempfile("exportToCsv")
-  on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
-  fileLocs <- exportAggregateCovariateToCsv(
-    result = agc,
-    saveDirectory = tempFolder
-  )
-
-  for (i in 1:length(fileLocs)) {
-    testthat::expect_true(file.exists(fileLocs[i]))
+  # test results combine execution files correctly
+  executionFolders <- dir(file.path(tempFolder2, 'execution'))
+  allcovs <- c()
+  for(executionFolder in executionFolders){
+    covstemp <- readr::read_csv(
+      file = file.path(
+        tempFolder2,
+        'execution',
+        executionFolder,
+        'covariates.csv'
+        ),
+      show_col_types = F
+    )
+    allcovs <- rbind(covstemp, allcovs)
   }
+
+  aggCovs <-  readr::read_csv(
+    file = file.path(tempFolder2, 'results', 'covariates.csv'),
+    show_col_types = F
+  )
+  testthat::expect_true(
+    nrow(aggCovs) == nrow(allcovs)
+  )
+
+  # check covariates is unique
+  testthat::expect_true(
+    nrow(aggCovs) == nrow(unique(aggCovs))
+  )
+
+  # check databaseId is added
+  testthat::expect_true(
+    aggCovs$database_id[1] == 'madeup'
+  )
+
 })
