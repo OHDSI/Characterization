@@ -158,7 +158,7 @@ CREATE TABLE @my_schema.@table_prefixcohort_counts(
     person_count int NOT NULL,
     min_exposure_time int,
     mean_exposure_time int,
-    max_exposure_time int-,
+    max_exposure_time int--,
     --PRIMARY KEY (database_id, target_cohort_id,outcome_cohort_id,
     --cohort_type, min_prior_observation, outcome_washout_days,
     --risk_window_start, start_anchor, risk_window_end, end_anchor)
