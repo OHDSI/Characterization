@@ -92,7 +92,7 @@ CREATE TABLE @my_schema.@table_prefixanalysis_ref (
     database_id varchar(100) NOT NULL,
     analysis_id int NOT NULL,
     analysis_name varchar(max) NOT NULL,
-    domain_id varchar(30) NOT NULL,
+    domain_id varchar(30),
     start_day int,
     end_day int,
     is_binary varchar(1),
