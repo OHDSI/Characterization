@@ -93,7 +93,9 @@ CREATE TABLE @my_schema.@table_prefixcovariate_ref (
     covariate_id int NOT NULL,
     covariate_name varchar(max) NOT NULL,
     analysis_id int NOT NULL,
-    concept_id int
+    concept_id int,
+    value_as_concept_id int,
+    collisions int
 );
 
 CREATE TABLE @my_schema.@table_prefixcovariates (
