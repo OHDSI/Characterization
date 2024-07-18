@@ -165,7 +165,7 @@ computeAggregateCovariateAnalyses <- function(
     cdmDatabaseSchema = cdmDatabaseSchema,
     cohortTable = "#agg_cohorts",
     cohortTableIsTemp = T,
-    cohortId = -1,
+    cohortIds = c(-1),
     covariateSettings = aggregateCovariateSettings$covariateSettings,
     cdmVersion = cdmVersion,
     aggregated = T,
