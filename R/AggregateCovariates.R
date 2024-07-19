@@ -98,15 +98,16 @@ createAggregateCovariateSettings <- function(
   )
 
   # check TAR - EFF edit
-  for(i in 1:length(riskWindowStart)){
-    .checkTimeAtRisk(
-      riskWindowStart = riskWindowStart[i],
-      startAnchor = startAnchor[i],
-      riskWindowEnd = riskWindowEnd[i],
-      endAnchor = endAnchor[i],
+  if(length(riskWindowStart)>1){
+    stop('Please add one time-at-risk per setting')
+  }
+  .checkTimeAtRisk(
+      riskWindowStart = riskWindowStart,
+      startAnchor = startAnchor,
+      riskWindowEnd = riskWindowEnd,
+      endAnchor = endAnchor,
       errorMessages = errorMessages
     )
-  }
 
   # check covariateSettings
   .checkCovariateSettings(
