@@ -158,7 +158,9 @@ getDbDuringCovariateData <- function(
   covariate_id bigint,
   covariate_name varchar(1000),
   analysis_id int,
-  concept_id bigint
+  concept_id bigint,
+  value_as_conceptId,
+  collisions
   );"
   sql <- SqlRender::translate(
     sql = sql,

@@ -59,6 +59,8 @@ covariate_ref,covariate_id,bigint,Yes,Yes,No,No,The covariate identifier
 covariate_ref,covariate_name,varchar,Yes,No,No,No,The covariate name
 covariate_ref,analysis_id,int,Yes,No,No,No,The analysis identifier
 covariate_ref,concept_id,bigint,Yes,No,No,No,The concept identifier
+covariate_ref,value_as_concept_id,int,N,N,N,N,The value as concept_id for features created from observation or measurement values
+covariate_ref,collisions,int,N,N,N,N,The number of collisions found for the covariate_id
 covariates,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 covariates,setting_id,int,Yes,Yes,No,No,The run identifier
 covariates,cohort_type,varchar(10),Yes,Yes,No,No,The cohort type

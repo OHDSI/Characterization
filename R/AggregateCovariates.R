@@ -838,66 +838,79 @@ getAggregateCovariatesJobs <- function(
   }
   ind <- 1:length(characterizationSettings)
 
+
   # target combinations
   targetCombinations <- do.call(what = 'rbind',
                                 args =
                                   lapply(
                                     1:length(characterizationSettings),
                                     function(i){
-                                      result <- data.frame(
-                                        targetIds = c(characterizationSettings[[i]]$targetIds,
-                                                      characterizationSettings[[i]]$outcomeIds),
-                                        minPriorObservation = characterizationSettings[[i]]$minPriorObservation,
-                                        covariateSettingsJson = as.character(ParallelLogger::convertSettingsToJson(characterizationSettings[[i]]$covariateSettings))
-                                      )
+
+                                      if(characterizationSettings[[i]]$extractNonCaseCovariates){
+                                        result <- data.frame(
+                                          targetIds = c(characterizationSettings[[i]]$targetIds,
+                                                        characterizationSettings[[i]]$outcomeIds),
+                                          minPriorObservation = characterizationSettings[[i]]$minPriorObservation,
+                                          covariateSettingsJson = as.character(ParallelLogger::convertSettingsToJson(characterizationSettings[[i]]$covariateSettings))
+                                        )
+                                        return(result)
+                                      } else{
+                                        return(
+                                          data.frame(targetIds = 1, minPriorObservation = 1, covariateSettingsJson = 1)[-1,]
+                                        )
+                                      }
                                     }
                                   )
   )
 
-  threadCols <- c("targetIds")
-  settingCols <- c("minPriorObservation")
+  if(nrow(targetCombinations) > 0){
+    threadCols <- c("targetIds")
+    settingCols <- c("minPriorObservation")
 
-  # thread split
-  threadSettings <- targetCombinations %>%
-    dplyr::select(dplyr::all_of(threadCols)) %>%
-    dplyr::distinct()
-  threadSettings$thread <- rep(1:threads, ceiling(nrow(threadSettings)/threads))[1:nrow(threadSettings)]
-  targetCombinations <- merge(targetCombinations, threadSettings, by = threadCols )
+    # thread split
+    threadSettings <- targetCombinations %>%
+      dplyr::select(dplyr::all_of(threadCols)) %>%
+      dplyr::distinct()
+    threadSettings$thread <- rep(1:threads, ceiling(nrow(threadSettings)/threads))[1:nrow(threadSettings)]
+    targetCombinations <- merge(targetCombinations, threadSettings, by = threadCols )
 
-  executionSettings <- data.frame(
-    minPriorObservation = unique(targetCombinations$minPriorObservation)
-  )
-  executionSettings$settingId <- createExecutionIds(nrow(executionSettings))
-  targetCombinations <- merge(targetCombinations, executionSettings, by = settingCols )
+    executionSettings <- data.frame(
+      minPriorObservation = unique(targetCombinations$minPriorObservation)
+    )
+    executionSettings$settingId <- createExecutionIds(nrow(executionSettings))
+    targetCombinations <- merge(targetCombinations, executionSettings, by = settingCols )
 
-  # recreate settings
-  settings <- c()
-  for(settingId in unique(executionSettings$settingId)){
-    settingVal <- executionSettings %>%
-      dplyr::filter(.data$settingId == !!settingId) %>%
-      dplyr::select(dplyr::all_of(settingCols))
+    # recreate settings
+    settings <- c()
+    for(settingId in unique(executionSettings$settingId)){
+      settingVal <- executionSettings %>%
+        dplyr::filter(.data$settingId == !!settingId) %>%
+        dplyr::select(dplyr::all_of(settingCols))
 
-    restrictedData <- targetCombinations %>%
-      dplyr::inner_join(settingVal, by = settingCols)
+      restrictedData <- targetCombinations %>%
+        dplyr::inner_join(settingVal, by = settingCols)
 
-    for(i in unique(restrictedData$thread)){
-      ind <- restrictedData$thread == i
-      settings <- rbind(settings,
-                        data.frame(
-                          functionName = 'computeTargetAggregateCovariateAnalyses',
-                          settings = as.character(ParallelLogger::convertSettingsToJson(
-                            list(
-                              targetIds = unique(restrictedData$targetId[ind]),
-                              minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
-                              covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind])),
-                              settingId = settingId
-                            )
-                          )),
-                          executionFolder = paste('tac', i ,paste(settingVal, collapse = '_'), sep = '_'),
-                          jobId = paste('tac', i ,paste(settingVal, collapse = '_'), sep = '_')
-                        )
-      )
+      for(i in unique(restrictedData$thread)){
+        ind <- restrictedData$thread == i
+        settings <- rbind(settings,
+                          data.frame(
+                            functionName = 'computeTargetAggregateCovariateAnalyses',
+                            settings = as.character(ParallelLogger::convertSettingsToJson(
+                              list(
+                                targetIds = unique(restrictedData$targetId[ind]),
+                                minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
+                                covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind])),
+                                settingId = settingId
+                              )
+                            )),
+                            executionFolder = paste('tac', i ,paste(settingVal, collapse = '_'), sep = '_'),
+                            jobId = paste('tac', i ,paste(settingVal, collapse = '_'), sep = '_')
+                          )
+        )
+      }
     }
+  } else{
+    settings <- c()
   }
 
   # get all combinations of TnOs, then split by treads

@@ -107,6 +107,8 @@ CREATE TABLE @my_schema.@table_prefixcovariate_ref (
     covariate_name varchar(max) NOT NULL,
     analysis_id int NOT NULL,
     concept_id bigint,
+    value_as_concept_id int,
+    collisions int,
     PRIMARY KEY (database_id, setting_id, covariate_id)
 );
 

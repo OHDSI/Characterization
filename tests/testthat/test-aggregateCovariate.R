@@ -319,6 +319,35 @@ test_that("getAggregateCovariatesJobs", {
                                 }
     )))) == 4)
 
+
+  # test when extractNonCaseCovariates = F
+  res3 <- Characterization:::createAggregateCovariateSettings(
+    targetIds = 1,
+    outcomeIds = 3,
+    extractNonCaseCovariates = F
+    )
+  jobDf <- Characterization:::getAggregateCovariatesJobs(
+    characterizationSettings = createCharacterizationSettings(
+      aggregateCovariateSettings = list(res3)
+    ),
+    threads = 3
+  )
+  testthat::expect_true(nrow(jobDf) == 1)
+
+  res4 <- Characterization:::createAggregateCovariateSettings(
+    targetIds = 2,
+    outcomeIds = 3,
+    extractNonCaseCovariates = T
+  )
+  jobDf <- Characterization:::getAggregateCovariatesJobs(
+    characterizationSettings = createCharacterizationSettings(
+      aggregateCovariateSettings = list(res3, res4)
+    ),
+    threads = 3
+  )
+
+  # add checks
+
 })
 
 test_that("computeTargetAggregateCovariateAnalyses", {
