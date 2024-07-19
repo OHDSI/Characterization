@@ -651,7 +651,7 @@ exportAndromedaToCsv <- function(
         if (sum(removeInd) > 0) {
           ParallelLogger::logInfo(paste0("Removing sum_value counts less than ", minCellCount))
           if (sum(removeInd) > 0) {
-            data$sum_value[removeInd] <- -1
+            data$sum_value[removeInd] <- -1*minCellCount
           }
         }
 
@@ -683,7 +683,7 @@ exportAndromedaToCsv <- function(
         if (sum(removeInd) > 0) {
           ParallelLogger::logInfo(paste0("Removing count_value counts less than ", minCellCount))
           if (sum(removeInd) > 0) {
-            data$count_value[removeInd] <- -1
+            data$count_value[removeInd] <- -1*minCellCount
           }
         }
 
@@ -725,6 +725,20 @@ exportAndromedaToCsv <- function(
     colnames(cohortCounts) <- SqlRender::camelCaseToSnakeCase(colnames(cohortCounts))
 
     # TODO apply minCellCount to columns row_count, person_count
+    removeInd <- cohortCounts$row_count < minCellCount
+    if (sum(removeInd) > 0) {
+      ParallelLogger::logInfo(paste0("Removing row_count counts less than ", minCellCount))
+      if (sum(removeInd) > 0) {
+        cohortCounts$row_count[removeInd] <- -1*minCellCount
+      }
+    }
+    removeInd <- cohortCounts$person_count < minCellCount
+    if (sum(removeInd) > 0) {
+      ParallelLogger::logInfo(paste0("Removing person_count counts less than ", minCellCount))
+      if (sum(removeInd) > 0) {
+        cohortCounts$person_count[removeInd] <- -1*minCellCount
+      }
+    }
 
     if(file.exists(file.path(saveLocation, 'cohort_counts.csv'))){
       append <- T

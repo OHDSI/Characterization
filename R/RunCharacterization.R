@@ -439,17 +439,27 @@ aggregateCsvs <- function(
 
         if(csvType == 'analysis_ref.csv'){
           data <- data %>%
-            dplyr::filter( # need to filter analysis_id and covariate_setting_id
-              !.data$setting_id %in% analysisRefTracker
-            )
-          analysisRefTracker <- c(analysisRefTracker, unique(data$setting_id))
+            dplyr::mutate(
+              unique_id = paste0(.data$setting_id, '-', .data$analysis_id)
+            ) %>%
+            dplyr::filter( # need to filter analysis_id and setting_id
+              !.data$unique_id %in% analysisRefTracker
+            ) %>%
+            dplyr::select(-"unique_id")
+
+          analysisRefTracker <- unique(c(analysisRefTracker, paste0(data$setting_id,'-',data$analysis_id)))
         }
-        if(csvType == 'covariate_ref.csv'){
+        if(csvType == 'covariate_ref.csv'){ # this could be problematic as may have differnet covariate_ids
           data <- data %>%
-            dplyr::filter(
-              !.data$setting_id %in% covariateRefTracker
-            )
-          covariateRefTracker <- c(covariateRefTracker, unique(data$setting_id))
+            dplyr::mutate(
+              unique_id = paste0(.data$setting_id, '-', .data$covariate_id)
+            ) %>%
+            dplyr::filter( # need to filter covariate_id and setting_id
+              !.data$unique_id %in% covariateRefTracker
+            )%>%
+            dplyr::select(-"unique_id")
+
+          covariateRefTracker <- unique(c(covariateRefTracker, paste0(data$setting_id,'-',data$covariate_id)))
         }
         if(csvType == 'settings.csv'){
           data <- data %>%
