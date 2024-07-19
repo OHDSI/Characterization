@@ -173,7 +173,7 @@ createExecutionIds <- function(size){
   return(executionIds)
 }
 
-
+# TODO cdmVersion should be in runChar
 computeTargetAggregateCovariateAnalyses <- function(
     connectionDetails = NULL,
     cdmDatabaseSchema,
@@ -507,7 +507,7 @@ computeCaseAggregateCovariateAnalyses <- function(
 
   message("Computing aggregate during case covariate results")
 
-  result2 <- FeatureExtraction::getDbCovariateData(
+  result2 <- tryCatch({FeatureExtraction::getDbCovariateData(
     connection = connection,
     oracleTempSchema = tempEmulationSchema,
     cdmDatabaseSchema = cdmDatabaseSchema,
@@ -518,7 +518,13 @@ computeCaseAggregateCovariateAnalyses <- function(
     cdmVersion = cdmVersion,
     aggregated = T,
     minCharacterizationMean = minCharacterizationMean
-  )
+  )}, error = function(e){
+    message(e);
+    return(NULL)
+  })
+  if(is.null(result2)){
+    stop('Issue with case series data extraction')
+  }
 
   # drop temp tables
   message("Dropping temp tables")

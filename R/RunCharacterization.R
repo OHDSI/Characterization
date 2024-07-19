@@ -169,12 +169,12 @@ runCharacterizationAnalyses <- function(
   createDirectory(outputDirectory)
   createDirectory(executionPath)
 
-  #logger <- createLogger(
-  #  logPath = file.path(outputDirectory),
-  #  logName = 'log.txt'
-  #)
-  #ParallelLogger::registerLogger(logger)
-  #on.exit(ParallelLogger::unregisterLogger(logger))
+  logger <- createLogger(
+    logPath = file.path(executionPath),
+    logName = 'log.txt'
+  )
+  ParallelLogger::registerLogger(logger)
+  on.exit(ParallelLogger::unregisterLogger(logger))
 
   jobs <- createJobs(
     characterizationSettings = characterizationSettings,
@@ -305,9 +305,14 @@ createDirectory <- function(x){
 createLogger <- function(logPath, logName){
   createDirectory(logPath)
   ParallelLogger::createLogger(
-    appenders = ParallelLogger::createFileAppender(
+    name = 'Characterization',
+    threshold = "INFO",
+    appenders = list(
+      ParallelLogger::createFileAppender(
       fileName = file.path(logPath, logName),
-      layout = ParallelLogger::layoutParallel
+      layout = ParallelLogger::layoutParallel,
+      expirationTime = 60*60*48
+    )
     )
   )
 }
