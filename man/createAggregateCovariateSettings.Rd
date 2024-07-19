@@ -32,7 +32,8 @@ createAggregateCovariateSettings(
     = T, useMeasurementDuring = T, useObservationDuring = T, useVisitConceptCountDuring =
     T),
   casePreTargetDuration = 365,
-  casePostOutcomeDuration = 365
+  casePostOutcomeDuration = 365,
+  extractNonCaseCovariates = T
 )
 }
 \arguments{
@@ -61,6 +62,8 @@ or `"cohort end"`.}
 \item{casePreTargetDuration}{The number of days prior to case index we use for FeatureExtraction}
 
 \item{casePostOutcomeDuration}{The number of days prior to case index we use for FeatureExtraction}
+
+\item{extractNonCaseCovariates}{Whether to extract aggregate covariates and counts for patients in the targets and outcomes in addition to the cases}
 }
 \value{
 A list with the settings

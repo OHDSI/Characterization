@@ -11,11 +11,12 @@ computeRechallengeFailCaseSeriesAnalyses(
   outcomeDatabaseSchema = targetDatabaseSchema,
   outcomeTable = targetTable,
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-  dechallengeRechallengeSettings,
+  settings,
   databaseId = "database 1",
   showSubjectId = F,
   outputFolder = file.path(getwd(), "results"),
-  minCellCount = 0
+  minCellCount = 0,
+  ...
 )
 }
 \arguments{
@@ -38,7 +39,7 @@ this should include both the database and schema name, for example
 To emulate temp tables, provide a schema with write privileges where temp tables
 can be created}
 
-\item{dechallengeRechallengeSettings}{The settings for the timeToEvent study}
+\item{settings}{The settings for the timeToEvent study}
 
 \item{databaseId}{An identifier for the database (string)}
 
@@ -47,6 +48,8 @@ can be created}
 \item{outputFolder}{A directory to save the results as csv files}
 
 \item{minCellCount}{The minimum cell value to display, values less than this will be replaced by -1}
+
+\item{...}{extra inputs}
 }
 \value{
 An \code{Andromeda::andromeda()} object with the case series details of the failed rechallenge

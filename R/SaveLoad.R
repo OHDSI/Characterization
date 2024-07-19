@@ -14,13 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-colnamesLower <- function(data) {
-  colnames(data) <- tolower(
-    x = colnames(data)
-  )
-  return(data)
-}
-
 #' export the TimeToEvent results as csv
 #'
 #' @param result  The output of running \code{computeTimeToEventAnalyses()}
@@ -61,13 +54,13 @@ exportTimeToEventToCsv <- function(
         string = colnames(dat)
       )
 
-      if (sum(dat$NUM_EVENTS < minCellCount) > 0) {
-        ParallelLogger::logInfo(paste0("Removing NUM_EVENTS less than ", minCellCount))
-        dat$NUM_EVENTS[dat$NUM_EVENTS < minCellCount] <- -1
+      if (sum(dat$num_events < minCellCount) > 0) {
+        ParallelLogger::logInfo(paste0("Removing num_events less than ", minCellCount))
+        dat$num_events[dat$num_events < minCellCount] <- -minCellCount
       }
 
       readr::write_csv(
-        x = dat,
+        x = formatDouble(x = dat),
         file = file.path(
           saveDirectory,
           "time_to_event.csv"
@@ -105,6 +98,10 @@ exportDechallengeRechallengeToCsv <- function(
   )
   message("Writing ", countN, " rows to csv")
 
+  if(!dir.exists(saveDirectory)){
+    dir.create(saveDirectory, recursive = T)
+  }
+
   Andromeda::batchApply(
     tbl = result$dechallengeRechallenge,
     fun = function(x) {
@@ -123,50 +120,58 @@ exportDechallengeRechallengeToCsv <- function(
         string = colnames(dat)
       )
 
-      removeInd <- dat$NUM_EVENTS < minCellCount
+      removeInd <- dat$num_persons_exposed < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing NUM_EVENTS counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Removing num_persons_exposed counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
-          dat$NUM_CASES[removeInd] <- -1
+          dat$num_persons_exposed[removeInd] <- -minCellCount
         }
       }
 
-      removeInd <- dat$DECHALLENGE_ATTEMPT < minCellCount
+      removeInd <- dat$num_cases < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing DECHALLENGE_ATTEMPT counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Removing num_cases counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
-          dat$DECHALLENGE_ATTEMPT[removeInd] <- -1
+          dat$num_cases[removeInd] <- -minCellCount
         }
       }
 
-      removeInd <- dat$DECHALLENGE_FAIL < minCellCount | dat$DECHALLENGE_SUCCESS < minCellCount
+      removeInd <- dat$dechallenge_attempt < minCellCount
+      if (sum(removeInd) > 0) {
+        ParallelLogger::logInfo(paste0("Removing dechallenge_attempt counts less than ", minCellCount))
+        if (sum(removeInd) > 0) {
+          dat$dechallenge_attempt[removeInd] <- -minCellCount
+        }
+      }
+
+      removeInd <- dat$dechallenge_fail < minCellCount | dat$dechallenge_success < minCellCount
       if (sum(removeInd) > 0) {
         ParallelLogger::logInfo(paste0("Removing DECHALLENGE FAIL or SUCCESS counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
-          dat$DECHALLENGE_FAIL[removeInd] <- -1
-          dat$DECHALLENGE_SUCCESS[removeInd] <- -1
+          dat$dechallenge_fail[removeInd] <- -minCellCount
+          dat$dechallenge_success[removeInd] <- -minCellCount
         }
       }
 
-      removeInd <- dat$RECHALLENGE_ATTEMPT < minCellCount
+      removeInd <- dat$rechallenge_attempt < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing RECHALLENGE_ATTEMPT counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Removing rechallenge_attempt counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
-          dat$RECHALLENGE_ATTEMPT[removeInd] <- -1
+          dat$rechallenge_attempt[removeInd] <- -minCellCount
         }
       }
 
-      removeInd <- dat$RECHALLENGE_FAIL < minCellCount | dat$RECHALLENGE_SUCCESS < minCellCount
+      removeInd <- dat$rechallenge_fail < minCellCount | dat$rechallenge_success < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing RECHALLENGE FAIL or SUCCESS counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Removing rechallenge_fail or rechallenge_success counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
-          dat$RECHALLENGE_FAIL[removeInd] <- -1
-          dat$RECHALLENGE_SUCCESS[removeInd] <- -1
+          dat$rechallenge_fail[removeInd] <- -minCellCount
+          dat$rechallenge_success[removeInd] <- -minCellCount
         }
       }
 
       readr::write_csv(
-        x = dat,
+        x = formatDouble(x = dat),
         file = file.path(
           saveDirectory,
           "dechallenge_rechallenge.csv"
@@ -195,7 +200,8 @@ exportDechallengeRechallengeToCsv <- function(
 #' @export
 exportRechallengeFailCaseSeriesToCsv <- function(
     result,
-    saveDirectory) {
+    saveDirectory
+    ) {
   if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
@@ -229,7 +235,7 @@ exportRechallengeFailCaseSeriesToCsv <- function(
       )
 
       readr::write_csv(
-        x = dat,
+        x = formatDouble(x = dat),
         file = file.path(
           saveDirectory,
           "rechallenge_fail_case_series.csv"

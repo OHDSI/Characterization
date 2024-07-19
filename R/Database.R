@@ -62,6 +62,7 @@ createSqliteDatabase <- function(
 #' @param schema               The schema for the result database
 #' @param resultsFolder        The folder containing the csv results
 #' @param tablePrefix          A prefix to append to the result tables for the characterization results
+#' @param csvTablePrefix.      The prefix added to the csv results - default is 'c_'
 #'
 #' @return
 #' Returns the connection to the sqlite database
@@ -71,12 +72,14 @@ insertResultsToDatabase <- function(
     connectionDetails,
     schema,
     resultsFolder,
-    tablePrefix = 'c_'
+    tablePrefix = '',
+    csvTablePrefix = 'c_'
     ){
   specLoc <- system.file('settings', 'resultsDataModelSpecification.csv',
                          package = 'Characterization')
   specs <- utils::read.csv(specLoc)
   colnames(specs) <- SqlRender::snakeCaseToCamelCase(colnames(specs))
+  specs$tableName <- paste0(csvTablePrefix, specs$tableName)
   ResultModelManager::uploadResults(
     connectionDetails = connectionDetails,
     schema = schema,

@@ -85,8 +85,9 @@ test_that("prepareCharacterizationShiny works", {
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     characterizationSettings = characterizationSettings,
-    saveDirectory = resultLocation,
-    tablePrefix = "c_",
+    outputDirectory = file.path(resultLocation, 'result'),
+    executionPath = file.path(resultLocation, 'execution'),
+    csvFilePrefix = "c_",
     databaseId = "1",
     threads = 1,
     incremental = T,
@@ -94,8 +95,8 @@ test_that("prepareCharacterizationShiny works", {
     minCharacterizationMean = 0.01
   )
 
-  settings <- prepareCharacterizationShiny(
-    resultFolder = file.path(resultLocation,'results'),
+  settings <- Characterization:::prepareCharacterizationShiny(
+    resultFolder = file.path(resultLocation,'result'),
     cohortDefinitionSet = NULL,
     sqliteLocation = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
   )
@@ -127,7 +128,7 @@ test_that("prepareCharacterizationShiny works", {
 
 test_that("shiny app works", {
   settings <- prepareCharacterizationShiny(
-    resultFolder  = file.path(resultLocation,'results'),
+    resultFolder  = file.path(resultLocation,'result'),
     cohortDefinitionSet = NULL,
     sqliteLocation = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
   )

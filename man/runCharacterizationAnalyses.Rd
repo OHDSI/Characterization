@@ -13,8 +13,9 @@ runCharacterizationAnalyses(
   tempEmulationSchema = NULL,
   cdmDatabaseSchema,
   characterizationSettings,
-  saveDirectory,
-  tablePrefix = "c_",
+  outputDirectory,
+  executionPath = file.path(outputDirectory, "execution"),
+  csvFilePrefix = "c_",
   databaseId = "1",
   showSubjectId = F,
   minCellCount = 0,
@@ -46,9 +47,11 @@ can be created}
 
 \item{characterizationSettings}{The study settings created using \code{createCharacterizationSettings}}
 
-\item{saveDirectory}{The location to save the results to}
+\item{outputDirectory}{The location to save the final csv files to}
 
-\item{tablePrefix}{A string to append the tables in the results}
+\item{executionPath}{The location where intermediate results are saved to}
+
+\item{csvFilePrefix}{A string to append the csv files in the outputDirectory}
 
 \item{databaseId}{The unique identifier for the cdm database}
 
@@ -63,8 +66,7 @@ can be created}
 \item{minCharacterizationMean}{The minimum mean threshold to extract when running aggregate covariates}
 }
 \value{
-An sqlite database with the results is saved into the saveDirectory and a csv file named tacker.csv
-details which analyses have run to completion.
+Multiple csv files in the outputDirectory.
 }
 \description{
 Specify the database connection containing the CDM data, the cohort database schemas/tables,

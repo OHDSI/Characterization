@@ -15,17 +15,17 @@ DROP TABLE #outcomes_washout;
 TRUNCATE TABLE #cohort_details;
 DROP TABLE #cohort_details;
 
-TRUNCATE TABLE #target_outcome_tar;
-DROP TABLE #target_outcome_tar;
+TRUNCATE TABLE #cases_tar;
+DROP TABLE #cases_tar;
 
-TRUNCATE TABLE #target_outcome_prior;
-DROP TABLE #target_outcome_prior;
+TRUNCATE TABLE #case_exclude;
+DROP TABLE #case_exclude;
 
-TRUNCATE TABLE #agg_cohorts_before;
-DROP TABLE #agg_cohorts_before;
+TRUNCATE TABLE #cases;
+DROP TABLE #cases;
 
-TRUNCATE TABLE #agg_cohorts_cases;
-DROP TABLE #agg_cohorts_cases;
+TRUNCATE TABLE #case_series;
+DROP TABLE #case_series;
 
 
 

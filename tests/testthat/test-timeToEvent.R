@@ -37,7 +37,7 @@ test_that("computeTimeToEventSettings", {
     cdmDatabaseSchema = "main",
     targetDatabaseSchema = "main",
     targetTable = "cohort",
-    timeToEventSettings = res,
+    settings = res,
     outputFolder = tteFolder,
     databaseId = 'tte_test'
   )
@@ -82,5 +82,26 @@ test_that("computeTimeToEventSettings", {
       ) ==
       length(unique(tte$outcome_cohort_definition_id))
   )
+
+
+  # test minCellCount
+  tteFolder <- tempfile("tte2")
+  computeTimeToEventAnalyses(
+    connectionDetails = connectionDetails,
+    cdmDatabaseSchema = "main",
+    targetDatabaseSchema = "main",
+    targetTable = "cohort",
+    settings = res,
+    outputFolder = tteFolder,
+    databaseId = 'tte_test',
+    minCellCount = 9999
+  )
+
+  tte <- readr::read_csv(
+    file = file.path(tteFolder,'time_to_event.csv'),
+    show_col_types = F
+  )
+
+  testthat::expect_true(max(tte$num_events) == -9999)
 
 })

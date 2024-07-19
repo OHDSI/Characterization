@@ -51,13 +51,38 @@ from
 	   group by cohort_definition_id
 	) exposures
 	inner join
+
   (
-	select dc1.cohort_definition_id as target_cohort_definition_id, io1.cohort_definition_id as outcome_cohort_definition_id, count(dc1.subject_id) as num_cases
+  select
+  target_cohort_definition_id,
+  outcome_cohort_definition_id,
+  sum(num_cases) as num_cases
+
+  from
+  (
+	select dc1.cohort_definition_id as target_cohort_definition_id,
+	io1.cohort_definition_id as outcome_cohort_definition_id,
+	count(dc1.subject_id) as num_cases
 	from #target_cohort dc1
 	inner join #outcome_cohort io1
 	on dc1.subject_id = io1.subject_id
 	and io1.cohort_start_date > dc1.cohort_start_date  and io1.cohort_start_date <= dc1.cohort_end_date
 	group by dc1.cohort_definition_id, io1.cohort_definition_id
+
+	-- added this code to return 0s when there are no outcomes
+	-- so we can tell whether the dechal has been run or not
+	union
+	select distinct
+	dc1_temp.cohort_definition_id as target_cohort_definition_id,
+	io1_temp.cohort_definition_id as outcome_cohort_definition_id,
+	0 as num_cases
+	from #target_cohort dc1_temp
+	join #outcome_cohort io1_temp
+	) temp_cases
+	group by
+	target_cohort_definition_id,
+  outcome_cohort_definition_id
+
 	) cases
 	on exposures.cohort_definition_id = cases.target_cohort_definition_id
 	left join

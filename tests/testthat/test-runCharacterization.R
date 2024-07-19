@@ -119,8 +119,9 @@ test_that("runCharacterizationAnalyses", {
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     characterizationSettings = characterizationSettings,
-    saveDirectory = tempFolder,
-    tablePrefix = "c_",
+    outputDirectory = file.path(tempFolder,'result'),
+    executionPath = file.path(tempFolder,'execution'),
+    csvFilePrefix = "c_",
     databaseId = "1",
     incremental = T,
     minCharacterizationMean = 0.01,
@@ -128,53 +129,48 @@ test_that("runCharacterizationAnalyses", {
   )
 
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "tracker.csv"))
+    dir.exists(file.path(tempFolder, "result"))
   )
-  tracker <- readr::read_csv(
-    file = file.path(tempFolder, "tracker.csv"),
-    show_col_types = FALSE
-  )
-  testthat::expect_equal(nrow(tracker), 5)
 
   # check csv files
   testthat::expect_true(
-    length(dir(file.path(tempFolder, "results"))) > 0
+    length(dir(file.path(tempFolder, "result"))) > 0
   )
 
   # check cohort details is saved
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "results", "cohort_details.csv"))
+    file.exists(file.path(tempFolder, "result", "c_cohort_details.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "results", "settings.csv"))
+    file.exists(file.path(tempFolder, "result", "c_settings.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "results", "analysis_ref.csv"))
+    file.exists(file.path(tempFolder, "result", "c_analysis_ref.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "results", "covariate_ref.csv"))
+    file.exists(file.path(tempFolder, "result", "c_covariate_ref.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "results", "covariates.csv"))
+    file.exists(file.path(tempFolder, "result", "c_covariates.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "results", "covariates_continuous.csv"))
+    file.exists(file.path(tempFolder, "result", "c_covariates_continuous.csv"))
   )
 
   # no results for dechal due to Eunomia - how to test?
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "result", "c_dechallenge_rechallenge.csv"))
+  )
   #testthat::expect_true(
-  #  file.exists(file.path(tempFolder, "results", "dechallenge_rechallenge.csv"))
-  #)
-  #testthat::expect_true(
-  #  file.exists(file.path(tempFolder, "results", "rechallenge_fail_case_series.csv"))
+  #  file.exists(file.path(tempFolder, "result", "rechallenge_fail_case_series.csv"))
   #)
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "results", "time_to_event.csv"))
+    file.exists(file.path(tempFolder, "result", "c_time_to_event.csv"))
   )
 
   # make sure both tte runs are in the csv
   tte <- readr::read_csv(
-         file = file.path(tempFolder,'results' ,"time_to_event.csv"),
+         file = file.path(tempFolder,'result' ,"c_time_to_event.csv"),
          show_col_types = FALSE
      )
   testthat::expect_equivalent(

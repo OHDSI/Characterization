@@ -47,7 +47,7 @@ and datediff(day, op.observation_period_start_date, o.cohort_start_date) >= @min
 
 
 -- 2) get all the people with the outcome during washout
-drop table if exists #target_outcome_prior;
+drop table if exists #case_exclude;
 
 -- people with outcome prior
 select
@@ -56,7 +56,7 @@ t.cohort_start_date,
 t.cohort_end_date,
 t.cohort_definition_id as target_cohort_id,
 o.cohort_definition_id as outcome_cohort_id
-into #target_outcome_prior
+into #case_exclude
 from #targets_inclusions t inner join #outcomes_washout o
 on t.subject_id = o.subject_id
 where
@@ -68,8 +68,8 @@ o.cohort_start_date <= dateadd(day, -1, t.cohort_start_date);
 
 
 ---- Create TAR agnostic cohorts
-drop table if exists #agg_cohorts_before;
-select * into #agg_cohorts_before
+drop table if exists #cases;
+select * into #cases
 
 from
 (
@@ -80,13 +80,13 @@ tno.subject_id,
 tno.cohort_start_date,
 tno.cohort_end_date,
 cd.cohort_definition_id
-from #target_outcome_prior tno
+from #case_exclude tno
 INNER JOIN #cohort_details cd
 on cd.target_cohort_id = tno.target_cohort_id
 and cd.outcome_cohort_id = tno.outcome_cohort_id
-and cd.cohort_type = 'TnOprior'
+and cd.cohort_type = 'Exclude' -- changed from TnOprior
 
 ) temp_ts2;
 
--- drop the table needed by the TnO cohorts
-drop table if exists #agg_cohorts_cases;
+-- drop the table needed by the case series cohorts
+drop table if exists #case_series;

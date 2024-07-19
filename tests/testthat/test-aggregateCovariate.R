@@ -3,6 +3,12 @@
 
 context("AggregateCovariate")
 
+tempFolder1 <- tempfile("runAggregate1")
+on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
+tempFolder2 <- tempfile("runAggregate2")
+on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
+
+
 test_that("createAggregateCovariateSettings", {
   targetIds <- sample(x = 100, size = sample(10, 1))
   outcomeIds <- sample(x = 100, size = sample(10, 1))
@@ -148,7 +154,174 @@ test_that("createAggregateCovariateSettingsList", {
   )
 })
 
-test_that("computeAggregateCovariateAnalyses", {
+test_that("createExecutionIds", {
+  testIds <- createExecutionIds(10)
+  testthat::expect_true(length(testIds) == 10)
+  testthat::expect_true(length(unique(testIds)) == 10)
+
+  testId1 <-  createExecutionIds(1)
+  testId2 <-  createExecutionIds(1)
+  testthat::expect_true(testId1 != testId2)
+})
+
+
+test_that("getAggregateCovariatesJobs", {
+  targetIds <- c(1, 2, 4)
+  outcomeIds <- c(3)
+  covariateSettings <- FeatureExtraction::createCovariateSettings(
+    useDemographicsGender = T,
+    useDemographicsAge = T,
+    useCharlsonIndex = T
+  )
+  caseCovariateSettings <- createDuringCovariateSettings(
+    useConditionOccurrenceDuring = T
+  )
+
+  minPriorObservation <- sample(30,1)
+
+  res <- createAggregateCovariateSettings(
+    targetIds = targetIds,
+    outcomeIds = outcomeIds,
+    minPriorObservation = minPriorObservation,
+    outcomeWashoutDays = 1,
+    riskWindowStart = 1, startAnchor = "cohort start",
+    riskWindowEnd = 5 * 365, endAnchor = "cohort start",
+    covariateSettings = covariateSettings,
+    caseCovariateSettings = caseCovariateSettings
+  )
+
+  jobDf <- getAggregateCovariatesJobs(
+    characterizationSettings = Characterization::createCharacterizationSettings(
+      aggregateCovariateSettings = res
+      ),
+    threads = 1
+  )
+
+  testthat::expect_true(
+    sum(c('computeTargetAggregateCovariateAnalyses',
+      'computeCaseAggregateCovariateAnalyses') %in%
+      jobDf$functionName) == 2
+    )
+  testthat::expect_true(nrow(jobDf) == 2)
+
+  testthat::expect_true(
+    paste0('tac_1_',minPriorObservation) %in% jobDf$executionFolder
+      )
+  testthat::expect_true(
+    paste0('cac_1_',minPriorObservation, '_1_365_365') %in% jobDf$executionFolder
+  )
+
+  settings <- ParallelLogger::convertJsonToSettings(jobDf$settings[1])
+  covSettings <- ParallelLogger::convertJsonToSettings(settings$covariateSettingsJson)
+  testthat::expect_true(
+    covSettings[[1]]$DemographicsGender == T
+  )
+  testthat::expect_true(
+    covSettings[[1]]$CharlsonIndex == T
+  )
+  testthat::expect_true(
+    covSettings[[1]]$DemographicsAge == T
+  )
+
+
+  # now check threads = 2
+  jobDf <- getAggregateCovariatesJobs(
+    characterizationSettings = Characterization::createCharacterizationSettings(
+      aggregateCovariateSettings = res
+    ),
+    threads = 2
+  )
+  testthat::expect_true(nrow(jobDf) == 4)
+
+  testthat::expect_true(
+    sum(c(paste0('tac_1_',minPriorObservation),
+      paste0('tac_2_',minPriorObservation))
+      %in% jobDf$executionFolder ) == 2
+  )
+  testthat::expect_true(
+    sum(c(paste0('cac_1_',minPriorObservation, '_1_365_365'),
+          paste0('cac_2_',minPriorObservation, '_1_365_365'))
+        %in% jobDf$executionFolder) == 2
+  )
+
+  # now check threads = 3
+  jobDf <- getAggregateCovariatesJobs(
+    characterizationSettings = Characterization::createCharacterizationSettings(
+      aggregateCovariateSettings = res
+    ),
+    threads = 3
+  )
+  testthat::expect_true(nrow(jobDf) == 2*3)
+
+  # now check threads = 4
+  jobDf <- getAggregateCovariatesJobs(
+    characterizationSettings = createCharacterizationSettings(
+      aggregateCovariateSettings = res
+    ),
+    threads = 4
+  )
+  testthat::expect_true(nrow(jobDf) == 7)
+
+  # now check threads = 5
+  jobDf <- getAggregateCovariatesJobs(
+    characterizationSettings = createCharacterizationSettings(
+      aggregateCovariateSettings = res
+    ),
+    threads = 5
+  )
+  testthat::expect_true(nrow(jobDf) == 7)
+
+  testthat::expect_true(
+    length(unique(unlist(lapply(1:nrow(jobDf),
+         function(i){
+          ParallelLogger::convertJsonToSettings(jobDf$settings[i])$settingId
+         }
+  )))) == 2)
+
+
+  # add more settings
+  res2 <- createAggregateCovariateSettings(
+    targetIds = targetIds,
+    outcomeIds = outcomeIds,
+    minPriorObservation = minPriorObservation + 1,
+    outcomeWashoutDays = 100,
+    riskWindowStart = 1, startAnchor = "cohort start",
+    riskWindowEnd = 5 * 365, endAnchor = "cohort start",
+    covariateSettings = covariateSettings,
+    caseCovariateSettings = caseCovariateSettings
+  )
+
+  jobDf <-  getAggregateCovariatesJobs(
+    characterizationSettings = createCharacterizationSettings(
+      aggregateCovariateSettings = list(res, res2)
+    ),
+    threads = 1
+  )
+  testthat::expect_true(nrow(jobDf) == 4)
+  testthat::expect_true(
+    length(unique(unlist(lapply(1:nrow(jobDf),
+                                function(i){
+                                  ParallelLogger::convertJsonToSettings(jobDf$settings[i])$settingId
+                                }
+    )))) == 4)
+
+  jobDf <- getAggregateCovariatesJobs(
+      characterizationSettings = createCharacterizationSettings(
+        aggregateCovariateSettings = list(res, res2)
+      ),
+      threads = 3
+    )
+  testthat::expect_true(nrow(jobDf) == 12)
+  testthat::expect_true(
+    length(unique(unlist(lapply(1:nrow(jobDf),
+                                function(i){
+                                  ParallelLogger::convertJsonToSettings(jobDf$settings[i])$settingId
+                                }
+    )))) == 4)
+
+})
+
+test_that("computeTargetAggregateCovariateAnalyses", {
   targetIds <- c(1, 2, 4)
   outcomeIds <- c(3)
   covariateSettings <- FeatureExtraction::createCovariateSettings(
@@ -171,110 +344,136 @@ test_that("computeAggregateCovariateAnalyses", {
     caseCovariateSettings = caseCovariateSettings
   )
 
-  tempFolder1 <- tempfile("runAggregate1")
-  on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
+  jobDf <-  getAggregateCovariatesJobs(
+    characterizationSettings = createCharacterizationSettings(
+      aggregateCovariateSettings = res
+      ),
+    threads = 1
+  )
 
-  computeAggregateCovariateAnalyses(
+  computeTargetAggregateCovariateAnalyses(
     connectionDetails = connectionDetails,
     cdmDatabaseSchema = "main",
     cdmVersion = 5,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
-    aggregateCovariateSettings = res,
+    settings = ParallelLogger::convertJsonToSettings(jobDf$settings[1]),
     minCharacterizationMean = 0.01,
     databaseId = 'madeup',
     outputFolder = tempFolder1
   )
   # check incremental does not run
-  testthat::expect_true(sum(c('results','execution') %in% dir(tempFolder1)) == length(dir(tempFolder1)))
-
-  tempFolder2 <- tempfile("runAggregate2")
-  on.exit(unlink(tempFolder2, recursive = TRUE), add = TRUE)
-
-  computeAggregateCovariateAnalyses(
-    connectionDetails = connectionDetails,
-    cdmDatabaseSchema = "main",
-    cdmVersion = 5,
-    targetDatabaseSchema = "main",
-    targetTable = "cohort",
-    aggregateCovariateSettings = res,
-    minCharacterizationMean = 0.01,
-    databaseId = 'madeup',
-    outputFolder = tempFolder2,
-    incrementalFile = file.path(tempFolder2,'executed.csv')
-  )
-  # check incremental does run
-  testthat::expect_true(sum(c('executed.csv','results','execution') %in% dir(tempFolder2)) == 3)
-
-  # make sure the execution logs all the completed runs
-  executed <- readr::read_csv(file.path(tempFolder2,'executed.csv'), show_col_types = F)
-  nrowExpected <- length(targetIds)*2 + length(outcomeIds)*2 + 4*length(targetIds)*length(outcomeIds)
-  testthat::expect_true(nrow(executed) == nrowExpected)
-
-  # check one execution folder where we have all results
-  resultFiles <- dir(file.path(tempFolder2, 'execution', 'T_1_30'))
   testthat::expect_true(
-    sum(resultFiles %in% c(
-      "analysis_ref.csv",
-      "covariate_ref.csv",
-      "covariates.csv",
-      "covariates_continuous.csv"
-    )) == 4
-  )
-
-  # make sure the files are written
-  resultFiles <- dir(file.path(tempFolder2, 'results'))
-  testthat::expect_true(
-    sum(resultFiles %in% c(
-      "analysis_ref.csv",
-      "covariate_ref.csv",
-      "covariates.csv",
-      "covariates_continuous.csv",
-      "settings.csv",
-      "cohort_details.csv"
-    )) == 6
+    sum(c('cohort_details.csv',
+          'settings.csv',
+          'covariates.csv',
+          'covariates_continuous.csv',
+          'cohort_counts.csv',
+          'covariate_ref.csv',
+          'analysis_ref.csv'
+    ) %in% dir(tempFolder1)
+    ) == length(dir(tempFolder1))
   )
 
   # check cohortCounts is done for all
   cohortDetails <- readr::read_csv(
-    file.path(tempFolder2, 'results', 'cohort_details.csv'),
+    file.path(tempFolder1,'cohort_details.csv'),
     show_col_types = F
   )
   testthat::expect_true(
     nrow(unique(cohortDetails)) == nrow(cohortDetails)
   )
   testthat::expect_true(
-    nrow(executed) == nrow(cohortDetails)
+    nrow(cohortDetails) == 8
   )
-
-  testthat::expect_true(
-    nrow(as.data.frame(cohortDetails)) == 20 # 8 T/Os, 3 TnO, 0 TnOc, 3 OnT, 3 TnOprior, 3 TnObetween
-  )
-
-  # test results combine execution files correctly
-  executionFolders <- dir(file.path(tempFolder2, 'execution'))
-  allcovs <- c()
-  for(executionFolder in executionFolders){
-    covstemp <- readr::read_csv(
-      file = file.path(
-        tempFolder2,
-        'execution',
-        executionFolder,
-        'covariates.csv'
-        ),
-      show_col_types = F
-    )
-    allcovs <- rbind(covstemp, allcovs)
-  }
 
   aggCovs <-  readr::read_csv(
-    file = file.path(tempFolder2, 'results', 'covariates.csv'),
+    file = file.path(tempFolder1, 'covariates.csv'),
+    show_col_types = F
+  )
+  # check covariates is unique
+  testthat::expect_true(
+    nrow(aggCovs) == nrow(unique(aggCovs))
+  )
+
+  # check databaseId is added
+  testthat::expect_true(
+    aggCovs$database_id[1] == 'madeup'
+  )
+
+})
+
+
+test_that("computeCaseAggregateCovariateAnalyses", {
+  targetIds <- c(1, 2, 4)
+  outcomeIds <- c(3)
+  covariateSettings <- FeatureExtraction::createCovariateSettings(
+    useDemographicsGender = T,
+    useDemographicsAge = T,
+    useCharlsonIndex = T
+  )
+  caseCovariateSettings <- createDuringCovariateSettings(
+    useConditionOccurrenceDuring = T
+  )
+
+  res <- createAggregateCovariateSettings(
+    targetIds = targetIds,
+    outcomeIds = outcomeIds,
+    minPriorObservation = 30,
+    outcomeWashoutDays = 1,
+    riskWindowStart = 1, startAnchor = "cohort start",
+    riskWindowEnd = 5 * 365, endAnchor = "cohort start",
+    covariateSettings = covariateSettings,
+    caseCovariateSettings = caseCovariateSettings
+  )
+
+  jobDf <- getAggregateCovariatesJobs(
+    characterizationSettings = createCharacterizationSettings(
+      aggregateCovariateSettings = res
+      ),
+    threads = 1
+  )
+
+  computeCaseAggregateCovariateAnalyses(
+    connectionDetails = connectionDetails,
+    cdmDatabaseSchema = "main",
+    cdmVersion = 5,
+    targetDatabaseSchema = "main",
+    targetTable = "cohort",
+    settings = ParallelLogger::convertJsonToSettings(jobDf$settings[2]),
+    minCharacterizationMean = 0.01,
+    databaseId = 'madeup',
+    outputFolder = tempFolder2
+  )
+  # check incremental does not run
+  testthat::expect_true(
+    sum(c('cohort_details.csv',
+          'settings.csv',
+          'covariates.csv',
+          'covariates_continuous.csv',
+          'cohort_counts.csv',
+          'covariate_ref.csv',
+          'analysis_ref.csv'
+    ) %in% dir(tempFolder2)
+    ) == length(dir(tempFolder2))
+  )
+
+  # check cohortCounts is done for all
+  cohortDetails <- readr::read_csv(
+    file.path(tempFolder2,'cohort_details.csv'),
     show_col_types = F
   )
   testthat::expect_true(
-    nrow(aggCovs) == nrow(allcovs)
+    nrow(unique(cohortDetails)) == nrow(cohortDetails)
+  )
+  testthat::expect_true(
+    nrow(cohortDetails) == 3*5
   )
 
+  aggCovs <-  readr::read_csv(
+    file = file.path(tempFolder2, 'covariates.csv'),
+    show_col_types = F
+  )
   # check covariates is unique
   testthat::expect_true(
     nrow(aggCovs) == nrow(unique(aggCovs))
