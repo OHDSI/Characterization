@@ -21,7 +21,7 @@ insertResultsToDatabase(
 
 \item{tablePrefix}{A prefix to append to the result tables for the characterization results}
 
-\item{csvTablePrefix.}{The prefix added to the csv results - default is 'c_'}
+\item{csvTablePrefix}{The prefix added to the csv results - default is 'c_'}
 }
 \value{
 Returns the connection to the sqlite database
