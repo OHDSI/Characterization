@@ -57,7 +57,7 @@ t.subject_id,
 t.cohort_start_date,
 t.cohort_end_date,
 cd.cohort_definition_id
-from #targets_inclusions as t
+from #targets_all as t
 INNER JOIN #cohort_details cd
 on cd.target_cohort_id = t.cohort_definition_id
 and cd.cohort_type = 'Tall'
