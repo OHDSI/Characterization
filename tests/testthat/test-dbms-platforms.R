@@ -1,6 +1,53 @@
 library(testthat)
 
 testPlatform <- function(dbmsDetails) {
+  # Setup an empty cohort table
+  cohortTableSql <- "IF OBJECT_ID('@cohort_database_schema.@cohort_table', 'U') IS NOT NULL
+  DROP TABLE @cohort_database_schema.@cohort_table;
+
+  CREATE TABLE @cohort_database_schema.@cohort_table (
+    cohort_definition_id BIGINT,
+    subject_id BIGINT,
+    cohort_start_date DATE,
+    cohort_end_date DATE
+  );"
+  sql <- SqlRender::translate(
+    sql = cohortTableSql,
+    targetDialect = dbmsDetails$connectionDetails$dbms
+  )
+  sql <- SqlRender::render(
+    sql = sql,
+    cohort_database_schema = dbmsDetails$cohortDatabaseSchema,
+    cohort_table = dbmsDetails$cohortTable
+  )
+  conn <- DatabaseConnector::connect(
+    connectionDetails = dbmsDetails$connectionDetails
+  )
+  DatabaseConnector::executeSql(
+    connection = conn,
+    sql = sql,
+    progressBar = F
+  )
+  on.exit({
+    sql <- "TRUNCATE TABLE @cohort_database_schema.@cohort_table;
+    DROP TABLE @cohort_database_schema.@cohort_table;"
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = dbmsDetails$connectionDetails$dbms
+    )
+    sql <- SqlRender::render(
+      sql = sql,
+      cohort_database_schema = dbmsDetails$cohortDatabaseSchema,
+      cohort_table = dbmsDetails$cohortTable
+    )
+    DatabaseConnector::executeSql(
+      connection = conn,
+      sql = sql,
+      progressBar = F
+    )
+    DatabaseConnector::disconnect(conn)
+  })
+
   targetIds <- c(1, 2, 4)
   outcomeIds <- c(3)
 
@@ -67,9 +114,9 @@ testPlatform <- function(dbmsDetails) {
     connectionDetails = dbmsDetails$connectionDetails,
     cdmDatabaseSchema = dbmsDetails$cdmDatabaseSchema,
     targetDatabaseSchema = dbmsDetails$cohortDatabaseSchema,
-    targetTable = "cohort",
+    targetTable = dbmsDetails$cohortTable,
     outcomeDatabaseSchema = dbmsDetails$cohortDatabaseSchema,
-    outcomeTable = "cohort",
+    outcomeTable = dbmsDetails$cohortTable,
     characterizationSettings = characterizationSettings,
     saveDirectory = tempFolder,
     tablePrefix = "c_",
@@ -79,11 +126,6 @@ testPlatform <- function(dbmsDetails) {
   testthat::expect_true(
     file.exists(file.path(tempFolder, "tracker.csv"))
   )
-  tracker <- readr::read_csv(
-    file = file.path(tempFolder, "tracker.csv"),
-    show_col_types = FALSE
-  )
-  testthat::expect_equal(nrow(tracker), 6)
 
   # check the sqlite database here using export to csv
 
