@@ -1,3 +1,4 @@
+dbmsPlatforms <- c("bigquery", "oracle", "postgresql", "redshift", "snowflake", "spark", "sql server")
 connectionDetails <- Eunomia::getEunomiaConnectionDetails(databaseFile = "testEunomia.sqlite")
 Eunomia::createCohorts(connectionDetails = connectionDetails)
 
