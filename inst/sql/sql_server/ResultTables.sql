@@ -59,37 +59,9 @@ CREATE TABLE @my_schema.@table_prefixdechallenge_rechallenge (
     outcome_cohort_definition_id)
 );
 
-
--- covariateSettings
-CREATE TABLE @my_schema.@table_prefixsettings (
-    setting_id int NOT NULL,
-    database_id varchar(100) NOT NULL,
-    covariate_setting_json varchar(MAX),
-    case_covariate_setting_json varchar(MAX),
-    min_prior_observation int,
-    outcome_washout_days int,
-    risk_window_start int,
-    start_anchor varchar(15),
-    risk_window_end int,
-    end_anchor varchar(15),
-    case_pre_target_duration int,
-    case_post_outcome_duration int,
-    PRIMARY KEY (setting_id, database_id)
-);
-
--- added this table
-CREATE TABLE @my_schema.@table_prefixcohort_details (
-    setting_id int NOT NULL,
-    database_id varchar(100) NOT NULL,
-    target_cohort_id int,
-    outcome_cohort_id int,
-    cohort_type varchar(10),
-    PRIMARY KEY (setting_id, database_id,target_cohort_id,outcome_cohort_id,cohort_type)
-);
-
 CREATE TABLE @my_schema.@table_prefixanalysis_ref (
-    setting_id int NOT NULL,
     database_id varchar(100) NOT NULL,
+    setting_id float NOT NULL,
     analysis_id int NOT NULL,
     analysis_name varchar(max) NOT NULL,
     domain_id varchar(30),
@@ -101,8 +73,8 @@ CREATE TABLE @my_schema.@table_prefixanalysis_ref (
 );
 
 CREATE TABLE @my_schema.@table_prefixcovariate_ref (
-    setting_id int NOT NULL,
     database_id varchar(100) NOT NULL,
+    setting_id float NOT NULL,
     covariate_id bigint NOT NULL,
     covariate_name varchar(max) NOT NULL,
     analysis_id int NOT NULL,
@@ -113,24 +85,24 @@ CREATE TABLE @my_schema.@table_prefixcovariate_ref (
 );
 
 CREATE TABLE @my_schema.@table_prefixcovariates (
-    setting_id int NOT NULL,
     database_id varchar(100) NOT NULL,
+    setting_id float NOT NULL,
+    cohort_type varchar(10),
     target_cohort_id int,
     outcome_cohort_id int,
-    cohort_type varchar(10),
+    min_characterization_mean float,
     covariate_id bigint NOT NULL,
     sum_value int NOT NULL,
     average_value float NOT NULL,
-    min_characterization_mean float,
     PRIMARY KEY (database_id, setting_id, target_cohort_id, outcome_cohort_id, cohort_type , covariate_id)
 );
 
 CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
-    setting_id int NOT NULL,
     database_id varchar(100) NOT NULL,
+    setting_id float NOT NULL,
+    cohort_type varchar(10),
     target_cohort_id int,
     outcome_cohort_id int,
-    cohort_type varchar(10),
     covariate_id bigint NOT NULL,
     count_value int NOT NULL,
     min_value float,
@@ -145,23 +117,47 @@ CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
     PRIMARY KEY (database_id, setting_id, target_cohort_id, outcome_cohort_id, cohort_type , covariate_id)
 );
 
-CREATE TABLE @my_schema.@table_prefixcohort_counts(
+-- covariateSettings
+CREATE TABLE @my_schema.@table_prefixsettings (
+    setting_id float NOT NULL,
     database_id varchar(100) NOT NULL,
-    target_cohort_id int,
-    outcome_cohort_id int,
-    cohort_type varchar(10),
+    covariate_setting_json varchar(MAX),
+    case_covariate_setting_json varchar(MAX),
     min_prior_observation int,
     outcome_washout_days int,
     risk_window_start int,
-    start_anchor varchar(15),
     risk_window_end int,
+    start_anchor varchar(15),
     end_anchor varchar(15),
+    case_pre_target_duration int,
+    case_post_outcome_duration int,
+    PRIMARY KEY (setting_id, database_id)
+);
+
+-- added this table
+CREATE TABLE @my_schema.@table_prefixcohort_details (
+    database_id varchar(100) NOT NULL,
+    setting_id float NOT NULL,
+    cohort_type varchar(10),
+    target_cohort_id int,
+    outcome_cohort_id int,
+    PRIMARY KEY (setting_id, database_id,target_cohort_id,outcome_cohort_id,cohort_type)
+);
+
+CREATE TABLE @my_schema.@table_prefixcohort_counts(
+    database_id varchar(100) NOT NULL,
+    cohort_type varchar(10),
+    target_cohort_id int,
+    outcome_cohort_id int,
+    risk_window_start int,
+    risk_window_end int,
+    start_anchor varchar(15),
+    end_anchor varchar(15),
+    min_prior_observation int,
+    outcome_washout_days int,
     row_count int NOT NULL,
     person_count int NOT NULL,
     min_exposure_time int,
     mean_exposure_time int,
-    max_exposure_time int--,
-    --PRIMARY KEY (database_id, target_cohort_id,outcome_cohort_id,
-    --cohort_type, min_prior_observation, outcome_washout_days,
-    --risk_window_start, start_anchor, risk_window_end, end_anchor)
+    max_exposure_time int
 );
