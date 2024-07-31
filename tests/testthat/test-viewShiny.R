@@ -1,7 +1,7 @@
 context("ViewShiny")
 
 # create a folder with results for the shiny app
-resultLocation <- file.path(tempdir(), "shinyResults")
+resultLocation <- file.path(tempdir(),paste0('d_', paste0(sample(100,3), collapse = '_'), sep = ''), "shinyResults")
 if (!dir.exists(resultLocation)) {
   dir.create(resultLocation, recursive = T)
 }
