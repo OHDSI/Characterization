@@ -1,43 +1,43 @@
 CREATE TABLE @my_schema.@table_prefixtime_to_event (
-    database_id varchar(100) NOT NULL,
-    target_cohort_definition_id bigint NOT NULL,
-    outcome_cohort_definition_id bigint NOT NULL,
-    outcome_type varchar(20) NOT NULL,
-    target_outcome_type varchar(20) NOT NULL,
-    time_to_event int NOT NULL,
-    num_events int NOT NULL,
-    time_scale varchar(20) NOT NULL
+    database_id varchar(100),
+    target_cohort_definition_id bigint,
+    outcome_cohort_definition_id bigint,
+    outcome_type varchar(20),
+    target_outcome_type varchar(20),
+    time_to_event int,
+    num_events int,
+    time_scale varchar(20)
 );
 
 CREATE TABLE @my_schema.@table_prefixrechallenge_fail_case_series (
     --run_id,
-    database_id varchar(100) NOT NULL,
+    database_id varchar(100),
     dechallenge_stop_interval int,
     dechallenge_evaluation_window int,
-    target_cohort_definition_id bigint NOT NULL,
-    outcome_cohort_definition_id bigint NOT NULL,
-    person_key int NOT NULL,
+    target_cohort_definition_id bigint,
+    outcome_cohort_definition_id bigint,
+    person_key int,
     subject_id bigint,
-    dechallenge_exposure_number int NOT NULL,
-    dechallenge_exposure_start_date_offset int NOT NULL,
-    dechallenge_exposure_end_date_offset int NOT NULL,
-    dechallenge_outcome_number int NOT NULL,
-    dechallenge_outcome_start_date_offset int NOT NULL,
-    rechallenge_exposure_number int NOT NULL,
-    rechallenge_exposure_start_date_offset int NOT NULL,
-    rechallenge_exposure_end_date_offset int NOT NULL,
-    rechallenge_outcome_number int NOT NULL,
-    rechallenge_outcome_start_date_offset int NOT NULL
+    dechallenge_exposure_number int,
+    dechallenge_exposure_start_date_offset int,
+    dechallenge_exposure_end_date_offset int,
+    dechallenge_outcome_number int,
+    dechallenge_outcome_start_date_offset int,
+    rechallenge_exposure_number int,
+    rechallenge_exposure_start_date_offset int,
+    rechallenge_exposure_end_date_offset int,
+    rechallenge_outcome_number int,
+    rechallenge_outcome_start_date_offset int
 );
 
 CREATE TABLE @my_schema.@table_prefixdechallenge_rechallenge (
-    database_id varchar(100) NOT NULL,
+    database_id varchar(100),
     dechallenge_stop_interval int,
     dechallenge_evaluation_window int,
-    target_cohort_definition_id bigint NOT NULL,
-    outcome_cohort_definition_id bigint NOT NULL,
-    num_exposure_eras int NOT NULL,
-    num_persons_exposed int NOT NULL,
+    target_cohort_definition_id bigint,
+    outcome_cohort_definition_id bigint,
+    num_exposure_eras int,
+    num_persons_exposed int,
     num_cases int,
     dechallenge_attempt int,
     dechallenge_fail int,
@@ -56,7 +56,7 @@ CREATE TABLE @my_schema.@table_prefixdechallenge_rechallenge (
 
 -- covariateSettings
 CREATE TABLE @my_schema.@table_prefixsettings (
-    run_id int NOT NULL,
+    run_id int,
     database_id varchar(100),
     covariate_setting_json varchar(MAX),
     risk_window_start int,
@@ -67,7 +67,7 @@ CREATE TABLE @my_schema.@table_prefixsettings (
 
 -- added this table
 CREATE TABLE @my_schema.@table_prefixcohort_details (
-    run_id int NOT NULL,
+    run_id int,
     database_id varchar(100),
     cohort_definition_id int,
     target_cohort_id int,
@@ -76,11 +76,11 @@ CREATE TABLE @my_schema.@table_prefixcohort_details (
 );
 
 CREATE TABLE @my_schema.@table_prefixanalysis_ref (
-    run_id int NOT NULL,
-    database_id varchar(100) NOT NULL,
-    analysis_id int NOT NULL,
-    analysis_name varchar(max) NOT NULL,
-    domain_id varchar(30) NOT NULL,
+    run_id int,
+    database_id varchar(100),
+    analysis_id int,
+    analysis_name varchar(max),
+    domain_id varchar(30),
     start_day int,
     end_day int,
     is_binary varchar(1),
@@ -88,29 +88,29 @@ CREATE TABLE @my_schema.@table_prefixanalysis_ref (
 );
 
 CREATE TABLE @my_schema.@table_prefixcovariate_ref (
-    run_id int NOT NULL,
-    database_id varchar(100) NOT NULL,
-    covariate_id int NOT NULL,
-    covariate_name varchar(max) NOT NULL,
-    analysis_id int NOT NULL,
+    run_id int,
+    database_id varchar(100),
+    covariate_id int,
+    covariate_name varchar(max),
+    analysis_id int,
     concept_id int
 );
 
 CREATE TABLE @my_schema.@table_prefixcovariates (
-    run_id int NOT NULL,
-    database_id varchar(100) NOT NULL,
-    cohort_definition_id int NOT NULL,
-    covariate_id int NOT NULL,
-    sum_value int NOT NULL,
-    average_value float NOT NULL
+    run_id int,
+    database_id varchar(100),
+    cohort_definition_id int,
+    covariate_id int,
+    sum_value int,
+    average_value float
 );
 
 CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
-    run_id int NOT NULL,
-    database_id varchar(100) NOT NULL,
-    cohort_definition_id int NOT NULL,
-    covariate_id int NOT NULL,
-    count_value int NOT NULL,
+    run_id int,
+    database_id varchar(100),
+    cohort_definition_id int,
+    covariate_id int,
+    count_value int,
     min_value float,
     max_value float,
     average_value float,
@@ -123,9 +123,9 @@ CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
 );
 
 CREATE TABLE @my_schema.@table_prefixcohort_counts(
-    run_id int NOT NULL,
-    database_id varchar(100) NOT NULL,
-    cohort_definition_id int NOT NULL,
-    row_count int NOT NULL,
-    person_count int NOT NULL
+    run_id int,
+    database_id varchar(100),
+    cohort_definition_id int,
+    row_count int,
+    person_count int
 );
