@@ -50,3 +50,8 @@ Extracts covariates that occur during a cohort
 \details{
 The user specifies a what during covariates they want and this executes them using FE
 }
+\seealso{
+Other {CovariateSetting}: 
+\code{\link{createDuringCovariateSettings}()}
+}
+\concept{{CovariateSetting}}

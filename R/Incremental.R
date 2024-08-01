@@ -56,7 +56,7 @@ getExecutionJobIssues <- function(
 #' and removes the record of the execution file
 #'
 #' @param executionFolder   The folder that has the execution files
-#'
+#' @family {Incremental}
 #' @return
 #' A list with the settings
 #'
@@ -154,7 +154,7 @@ recordIncremental <- function(
 #' when running in non-incremental model
 #'
 #' @param executionFolder   The folder that has the execution files
-#'
+#' @family {Incremental}
 #' @return
 #' A list with the settings
 #'

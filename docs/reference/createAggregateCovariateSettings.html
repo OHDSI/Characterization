@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
       </span>
     </div>
 
@@ -107,7 +107,7 @@
 <span>    <span class="cn">T</span><span class="op">)</span>,</span>
 <span>  casePreTargetDuration <span class="op">=</span> <span class="fl">365</span>,</span>
 <span>  casePostOutcomeDuration <span class="op">=</span> <span class="fl">365</span>,</span>
-<span>  minCharacterizationMean <span class="op">=</span> <span class="fl">0</span></span>
+<span>  extractNonCaseCovariates <span class="op">=</span> <span class="cn">T</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -163,10 +163,8 @@ or `"cohort end"`.</p></dd>
 <dd><p>The number of days prior to case index we use for FeatureExtraction</p></dd>
 
 
-<dt>minCharacterizationMean</dt>
-<dd><p>The minimum mean value for characterization output. Values below this will be cut off from output. This
-will help reduce the file size of the characterization output, but will remove information
-on covariates that have very low values. The default is 0.</p></dd>
+<dt>extractNonCaseCovariates</dt>
+<dd><p>Whether to extract aggregate covariates and counts for patients in the targets and outcomes in addition to the cases</p></dd>
 
 </dl></div>
     <div id="value">

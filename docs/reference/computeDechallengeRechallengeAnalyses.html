@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
       </span>
     </div>
 
@@ -85,8 +85,11 @@
 <span>  outcomeDatabaseSchema <span class="op">=</span> <span class="va">targetDatabaseSchema</span>,</span>
 <span>  outcomeTable <span class="op">=</span> <span class="va">targetTable</span>,</span>
 <span>  tempEmulationSchema <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"sqlRenderTempEmulationSchema"</span><span class="op">)</span>,</span>
-<span>  <span class="va">dechallengeRechallengeSettings</span>,</span>
-<span>  databaseId <span class="op">=</span> <span class="st">"database 1"</span></span>
+<span>  <span class="va">settings</span>,</span>
+<span>  databaseId <span class="op">=</span> <span class="st">"database 1"</span>,</span>
+<span>  outputFolder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"results"</span><span class="op">)</span>,</span>
+<span>  minCellCount <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -123,12 +126,24 @@ To emulate temp tables, provide a schema with write privileges where temp tables
 can be created</p></dd>
 
 
-<dt>dechallengeRechallengeSettings</dt>
+<dt>settings</dt>
 <dd><p>The settings for the timeToEvent study</p></dd>
 
 
 <dt>databaseId</dt>
 <dd><p>An identifier for the database (string)</p></dd>
+
+
+<dt>outputFolder</dt>
+<dd><p>A directory to save the results as csv files</p></dd>
+
+
+<dt>minCellCount</dt>
+<dd><p>The minimum cell value to display, values less than this will be replaced by -1</p></dd>
+
+
+<dt>...</dt>
+<dd><p>extra inputs</p></dd>
 
 </dl></div>
     <div id="value">
@@ -136,6 +151,12 @@ can be created</p></dd>
     
 
 <p>An <code><a href="https://rdrr.io/pkg/Andromeda/man/andromeda_constructor.html" class="external-link">Andromeda::andromeda()</a></code> object containing the dechallenge rechallenge results</p>
+    </div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p>Other DechallengeRechallenge: 
+<code><a href="computeRechallengeFailCaseSeriesAnalyses.html">computeRechallengeFailCaseSeriesAnalyses</a>()</code>,
+<code><a href="createDechallengeRechallengeSettings.html">createDechallengeRechallengeSettings</a>()</code></p></div>
     </div>
 
   </div>

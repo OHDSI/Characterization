@@ -45,6 +45,7 @@
 #'                                                             to the list of concepts to exclude?
 #' @param includedCovariateIds                                 A list of covariate IDs that should be
 #'                                                             restricted to.
+#' @family {CovariateSetting}
 #'
 #' @return
 #' An object of type \code{covariateSettings}, to be used in other functions.
@@ -126,7 +127,7 @@ createDuringCovariateSettings <- function(
 #' @param covariateSettings  settings for the covariate cohorts and time periods
 #' @param minCharacterizationMean the minimum value for a covariate to be extracted
 #' @param ...  additional arguments from FeatureExtraction
-#'
+#' @family {CovariateSetting}
 #' @return
 #' The the during covariates based on user settings
 #'

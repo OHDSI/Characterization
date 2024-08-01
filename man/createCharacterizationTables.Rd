@@ -40,3 +40,9 @@ This function executes a large set of SQL statements to create tables that can s
 \details{
 This function can be used to create (or delete) Characterization result tables
 }
+\seealso{
+Other {Database}: 
+\code{\link{createSqliteDatabase}()},
+\code{\link{insertResultsToDatabase}()}
+}
+\concept{{Database}}

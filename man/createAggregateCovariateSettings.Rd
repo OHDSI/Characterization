@@ -71,3 +71,4 @@ A list with the settings
 \description{
 Create aggregate covariate study settings
 }
+\concept{{Aggregate}}

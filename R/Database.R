@@ -24,7 +24,7 @@
 #' This function creates a sqlite database and connection
 #'
 #' @param sqliteLocation    The location of the sqlite database
-#'
+#' @family {Database}
 #' @return
 #' Returns the connection to the sqlite database
 #'
@@ -63,7 +63,7 @@ createSqliteDatabase <- function(
 #' @param resultsFolder        The folder containing the csv results
 #' @param tablePrefix          A prefix to append to the result tables for the characterization results
 #' @param csvTablePrefix      The prefix added to the csv results - default is 'c_'
-#'
+#' @family {Database}
 #' @return
 #' Returns the connection to the sqlite database
 #'
@@ -136,7 +136,7 @@ removeMinCell <- function(
 #' @param createTables                 If true the Characterization result tables will be created
 #' @param tablePrefix                  A string appended to the Characterization result tables
 #' @param tempEmulationSchema          The temp schema used when the database management system is oracle
-#'
+#' @family {Database}
 #' @return
 #' Returns NULL but creates the required tables into the specified database schema.
 #'

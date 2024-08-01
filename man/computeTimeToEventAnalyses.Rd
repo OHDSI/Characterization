@@ -57,3 +57,8 @@ An \code{Andromeda::andromeda()} object containing the time to event results.
 \description{
 Compute time to event study
 }
+\seealso{
+Other {TimeToEvent}: 
+\code{\link{createTimeToEventSettings}()}
+}
+\concept{{TimeToEvent}}

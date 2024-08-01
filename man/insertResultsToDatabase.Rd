@@ -32,3 +32,9 @@ This function uploads results in csv format into a result database
 \details{
 Calls ResultModelManager uploadResults function to upload the csv files
 }
+\seealso{
+Other {Database}: 
+\code{\link{createCharacterizationTables}()},
+\code{\link{createSqliteDatabase}()}
+}
+\concept{{Database}}

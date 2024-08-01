@@ -76,3 +76,10 @@ the characterization settings and the directory to save the results to
 The results of the characterization will be saved into an sqlite database inside the
 specified saveDirectory
 }
+\seealso{
+Other {LargeScale}: 
+\code{\link{createCharacterizationSettings}()},
+\code{\link{loadCharacterizationSettings}()},
+\code{\link{saveCharacterizationSettings}()}
+}
+\concept{{LargeScale}}

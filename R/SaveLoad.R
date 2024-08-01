@@ -19,7 +19,7 @@
 #' @param result  The output of running \code{computeTimeToEventAnalyses()}
 #' @template saveDirectory
 #' @param minCellCount  The minimum value that will be displayed in count columns
-#'
+#' @family {SaveLoad}
 #' @return
 #' A string specifying the directory the csv results are saved to
 #'
@@ -84,7 +84,7 @@ exportTimeToEventToCsv <- function(
 #' @param result  The output of running \code{computeDechallengeRechallengeAnalyses()}
 #' @template saveDirectory
 #' @param minCellCount  The minimum value that will be displayed in count columns
-#'
+#' @family {SaveLoad}
 #' @return
 #' A string specifying the directory the csv results are saved to
 #'
@@ -193,7 +193,7 @@ exportDechallengeRechallengeToCsv <- function(
 #'
 #' @param result  The output of running \code{computeRechallengeFailCaseSeriesAnalyses()}
 #' @template saveDirectory
-#'
+#' @family {SaveLoad}
 #' @return
 #' A string specifying the directory the csv results are saved to
 #'

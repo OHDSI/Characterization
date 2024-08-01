@@ -20,3 +20,4 @@ This is a shiny app for viewing interactive plots and tables
 \details{
 Input is the output of ...
 }
+\concept{{Shiny}}

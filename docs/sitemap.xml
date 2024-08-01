@@ -31,6 +31,12 @@
     <loc>/reference/Characterization-package.html</loc>
   </url>
   <url>
+    <loc>/reference/cleanIncremental.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cleanNonIncremental.html</loc>
+  </url>
+  <url>
     <loc>/reference/computeAggregateCovariateAnalyses.html</loc>
   </url>
   <url>
@@ -83,6 +89,9 @@
   </url>
   <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/insertResultsToDatabase.html</loc>
   </url>
   <url>
     <loc>/reference/loadAggregateCovariateAnalyses.html</loc>

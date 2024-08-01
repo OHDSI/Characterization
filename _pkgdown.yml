@@ -40,59 +40,36 @@ reference:
   - title: "Aggregate Covariate Analysis"
     desc: >
       This analysis calculates the aggregate characteristics for a Target cohort (T), an Outcome cohort (O) and combiations of T with O during time at risk and T without O during time at risk.
-    contents:
-      - createAggregateCovariateSettings
-      - computeAggregateCovariateAnalyses
-      - createDuringCovariateSettings
-      - getDbDuringCovariateData
+    contents: has_concept("Aggregate")
   - title: "Dechallenge Rechallenge Analysis"
     desc: >
       For a given Target cohort (T) and Outcome cohort (O) find any occurrances of a dechallenge (when the T cohort stops close to when O started) and a rechallenge (when T restarts and O starts again)  This is useful for investigating causality between drugs and events.
-    contents:
-      - createDechallengeRechallengeSettings
-      - computeDechallengeRechallengeAnalyses
-      - computeRechallengeFailCaseSeriesAnalyses
+    contents: has_concept("DechallengeRechallenge")
   - title: "Time to Event Analysis"
     desc: >
       This analysis calculates the timing between the Target cohort (T) and an Outcome cohort (O).
-    contents:
-      - createTimeToEventSettings
-      - computeTimeToEventAnalyses
+    contents: has_concept("TimeToEvent")
   - title: "Run Large Scale Characterization Study"
     desc: >
       Run multipe aggregate covariate analysis, time to event and dechallenge/rechallenge studies.
-    contents:
-      - createCharacterizationSettings
-      - runCharacterizationAnalyses
-      - saveCharacterizationSettings
-      - loadCharacterizationSettings
+    contents: has_concept("LargeScale")
   - title: "Save Load"
     desc: >
       Functions to save the analysis settings and the results (as sqlite or csv files).
-    contents:
-      - saveTimeToEventAnalyses
-      - exportTimeToEventToCsv
-      - loadTimeToEventAnalyses
-      - saveDechallengeRechallengeAnalyses
-      - saveRechallengeFailCaseSeriesAnalyses
-      - loadDechallengeRechallengeAnalyses
-      - loadRechallengeFailCaseSeriesAnalyses
-      - exportDechallengeRechallengeToCsv
-      - exportRechallengeFailCaseSeriesToCsv
-      - saveAggregateCovariateAnalyses
-      - loadAggregateCovariateAnalyses
-      - exportAggregateCovariateToCsv
+    contents: has_concept("SaveLoad")
   - title: "Insert into Database"
     desc: >
       Functions to insert the results into a database.
-    contents:
-      - createSqliteDatabase
-      - createCharacterizationTables
-      - exportDatabaseToCsv
+    contents: has_concept("Database")
   - title: "Shiny App"
     desc: >
       Functions to interactively exlore the results from runCharacterizationAnalyses().
-    contents:
-      - viewCharacterization
-
-
+    contents: has_concept("Shiny")
+  - title: "Custom covariates"
+    desc: >
+      Code to create covariates during cohort start and end
+    contents: has_concept("CovariateSetting")
+  - title: "Incremental"
+    desc: >
+      Code to run incremetal model
+    contents: has_concept("Incremental")

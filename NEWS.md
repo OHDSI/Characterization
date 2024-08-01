@@ -1,3 +1,10 @@
+Characterization 1.1.0
+======================
+- fixed issues with incremental
+- made the code more modular to enable new characterizations to be added
+- added job optimization code to optimize the distributuion of jobs
+- fixed tests and made minor bug updates
+
 Characterization 1.0.0
 ======================
 - Added parallelization in the aggregate covariates analysis

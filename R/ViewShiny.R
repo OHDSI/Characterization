@@ -6,6 +6,7 @@
 #' Input is the output of ...
 #' @param resultFolder   The location of the csv results
 #' @param cohortDefinitionSet  The cohortDefinitionSet extracted using webAPI
+#' @family {Shiny}
 #' @return
 #' Opens a shiny app for interactively viewing the results
 #'

@@ -18,3 +18,9 @@ This function creates a connection to an sqlite database
 \details{
 This function creates a sqlite database and connection
 }
+\seealso{
+Other {Database}: 
+\code{\link{createCharacterizationTables}()},
+\code{\link{insertResultsToDatabase}()}
+}
+\concept{{Database}}
