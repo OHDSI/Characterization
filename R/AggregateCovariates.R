@@ -934,6 +934,9 @@ getAggregateCovariatesJobs <- function(
     settings <- c()
   }
 
+  # adding a delay so the target and case setting ids are always unique
+  Sys.sleep(time = 2)
+
   # get all combinations of TnOs, then split by treads
   caseCombinations <- do.call(what = 'rbind',
                               args =
