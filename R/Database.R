@@ -60,7 +60,7 @@ insertAndromedaToDatabase <- function(
     databaseSchema,
     tableName,
     andromedaObject,
-    tempEmulationSchema,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     bulkLoad = T,
     tablePrefix = "c_",
     minCellCount = 0,
