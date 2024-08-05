@@ -1,8 +1,7 @@
 -- PER TAR RUN TO GET TnO cohorts
 
 -- 1) get all the people with the outcome in TAR
-drop table if exists #cases_tar;
-
+IF OBJECT_ID('tempdb..#cases_tar', 'U') IS NOT NULL DROP TABLE #cases_tar;
 -- cases
 select
 t.subject_id,

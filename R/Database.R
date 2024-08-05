@@ -148,7 +148,8 @@ createCharacterizationTables <- function(
     deleteExistingTables = T,
     createTables = T,
     tablePrefix = "c_",
-    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")) {
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
+    ) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkTablePrefix(
     tablePrefix = tablePrefix,

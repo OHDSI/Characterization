@@ -1,14 +1,14 @@
 --need to know indication/target/outcome tuples
 
 -- all targets
-drop table if exists #targets_all;
+IF OBJECT_ID('tempdb..#targets_all', 'U') IS NOT NULL DROP TABLE #targets_all;
 select * into #targets_all
 from @target_database_schema.@target_table
 where cohort_definition_id in
 (@target_ids);
 
 -- first T with > minPrioObs
-drop table if exists #targets_inclusions;
+IF OBJECT_ID('tempdb..#targets_inclusions', 'U') IS NOT NULL DROP TABLE #targets_inclusions;
 select * into #targets_inclusions
 from
 (select *,
@@ -25,19 +25,19 @@ where temp_t.rn = 1
 and datediff(day, op.observation_period_start_date, temp_t.cohort_start_date) >= @min_prior_observation;
 
 -- all outcomes
-drop table if exists #outcomes_all;
+IF OBJECT_ID('tempdb..#outcomes_all', 'U') IS NOT NULL DROP TABLE #outcomes_all;
 select * into #outcomes_all
 from @outcome_database_schema.@outcome_table
 where cohort_definition_id in
 (@outcome_ids);
 
 -- first outcomes in washout days and min prior obs
-drop table if exists #outcomes_washout;
+IF OBJECT_ID('tempdb..#outcomes_washout', 'U') IS NOT NULL DROP TABLE #outcomes_washout;
 select o.* into #outcomes_washout
 from (select *,
       ISNULL(datediff(day, LAG(cohort_start_date) OVER(partition by subject_id, cohort_definition_id order by cohort_start_date asc), cohort_start_date ), 100000) as time_between
       from #outcomes_all
-) as o
+) o
 inner join @cdm_database_schema.observation_period op
 on op.person_id = o.subject_id
 and o.cohort_start_date >= op.observation_period_start_date
@@ -47,7 +47,7 @@ and datediff(day, op.observation_period_start_date, o.cohort_start_date) >= @min
 
 
 -- 2) get all the people with the outcome during washout
-drop table if exists #case_exclude;
+IF OBJECT_ID('tempdb..#case_exclude', 'U') IS NOT NULL DROP TABLE #case_exclude;
 
 -- people with outcome prior
 select
@@ -68,7 +68,7 @@ o.cohort_start_date <= dateadd(day, -1, t.cohort_start_date);
 
 
 ---- Create TAR agnostic cohorts
-drop table if exists #cases;
+IF OBJECT_ID('tempdb..#cases', 'U') IS NOT NULL DROP TABLE #cases;
 select * into #cases
 
 from
@@ -89,4 +89,5 @@ and cd.cohort_type = 'Exclude' -- changed from TnOprior
 ) temp_ts2;
 
 -- drop the table needed by the case series cohorts
-drop table if exists #case_series;
+IF OBJECT_ID('tempdb..#case_series', 'U') IS NOT NULL DROP TABLE #case_series;
+

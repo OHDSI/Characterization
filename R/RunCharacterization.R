@@ -137,7 +137,7 @@ runCharacterizationAnalyses <- function(
     targetTable,
     outcomeDatabaseSchema,
     outcomeTable,
-    tempEmulationSchema = NULL,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     cdmDatabaseSchema,
     characterizationSettings,
     outputDirectory,
