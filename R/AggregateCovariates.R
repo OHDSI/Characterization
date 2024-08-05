@@ -361,7 +361,6 @@ computeCaseAggregateCovariateAnalyses <- function(
     cohortType = c('Cases', 'CasesBefore', 'CasesAfter', 'CasesBetween')
   )
 
-  cohortDetails$cohortDefinitionId <- 1:nrow(cohortDetails)
   cohortDetails$minPriorObservation <- settings$minPriorObservation
   cohortDetails$outcomeWashoutDays <- settings$outcomeWashoutDays
   cohortDetails$casePreTargetDuration <- settings$casePreTargetDuration
@@ -374,6 +373,8 @@ computeCaseAggregateCovariateAnalyses <- function(
 
   # add executionIds
   cohortDetails <- merge(cohortDetails, tars)
+  # moved id so different tars have different id?
+  cohortDetails$cohortDefinitionId <- 1:nrow(cohortDetails)
 
   # add 'Exclude' with random tar
   cohortDetailsExtra <- expand.grid(
