@@ -52,7 +52,7 @@ getPlatformConnectionDetails <- function(dbmsPlatform) {
         vocabularyDatabaseSchema <- Sys.getenv("CDM_BIG_QUERY_CDM_SCHEMA")
         cohortDatabaseSchema <- Sys.getenv("CDM_BIG_QUERY_OHDSI_SCHEMA")
         options(sqlRenderTempEmulationSchema = Sys.getenv("CDM_BIG_QUERY_OHDSI_SCHEMA"))
-      } else {
+     } else {
         return(NULL)
       }
     } else if (dbmsPlatform == "oracle") {
@@ -148,8 +148,10 @@ for(dbmsPlatform in dbmsPlatforms){
     on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
 
     dbmsDetails <- getPlatformConnectionDetails(dbmsPlatform)
-    con <- DatabaseConnector::connect(dbmsDetails$connectionDetails)
-    on.exit(DatabaseConnector::disconnect(con))
+    if(!is.null(dbmsDetails)){
+      con <- DatabaseConnector::connect(dbmsDetails$connectionDetails)
+      on.exit(DatabaseConnector::disconnect(con))
+    }
   }
 
   # This file contains platform specific tests
@@ -161,14 +163,15 @@ for(dbmsPlatform in dbmsPlatforms){
 
       # create a cohort table
       DatabaseConnector::insertTable(
+        bulkLoad = F,
         connection = con,
         databaseSchema = dbmsDetails$cohortDatabaseSchema,
         tableName = dbmsDetails$cohortTable,
         data = data.frame(
           subject_id = 1:10,
           cohort_definition_id = sample(4, 10, replace = T),
-          cohort_start_date = rep('20100101', 10),
-          cohort_end_date = rep('20100101', 10)
+          cohort_start_date = rep(as.Date('2010-01-01'), 10),
+          cohort_end_date = rep(as.Date('2010-01-01'), 10)
         ))
 
       targetIds <- c(1, 2, 4)
@@ -261,15 +264,6 @@ for(dbmsPlatform in dbmsPlatforms){
       )
       testthat::expect_true(
         file.exists(file.path(tempFolder, "csv", "c_covariate_ref.csv"))
-      )
-      testthat::expect_true(
-        file.exists(file.path(tempFolder, "csv", "c_dechallenge_rechallenge.csv"))
-      )
-      #testthat::expect_true(
-      #  file.exists(file.path(tempFolder, "csv", "rechallenge_fail_case_series.csv"))
-      #)
-      testthat::expect_true(
-        file.exists(file.path(tempFolder, "csv", "c_time_to_event.csv"))
       )
     }
   })

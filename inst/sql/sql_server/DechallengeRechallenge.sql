@@ -1,13 +1,16 @@
+IF OBJECT_ID('tempdb..#target_cohort', 'U') IS NOT NULL DROP TABLE #target_cohort;
 select * into #target_cohort
 from @target_database_schema.@target_table
 where cohort_definition_id in (@target_ids)
 ;
 
+IF OBJECT_ID('tempdb..#outcome_cohort', 'U') IS NOT NULL DROP TABLE #outcome_cohort;
 select * into #outcome_cohort
 from @outcome_database_schema.@outcome_table
 where cohort_definition_id in (@outcome_ids)
 ;
 
+IF OBJECT_ID('tempdb..#challenge', 'U') IS NOT NULL DROP TABLE #challenge;
 select
 '@database_id' as database_id,
 @dechallenge_stop_interval as dechallenge_stop_interval,

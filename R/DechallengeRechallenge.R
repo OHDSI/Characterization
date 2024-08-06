@@ -291,7 +291,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       DatabaseConnector::disconnect(connection)
     )
 
-    message("Computing dechallenge rechallenge results")
+    message("Computing dechallenge rechallenge fails results")
     sql <- SqlRender::loadRenderTranslateSql(
       sqlFilename = "RechallengeFailCaseSeries.sql",
       packageName = "Characterization",
