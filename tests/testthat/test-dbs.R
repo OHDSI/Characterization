@@ -114,7 +114,7 @@ getPlatformConnectionDetails <- function(dbmsPlatform) {
       cohortDatabaseSchema <- Sys.getenv("CDM5_SPARK_OHDSI_SCHEMA")
       options(sqlRenderTempEmulationSchema = Sys.getenv("CDM5_SPARK_OHDSI_SCHEMA"))
     } else if (dbmsPlatform == "sql server") {
-      connectionDetails <- createConnectionDetails(
+      connectionDetails <- DatabaseConnector::createConnectionDetails(
         dbms = dbmsPlatform,
         user = Sys.getenv("CDM5_SQL_SERVER_USER"),
         password = URLdecode(Sys.getenv("CDM5_SQL_SERVER_PASSWORD")),

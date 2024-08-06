@@ -158,7 +158,7 @@ test_that("runCharacterizationAnalyses", {
   )
 
   # no results for dechal due to Eunomia - how to test?
-  testthat::expect_true(
+  testthat::expect_false(
     file.exists(file.path(tempFolder, "result", "c_dechallenge_rechallenge.csv"))
   )
   #testthat::expect_true(

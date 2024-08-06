@@ -70,14 +70,14 @@ from
 	and io1.cohort_start_date > dc1.cohort_start_date  and io1.cohort_start_date <= dc1.cohort_end_date
 	group by dc1.cohort_definition_id, io1.cohort_definition_id
 
-	union
+	--union
 
-	select distinct
-	dc1_temp.cohort_definition_id as target_cohort_definition_id,
-	io1_temp.cohort_definition_id as outcome_cohort_definition_id,
-	0 as num_cases
-	from #target_cohort dc1_temp
-	cross join #outcome_cohort io1_temp
+	--select distinct
+	--dc1_temp.cohort_definition_id as target_cohort_definition_id,
+	--io1_temp.cohort_definition_id as outcome_cohort_definition_id,
+	--0 as num_cases
+	--from #target_cohort dc1_temp
+	--cross join #outcome_cohort io1_temp
 
 	) temp_cases
 	group by
