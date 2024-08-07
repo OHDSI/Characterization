@@ -38,9 +38,6 @@ Suggests:
 	shiny,
 	withr
 Remotes:
-	ohdsi/FeatureExtraction,
-	ohdsi/Eunomia,
-	ohdsi/ResultModelManager,
 	ohdsi/ShinyAppBuilder
 NeedsCompilation: no
 RoxygenNote: 7.3.1
