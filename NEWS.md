@@ -1,3 +1,8 @@
+Characterization 1.1.1
+======================
+- added tests for all HADES supported dbms
+- updated minCellCount censoring 
+
 Characterization 1.1.0
 ======================
 - fixed issues with incremental

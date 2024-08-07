@@ -122,20 +122,27 @@ exampleAggregateCovariateSettings <- createAggregateCovariateSettings(
 Next we need to use the `exampleAggregateCovariateSettings` as the settings to `computeAggregateCovariateAnalyses`, we need to use the Eunomia connectionDetails and in Eunomia the OMOP CDM data and cohort table are in the 'main' schema.  The cohort table name is 'cohort'.  The following code will apply the aggregated covariates analysis using the previously specified settings on the simulated Eunomia data, but we can specify the `minCharacterizationMean` to exclude covarites with mean values below 0.01, and we must specify the `outputFolder` where the csv results will be written to.
 
 ```{r eval=FALSE,results='hide',error=FALSE,warning=FALSE,message=FALSE}
-agc <- computeAggregateCovariateAnalyses(
+runCharacterizationAnalyses(
   connectionDetails = connectionDetails,
   cdmDatabaseSchema = "main",
-  cdmVersion = 5,
   targetDatabaseSchema = "main",
   targetTable = "cohort",
-  aggregateCovariateSettings = exampleAggregateCovariateSettings,
+  outcomeDatabaseSchema = "main",
+  outcomeTable = "cohort",
+  characterizationSettings = createCharacterizationSettings(
+    aggregateCovariateSettings =  exampleAggregateCovariateSettings
+    ),
   databaseId = "Eunomia",
   runId = 1, 
   minCharacterizationMean = 0.01, 
-  outputFolder = file.path(getwd(), 'example_char')
+  outputDirectory =  file.path(getwd(), 'example_char', 'results'), executionPath = file.path(getwd(), 'example_char', 'execution'),
+  minCellCount = 10,
+  incremental = F,
+  threads = 1
 )
 ```
 
+You can then see the results in the location `file.path(getwd(), 'example_char', 'results')` where you will find csv files.
 
 ## Dechallenge Rechallenge
 
@@ -171,7 +178,7 @@ dc <- computeDechallengeRechallengeAnalyses(
   connectionDetails = connectionDetails,
   targetDatabaseSchema = "main",
   targetTable = "cohort",
-  dechallengeRechallengeSettings = exampleDechallengeRechallengeSettings,
+  settings = exampleDechallengeRechallengeSettings,
   databaseId = "Eunomia", 
   outcomeTable = file.path(getwd(), 'example_char', 'results'), 
   minCellCount = 5
@@ -185,7 +192,7 @@ failed <- computeRechallengeFailCaseSeriesAnalyses(
   connectionDetails = connectionDetails,
   targetDatabaseSchema = "main",
   targetTable = "cohort",
-  dechallengeRechallengeSettings = exampleDechallengeRechallengeSettings,
+  settings = exampleDechallengeRechallengeSettings,
   outcomeDatabaseSchema = "main",
   outcomeTable = "cohort",
   databaseId = "Eunomia",
@@ -216,7 +223,7 @@ tte <- computeTimeToEventAnalyses(
   cdmDatabaseSchema = "main",
   targetDatabaseSchema = "main",
   targetTable = "cohort",
-  timeToEventSettings = exampleTimeToEventSettings,
+  settings = exampleTimeToEventSettings,
   databaseId = "Eunomia",
   outcomeTable = file.path(getwd(), 'example_char', 'results'), 
   minCellCount = 5

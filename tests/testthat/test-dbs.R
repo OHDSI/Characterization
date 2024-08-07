@@ -148,7 +148,7 @@ getPlatformConnectionDetails <- function(dbmsPlatform) {
 }
 
 for(dbmsPlatform in dbmsPlatforms){
-  if(Sys.getenv('CI') == 'true'){
+  if(Sys.getenv('CI') == 'true' & .Platform$OS.type == "windows"){
     tempFolder <- tempfile(paste0("Characterization_", dbmsPlatform))
     on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
 
@@ -161,7 +161,7 @@ for(dbmsPlatform in dbmsPlatforms){
 
   # This file contains platform specific tests
   test_that(paste0("platform specific test ", dbmsPlatform), {
-    skip_if(Sys.getenv('CI') != 'true', 'not run locally')
+    skip_if(Sys.getenv('CI') != 'true' | .Platform$OS.type != "windows", 'not run locally')
     if (is.null(dbmsDetails)) {
       print(paste("No platform details available for", dbmsPlatform))
     } else {

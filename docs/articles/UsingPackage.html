@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -96,7 +96,7 @@
       <h1 data-toc-skip>Using Characterization Package</h1>
                         <h4 data-toc-skip class="author">Jenna Reps</h4>
             
-            <h4 data-toc-skip class="date">2024-08-01</h4>
+            <h4 data-toc-skip class="date">2024-08-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/HEAD/vignettes/UsingPackage.Rmd" class="external-link"><code>vignettes/UsingPackage.Rmd</code></a></small>
       <div class="hidden name"><code>UsingPackage.Rmd</code></div>
@@ -164,21 +164,21 @@ with the simulated data ready to be used.</p>
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0058 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00776 secs</span></span></code></pre>
 <pre><code>## Creating cohort: Diclofenac
 ## 
   |                                                                            
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.00478 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00674 secs</span></span></code></pre>
 <pre><code>## Creating cohort: GiBleed
 ## 
   |                                                                            
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%</code></pre>
-<pre><code><span><span class="co">## Executing SQL took 0.0094 secs</span></span></code></pre>
+<pre><code><span><span class="co">## Executing SQL took 0.00919 secs</span></span></code></pre>
 <pre><code>## Creating cohort: NSAIDs
 ## 
   |                                                                            
@@ -307,18 +307,27 @@ specify the <code>minCharacterizationMean</code> to exclude covarites
 with mean values below 0.01, and we must specify the
 <code>outputFolder</code> where the csv results will be written to.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">agc</span> <span class="op">&lt;-</span> <span class="fu">computeAggregateCovariateAnalyses</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/runCharacterizationAnalyses.html">runCharacterizationAnalyses</a></span><span class="op">(</span></span>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
 <span>  cdmDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
-<span>  cdmVersion <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
 <span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
-<span>  aggregateCovariateSettings <span class="op">=</span> <span class="va">exampleAggregateCovariateSettings</span>,</span>
+<span>  outcomeDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  outcomeTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  characterizationSettings <span class="op">=</span> <span class="fu"><a href="../reference/createCharacterizationSettings.html">createCharacterizationSettings</a></span><span class="op">(</span></span>
+<span>    aggregateCovariateSettings <span class="op">=</span>  <span class="va">exampleAggregateCovariateSettings</span></span>
+<span>    <span class="op">)</span>,</span>
 <span>  databaseId <span class="op">=</span> <span class="st">"Eunomia"</span>,</span>
 <span>  runId <span class="op">=</span> <span class="fl">1</span>, </span>
 <span>  minCharacterizationMean <span class="op">=</span> <span class="fl">0.01</span>, </span>
-<span>  outputFolder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">'example_char'</span><span class="op">)</span></span>
+<span>  outputDirectory <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">'example_char'</span>, <span class="st">'results'</span><span class="op">)</span>, executionPath <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">'example_char'</span>, <span class="st">'execution'</span><span class="op">)</span>,</span>
+<span>  minCellCount <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  incremental <span class="op">=</span> <span class="cn">F</span>,</span>
+<span>  threads <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>You can then see the results in the location
+<code>file.path(getwd(), 'example_char', 'results')</code> where you
+will find csv files.</p>
 </div>
 <div class="section level3">
 <h3 id="dechallenge-rechallenge">Dechallenge Rechallenge<a class="anchor" aria-label="anchor" href="#dechallenge-rechallenge"></a>
@@ -359,7 +368,7 @@ less than the specified value:</p>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
 <span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
 <span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
-<span>  dechallengeRechallengeSettings <span class="op">=</span> <span class="va">exampleDechallengeRechallengeSettings</span>,</span>
+<span>  settings <span class="op">=</span> <span class="va">exampleDechallengeRechallengeSettings</span>,</span>
 <span>  databaseId <span class="op">=</span> <span class="st">"Eunomia"</span>, </span>
 <span>  outcomeTable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">'example_char'</span>, <span class="st">'results'</span><span class="op">)</span>, </span>
 <span>  minCellCount <span class="op">=</span> <span class="fl">5</span></span>
@@ -370,7 +379,7 @@ less than the specified value:</p>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
 <span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
 <span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
-<span>  dechallengeRechallengeSettings <span class="op">=</span> <span class="va">exampleDechallengeRechallengeSettings</span>,</span>
+<span>  settings <span class="op">=</span> <span class="va">exampleDechallengeRechallengeSettings</span>,</span>
 <span>  outcomeDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
 <span>  outcomeTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
 <span>  databaseId <span class="op">=</span> <span class="st">"Eunomia"</span>,</span>
@@ -404,7 +413,7 @@ specified:</p>
 <span>  cdmDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
 <span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
 <span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
-<span>  timeToEventSettings <span class="op">=</span> <span class="va">exampleTimeToEventSettings</span>,</span>
+<span>  settings <span class="op">=</span> <span class="va">exampleTimeToEventSettings</span>,</span>
 <span>  databaseId <span class="op">=</span> <span class="st">"Eunomia"</span>,</span>
 <span>  outcomeTable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">'example_char'</span>, <span class="st">'results'</span><span class="op">)</span>, </span>
 <span>  minCellCount <span class="op">=</span> <span class="fl">5</span></span>
