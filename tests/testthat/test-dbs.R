@@ -102,6 +102,7 @@ getPlatformConnectionDetails <- function(dbmsPlatform) {
       cohortDatabaseSchema <- Sys.getenv("CDM_SNOWFLAKE_OHDSI_SCHEMA")
       options(sqlRenderTempEmulationSchema = Sys.getenv("CDM_SNOWFLAKE_OHDSI_SCHEMA"))
     } else if (dbmsPlatform == "spark") {
+      if (.Platform$OS.type == "windows") { # skipping Mac for GHA due to JAVA issue
       connectionDetails <- DatabaseConnector::createConnectionDetails(
         dbms = dbmsPlatform,
         user = Sys.getenv("CDM5_SPARK_USER"),
@@ -113,6 +114,10 @@ getPlatformConnectionDetails <- function(dbmsPlatform) {
       vocabularyDatabaseSchema <- Sys.getenv("CDM5_SPARK_CDM_SCHEMA")
       cohortDatabaseSchema <- Sys.getenv("CDM5_SPARK_OHDSI_SCHEMA")
       options(sqlRenderTempEmulationSchema = Sys.getenv("CDM5_SPARK_OHDSI_SCHEMA"))
+      }
+      else{
+        return(NULL)
+      }
     } else if (dbmsPlatform == "sql server") {
       connectionDetails <- DatabaseConnector::createConnectionDetails(
         dbms = dbmsPlatform,

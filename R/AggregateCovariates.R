@@ -188,6 +188,7 @@ computeTargetAggregateCovariateAnalyses <- function(
     databaseId = "database 1",
     outputFolder = file.path(getwd(),'characterization_results'),
     minCharacterizationMean = 0,
+    minCellCount = 0,
     ...
 ) {
 
@@ -317,7 +318,8 @@ computeTargetAggregateCovariateAnalyses <- function(
     cohortDetails = cohortDetails,
     counts = counts,
     databaseId = databaseId,
-    minCharacterizationMean = minCharacterizationMean
+    minCharacterizationMean = minCharacterizationMean,
+    minCellCount = minCellCount
   )
 
   return(invisible(T))
@@ -337,6 +339,7 @@ computeCaseAggregateCovariateAnalyses <- function(
     databaseId = "database 1",
     outputFolder = file.path(getwd(),'characterization_results'),
     minCharacterizationMean = 0,
+    minCellCount = 0,
     ...
     ) {
   # check inputs
@@ -550,7 +553,8 @@ computeCaseAggregateCovariateAnalyses <- function(
     cohortDetails = cohortDetails,
     counts = counts,
     databaseId = databaseId,
-    minCharacterizationMean = minCharacterizationMean
+    minCharacterizationMean = minCharacterizationMean,
+    minCellCount = minCellCount
   )
   exportAndromedaToCsv(
     andromeda = result2,
@@ -559,7 +563,8 @@ computeCaseAggregateCovariateAnalyses <- function(
     counts = NULL, # previously added
     databaseId = databaseId,
     minCharacterizationMean = minCharacterizationMean,
-    includeSettings = F
+    includeSettings = F,
+    minCellCount = minCellCount
   )
 
   return(invisible(T))
@@ -654,6 +659,8 @@ exportAndromedaToCsv <- function(
           ParallelLogger::logInfo(paste0("Removing sum_value counts less than ", minCellCount))
           if (sum(removeInd) > 0) {
             data$sum_value[removeInd] <- -1*minCellCount
+            # adding other calculated columns
+            data$average_value[removeInd] <- NA
           }
         }
 
@@ -686,6 +693,16 @@ exportAndromedaToCsv <- function(
           ParallelLogger::logInfo(paste0("Removing count_value counts less than ", minCellCount))
           if (sum(removeInd) > 0) {
             data$count_value[removeInd] <- -1*minCellCount
+            # adding columns calculated from count
+            data$min_value[removeInd] <- NA
+            data$max_value[removeInd] <- NA
+            data$average_value[removeInd] <- NA
+            data$standard_deviation[removeInd] <- NA
+            data$median_value[removeInd] <- NA
+            data$p_10_value[removeInd] <- NA
+            data$p_25_value[removeInd] <- NA
+            data$p_75_value[removeInd] <- NA
+            data$p_90_value[removeInd] <- NA
           }
         }
 

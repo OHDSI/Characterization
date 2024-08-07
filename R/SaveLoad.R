@@ -27,7 +27,8 @@
 exportTimeToEventToCsv <- function(
     result,
     saveDirectory,
-    minCellCount = 0) {
+    minCellCount = 0
+    ) {
   if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
@@ -120,9 +121,17 @@ exportDechallengeRechallengeToCsv <- function(
         string = colnames(dat)
       )
 
+      removeInd <- dat$num_exposure_eras < minCellCount
+      if (sum(removeInd) > 0) {
+        ParallelLogger::logInfo(paste0("Censoring num_exposure_eras counts less than ", minCellCount))
+        if (sum(removeInd) > 0) {
+          dat$num_exposure_eras[removeInd] <- -minCellCount
+        }
+      }
+
       removeInd <- dat$num_persons_exposed < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing num_persons_exposed counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Censoring num_persons_exposed counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
           dat$num_persons_exposed[removeInd] <- -minCellCount
         }
@@ -130,7 +139,7 @@ exportDechallengeRechallengeToCsv <- function(
 
       removeInd <- dat$num_cases < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing num_cases counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Censoring num_cases counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
           dat$num_cases[removeInd] <- -minCellCount
         }
@@ -138,35 +147,41 @@ exportDechallengeRechallengeToCsv <- function(
 
       removeInd <- dat$dechallenge_attempt < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing dechallenge_attempt counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Censoring/removing dechallenge_attempt counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
           dat$dechallenge_attempt[removeInd] <- -minCellCount
+          dat$pct_dechallenge_attempt[removeInd] <- NA
         }
       }
 
       removeInd <- dat$dechallenge_fail < minCellCount | dat$dechallenge_success < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing DECHALLENGE FAIL or SUCCESS counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Censoring/removing DECHALLENGE FAIL or SUCCESS counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
           dat$dechallenge_fail[removeInd] <- -minCellCount
           dat$dechallenge_success[removeInd] <- -minCellCount
+          dat$pct_dechallenge_fail[removeInd] <- NA
+          dat$pct_dechallenge_success[removeInd] <- NA
         }
       }
 
       removeInd <- dat$rechallenge_attempt < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing rechallenge_attempt counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Censoring/removing rechallenge_attempt counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
           dat$rechallenge_attempt[removeInd] <- -minCellCount
+          dat$pct_rechallenge_attempt[removeInd] <- NA
         }
       }
 
       removeInd <- dat$rechallenge_fail < minCellCount | dat$rechallenge_success < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing rechallenge_fail or rechallenge_success counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Censoring/removing rechallenge_fail or rechallenge_success counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
           dat$rechallenge_fail[removeInd] <- -minCellCount
           dat$rechallenge_success[removeInd] <- -minCellCount
+          dat$pct_rechallenge_fail[removeInd] <- NA
+          dat$pct_rechallenge_success[removeInd] <- NA
         }
       }
 
