@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -44,14 +44,14 @@
       <a href="../articles/InstallationGuide.html">Characterization Installation Guide</a>
     </li>
     <li>
-      <a href="../articles/UsingCharacterizationPackage.html">Using Characterization Package</a>
+      <a href="../articles/UsingPackage.html">Using Characterization Package</a>
     </li>
   </ul></li>
 <li>
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://ohdsi.github.io/Hades" class="external-link">hadesLogo</a>
+  <a href="https://ohdsi.github.io/Hades" class="external-link"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
 </li>
 <li>
   <a href="https://github.com/OHDSI/PatientLevelPrediction" class="external-link">
@@ -82,12 +82,32 @@
 <span>  <span class="va">targetIds</span>,</span>
 <span>  <span class="va">outcomeIds</span>,</span>
 <span>  minPriorObservation <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  outcomeWashoutDays <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  riskWindowStart <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  startAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
 <span>  riskWindowEnd <span class="op">=</span> <span class="fl">365</span>,</span>
 <span>  endAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
-<span>  <span class="va">covariateSettings</span>,</span>
-<span>  minCharacterizationMean <span class="op">=</span> <span class="fl">0</span></span>
+<span>  covariateSettings <span class="op">=</span> <span class="fu">FeatureExtraction</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">createCovariateSettings</a></span><span class="op">(</span>useDemographicsGender <span class="op">=</span></span>
+<span>    <span class="cn">T</span>, useDemographicsAge <span class="op">=</span> <span class="cn">T</span>, useDemographicsAgeGroup <span class="op">=</span> <span class="cn">T</span>, useDemographicsRace <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>    useDemographicsEthnicity <span class="op">=</span> <span class="cn">T</span>, useDemographicsIndexYear <span class="op">=</span> <span class="cn">T</span>, useDemographicsIndexMonth</span>
+<span>    <span class="op">=</span> <span class="cn">T</span>, useDemographicsTimeInCohort <span class="op">=</span> <span class="cn">T</span>, useDemographicsPriorObservationTime <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>    useDemographicsPostObservationTime <span class="op">=</span> <span class="cn">T</span>, useConditionGroupEraLongTerm <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>    useDrugGroupEraOverlapping <span class="op">=</span> <span class="cn">T</span>, useDrugGroupEraLongTerm <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>    useProcedureOccurrenceLongTerm <span class="op">=</span> <span class="cn">T</span>, useMeasurementLongTerm <span class="op">=</span> <span class="cn">T</span>, </span>
+<span>    </span>
+<span>    useObservationLongTerm <span class="op">=</span> <span class="cn">T</span>, useDeviceExposureLongTerm <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>    useVisitConceptCountLongTerm <span class="op">=</span> <span class="cn">T</span>, useConditionGroupEraShortTerm <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>    useDrugGroupEraShortTerm <span class="op">=</span> <span class="cn">T</span>, useProcedureOccurrenceShortTerm <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>    useMeasurementShortTerm <span class="op">=</span> <span class="cn">T</span>, useObservationShortTerm <span class="op">=</span> <span class="cn">T</span>, useDeviceExposureShortTerm</span>
+<span>    <span class="op">=</span> <span class="cn">T</span>, useVisitConceptCountShortTerm <span class="op">=</span> <span class="cn">T</span>, endDays <span class="op">=</span> <span class="fl">0</span>, longTermStartDays <span class="op">=</span> <span class="op">-</span><span class="fl">365</span>,</span>
+<span>    shortTermStartDays <span class="op">=</span> <span class="op">-</span><span class="fl">30</span><span class="op">)</span>,</span>
+<span>  caseCovariateSettings <span class="op">=</span> <span class="fu"><a href="createDuringCovariateSettings.html">createDuringCovariateSettings</a></span><span class="op">(</span>useConditionGroupEraDuring <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>    useDrugGroupEraDuring <span class="op">=</span> <span class="cn">T</span>, useProcedureOccurrenceDuring <span class="op">=</span> <span class="cn">T</span>, useDeviceExposureDuring</span>
+<span>    <span class="op">=</span> <span class="cn">T</span>, useMeasurementDuring <span class="op">=</span> <span class="cn">T</span>, useObservationDuring <span class="op">=</span> <span class="cn">T</span>, useVisitConceptCountDuring <span class="op">=</span></span>
+<span>    <span class="cn">T</span><span class="op">)</span>,</span>
+<span>  casePreTargetDuration <span class="op">=</span> <span class="fl">365</span>,</span>
+<span>  casePostOutcomeDuration <span class="op">=</span> <span class="fl">365</span>,</span>
+<span>  extractNonCaseCovariates <span class="op">=</span> <span class="cn">T</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -102,7 +122,11 @@
 
 
 <dt>minPriorObservation</dt>
-<dd><p>The minimum time in the database a patient in the target cohorts must be observed prior to index</p></dd>
+<dd><p>The minimum time (in days) in the database a patient in the target cohorts must be observed prior to index</p></dd>
+
+
+<dt>outcomeWashoutDays</dt>
+<dd><p>Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis</p></dd>
 
 
 <dt>riskWindowStart</dt>
@@ -127,10 +151,20 @@ or `"cohort end"`.</p></dd>
 <dd><p>An object created using <code><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">FeatureExtraction::createCovariateSettings</a></code></p></dd>
 
 
-<dt>minCharacterizationMean</dt>
-<dd><p>The minimum mean value for characterization output. Values below this will be cut off from output. This
-will help reduce the file size of the characterization output, but will remove information
-on covariates that have very low values. The default is 0.</p></dd>
+<dt>caseCovariateSettings</dt>
+<dd><p>An object created using <code>createDuringCovariateSettings</code></p></dd>
+
+
+<dt>casePreTargetDuration</dt>
+<dd><p>The number of days prior to case index we use for FeatureExtraction</p></dd>
+
+
+<dt>casePostOutcomeDuration</dt>
+<dd><p>The number of days prior to case index we use for FeatureExtraction</p></dd>
+
+
+<dt>extractNonCaseCovariates</dt>
+<dd><p>Whether to extract aggregate covariates and counts for patients in the targets and outcomes in addition to the cases</p></dd>
 
 </dl></div>
     <div id="value">
@@ -148,7 +182,7 @@ on covariates that have very low values. The default is 0.</p></dd>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Jenna Reps, Patrick Ryan.</p>
+  <p></p><p>Developed by Jenna Reps, Patrick Ryan, Chris Knoll.</p>
 </div>
 
 <div class="pkgdown">

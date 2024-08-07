@@ -97,9 +97,10 @@ runCharacterizationAnalyses(
   targetTable = 'cohort',
   outcomeDatabaseSchema = 'main',
   outcomeTable = 'cohort',
-  characterizationSettings = characterizationSettings,
-  saveDirectory = file.path(tempdir(), 'example'),
-  tablePrefix = 'c_',
+  characterizationSettings = characterizationSettings,   
+  outputDirectory = file.path(tempdir(), 'example', 'results'),
+  executionPath = file.path(tempdir(), 'example', 'execution'),
+  csvFilePrefix = 'c_',
   databaseId = 'Eunomia'
 )
 ```

@@ -4,13 +4,16 @@
     <loc>/404.html</loc>
   </url>
   <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
     <loc>/articles/InstallationGuide.html</loc>
   </url>
   <url>
     <loc>/articles/UsingCharacterizationPackage.html</loc>
+  </url>
+  <url>
+    <loc>/articles/UsingPackage.html</loc>
+  </url>
+  <url>
+    <loc>/articles/index.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>
@@ -26,6 +29,12 @@
   </url>
   <url>
     <loc>/reference/Characterization-package.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cleanIncremental.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cleanNonIncremental.html</loc>
   </url>
   <url>
     <loc>/reference/computeAggregateCovariateAnalyses.html</loc>
@@ -52,6 +61,9 @@
     <loc>/reference/createDechallengeRechallengeSettings.html</loc>
   </url>
   <url>
+    <loc>/reference/createDuringCovariateSettings.html</loc>
+  </url>
+  <url>
     <loc>/reference/createSqliteDatabase.html</loc>
   </url>
   <url>
@@ -73,7 +85,13 @@
     <loc>/reference/exportTimeToEventToCsv.html</loc>
   </url>
   <url>
+    <loc>/reference/getDbDuringCovariateData.html</loc>
+  </url>
+  <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/insertResultsToDatabase.html</loc>
   </url>
   <url>
     <loc>/reference/loadAggregateCovariateAnalyses.html</loc>

@@ -20,7 +20,7 @@
 #' @param outcomeIds   A list of cohortIds for the outcome cohorts
 #' @param dechallengeStopInterval  An integer specifying the how much time to add to the cohort_end when determining whether the event starts during cohort and ends after
 #' @param dechallengeEvaluationWindow An integer specifying the period of time after the cohort_end when you cannot see an outcome for a dechallenge success
-#'
+#' @family {DechallengeRechallenge}
 #' @return
 #' A list with the settings
 #'
@@ -85,9 +85,12 @@ createDechallengeRechallengeSettings <- function(
 #' @template ConnectionDetails
 #' @template TargetOutcomeTables
 #' @template TempEmulationSchema
-#' @param dechallengeRechallengeSettings   The settings for the timeToEvent study
+#' @param settings   The settings for the timeToEvent study
 #' @param databaseId An identifier for the database (string)
-#'
+#' @param outputFolder A directory to save the results as csv files
+#' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
+#' @param ... extra inputs
+#' @family {DechallengeRechallenge}
 #' @return
 #' An \code{Andromeda::andromeda()} object containing the dechallenge rechallenge results
 #'
@@ -99,8 +102,12 @@ computeDechallengeRechallengeAnalyses <- function(
     outcomeDatabaseSchema = targetDatabaseSchema,
     outcomeTable = targetTable,
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-    dechallengeRechallengeSettings,
-    databaseId = "database 1") {
+    settings,
+    databaseId = "database 1",
+    outputFolder = file.path(getwd(),'results'),
+    minCellCount = 0,
+    ...
+    ) {
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
@@ -121,7 +128,7 @@ computeDechallengeRechallengeAnalyses <- function(
     errorMessages = errorMessages
   )
   .checkDechallengeRechallengeSettings(
-    settings = dechallengeRechallengeSettings,
+    settings = settings,
     errorMessages = errorMessages
   )
 
@@ -153,10 +160,10 @@ computeDechallengeRechallengeAnalyses <- function(
       target_table = targetTable,
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
-      target_ids = paste(dechallengeRechallengeSettings$targetCohortDefinitionIds, sep = "", collapse = ","),
-      outcome_ids = paste(dechallengeRechallengeSettings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
-      dechallenge_stop_interval = dechallengeRechallengeSettings$dechallengeStopInterval,
-      dechallenge_evaluation_window = dechallengeRechallengeSettings$dechallengeEvaluationWindow
+      target_ids = paste(settings$targetCohortDefinitionIds, sep = "", collapse = ","),
+      outcome_ids = paste(settings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
+      dechallenge_stop_interval = settings$dechallengeStopInterval,
+      dechallenge_evaluation_window = settings$dechallengeEvaluationWindow
     )
     DatabaseConnector::executeSql(
       connection = connection,
@@ -195,14 +202,22 @@ computeDechallengeRechallengeAnalyses <- function(
     message(
       paste0(
         "Computing dechallenge rechallenge for ",
-        length(dechallengeRechallengeSettings$targetCohortDefinitionIds), " target ids and ",
-        length(dechallengeRechallengeSettings$outcomeCohortDefinitionIds), "outcome ids took ",
+        length(settings$targetCohortDefinitionIds), " target ids and ",
+        length(settings$outcomeCohortDefinitionIds), " outcome ids took ",
         signif(delta, 3), " ",
         attr(delta, "units")
       )
     )
 
-    return(result)
+    # export results to csv
+    message('exporting to csv file')
+    exportDechallengeRechallengeToCsv(
+      result = result,
+      saveDirectory = outputFolder,
+      minCellCount = minCellCount
+    )
+
+    return(invisible(TRUE))
   }
 }
 
@@ -212,10 +227,13 @@ computeDechallengeRechallengeAnalyses <- function(
 #' @template ConnectionDetails
 #' @template TargetOutcomeTables
 #' @template TempEmulationSchema
-#' @param dechallengeRechallengeSettings   The settings for the timeToEvent study
+#' @param settings   The settings for the timeToEvent study
 #' @param databaseId An identifier for the database (string)
 #' @param showSubjectId if F then subject_ids are hidden (recommended if sharing results)
-#'
+#' @param outputFolder A directory to save the results as csv files
+#' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
+#' @param ... extra inputs
+#' @family {DechallengeRechallenge}
 #' @return
 #' An \code{Andromeda::andromeda()} object with the case series details of the failed rechallenge
 #'
@@ -227,9 +245,13 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     outcomeDatabaseSchema = targetDatabaseSchema,
     outcomeTable = targetTable,
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-    dechallengeRechallengeSettings,
+    settings,
     databaseId = "database 1",
-    showSubjectId = F) {
+    showSubjectId = F,
+    outputFolder = file.path(getwd(),'results'),
+    minCellCount = 0,
+    ...
+    ){
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
@@ -250,7 +272,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     errorMessages = errorMessages
   )
   .checkDechallengeRechallengeSettings(
-    settings = dechallengeRechallengeSettings,
+    settings = settings,
     errorMessages = errorMessages
   )
 
@@ -269,7 +291,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       DatabaseConnector::disconnect(connection)
     )
 
-    message("Computing dechallenge rechallenge results")
+    message("Computing dechallenge rechallenge fails results")
     sql <- SqlRender::loadRenderTranslateSql(
       sqlFilename = "RechallengeFailCaseSeries.sql",
       packageName = "Characterization",
@@ -280,10 +302,10 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       target_table = targetTable,
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
-      target_ids = paste(dechallengeRechallengeSettings$targetCohortDefinitionIds, sep = "", collapse = ","),
-      outcome_ids = paste(dechallengeRechallengeSettings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
-      dechallenge_stop_interval = dechallengeRechallengeSettings$dechallengeStopInterval,
-      dechallenge_evaluation_window = dechallengeRechallengeSettings$dechallengeEvaluationWindow,
+      target_ids = paste(settings$targetCohortDefinitionIds, sep = "", collapse = ","),
+      outcome_ids = paste(settings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
+      dechallenge_stop_interval = settings$dechallengeStopInterval,
+      dechallenge_evaluation_window = settings$dechallengeEvaluationWindow,
       show_subject_id = showSubjectId
     )
     DatabaseConnector::executeSql(
@@ -323,13 +345,138 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     message(
       paste0(
         "Computing dechallenge failed case series for ",
-        length(dechallengeRechallengeSettings$targetCohortDefinitionIds), " target IDs and ",
-        length(dechallengeRechallengeSettings$outcomeCohortDefinitionIds), " outcome IDs took ",
+        length(settings$targetCohortDefinitionIds), " target IDs and ",
+        length(settings$outcomeCohortDefinitionIds), " outcome IDs took ",
         signif(delta, 3), " ",
         attr(delta, "units")
       )
     )
 
-    return(result)
+    # add the csv export here
+    message('exporting to csv file')
+    exportRechallengeFailCaseSeriesToCsv(
+      result = result,
+      saveDirectory = outputFolder
+    )
+
+    return(invisible(TRUE))
   }
+}
+
+getDechallengeRechallengeJobs <- function(
+    characterizationSettings,
+    threads
+){
+
+  characterizationSettings <- characterizationSettings$dechallengeRechallengeSettings
+  if(length(characterizationSettings) == 0){
+    return(NULL)
+  }
+  ind <- 1:length(characterizationSettings)
+  targetIds <- lapply(ind, function(i){characterizationSettings[[i]]$targetCohortDefinitionIds})
+  outcomeIds <- lapply(ind, function(i){characterizationSettings[[i]]$outcomeCohortDefinitionIds})
+  dechallengeStopIntervals <- lapply(ind, function(i){characterizationSettings[[i]]$dechallengeStopInterval})
+  dechallengeEvaluationWindows <- lapply(ind, function(i){characterizationSettings[[i]]$dechallengeEvaluationWindow})
+
+  # get all combinations of TnOs, then split by treads
+
+  combinations <- do.call(what = 'rbind',
+                          args =
+                            lapply(
+                              1:length(targetIds),
+                              function(i){
+                                result <- expand.grid(
+                                  targetId = targetIds[[i]],
+                                  outcomeId = outcomeIds[[i]]
+                                )
+                                result$dechallengeStopInterval <- dechallengeStopIntervals[[i]]
+                                result$dechallengeEvaluationWindow <- dechallengeEvaluationWindows[[i]]
+                                return(result)
+                              }
+                            )
+  )
+  # find out whether more Ts or more Os
+  tcount <- nrow(
+    combinations %>%
+      dplyr::count(
+        .data$targetId,
+        .data$dechallengeStopInterval,
+        .data$dechallengeEvaluationWindow
+      )
+  )
+
+  ocount <- nrow(
+    combinations %>%
+      dplyr::count(
+        .data$outcomeId,
+        .data$dechallengeStopInterval,
+        .data$dechallengeEvaluationWindow
+      )
+  )
+
+  if(threads > max(tcount, ocount)){
+    message('Tnput parameter threads greater than number of targets and outcomes')
+    message(paste0('Only using ', max(tcount, ocount) ,' threads for TimeToEvent'))
+  }
+
+  if(tcount >= ocount){
+    threadDf <- combinations %>%
+      dplyr::count(
+        .data$targetId,
+        .data$dechallengeStopInterval,
+        .data$dechallengeEvaluationWindow
+      )
+    threadDf$thread = rep(1:threads, ceiling(tcount/threads))[1:tcount]
+    mergeColumn <- c('targetId','dechallengeStopInterval', 'dechallengeEvaluationWindow')
+  } else{
+    threadDf <- combinations %>%
+      dplyr::count(
+        .data$outcomeId,
+        .data$dechallengeStopInterval,
+        .data$dechallengeEvaluationWindow
+      )
+    threadDf$thread = rep(1:threads, ceiling(ocount/threads))[1:ocount]
+    mergeColumn <- c('outcomeId','dechallengeStopInterval', 'dechallengeEvaluationWindow')
+  }
+
+  combinations <- merge(combinations, threadDf, by = mergeColumn)
+  sets <- lapply(
+    X = 1:max(threadDf$thread),
+    FUN = function(i){
+      createDechallengeRechallengeSettings(
+        targetIds = unique(combinations$targetId[combinations$thread == i]),
+        outcomeIds = unique(combinations$outcomeId[combinations$thread == i]),
+        dechallengeStopInterval = unique(combinations$dechallengeStopInterval[combinations$thread == i]),
+        dechallengeEvaluationWindow = unique(combinations$dechallengeEvaluationWindow[combinations$thread == i])
+      )
+    }
+  )
+
+  # recreate settings
+  settings <- c()
+  for(i in 1:length(sets)){
+    settings <- rbind(settings,
+                      data.frame(
+                        functionName = 'computeDechallengeRechallengeAnalyses',
+                        settings = as.character(ParallelLogger::convertSettingsToJson(
+                          sets[[i]]
+                        )),
+                        executionFolder = paste0('dr_', i),
+                        jobId = paste0('dr_', i)
+                      )
+    )
+    settings <- rbind(settings,
+                      data.frame(
+                        functionName = 'computeRechallengeFailCaseSeriesAnalyses',
+                        settings = as.character(ParallelLogger::convertSettingsToJson(
+                          sets[[i]]
+                        )),
+                        executionFolder = paste0('rfcs_', i),
+                        jobId = paste0('rfcs_', i)
+                      )
+    )
+
+  }
+
+  return(settings)
 }

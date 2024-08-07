@@ -212,7 +212,7 @@
 
 .checkCovariateSettings <- function(covariateSettings,
                                     errorMessages) {
-  if (class(covariateSettings) == "covariateSettings") {
+  if (inherits(covariateSettings,"covariateSettings")) {
     checkmate::assertClass(
       x = covariateSettings,
       classes = "covariateSettings",
@@ -238,4 +238,27 @@
     .var.name = "minPriorObservation",
     add = errorMessages
   )
+}
+
+
+
+checkNoCsv <- function(
+    csvFiles,
+    errorMessage
+    ){
+
+  csvExists <- sapply(csvFiles, function(x){file.exists(x)})
+
+  if(sum(csvExists) > 0){
+    stop(errorMessage)
+  }
+
+  return(invisible(TRUE))
+}
+
+cleanCsv <- function(
+    resultFolder,
+    fileName = 'time_to_event.csv'
+    ){
+  file.remove(file.path(resultFolder, fileName ))
 }

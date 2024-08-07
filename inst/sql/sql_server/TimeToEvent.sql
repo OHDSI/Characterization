@@ -16,9 +16,18 @@ where cohort_definition_id in (select distinct outcome_cohort_definition_id from
 
 
 drop table if exists #target_w_outcome;
-select t1.cohort_definition_id as target_cohort_definition_id, o1.cohort_definition_id as outcome_cohort_definition_id,
-      t1.subject_id, t1.first_start_date as target_first_start_date, t1.last_end_date as target_last_end_date, t1.num_eras as target_num_eras, t1.total_duration as target_total_duration,
-      o1.first_start_date as outcome_first_start_date, o1.last_end_date as outcome_last_end_date, o1.num_eras as outcome_num_eras, o1.total_duration as outcome_total_duration
+select
+t1.cohort_definition_id as target_cohort_definition_id,
+o1.cohort_definition_id as outcome_cohort_definition_id,
+t1.subject_id,
+t1.first_start_date as target_first_start_date,
+t1.last_end_date as target_last_end_date,
+t1.num_eras as target_num_eras,
+t1.total_duration as target_total_duration,
+o1.first_start_date as outcome_first_start_date,
+o1.last_end_date as outcome_last_end_date,
+o1.num_eras as outcome_num_eras,
+o1.total_duration as outcome_total_duration
 into #target_w_outcome
 from (
   select cohort_definition_id, subject_id,
@@ -251,18 +260,32 @@ select '@database_id' as database_id, temp.*
 into #two_tte_summary
 from
 (
---daily counting for +/- 100 days
-select target_cohort_definition_id, outcome_cohort_definition_id, outcome_type, target_outcome_type, time_to_event, num_events, 'per 1-day' as time_scale
+--daily counting for +/- 100 days, jenna comment why 100
+select
+target_cohort_definition_id,
+outcome_cohort_definition_id,
+outcome_type,
+target_outcome_type,
+time_to_event,
+num_events,
+'per 1-day' as time_scale
 from #two_tte
 where abs(time_to_event) <= 100
 
 union all
 
 --30-day counting for +/- 1080 days (~ 3 years)
-select target_cohort_definition_id, outcome_cohort_definition_id, outcome_type, target_outcome_type,
-  case when time_to_event = 0 then 0
-       when time_to_event < 0 then (floor(time_to_event/30)-1)*30
-       when time_to_event > 0 then (floor(time_to_event/30)+1)*30 end as time_to_event, sum(num_events) as num_events, 'per 30-day' as time_scale
+select
+target_cohort_definition_id,
+outcome_cohort_definition_id,
+outcome_type,
+target_outcome_type,
+case when time_to_event = 0 then 0
+     when time_to_event < 0 then (floor(time_to_event/30)-1)*30
+     when time_to_event > 0 then (floor(time_to_event/30)+1)*30
+     end as time_to_event,
+sum(num_events) as num_events,
+'per 30-day' as time_scale
 from #two_tte
 where abs(time_to_event) <= 1080
 group by target_cohort_definition_id, outcome_cohort_definition_id, outcome_type, target_outcome_type,
@@ -273,10 +296,16 @@ group by target_cohort_definition_id, outcome_cohort_definition_id, outcome_type
 union all
 
 --365-day counting for +/- all days
-select target_cohort_definition_id, outcome_cohort_definition_id, outcome_type, target_outcome_type,
+select
+target_cohort_definition_id,
+outcome_cohort_definition_id,
+outcome_type,
+target_outcome_type,
   case when time_to_event = 0 then 0
        when time_to_event < 0 then (floor(time_to_event/365)-1)*365
-       when time_to_event > 0 then (floor(time_to_event/365)+1)*365 end as time_to_event, sum(num_events) as num_events, 'per 365-day' as time_scale
+       when time_to_event > 0 then (floor(time_to_event/365)+1)*365 end as time_to_event,
+sum(num_events) as num_events,
+'per 365-day' as time_scale
 from #two_tte
 group by target_cohort_definition_id, outcome_cohort_definition_id, outcome_type, target_outcome_type,
   case when time_to_event = 0 then 0

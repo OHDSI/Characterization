@@ -8,12 +8,32 @@ createAggregateCovariateSettings(
   targetIds,
   outcomeIds,
   minPriorObservation = 0,
+  outcomeWashoutDays = 0,
   riskWindowStart = 1,
   startAnchor = "cohort start",
   riskWindowEnd = 365,
   endAnchor = "cohort start",
-  covariateSettings,
-  minCharacterizationMean = 0
+  covariateSettings = FeatureExtraction::createCovariateSettings(useDemographicsGender =
+    T, useDemographicsAge = T, useDemographicsAgeGroup = T, useDemographicsRace = T,
+    useDemographicsEthnicity = T, useDemographicsIndexYear = T, useDemographicsIndexMonth
+    = T, useDemographicsTimeInCohort = T, useDemographicsPriorObservationTime = T,
+    useDemographicsPostObservationTime = T, useConditionGroupEraLongTerm = T,
+    useDrugGroupEraOverlapping = T, useDrugGroupEraLongTerm = T,
+    useProcedureOccurrenceLongTerm = T, useMeasurementLongTerm = T, 
+    
+    useObservationLongTerm = T, useDeviceExposureLongTerm = T,
+    useVisitConceptCountLongTerm = T, useConditionGroupEraShortTerm = T,
+    useDrugGroupEraShortTerm = T, useProcedureOccurrenceShortTerm = T,
+    useMeasurementShortTerm = T, useObservationShortTerm = T, useDeviceExposureShortTerm
+    = T, useVisitConceptCountShortTerm = T, endDays = 0, longTermStartDays = -365,
+    shortTermStartDays = -30),
+  caseCovariateSettings = createDuringCovariateSettings(useConditionGroupEraDuring = T,
+    useDrugGroupEraDuring = T, useProcedureOccurrenceDuring = T, useDeviceExposureDuring
+    = T, useMeasurementDuring = T, useObservationDuring = T, useVisitConceptCountDuring =
+    T),
+  casePreTargetDuration = 365,
+  casePostOutcomeDuration = 365,
+  extractNonCaseCovariates = T
 )
 }
 \arguments{
@@ -21,7 +41,9 @@ createAggregateCovariateSettings(
 
 \item{outcomeIds}{A list of cohortIds for the outcome cohorts}
 
-\item{minPriorObservation}{The minimum time in the database a patient in the target cohorts must be observed prior to index}
+\item{minPriorObservation}{The minimum time (in days) in the database a patient in the target cohorts must be observed prior to index}
+
+\item{outcomeWashoutDays}{Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis}
 
 \item{riskWindowStart}{The start of the risk window (in days) relative to the `startAnchor`.}
 
@@ -35,9 +57,13 @@ or `"cohort end"`.}
 
 \item{covariateSettings}{An object created using \code{FeatureExtraction::createCovariateSettings}}
 
-\item{minCharacterizationMean}{The minimum mean value for characterization output. Values below this will be cut off from output. This
-will help reduce the file size of the characterization output, but will remove information
-on covariates that have very low values. The default is 0.}
+\item{caseCovariateSettings}{An object created using \code{createDuringCovariateSettings}}
+
+\item{casePreTargetDuration}{The number of days prior to case index we use for FeatureExtraction}
+
+\item{casePostOutcomeDuration}{The number of days prior to case index we use for FeatureExtraction}
+
+\item{extractNonCaseCovariates}{Whether to extract aggregate covariates and counts for patients in the targets and outcomes in addition to the cases}
 }
 \value{
 A list with the settings
@@ -45,3 +71,4 @@ A list with the settings
 \description{
 Create aggregate covariate study settings
 }
+\concept{{Aggregate}}

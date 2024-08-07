@@ -5,7 +5,7 @@
 \title{Create the results tables to store characterization results into a database}
 \usage{
 createCharacterizationTables(
-  conn,
+  connectionDetails,
   resultSchema,
   targetDialect = "postgresql",
   deleteExistingTables = T,
@@ -15,8 +15,8 @@ createCharacterizationTables(
 )
 }
 \arguments{
-\item{conn}{A connection to a database created by using the
-function \code{connect} in the
+\item{connectionDetails}{The connectionDetails to a database created by using the
+function \code{createConnectDetails} in the
 \code{DatabaseConnector} package.}
 
 \item{resultSchema}{The name of the database schema that the result tables will be created.}
@@ -40,3 +40,9 @@ This function executes a large set of SQL statements to create tables that can s
 \details{
 This function can be used to create (or delete) Characterization result tables
 }
+\seealso{
+Other {Database}: 
+\code{\link{createSqliteDatabase}()},
+\code{\link{insertResultsToDatabase}()}
+}
+\concept{{Database}}

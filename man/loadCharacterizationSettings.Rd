@@ -18,3 +18,10 @@ This function converts the json file back into an R object
 \details{
 Input the directory containing the 'characterizationSettings.json' file and load the settings into R
 }
+\seealso{
+Other {LargeScale}: 
+\code{\link{createCharacterizationSettings}()},
+\code{\link{runCharacterizationAnalyses}()},
+\code{\link{saveCharacterizationSettings}()}
+}
+\concept{{LargeScale}}

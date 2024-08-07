@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Characterization</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
       </span>
     </div>
 
@@ -44,14 +44,14 @@
       <a href="../articles/InstallationGuide.html">Characterization Installation Guide</a>
     </li>
     <li>
-      <a href="../articles/UsingCharacterizationPackage.html">Using Characterization Package</a>
+      <a href="../articles/UsingPackage.html">Using Characterization Package</a>
     </li>
   </ul></li>
 <li>
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://ohdsi.github.io/Hades" class="external-link">hadesLogo</a>
+  <a href="https://ohdsi.github.io/Hades" class="external-link"><img src='https://ohdsi.github.io/Hades/images/hadesMini.png' width=80 height=17 style='vertical-align: top;'></a>
 </li>
 <li>
   <a href="https://github.com/OHDSI/PatientLevelPrediction" class="external-link">
@@ -85,9 +85,12 @@
 <span>  outcomeDatabaseSchema <span class="op">=</span> <span class="va">targetDatabaseSchema</span>,</span>
 <span>  outcomeTable <span class="op">=</span> <span class="va">targetTable</span>,</span>
 <span>  tempEmulationSchema <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"sqlRenderTempEmulationSchema"</span><span class="op">)</span>,</span>
-<span>  <span class="va">dechallengeRechallengeSettings</span>,</span>
+<span>  <span class="va">settings</span>,</span>
 <span>  databaseId <span class="op">=</span> <span class="st">"database 1"</span>,</span>
-<span>  showSubjectId <span class="op">=</span> <span class="cn">F</span></span>
+<span>  showSubjectId <span class="op">=</span> <span class="cn">F</span>,</span>
+<span>  outputFolder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"results"</span><span class="op">)</span>,</span>
+<span>  minCellCount <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -124,7 +127,7 @@ To emulate temp tables, provide a schema with write privileges where temp tables
 can be created</p></dd>
 
 
-<dt>dechallengeRechallengeSettings</dt>
+<dt>settings</dt>
 <dd><p>The settings for the timeToEvent study</p></dd>
 
 
@@ -135,12 +138,30 @@ can be created</p></dd>
 <dt>showSubjectId</dt>
 <dd><p>if F then subject_ids are hidden (recommended if sharing results)</p></dd>
 
+
+<dt>outputFolder</dt>
+<dd><p>A directory to save the results as csv files</p></dd>
+
+
+<dt>minCellCount</dt>
+<dd><p>The minimum cell value to display, values less than this will be replaced by -1</p></dd>
+
+
+<dt>...</dt>
+<dd><p>extra inputs</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     
 
 <p>An <code><a href="https://rdrr.io/pkg/Andromeda/man/andromeda_constructor.html" class="external-link">Andromeda::andromeda()</a></code> object with the case series details of the failed rechallenge</p>
+    </div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p>Other DechallengeRechallenge: 
+<code><a href="computeDechallengeRechallengeAnalyses.html">computeDechallengeRechallengeAnalyses</a>()</code>,
+<code><a href="createDechallengeRechallengeSettings.html">createDechallengeRechallengeSettings</a>()</code></p></div>
     </div>
 
   </div>
@@ -151,7 +172,7 @@ can be created</p></dd>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Jenna Reps, Patrick Ryan.</p>
+  <p></p><p>Developed by Jenna Reps, Patrick Ryan, Chris Knoll.</p>
 </div>
 
 <div class="pkgdown">
