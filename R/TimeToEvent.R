@@ -25,8 +25,7 @@
 #' @export
 createTimeToEventSettings <- function(
     targetIds,
-    outcomeIds
-    ) {
+    outcomeIds) {
   # check indicationIds
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
@@ -80,10 +79,9 @@ computeTimeToEventAnalyses <- function(
     cdmDatabaseSchema,
     settings,
     databaseId = "database 1",
-    outputFolder = file.path(getwd(),'results'),
+    outputFolder = file.path(getwd(), "results"),
     minCellCount = 0,
-    ...
-    ) {
+    ...) {
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
@@ -105,7 +103,7 @@ computeTimeToEventAnalyses <- function(
   )
   .checkTimeToEventSettings(
     settings = settings,
-    errorMessages =  errorMessages
+    errorMessages = errorMessages
   )
 
   valid <- checkmate::reportAssertions(errorMessages)
@@ -200,7 +198,7 @@ computeTimeToEventAnalyses <- function(
     )
 
     # add the csv export here
-    message('exporting to csv file')
+    message("exporting to csv file")
     exportTimeToEventToCsv(
       result = result,
       saveDirectory = outputFolder,
@@ -216,57 +214,61 @@ computeTimeToEventAnalyses <- function(
 # based on the number of threads
 getTimeToEventJobs <- function(
     characterizationSettings,
-    threads
-){
-
-
+    threads) {
   characterizationSettings <- characterizationSettings$timeToEventSettings
-  if(length(characterizationSettings) == 0){
+  if (length(characterizationSettings) == 0) {
     return(NULL)
   }
   ind <- 1:length(characterizationSettings)
-  targetIds <- lapply(ind, function(i){characterizationSettings[[i]]$targetIds})
-  outcomeIds <- lapply(ind, function(i){characterizationSettings[[i]]$outcomeIds})
+  targetIds <- lapply(ind, function(i) {
+    characterizationSettings[[i]]$targetIds
+  })
+  outcomeIds <- lapply(ind, function(i) {
+    characterizationSettings[[i]]$outcomeIds
+  })
 
   # get all combinations of TnOs, then split by treads
 
-  tnos <- do.call(what = 'rbind',
-                  args =
-                    lapply(
-                      1:length(targetIds),
-                      function(i){expand.grid(
-                        targetId = targetIds[[i]],
-                        outcomeId = outcomeIds[[i]]
-                      )}
-                    )
+  tnos <- do.call(
+    what = "rbind",
+    args =
+      lapply(
+        1:length(targetIds),
+        function(i) {
+          expand.grid(
+            targetId = targetIds[[i]],
+            outcomeId = outcomeIds[[i]]
+          )
+        }
+      )
   )
   # find out whether more Ts or more Os
   tcount <- length(unique(tnos$targetId))
   ocount <- length(unique(tnos$outcomeId))
 
-  if(threads > max(tcount, ocount)){
-    message('Tnput parameter threads greater than number of targets and outcomes')
-    message(paste0('Only using ', max(tcount, ocount) ,' threads for TimeToEvent'))
+  if (threads > max(tcount, ocount)) {
+    message("Tnput parameter threads greater than number of targets and outcomes")
+    message(paste0("Only using ", max(tcount, ocount), " threads for TimeToEvent"))
   }
 
-  if(tcount >= ocount){
+  if (tcount >= ocount) {
     threadDf <- data.frame(
       targetId = unique(tnos$targetId),
-      thread = rep(1:threads, ceiling(tcount/threads))[1:tcount]
+      thread = rep(1:threads, ceiling(tcount / threads))[1:tcount]
     )
-    mergeColumn <- 'targetId'
-  } else{
+    mergeColumn <- "targetId"
+  } else {
     threadDf <- data.frame(
       outcomeId = unique(tnos$outcomeId),
-      thread = rep(1:threads, ceiling(ocount/threads))[1:ocount]
+      thread = rep(1:threads, ceiling(ocount / threads))[1:ocount]
     )
-    mergeColumn <- 'outcomeId'
+    mergeColumn <- "outcomeId"
   }
 
   tnos <- merge(tnos, threadDf, by = mergeColumn)
   sets <- lapply(
     X = 1:max(threadDf$thread),
-    FUN = function(i){
+    FUN = function(i) {
       createTimeToEventSettings(
         targetIds = unique(tnos$targetId[tnos$thread == i]),
         outcomeIds = unique(tnos$outcomeId[tnos$thread == i])
@@ -276,16 +278,17 @@ getTimeToEventJobs <- function(
 
   # recreate settings
   settings <- c()
-  for(i in 1:length(sets)){
-    settings <- rbind(settings,
-                      data.frame(
-                        functionName = 'computeTimeToEventAnalyses',
-                        settings = as.character(ParallelLogger::convertSettingsToJson(
-                          sets[[i]]
-                        )),
-                        executionFolder = paste0('tte_', i),
-                        jobId = paste0('tte_', i)
-                      )
+  for (i in 1:length(sets)) {
+    settings <- rbind(
+      settings,
+      data.frame(
+        functionName = "computeTimeToEventAnalyses",
+        settings = as.character(ParallelLogger::convertSettingsToJson(
+          sets[[i]]
+        )),
+        executionFolder = paste0("tte_", i),
+        jobId = paste0("tte_", i)
+      )
     )
   }
 

@@ -13,8 +13,7 @@
 #' @export
 viewCharacterization <- function(
     resultFolder,
-    cohortDefinitionSet = NULL
-    ) {
+    cohortDefinitionSet = NULL) {
   databaseSettings <- prepareCharacterizationShiny(
     resultFolder = resultFolder,
     cohortDefinitionSet = cohortDefinitionSet
@@ -26,12 +25,10 @@ viewCharacterization <- function(
 prepareCharacterizationShiny <- function(
     resultFolder,
     cohortDefinitionSet,
-    sqliteLocation = file.path(tempdir(), 'results.sqlite'),
-    tablePrefix = '',
-    csvTablePrefix = 'c_'
-    ) {
-
-  if(!dir.exists(dirname(sqliteLocation))){
+    sqliteLocation = file.path(tempdir(), "results.sqlite"),
+    tablePrefix = "",
+    csvTablePrefix = "c_") {
+  if (!dir.exists(dirname(sqliteLocation))) {
     dir.create(dirname(sqliteLocation), recursive = T)
   }
 
@@ -55,7 +52,7 @@ prepareCharacterizationShiny <- function(
   # upload the results
   insertResultsToDatabase(
     connectionDetails = connectionDetails,
-    schema = 'main',
+    schema = "main",
     resultsFolder = resultFolder,
     tablePrefix = tablePrefix,
     csvTablePrefix = csvTablePrefix
@@ -71,12 +68,12 @@ prepareCharacterizationShiny <- function(
   if (!"cg_cohort_definition" %in% tables) {
     cohortIds <- unique(
       c(
-        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_ID from ",tablePrefix,csvTablePrefix,"cohort_details where COHORT_TYPE = 'Target';"))$TARGET_COHORT_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_ID from ",tablePrefix,csvTablePrefix,"cohort_details where COHORT_TYPE = 'TnO';"))$OUTCOME_COHORT_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ",tablePrefix,csvTablePrefix,"time_to_event;"))$TARGET_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ",tablePrefix,csvTablePrefix,"time_to_event;"))$OUTCOME_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ",tablePrefix,csvTablePrefix,"rechallenge_fail_case_series;"))$TARGET_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ",tablePrefix,csvTablePrefix,"rechallenge_fail_case_series;"))$OUTCOME_COHORT_DEFINITION_ID
+        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'Target';"))$TARGET_COHORT_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'TnO';"))$OUTCOME_COHORT_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$TARGET_COHORT_DEFINITION_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$OUTCOME_COHORT_DEFINITION_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"))$TARGET_COHORT_DEFINITION_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"))$OUTCOME_COHORT_DEFINITION_ID
       )
     )
 
@@ -95,9 +92,9 @@ prepareCharacterizationShiny <- function(
   if (!"database_meta_data" %in% tables) {
     dbIds <- unique(
       c(
-        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ",tablePrefix,csvTablePrefix,"analysis_ref;"))$DATABASE_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ",tablePrefix,csvTablePrefix,"dechallenge_rechallenge;"))$DATABASE_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ",tablePrefix,csvTablePrefix,"time_to_event;"))$DATABASE_ID
+        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "analysis_ref;"))$DATABASE_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "dechallenge_rechallenge;"))$DATABASE_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$DATABASE_ID
       )
     )
 
@@ -120,7 +117,7 @@ prepareCharacterizationShiny <- function(
       server = server
     ),
     schema = "main",
-    tablePrefix = paste0(tablePrefix,csvTablePrefix),
+    tablePrefix = paste0(tablePrefix, csvTablePrefix),
     cohortTablePrefix = "cg_",
     databaseTable = "DATABASE_META_DATA"
   )
@@ -174,7 +171,7 @@ viewChars <- function(
     databaseSettings$cgTablePrefix <- databaseSettings$cohortTablePrefix
     databaseSettings$databaseTable <- "DATABASE_META_DATA"
     databaseSettings$databaseTablePrefix <- ""
-    #databaseSettings$iTablePrefix <- databaseSettings$incidenceTablePrefix
+    # databaseSettings$iTablePrefix <- databaseSettings$incidenceTablePrefix
     databaseSettings$cgTable <- "cohort_definition"
 
     if (!testApp) {

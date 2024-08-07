@@ -72,11 +72,11 @@ insertResultsToDatabase <- function(
     connectionDetails,
     schema,
     resultsFolder,
-    tablePrefix = '',
-    csvTablePrefix = 'c_'
-    ){
-  specLoc <- system.file('settings', 'resultsDataModelSpecification.csv',
-                         package = 'Characterization')
+    tablePrefix = "",
+    csvTablePrefix = "c_") {
+  specLoc <- system.file("settings", "resultsDataModelSpecification.csv",
+    package = "Characterization"
+  )
   specs <- utils::read.csv(specLoc)
   colnames(specs) <- SqlRender::snakeCaseToCamelCase(colnames(specs))
   specs$tableName <- paste0(csvTablePrefix, specs$tableName)
@@ -148,8 +148,7 @@ createCharacterizationTables <- function(
     deleteExistingTables = T,
     createTables = T,
     tablePrefix = "c_",
-    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
-    ) {
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkTablePrefix(
     tablePrefix = tablePrefix,
@@ -170,8 +169,8 @@ createCharacterizationTables <- function(
   tables <- paste0(tablePrefix, tables)
 
   # adding this to not create tables if all tables esist
-  if(sum(tables %in% alltables) == length(tables) & !deleteExistingTables){
-    message('All tables exist so no need to recreate')
+  if (sum(tables %in% alltables) == length(tables) & !deleteExistingTables) {
+    message("All tables exist so no need to recreate")
     createTables <- FALSE
   }
 
@@ -247,16 +246,16 @@ migrateDataModel <- function(connectionDetails, databaseSchema, tablePrefix = ""
     connectionDetails = connectionDetails,
     databaseSchema = databaseSchema,
     tablePrefix = tablePrefix
-    )
+  )
   migrator$executeMigrations()
   migrator$finalize()
 
   ParallelLogger::logInfo("Updating version number")
   updateVersionSql <- SqlRender::loadRenderTranslateSql("UpdateVersionNumber.sql",
-                                                        packageName = utils::packageName(),
-                                                        database_schema = databaseSchema,
-                                                        table_prefix = tablePrefix,
-                                                        dbms = connectionDetails$dbms
+    packageName = utils::packageName(),
+    database_schema = databaseSchema,
+    table_prefix = tablePrefix,
+    dbms = connectionDetails$dbms
   )
 
   connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
@@ -287,7 +286,7 @@ getResultTables <- function() {
           ),
           show_col_types = FALSE
         )$table_name,
-        'migration', 'package_version'
+        "migration", "package_version"
       )
     )
   )

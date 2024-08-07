@@ -119,8 +119,8 @@ test_that("runCharacterizationAnalyses", {
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     characterizationSettings = characterizationSettings,
-    outputDirectory = file.path(tempFolder,'result'),
-    executionPath = file.path(tempFolder,'execution'),
+    outputDirectory = file.path(tempFolder, "result"),
+    executionPath = file.path(tempFolder, "execution"),
     csvFilePrefix = "c_",
     databaseId = "1",
     incremental = T,
@@ -161,43 +161,40 @@ test_that("runCharacterizationAnalyses", {
   testthat::expect_false(
     file.exists(file.path(tempFolder, "result", "c_dechallenge_rechallenge.csv"))
   )
-  #testthat::expect_true(
+  # testthat::expect_true(
   #  file.exists(file.path(tempFolder, "result", "rechallenge_fail_case_series.csv"))
-  #)
+  # )
   testthat::expect_true(
     file.exists(file.path(tempFolder, "result", "c_time_to_event.csv"))
   )
 
   # make sure both tte runs are in the csv
   tte <- readr::read_csv(
-         file = file.path(tempFolder,'result' ,"c_time_to_event.csv"),
-         show_col_types = FALSE
-     )
+    file = file.path(tempFolder, "result", "c_time_to_event.csv"),
+    show_col_types = FALSE
+  )
   testthat::expect_equivalent(
     unique(tte$target_cohort_definition_id),
-    c(1,2)
+    c(1, 2)
   )
-
-
 })
 
 
 
-manualDataMin <- file.path(tempdir(), 'manual_min.sqlite')
+manualDataMin <- file.path(tempdir(), "manual_min.sqlite")
 on.exit(file.remove(manualDataMin), add = TRUE)
 
 test_that("min cell count works", {
-
   tempFolder <- tempfile("CharacterizationMin")
   on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
 
   connectionDetails <- DatabaseConnector::createConnectionDetails(
-    dbms = 'sqlite',
+    dbms = "sqlite",
     server = manualDataMin
   )
   con <- DatabaseConnector::connect(connectionDetails = connectionDetails)
   on.exit(DatabaseConnector::disconnect(con))
-  schema <- 'main'
+  schema <- "main"
 
   # add persons  - aggregate covs (age)
   persons <- data.frame(
@@ -206,18 +203,18 @@ test_that("min cell count works", {
     year_of_birth = rep(2000, 10),
     race_concept_id = rep(1, 10),
     ethnicity_concept_id = rep(1, 10),
-    location_id = rep(1,10),
-    provider_id = rep(1,10),
-    care_site_id = rep(1,10),
+    location_id = rep(1, 10),
+    provider_id = rep(1, 10),
+    care_site_id = rep(1, 10),
     person_source_value = 1:10,
-    gender_source_value = rep('female', 10),
-    race_source_value = rep('na', 10),
-    ethnicity_source_value = rep('na', 10)
+    gender_source_value = rep("female", 10),
+    race_source_value = rep("na", 10),
+    ethnicity_source_value = rep("na", 10)
   )
   DatabaseConnector::insertTable(
     connection = con,
     databaseSchema = schema,
-    tableName = 'person',
+    tableName = "person",
     data = persons
   )
 
@@ -225,16 +222,16 @@ test_that("min cell count works", {
   obs_period <- data.frame(
     observation_period_id = 1:10,
     person_id = 1:10,
-    observation_period_start_date = rep('2000-12-31', 10),
-    observation_period_end_date = c('2000-12-31', rep('2020-12-31', 9)),
-    period_type_concept_id = rep(1,10)
+    observation_period_start_date = rep("2000-12-31", 10),
+    observation_period_end_date = c("2000-12-31", rep("2020-12-31", 9)),
+    period_type_concept_id = rep(1, 10)
   )
   obs_period$observation_period_start_date <- as.Date(obs_period$observation_period_start_date)
   obs_period$observation_period_end_date <- as.Date(obs_period$observation_period_end_date)
   DatabaseConnector::insertTable(
     connection = con,
     databaseSchema = schema,
-    tableName = 'observation_period',
+    tableName = "observation_period",
     data = obs_period
   )
   # person 1 has 1 day obs
@@ -247,14 +244,18 @@ test_that("min cell count works", {
 
   condition_era <- data.frame(
     condition_era_id = 1:7,
-    person_id = c(7,7,8, 9,9,9,10),
-    condition_concept_id = c(201820, 378253,201820,378253,378253,378253, 201820),
-    condition_era_start_date = c('2011-01-01', '2013-04-03', '2016-01-01',
-                                 '2006-01-04', '2014-08-02', '2014-08-04',
-                                 '2013-01-04'),
-    condition_era_end_date = c('2011-01-01', '2013-04-03', '2016-01-01',
-                               '2006-01-04', '2014-08-02', '2014-08-04',
-                               '2013-01-04'),
+    person_id = c(7, 7, 8, 9, 9, 9, 10),
+    condition_concept_id = c(201820, 378253, 201820, 378253, 378253, 378253, 201820),
+    condition_era_start_date = c(
+      "2011-01-01", "2013-04-03", "2016-01-01",
+      "2006-01-04", "2014-08-02", "2014-08-04",
+      "2013-01-04"
+    ),
+    condition_era_end_date = c(
+      "2011-01-01", "2013-04-03", "2016-01-01",
+      "2006-01-04", "2014-08-02", "2014-08-04",
+      "2013-01-04"
+    ),
     condition_occurrence_count = rep(1, 7)
   )
   condition_era$condition_era_start_date <- as.Date(condition_era$condition_era_start_date)
@@ -263,27 +264,27 @@ test_that("min cell count works", {
   DatabaseConnector::insertTable(
     connection = con,
     databaseSchema = schema,
-    tableName = 'condition_era',
+    tableName = "condition_era",
     data = condition_era
   )
 
   # add concept
   concept <- data.frame(
-    concept_id = c(201820,378253),
-    concept_name = c('diabetes', 'hypertension'),
-    domain_id = rep(1,2),
-    vocabulary_id = rep(1,2),
-    concept_class_id = c('Condition', 'Condition'),
-    standard_concept = rep('S',2),
-    concept_code = rep('Snowmed',2)
-    #,valid_start_date = NULL,
-    #valid_end_date = NULL,
-    #invalid_reason = NULL
+    concept_id = c(201820, 378253),
+    concept_name = c("diabetes", "hypertension"),
+    domain_id = rep(1, 2),
+    vocabulary_id = rep(1, 2),
+    concept_class_id = c("Condition", "Condition"),
+    standard_concept = rep("S", 2),
+    concept_code = rep("Snowmed", 2)
+    # ,valid_start_date = NULL,
+    # valid_end_date = NULL,
+    # invalid_reason = NULL
   )
   DatabaseConnector::insertTable(
     connection = con,
     databaseSchema = schema,
-    tableName = 'concept',
+    tableName = "concept",
     data = concept
   )
 
@@ -291,27 +292,27 @@ test_that("min cell count works", {
   cohort <- data.frame(
     subject_id = c(
       1:10,
-      7,8,10,
-      c(3,6,7,8,10),
+      7, 8, 10,
+      c(3, 6, 7, 8, 10),
       c(7)
     ),
     cohort_definition_id = c(
-      rep(1,10),
-      rep(1,3),
+      rep(1, 10),
+      rep(1, 3),
       rep(2, 5),
       2
     ),
     cohort_start_date = c(
-      rep('2018-01-01', 10),
-      rep('2018-05-01',3),
-      '2018-01-13','2018-01-03',rep('2018-01-06',3),
-      '2018-05-24'
+      rep("2018-01-01", 10),
+      rep("2018-05-01", 3),
+      "2018-01-13", "2018-01-03", rep("2018-01-06", 3),
+      "2018-05-24"
     ),
     cohort_end_date = c(
-      rep('2018-02-01', 10),
-      rep('2018-06-01',3),
-      '2018-02-02','2018-02-04',rep('2018-02-08',3),
-      '2018-06-05'
+      rep("2018-02-01", 10),
+      rep("2018-06-01", 3),
+      "2018-02-02", "2018-02-04", rep("2018-02-08", 3),
+      "2018-06-05"
     )
   )
   cohort$cohort_start_date <- as.Date(cohort$cohort_start_date)
@@ -319,7 +320,7 @@ test_that("min cell count works", {
   DatabaseConnector::insertTable(
     connection = con,
     databaseSchema = schema,
-    tableName = 'cohort',
+    tableName = "cohort",
     data = cohort
   )
 
@@ -346,7 +347,7 @@ test_that("min cell count works", {
         useConditionEraAnyTimePrior = T
       ),
       caseCovariateSettings = Characterization::createDuringCovariateSettings(useConditionEraDuring = T),
-      casePreTargetDuration = 365*5
+      casePreTargetDuration = 365 * 5
     )
   )
 
@@ -358,8 +359,8 @@ test_that("min cell count works", {
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     characterizationSettings = characterizationSettings,
-    outputDirectory = file.path(tempFolder,'result_mincell'),
-    executionPath = file.path(tempFolder,'execution_mincell'),
+    outputDirectory = file.path(tempFolder, "result_mincell"),
+    executionPath = file.path(tempFolder, "execution_mincell"),
     csvFilePrefix = "c_",
     databaseId = "1",
     incremental = F,
@@ -426,5 +427,4 @@ test_that("min cell count works", {
   testthat::expect_true(sum(is.na(res$p_75_value)) == length(res$p_75_value))
   testthat::expect_true(sum(is.na(res$min_value)) == length(res$min_value))
   testthat::expect_true(sum(is.na(res$max_value)) == length(res$max_value))
-
 })

@@ -1,10 +1,7 @@
-Characterization 1.1.1
+Characterization 2.0.0
 ======================
 - added tests for all HADES supported dbms
 - updated minCellCount censoring 
-
-Characterization 1.1.0
-======================
 - fixed issues with incremental
 - made the code more modular to enable new characterizations to be added
 - added job optimization code to optimize the distributuion of jobs
