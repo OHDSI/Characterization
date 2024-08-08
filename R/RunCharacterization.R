@@ -16,8 +16,7 @@
 createCharacterizationSettings <- function(
     timeToEventSettings = NULL,
     dechallengeRechallengeSettings = NULL,
-    aggregateCovariateSettings = NULL
-) {
+    aggregateCovariateSettings = NULL) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkTimeToEventSettingsList(
     settings = timeToEventSettings,
@@ -141,15 +140,14 @@ runCharacterizationAnalyses <- function(
     cdmDatabaseSchema,
     characterizationSettings,
     outputDirectory,
-    executionPath = file.path(outputDirectory, 'execution'),
+    executionPath = file.path(outputDirectory, "execution"),
     csvFilePrefix = "c_",
     databaseId = "1",
     showSubjectId = F,
     minCellCount = 0,
     incremental = T,
     threads = 1,
-    minCharacterizationMean = 0.01
-) {
+    minCharacterizationMean = 0.01) {
   # inputs checks
   errorMessages <- checkmate::makeAssertCollection()
   .checkCharacterizationSettings(
@@ -171,7 +169,7 @@ runCharacterizationAnalyses <- function(
 
   logger <- createLogger(
     logPath = file.path(executionPath),
-    logName = 'log.txt'
+    logName = "log.txt"
   )
   ParallelLogger::registerLogger(logger)
   on.exit(ParallelLogger::unregisterLogger(logger))
@@ -179,60 +177,59 @@ runCharacterizationAnalyses <- function(
   jobs <- createJobs(
     characterizationSettings = characterizationSettings,
     threads = threads
-    )
+  )
 
   # save settings
-  if(!file.exists(file.path(executionPath, 'settings.rds'))){
+  if (!file.exists(file.path(executionPath, "settings.rds"))) {
     saveRDS(
       object = list(
         characterizationSettings = characterizationSettings,
         threads = threads
-        ),
-      file = file.path(executionPath, 'settings.rds')
+      ),
+      file = file.path(executionPath, "settings.rds")
     )
   }
 
-  if(incremental){
+  if (incremental) {
     # check for any issues with current incremental
     oldSettings <- readRDS(
-      file = file.path(executionPath, 'settings.rds')
-      )
-    if(!identical(characterizationSettings,oldSettings$characterizationSettings)){
-      stop('Settings have changed - please turn off incremental')
+      file = file.path(executionPath, "settings.rds")
+    )
+    if (!identical(characterizationSettings, oldSettings$characterizationSettings)) {
+      stop("Settings have changed - please turn off incremental")
     }
-    if(!identical(threads,oldSettings$threads)){
-      stop('Cannot change number of threads in incremental model')
+    if (!identical(threads, oldSettings$threads)) {
+      stop("Cannot change number of threads in incremental model")
     }
 
     # create logs if not exists
     createIncrementalLog(
       executionFolder = executionPath,
-      logname = 'execution.csv'
+      logname = "execution.csv"
     )
     createIncrementalLog(
       executionFolder = executionPath,
-      logname = 'completed.csv'
+      logname = "completed.csv"
     )
 
     checkResultFilesIncremental(
-      executionFolder  = executionPath
+      executionFolder = executionPath
     )
 
     # remove any previously completed jobs
     completedJobIds <- findCompletedJobs(executionFolder = executionPath)
 
     completedJobIndex <- jobs$jobId %in% completedJobIds
-    if(sum(completedJobIndex) > 0){
-      message(paste0('Removing ', sum(completedJobIndex), ' previously completed jobs'))
-      jobs <- jobs[!completedJobIndex,]
+    if (sum(completedJobIndex) > 0) {
+      message(paste0("Removing ", sum(completedJobIndex), " previously completed jobs"))
+      jobs <- jobs[!completedJobIndex, ]
     }
 
-    if(nrow(jobs) == 0){
-      message('No jobs left')
+    if (nrow(jobs) == 0) {
+      message("No jobs left")
       return(invisible(T))
     }
-
-  } else{
+  } else {
     # check for any csv files in folder
     checkResultFilesNonIncremental(
       executionFolder = executionPath
@@ -261,17 +258,18 @@ runCharacterizationAnalyses <- function(
   # convert jobList to list with extra inputs
   jobList <- lapply(
     X = 1:nrow(jobs),
-    FUN = function(ind){
+    FUN = function(ind) {
       inputs <- inputSettings
       inputs$settings <- jobs$settings[ind]
       inputs$functionName <- jobs$functionName[ind]
-      inputs$executionFolder<- jobs$executionFolder[ind]
-      inputs$jobId <-jobs$jobId[ind]
+      inputs$executionFolder <- jobs$executionFolder[ind]
+      inputs$jobId <- jobs$jobId[ind]
       inputs$runDateTime <- runDateTime
       return(inputs)
-    })
+    }
+  )
 
-  message('Creating new cluster')
+  message("Creating new cluster")
   cluster <- ParallelLogger::makeCluster(
     numberOfThreads = threads,
     singleThreadToMain = T,
@@ -295,30 +293,29 @@ runCharacterizationAnalyses <- function(
   invisible(outputDirectory)
 }
 
-createDirectory <- function(x){
-  if(!dir.exists(x)){
-    message(paste0('Creating directory ', x))
+createDirectory <- function(x) {
+  if (!dir.exists(x)) {
+    message(paste0("Creating directory ", x))
     dir.create(x, recursive = T)
   }
 }
 
-createLogger <- function(logPath, logName){
+createLogger <- function(logPath, logName) {
   createDirectory(logPath)
   ParallelLogger::createLogger(
-    name = 'Characterization',
+    name = "Characterization",
     threshold = "INFO",
     appenders = list(
       ParallelLogger::createFileAppender(
-      fileName = file.path(logPath, logName),
-      layout = ParallelLogger::layoutParallel,
-      expirationTime = 60*60*48
-    )
+        fileName = file.path(logPath, logName),
+        layout = ParallelLogger::layoutParallel,
+        expirationTime = 60 * 60 * 48
+      )
     )
   )
 }
 
-runCharacterizationsInParallel <- function(x){
-
+runCharacterizationsInParallel <- function(x) {
   startTime <- Sys.time()
 
   functionName <- x$functionName
@@ -327,16 +324,16 @@ runCharacterizationsInParallel <- function(x){
   inputSettings$settings <- ParallelLogger::convertJsonToSettings(inputSettings$settings)
   inputSettings$outputFolder <- file.path(x$executionPath, x$executionFolder)
 
-    if(x$incremental){
-      recordIncremental(
-        executionFolder = x$executionPath,
-        runDateTime = x$runDateTime,
-        jobId = x$jobId,
-        startTime = startTime,
-        endTime = startTime,
-        logname = 'execution.csv'
-      )
-    }
+  if (x$incremental) {
+    recordIncremental(
+      executionFolder = x$executionPath,
+      runDateTime = x$runDateTime,
+      jobId = x$jobId,
+      startTime = startTime,
+      endTime = startTime,
+      logname = "execution.csv"
+    )
+  }
 
   completed <- tryCatch(
     {
@@ -344,30 +341,31 @@ runCharacterizationsInParallel <- function(x){
         what = eval(parse(text = functionName)),
         args = inputSettings
       )
-    }, error = function(e){print(e); return(FALSE)}
-
-    )
+    },
+    error = function(e) {
+      print(e)
+      return(FALSE)
+    }
+  )
 
   endTime <- Sys.time()
 
-    # if it completed without issues save it
-    if(x$incremental & completed){
-      recordIncremental(
-        executionFolder = x$executionPath,
-        runDateTime = x$runDateTime,
-        jobId = x$jobId,
-        startTime = startTime,
-        endTime = endTime,
-        logname = 'completed.csv'
-      )
-    }
+  # if it completed without issues save it
+  if (x$incremental & completed) {
+    recordIncremental(
+      executionFolder = x$executionPath,
+      runDateTime = x$runDateTime,
+      jobId = x$jobId,
+      startTime = startTime,
+      endTime = endTime,
+      logname = "completed.csv"
+    )
+  }
 }
 
 createJobs <- function(
-  characterizationSettings,
-  threads
-){
-
+    characterizationSettings,
+    threads) {
   jobDf <- rbind(
     getTimeToEventJobs(
       characterizationSettings,
@@ -378,17 +376,17 @@ createJobs <- function(
       threads
     ),
     getAggregateCovariatesJobs(
-        characterizationSettings,
-        threads
+      characterizationSettings,
+      threads
     )
   )
 
-  #data.frame(
+  # data.frame(
   #  functionName,
   #  settings # json,
   #  executionFolder,
   #  jobId
-  #)
+  # )
 
   return(jobDf)
 }
@@ -399,14 +397,14 @@ aggregateCsvs <- function(
     executionPath,
     outputFolder,
     executionFolders, # needed?
-    csvFilePrefix
-){
-
-  tables <- c('cohort_details.csv', 'settings.csv','covariates.csv',
-              'covariates_continuous.csv','covariate_ref.csv',
-              'analysis_ref.csv','cohort_counts.csv',
-              'time_to_event.csv',
-              'rechallenge_fail_case_series.csv', 'dechallenge_rechallenge.csv')
+    csvFilePrefix) {
+  tables <- c(
+    "cohort_details.csv", "settings.csv", "covariates.csv",
+    "covariates_continuous.csv", "covariate_ref.csv",
+    "analysis_ref.csv", "cohort_counts.csv",
+    "time_to_event.csv",
+    "rechallenge_fail_case_series.csv", "dechallenge_rechallenge.csv"
+  )
 
   # this makes sure results are recreated
   firstTracker <- data.frame(
@@ -424,44 +422,42 @@ aggregateCsvs <- function(
 
   # for each folder load covariates, covariates_continuous,
   # covariate_ref and analysis_ref
-  for(folderName in folderNames){
-    for(csvType in tables){
-
+  for (folderName in folderNames) {
+    for (csvType in tables) {
       loadPath <- file.path(executionPath, folderName, csvType)
-      savePath <- file.path(outputFolder, paste0(csvFilePrefix,csvType))
-      if(file.exists(loadPath)){
-
-        #TODO do this in batches
+      savePath <- file.path(outputFolder, paste0(csvFilePrefix, csvType))
+      if (file.exists(loadPath)) {
+        # TODO do this in batches
         data <- readr::read_csv(
           file = loadPath,
           show_col_types = F
         )
 
-        if(csvType == 'analysis_ref.csv'){
+        if (csvType == "analysis_ref.csv") {
           data <- data %>%
             dplyr::mutate(
-              unique_id = paste0(.data$setting_id, '-', .data$analysis_id)
+              unique_id = paste0(.data$setting_id, "-", .data$analysis_id)
             ) %>%
             dplyr::filter( # need to filter analysis_id and setting_id
               !.data$unique_id %in% analysisRefTracker
             ) %>%
             dplyr::select(-"unique_id")
 
-          analysisRefTracker <- unique(c(analysisRefTracker, paste0(data$setting_id,'-',data$analysis_id)))
+          analysisRefTracker <- unique(c(analysisRefTracker, paste0(data$setting_id, "-", data$analysis_id)))
         }
-        if(csvType == 'covariate_ref.csv'){ # this could be problematic as may have differnet covariate_ids
+        if (csvType == "covariate_ref.csv") { # this could be problematic as may have differnet covariate_ids
           data <- data %>%
             dplyr::mutate(
-              unique_id = paste0(.data$setting_id, '-', .data$covariate_id)
+              unique_id = paste0(.data$setting_id, "-", .data$covariate_id)
             ) %>%
             dplyr::filter( # need to filter covariate_id and setting_id
               !.data$unique_id %in% covariateRefTracker
-            )%>%
+            ) %>%
             dplyr::select(-"unique_id")
 
-          covariateRefTracker <- unique(c(covariateRefTracker, paste0(data$setting_id,'-',data$covariate_id)))
+          covariateRefTracker <- unique(c(covariateRefTracker, paste0(data$setting_id, "-", data$covariate_id)))
         }
-        if(csvType == 'settings.csv'){
+        if (csvType == "settings.csv") {
           data <- data %>%
             dplyr::filter(
               !.data$setting_id %in% settingsTracker
@@ -472,12 +468,11 @@ aggregateCsvs <- function(
         append <- file.exists(savePath)
         readr::write_csv(
           x = data,
-          file = savePath, quote = 'all',
+          file = savePath, quote = "all",
           append = append & !firstTracker$first[firstTracker$table == csvType]
         )
         firstTracker$first[firstTracker$table == csvType] <- F
       }
-
     }
   }
 }

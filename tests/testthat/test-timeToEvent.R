@@ -39,19 +39,19 @@ test_that("computeTimeToEventSettings", {
     targetTable = "cohort",
     settings = res,
     outputFolder = tteFolder,
-    databaseId = 'tte_test'
+    databaseId = "tte_test"
   )
 
   testthat::expect_true(file.exists(file.path(tteFolder, "time_to_event.csv")))
 
   tte <- readr::read_csv(
-    file = file.path(tteFolder,'time_to_event.csv'),
+    file = file.path(tteFolder, "time_to_event.csv"),
     show_col_types = F
-    )
+  )
 
   testthat::expect_true(nrow(tte) == 160)
   testthat::expect_true("database_id" %in% colnames(tte))
-  testthat::expect_true(tte$database_id[1] ==  'tte_test')
+  testthat::expect_true(tte$database_id[1] == "tte_test")
 
   testthat::expect_true(
     length(
@@ -79,7 +79,7 @@ test_that("computeTimeToEventSettings", {
     sum(
       unique(tte$outcome_cohort_definition_id)
       %in% outcomeIds
-      ) ==
+    ) ==
       length(unique(tte$outcome_cohort_definition_id))
   )
 
@@ -93,15 +93,14 @@ test_that("computeTimeToEventSettings", {
     targetTable = "cohort",
     settings = res,
     outputFolder = tteFolder,
-    databaseId = 'tte_test',
+    databaseId = "tte_test",
     minCellCount = 9999
   )
 
   tte <- readr::read_csv(
-    file = file.path(tteFolder,'time_to_event.csv'),
+    file = file.path(tteFolder, "time_to_event.csv"),
     show_col_types = F
   )
 
   testthat::expect_true(max(tte$num_events) == -9999)
-
 })

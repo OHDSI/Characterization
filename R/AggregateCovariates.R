@@ -67,7 +67,7 @@ createAggregateCovariateSettings <- function(
       useDeviceExposureShortTerm = T,
       useVisitConceptCountShortTerm = T,
       endDays = 0,
-      longTermStartDays =  -365,
+      longTermStartDays = -365,
       shortTermStartDays = -30
     ),
     caseCovariateSettings = createDuringCovariateSettings(
@@ -78,11 +78,10 @@ createAggregateCovariateSettings <- function(
       useMeasurementDuring = T,
       useObservationDuring = T,
       useVisitConceptCountDuring = T
-      ),
+    ),
     casePreTargetDuration = 365,
     casePostOutcomeDuration = 365,
-    extractNonCaseCovariates = T
-    ) {
+    extractNonCaseCovariates = T) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
   .checkCohortIds(
@@ -98,16 +97,16 @@ createAggregateCovariateSettings <- function(
   )
 
   # check TAR - EFF edit
-  if(length(riskWindowStart)>1){
-    stop('Please add one time-at-risk per setting')
+  if (length(riskWindowStart) > 1) {
+    stop("Please add one time-at-risk per setting")
   }
   .checkTimeAtRisk(
-      riskWindowStart = riskWindowStart,
-      startAnchor = startAnchor,
-      riskWindowEnd = riskWindowEnd,
-      endAnchor = endAnchor,
-      errorMessages = errorMessages
-    )
+    riskWindowStart = riskWindowStart,
+    startAnchor = startAnchor,
+    riskWindowEnd = riskWindowEnd,
+    endAnchor = endAnchor,
+    errorMessages = errorMessages
+  )
 
   # check covariateSettings
   .checkCovariateSettings(
@@ -116,11 +115,13 @@ createAggregateCovariateSettings <- function(
   )
 
   # check temporal is false
-  if(inherits(covariateSettings, 'covariateSettings')){
+  if (inherits(covariateSettings, "covariateSettings")) {
     covariateSettings <- list(covariateSettings)
   }
-  if(sum(unlist(lapply(covariateSettings, function(x){x$temporal})))>0){
-    stop('Temporal covariateSettings not supported by createAggregateCovariateSettings()')
+  if (sum(unlist(lapply(covariateSettings, function(x) {
+    x$temporal
+  }))) > 0) {
+    stop("Temporal covariateSettings not supported by createAggregateCovariateSettings()")
   }
 
   # check minPriorObservation
@@ -134,12 +135,12 @@ createAggregateCovariateSettings <- function(
   checkmate::reportAssertions(errorMessages)
 
   # check unique Ts and Os
-  if(length(targetIds) != length(unique(targetIds))){
-    message('targetIds have duplicates - making unique')
+  if (length(targetIds) != length(unique(targetIds))) {
+    message("targetIds have duplicates - making unique")
     targetIds <- unique(targetIds)
   }
-  if(length(outcomeIds) != length(unique(outcomeIds))){
-    message('outcomeIds have duplicates - making unique')
+  if (length(outcomeIds) != length(unique(outcomeIds))) {
+    message("outcomeIds have duplicates - making unique")
     outcomeIds <- unique(outcomeIds)
   }
 
@@ -148,15 +149,12 @@ createAggregateCovariateSettings <- function(
   result <- list(
     targetIds = targetIds,
     minPriorObservation = minPriorObservation,
-
     outcomeIds = outcomeIds,
     outcomeWashoutDays = outcomeWashoutDays,
-
     riskWindowStart = riskWindowStart,
     startAnchor = startAnchor,
     riskWindowEnd = riskWindowEnd,
     endAnchor = endAnchor,
-
     covariateSettings = covariateSettings, # risk factors
     caseCovariateSettings = caseCovariateSettings, # case series
     casePreTargetDuration = casePreTargetDuration, # case series
@@ -169,8 +167,8 @@ createAggregateCovariateSettings <- function(
   return(result)
 }
 
-createExecutionIds <- function(size){
-  executionIds <- gsub(" ", "", gsub("[[:punct:]]", "",paste(Sys.time(), sample(1000000,size), sep = '')))
+createExecutionIds <- function(size) {
+  executionIds <- gsub(" ", "", gsub("[[:punct:]]", "", paste(Sys.time(), sample(1000000, size), sep = "")))
   return(executionIds)
 }
 
@@ -186,12 +184,10 @@ computeTargetAggregateCovariateAnalyses <- function(
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
     databaseId = "database 1",
-    outputFolder = file.path(getwd(),'characterization_results'),
+    outputFolder = file.path(getwd(), "characterization_results"),
     minCharacterizationMean = 0,
     minCellCount = 0,
-    ...
-) {
-
+    ...) {
   # get settings
   settingId <- unique(settings$settingId)
   targetIds <- unique(settings$targetId)
@@ -201,10 +197,10 @@ computeTargetAggregateCovariateAnalyses <- function(
   # create cohortDetails - all Ts, minPriorObservation, twice (type = Tall, Target)
   cohortDetails <- data.frame(
     settingId = settingId,
-    targetCohortId = rep(targetIds,2),
+    targetCohortId = rep(targetIds, 2),
     outcomeCohortId = 0, # cannot be NA due to pk/index
-    cohortType = c(rep('Target',length(targetIds)),rep('Tall',length(targetIds))),
-    cohortDefinitionId = 1:(length(targetIds)*2),
+    cohortType = c(rep("Target", length(targetIds)), rep("Tall", length(targetIds))),
+    cohortDefinitionId = 1:(length(targetIds) * 2),
     minPriorObservation = minPriorObservation,
     outcomeWashoutDays = NA,
     casePreTargetDuration = NA,
@@ -226,10 +222,10 @@ computeTargetAggregateCovariateAnalyses <- function(
 
   # create the temp table with cohort_details
   DatabaseConnector::insertTable(
-    data = cohortDetails[,c('settingId','targetCohortId','outcomeCohortId','cohortType','cohortDefinitionId')],
+    data = cohortDetails[, c("settingId", "targetCohortId", "outcomeCohortId", "cohortType", "cohortDefinitionId")],
     camelCaseToSnakeCase = T,
     connection = connection,
-    tableName =  '#cohort_details',
+    tableName = "#cohort_details",
     tempTable = T,
     dropTableIfExists = T,
     createTable = T,
@@ -259,7 +255,7 @@ computeTargetAggregateCovariateAnalyses <- function(
   )
   completionTime <- Sys.time() - start
 
-  message(paste0('Computing target cohorts took ',round(completionTime,digits = 1), ' ', units(completionTime)))
+  message(paste0("Computing target cohorts took ", round(completionTime, digits = 1), " ", units(completionTime)))
   ## get counts
   message("Extracting target cohort counts")
   sql <- "select
@@ -337,11 +333,10 @@ computeCaseAggregateCovariateAnalyses <- function(
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
     databaseId = "database 1",
-    outputFolder = file.path(getwd(),'characterization_results'),
+    outputFolder = file.path(getwd(), "characterization_results"),
     minCharacterizationMean = 0,
     minCellCount = 0,
-    ...
-    ) {
+    ...) {
   # check inputs
 
   # create cohortDetails - all Ts, minPriorObservation, twice (type = Tall, Target)
@@ -361,7 +356,7 @@ computeCaseAggregateCovariateAnalyses <- function(
   cohortDetails <- expand.grid(
     targetCohortId = unique(settings$targetId),
     outcomeCohortId = unique(settings$outcomeId),
-    cohortType = c('Cases', 'CasesBefore', 'CasesAfter', 'CasesBetween')
+    cohortType = c("Cases", "CasesBefore", "CasesAfter", "CasesBetween")
   )
 
   cohortDetails$minPriorObservation <- settings$minPriorObservation
@@ -383,7 +378,7 @@ computeCaseAggregateCovariateAnalyses <- function(
   cohortDetailsExtra <- expand.grid(
     targetCohortId = unique(settings$targetId),
     outcomeCohortId = unique(settings$outcomeId),
-    cohortType = 'Exclude',
+    cohortType = "Exclude",
     minPriorObservation = settings$minPriorObservation,
     outcomeWashoutDays = settings$outcomeWashoutDays,
     casePreTargetDuration = settings$casePreTargetDuration,
@@ -408,10 +403,10 @@ computeCaseAggregateCovariateAnalyses <- function(
 
   # create the temp table with cohort_details
   DatabaseConnector::insertTable(
-    data = cohortDetails[,c('targetCohortId','outcomeCohortId','cohortType','cohortDefinitionId', 'settingId')],
+    data = cohortDetails[, c("targetCohortId", "outcomeCohortId", "cohortType", "cohortDefinitionId", "settingId")],
     camelCaseToSnakeCase = T,
     connection = connection,
-    tableName =  '#cohort_details',
+    tableName = "#cohort_details",
     tempTable = T,
     dropTableIfExists = T,
     createTable = T,
@@ -448,20 +443,20 @@ computeCaseAggregateCovariateAnalyses <- function(
   # excluded_analysis_ref, excluded_covariate_ref
 
   # loop over settingId which contains tars:
-  for(i in 1:nrow(tars)){
+  for (i in 1:nrow(tars)) {
     sql <- SqlRender::loadRenderTranslateSql(
       sqlFilename = "CaseCohortsPart2.sql",
       packageName = "Characterization",
       dbms = connectionDetails$dbms,
       tempEmulationSchema = tempEmulationSchema,
-      first = i==1,
+      first = i == 1,
       case_pre_target_duration = casePreTargetDuration,
       case_post_outcome_duration = casePostOutcomeDuration,
       setting_id = tars$settingId[i],
       tar_start = tars$riskWindowStart[i],
-      tar_start_anchor = ifelse(tars$startAnchor[i] == 'cohort start','cohort_start_date','cohort_end_date'), ##TODO change?
+      tar_start_anchor = ifelse(tars$startAnchor[i] == "cohort start", "cohort_start_date", "cohort_end_date"), ## TODO change?
       tar_end = tars$riskWindowEnd[i],
-      tar_end_anchor = ifelse(tars$endAnchor[i] == 'cohort start','cohort_start_date','cohort_end_date') ##TODO change?
+      tar_end_anchor = ifelse(tars$endAnchor[i] == "cohort start", "cohort_start_date", "cohort_end_date") ## TODO change?
     )
     DatabaseConnector::executeSql(
       connection = connection,
@@ -472,7 +467,7 @@ computeCaseAggregateCovariateAnalyses <- function(
   }
   completionTime <- Sys.time() - start
 
-  message(paste0('Computing case cohorts took ',round(completionTime,digits = 1), ' ', units(completionTime)))
+  message(paste0("Computing case cohorts took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
   ## get counts
   message("Extracting case cohort counts")
@@ -512,23 +507,28 @@ computeCaseAggregateCovariateAnalyses <- function(
 
   message("Computing aggregate during case covariate results")
 
-  result2 <- tryCatch({FeatureExtraction::getDbCovariateData(
-    connection = connection,
-    oracleTempSchema = tempEmulationSchema,
-    cdmDatabaseSchema = cdmDatabaseSchema,
-    cohortTable = "#case_series",
-    cohortTableIsTemp = T,
-    cohortIds = -1,
-    covariateSettings = ParallelLogger::convertJsonToSettings(caseCovariateSettings),
-    cdmVersion = cdmVersion,
-    aggregated = T,
-    minCharacterizationMean = minCharacterizationMean
-  )}, error = function(e){
-    message(e);
-    return(NULL)
-  })
-  if(is.null(result2)){
-    stop('Issue with case series data extraction')
+  result2 <- tryCatch(
+    {
+      FeatureExtraction::getDbCovariateData(
+        connection = connection,
+        oracleTempSchema = tempEmulationSchema,
+        cdmDatabaseSchema = cdmDatabaseSchema,
+        cohortTable = "#case_series",
+        cohortTableIsTemp = T,
+        cohortIds = -1,
+        covariateSettings = ParallelLogger::convertJsonToSettings(caseCovariateSettings),
+        cdmVersion = cdmVersion,
+        aggregated = T,
+        minCharacterizationMean = minCharacterizationMean
+      )
+    },
+    error = function(e) {
+      message(e)
+      return(NULL)
+    }
+  )
+  if (is.null(result2)) {
+    stop("Issue with case series data extraction")
   }
 
   # drop temp tables
@@ -580,11 +580,9 @@ exportAndromedaToCsv <- function(
     minCharacterizationMean,
     batchSize = 100000,
     minCellCount = 0,
-    includeSettings = T
-){
-
+    includeSettings = T) {
   saveLocation <- outputFolder
-  if(!dir.exists(saveLocation)){
+  if (!dir.exists(saveLocation)) {
     dir.create(saveLocation, recursive = T)
   }
 
@@ -595,21 +593,21 @@ exportAndromedaToCsv <- function(
 
   # analysis_ref and covariate_ref
   # add database_id and setting_id
-  if(!is.null(andromeda$analysisRef)){
+  if (!is.null(andromeda$analysisRef)) {
     Andromeda::batchApply(
-      tbl =   andromeda$analysisRef,
-      fun = function(x){
+      tbl = andromeda$analysisRef,
+      fun = function(x) {
         data <- merge(x, ids)
         colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
 
-        if(file.exists(file.path(saveLocation, 'analysis_ref.csv'))){
+        if (file.exists(file.path(saveLocation, "analysis_ref.csv"))) {
           append <- T
-        } else{
-          append = F
+        } else {
+          append <- F
         }
         readr::write_csv(
           x = formatDouble(data),
-          file = file.path(saveLocation, 'analysis_ref.csv'),
+          file = file.path(saveLocation, "analysis_ref.csv"),
           append = append
         )
       },
@@ -617,21 +615,21 @@ exportAndromedaToCsv <- function(
     )
   }
 
-  if(!is.null(andromeda$covariateRef)){
+  if (!is.null(andromeda$covariateRef)) {
     Andromeda::batchApply(
-      tbl =   andromeda$covariateRef,
-      fun = function(x){
+      tbl = andromeda$covariateRef,
+      fun = function(x) {
         data <- merge(x, ids)
         colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
 
-        if(file.exists(file.path(saveLocation, 'covariate_ref.csv'))){
+        if (file.exists(file.path(saveLocation, "covariate_ref.csv"))) {
           append <- T
-        } else{
-          append = F
+        } else {
+          append <- F
         }
         readr::write_csv(
           x = formatDouble(data),
-          file = file.path(saveLocation, 'covariate_ref.csv'),
+          file = file.path(saveLocation, "covariate_ref.csv"),
           append = append
         )
       },
@@ -640,16 +638,16 @@ exportAndromedaToCsv <- function(
   }
 
   # covariates and covariate_continuous
-  extras <- cohortDetails[, c('cohortDefinitionId','settingId', 'targetCohortId', 'outcomeCohortId', 'cohortType')]
-  extras$databaseId  <- databaseId
+  extras <- cohortDetails[, c("cohortDefinitionId", "settingId", "targetCohortId", "outcomeCohortId", "cohortType")]
+  extras$databaseId <- databaseId
   extras$minCharacterizationMean <- minCharacterizationMean
 
   # add database_id, setting_id, target_cohort_id, outcome_cohort_id and cohort_type
-  if(!is.null(andromeda$covariates)){
+  if (!is.null(andromeda$covariates)) {
     Andromeda::batchApply(
-      tbl =   andromeda$covariates,
-      fun = function(x){
-        data <- merge(x, extras, by = 'cohortDefinitionId')
+      tbl = andromeda$covariates,
+      fun = function(x) {
+        data <- merge(x, extras, by = "cohortDefinitionId")
         data <- data %>% dplyr::select(-"cohortDefinitionId")
         colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
 
@@ -658,20 +656,20 @@ exportAndromedaToCsv <- function(
         if (sum(removeInd) > 0) {
           ParallelLogger::logInfo(paste0("Removing sum_value counts less than ", minCellCount))
           if (sum(removeInd) > 0) {
-            data$sum_value[removeInd] <- -1*minCellCount
+            data$sum_value[removeInd] <- -1 * minCellCount
             # adding other calculated columns
             data$average_value[removeInd] <- NA
           }
         }
 
-        if(file.exists(file.path(saveLocation, 'covariates.csv'))){
+        if (file.exists(file.path(saveLocation, "covariates.csv"))) {
           append <- T
-        } else{
-          append = F
+        } else {
+          append <- F
         }
         readr::write_csv(
           x = formatDouble(data),
-          file = file.path(saveLocation, 'covariates.csv'),
+          file = file.path(saveLocation, "covariates.csv"),
           append = append
         )
       },
@@ -679,11 +677,11 @@ exportAndromedaToCsv <- function(
     )
   }
 
-  if(!is.null(andromeda$covariatesContinuous)){
+  if (!is.null(andromeda$covariatesContinuous)) {
     Andromeda::batchApply(
-      tbl =   andromeda$covariatesContinuous,
-      fun = function(x){
-        data <- merge(x, extras %>% dplyr::select(-"minCharacterizationMean"), by = 'cohortDefinitionId')
+      tbl = andromeda$covariatesContinuous,
+      fun = function(x) {
+        data <- merge(x, extras %>% dplyr::select(-"minCharacterizationMean"), by = "cohortDefinitionId")
         data <- data %>% dplyr::select(-"cohortDefinitionId")
         colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
 
@@ -692,7 +690,7 @@ exportAndromedaToCsv <- function(
         if (sum(removeInd) > 0) {
           ParallelLogger::logInfo(paste0("Removing count_value counts less than ", minCellCount))
           if (sum(removeInd) > 0) {
-            data$count_value[removeInd] <- -1*minCellCount
+            data$count_value[removeInd] <- -1 * minCellCount
             # adding columns calculated from count
             data$min_value[removeInd] <- NA
             data$max_value[removeInd] <- NA
@@ -706,14 +704,14 @@ exportAndromedaToCsv <- function(
           }
         }
 
-        if(file.exists(file.path(saveLocation, 'covariates_continuous.csv'))){
+        if (file.exists(file.path(saveLocation, "covariates_continuous.csv"))) {
           append <- T
-        } else{
-          append = F
+        } else {
+          append <- F
         }
         readr::write_csv(
           x = formatDouble(data),
-          file = file.path(saveLocation, 'covariates_continuous.csv'),
+          file = file.path(saveLocation, "covariates_continuous.csv"),
           append = append
         )
       },
@@ -722,23 +720,24 @@ exportAndromedaToCsv <- function(
   }
 
   # cohort_counts:
-  if(!is.null(counts)){
-    cohortCounts <- cohortDetails %>% dplyr::select(
-      'targetCohortId',
-      'outcomeCohortId',
-      'cohortType',
-      'cohortDefinitionId',
-      'riskWindowStart',
-      'riskWindowEnd',
-      'startAnchor',
-      'endAnchor',
-      'minPriorObservation',
-      'outcomeWashoutDays'
-    ) %>%
+  if (!is.null(counts)) {
+    cohortCounts <- cohortDetails %>%
+      dplyr::select(
+        "targetCohortId",
+        "outcomeCohortId",
+        "cohortType",
+        "cohortDefinitionId",
+        "riskWindowStart",
+        "riskWindowEnd",
+        "startAnchor",
+        "endAnchor",
+        "minPriorObservation",
+        "outcomeWashoutDays"
+      ) %>%
       dplyr::mutate(
         databaseId = !!databaseId
       ) %>%
-      dplyr::inner_join(counts, by = 'cohortDefinitionId') %>%
+      dplyr::inner_join(counts, by = "cohortDefinitionId") %>%
       dplyr::select(-"cohortDefinitionId")
     cohortCounts <- unique(cohortCounts)
     colnames(cohortCounts) <- SqlRender::camelCaseToSnakeCase(colnames(cohortCounts))
@@ -748,35 +747,37 @@ exportAndromedaToCsv <- function(
     if (sum(removeInd) > 0) {
       ParallelLogger::logInfo(paste0("Removing row_count counts less than ", minCellCount))
       if (sum(removeInd) > 0) {
-        cohortCounts$row_count[removeInd] <- -1*minCellCount
+        cohortCounts$row_count[removeInd] <- -1 * minCellCount
       }
     }
     removeInd <- cohortCounts$person_count < minCellCount
     if (sum(removeInd) > 0) {
       ParallelLogger::logInfo(paste0("Removing person_count counts less than ", minCellCount))
       if (sum(removeInd) > 0) {
-        cohortCounts$person_count[removeInd] <- -1*minCellCount
+        cohortCounts$person_count[removeInd] <- -1 * minCellCount
       }
     }
 
-    if(file.exists(file.path(saveLocation, 'cohort_counts.csv'))){
+    if (file.exists(file.path(saveLocation, "cohort_counts.csv"))) {
       append <- T
-    } else{
-      append = F
+    } else {
+      append <- F
     }
     readr::write_csv(
       x = formatDouble(cohortCounts),
-      file = file.path(saveLocation, 'cohort_counts.csv'),
+      file = file.path(saveLocation, "cohort_counts.csv"),
       append = append
     )
   }
 
-  if(includeSettings){
-    settings <-  cohortDetails %>%
-      dplyr::select('settingId', 'minPriorObservation', 'outcomeWashoutDays',
-                    'riskWindowStart', 'riskWindowEnd', 'startAnchor', 'endAnchor',
-                    'casePreTargetDuration', 'casePostOutcomeDuration',
-                    'covariateSettingJson', 'caseCovariateSettingJson') %>%
+  if (includeSettings) {
+    settings <- cohortDetails %>%
+      dplyr::select(
+        "settingId", "minPriorObservation", "outcomeWashoutDays",
+        "riskWindowStart", "riskWindowEnd", "startAnchor", "endAnchor",
+        "casePreTargetDuration", "casePostOutcomeDuration",
+        "covariateSettingJson", "caseCovariateSettingJson"
+      ) %>%
       dplyr::mutate(databaseId = !!databaseId) %>%
       dplyr::distinct()
     colnames(settings) <- SqlRender::camelCaseToSnakeCase(colnames(settings))
@@ -784,13 +785,15 @@ exportAndromedaToCsv <- function(
     # add setting.csv with cohortDetails plus database
     readr::write_csv(
       x = settings,
-      file = file.path(saveLocation, 'settings.csv'),
+      file = file.path(saveLocation, "settings.csv"),
       append = F
     )
 
     cohortDetails <- cohortDetails %>%
-      dplyr::select('settingId', 'targetCohortId',
-                    'outcomeCohortId','cohortType') %>%
+      dplyr::select(
+        "settingId", "targetCohortId",
+        "outcomeCohortId", "cohortType"
+      ) %>%
       dplyr::mutate(databaseId = !!databaseId) %>%
       dplyr::distinct()
     colnames(cohortDetails) <- SqlRender::camelCaseToSnakeCase(colnames(cohortDetails))
@@ -798,7 +801,7 @@ exportAndromedaToCsv <- function(
     # add cohort_details.csv with cohortDetails plus database
     readr::write_csv(
       x = cohortDetails,
-      file = file.path(saveLocation, 'cohort_details.csv'),
+      file = file.path(saveLocation, "cohort_details.csv"),
       append = F
     )
   }
@@ -809,56 +812,65 @@ exportAndromedaToCsv <- function(
 
 
 
-combineCovariateSettingsJsons <- function(covariateSettingsJsonList){
-
+combineCovariateSettingsJsons <- function(covariateSettingsJsonList) {
   # get unique
   covariateSettingsJsonList <- unique(covariateSettingsJsonList)
 
   # first convert from json
   covariateSettings <- lapply(
     X = covariateSettingsJsonList,
-    FUN = function(x){ParallelLogger::convertJsonToSettings(x)}
+    FUN = function(x) {
+      ParallelLogger::convertJsonToSettings(x)
+    }
   )
 
   # then combine the covariates
-  singleSettings <- which(unlist(lapply(covariateSettings, function(x) inherits(x, 'covariateSettings'))))
-  multipleSettings <- which(unlist(lapply(covariateSettings, function(x) inherits(x, 'list'))))
+  singleSettings <- which(unlist(lapply(covariateSettings, function(x) inherits(x, "covariateSettings"))))
+  multipleSettings <- which(unlist(lapply(covariateSettings, function(x) inherits(x, "list"))))
 
   covariateSettingList <- list()
-  if(length(singleSettings)>0){
-    for(i in singleSettings){
+  if (length(singleSettings) > 0) {
+    for (i in singleSettings) {
       covariateSettingList[[length(covariateSettingList) + 1]] <- covariateSettings[[i]]
     }
   }
-  if(length(multipleSettings) > 0){
-    for(i in multipleSettings){
+  if (length(multipleSettings) > 0) {
+    for (i in multipleSettings) {
       settingList <- covariateSettings[[i]]
-      for(j in 1:length(settingList)){
-        if(inherits(settingList[[j]], 'covariateSettings')){
+      for (j in 1:length(settingList)) {
+        if (inherits(settingList[[j]], "covariateSettings")) {
           covariateSettingList[[length(covariateSettingList) + 1]] <- settingList[[j]]
-        } else{
-          message('Incorrect covariate settings found') # stop?
+        } else {
+          message("Incorrect covariate settings found") # stop?
         }
       }
     }
   }
 
   # check for covariates with same id but different
-  endDays <- unique(unlist(lapply(covariateSettingList, function(x){x$endDays})))
-  if(length(endDays) > 1){
-    stop('Covariate settings for aggregate covariates using different end days')
+  endDays <- unique(unlist(lapply(covariateSettingList, function(x) {
+    x$endDays
+  })))
+  if (length(endDays) > 1) {
+    stop("Covariate settings for aggregate covariates using different end days")
   }
-  longTermStartDays <- unique(unlist(lapply(covariateSettingList, function(x){x$longTermStartDays})))
-  if(length(longTermStartDays) > 1){
-    stop('Covariate settings for aggregate covariates using different longTermStartDays')
+  longTermStartDays <- unique(unlist(lapply(covariateSettingList, function(x) {
+    x$longTermStartDays
+  })))
+  if (length(longTermStartDays) > 1) {
+    stop("Covariate settings for aggregate covariates using different longTermStartDays")
   }
-  mediumTermStartDays <- unique(unlist(lapply(covariateSettingList, function(x){x$mediumTermStartDays})))
-  if(length(mediumTermStartDays) > 1){
-    stop('Covariate settings for aggregate covariates using different mediumTermStartDays')
+  mediumTermStartDays <- unique(unlist(lapply(covariateSettingList, function(x) {
+    x$mediumTermStartDays
+  })))
+  if (length(mediumTermStartDays) > 1) {
+    stop("Covariate settings for aggregate covariates using different mediumTermStartDays")
   }
-  shortTermStartDays <- unique(unlist(lapply(covariateSettingList, function(x){x$shortTermStartDays})))
-  if(length(shortTermStartDays) > 1){
-    stop('Covariate settings for aggregate covariates using different shortTermStartDays')
+  shortTermStartDays <- unique(unlist(lapply(covariateSettingList, function(x) {
+    x$shortTermStartDays
+  })))
+  if (length(shortTermStartDays) > 1) {
+    stop("Covariate settings for aggregate covariates using different shortTermStartDays")
   }
 
   # convert to json
@@ -868,41 +880,41 @@ combineCovariateSettingsJsons <- function(covariateSettingsJsonList){
 
 getAggregateCovariatesJobs <- function(
     characterizationSettings,
-    threads
-){
-
+    threads) {
   characterizationSettings <- characterizationSettings$aggregateCovariateSettings
-  if(length(characterizationSettings) == 0){
+  if (length(characterizationSettings) == 0) {
     return(NULL)
   }
   ind <- 1:length(characterizationSettings)
 
 
   # target combinations
-  targetCombinations <- do.call(what = 'rbind',
-                                args =
-                                  lapply(
-                                    1:length(characterizationSettings),
-                                    function(i){
-
-                                      if(characterizationSettings[[i]]$extractNonCaseCovariates){
-                                        result <- data.frame(
-                                          targetIds = c(characterizationSettings[[i]]$targetIds,
-                                                        characterizationSettings[[i]]$outcomeIds),
-                                          minPriorObservation = characterizationSettings[[i]]$minPriorObservation,
-                                          covariateSettingsJson = as.character(ParallelLogger::convertSettingsToJson(characterizationSettings[[i]]$covariateSettings))
-                                        )
-                                        return(result)
-                                      } else{
-                                        return(
-                                          data.frame(targetIds = 1, minPriorObservation = 1, covariateSettingsJson = 1)[-1,]
-                                        )
-                                      }
-                                    }
-                                  )
+  targetCombinations <- do.call(
+    what = "rbind",
+    args =
+      lapply(
+        1:length(characterizationSettings),
+        function(i) {
+          if (characterizationSettings[[i]]$extractNonCaseCovariates) {
+            result <- data.frame(
+              targetIds = c(
+                characterizationSettings[[i]]$targetIds,
+                characterizationSettings[[i]]$outcomeIds
+              ),
+              minPriorObservation = characterizationSettings[[i]]$minPriorObservation,
+              covariateSettingsJson = as.character(ParallelLogger::convertSettingsToJson(characterizationSettings[[i]]$covariateSettings))
+            )
+            return(result)
+          } else {
+            return(
+              data.frame(targetIds = 1, minPriorObservation = 1, covariateSettingsJson = 1)[-1, ]
+            )
+          }
+        }
+      )
   )
 
-  if(nrow(targetCombinations) > 0){
+  if (nrow(targetCombinations) > 0) {
     threadCols <- c("targetIds")
     settingCols <- c("minPriorObservation")
 
@@ -910,18 +922,18 @@ getAggregateCovariatesJobs <- function(
     threadSettings <- targetCombinations %>%
       dplyr::select(dplyr::all_of(threadCols)) %>%
       dplyr::distinct()
-    threadSettings$thread <- rep(1:threads, ceiling(nrow(threadSettings)/threads))[1:nrow(threadSettings)]
-    targetCombinations <- merge(targetCombinations, threadSettings, by = threadCols )
+    threadSettings$thread <- rep(1:threads, ceiling(nrow(threadSettings) / threads))[1:nrow(threadSettings)]
+    targetCombinations <- merge(targetCombinations, threadSettings, by = threadCols)
 
     executionSettings <- data.frame(
       minPriorObservation = unique(targetCombinations$minPriorObservation)
     )
     executionSettings$settingId <- createExecutionIds(nrow(executionSettings))
-    targetCombinations <- merge(targetCombinations, executionSettings, by = settingCols )
+    targetCombinations <- merge(targetCombinations, executionSettings, by = settingCols)
 
     # recreate settings
     settings <- c()
-    for(settingId in unique(executionSettings$settingId)){
+    for (settingId in unique(executionSettings$settingId)) {
       settingVal <- executionSettings %>%
         dplyr::filter(.data$settingId == !!settingId) %>%
         dplyr::select(dplyr::all_of(settingCols))
@@ -929,26 +941,27 @@ getAggregateCovariatesJobs <- function(
       restrictedData <- targetCombinations %>%
         dplyr::inner_join(settingVal, by = settingCols)
 
-      for(i in unique(restrictedData$thread)){
+      for (i in unique(restrictedData$thread)) {
         ind <- restrictedData$thread == i
-        settings <- rbind(settings,
-                          data.frame(
-                            functionName = 'computeTargetAggregateCovariateAnalyses',
-                            settings = as.character(ParallelLogger::convertSettingsToJson(
-                              list(
-                                targetIds = unique(restrictedData$targetId[ind]),
-                                minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
-                                covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind])),
-                                settingId = settingId
-                              )
-                            )),
-                            executionFolder = paste('tac', i ,paste(settingVal, collapse = '_'), sep = '_'),
-                            jobId = paste('tac', i ,paste(settingVal, collapse = '_'), sep = '_')
-                          )
+        settings <- rbind(
+          settings,
+          data.frame(
+            functionName = "computeTargetAggregateCovariateAnalyses",
+            settings = as.character(ParallelLogger::convertSettingsToJson(
+              list(
+                targetIds = unique(restrictedData$targetId[ind]),
+                minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
+                covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind])),
+                settingId = settingId
+              )
+            )),
+            executionFolder = paste("tac", i, paste(settingVal, collapse = "_"), sep = "_"),
+            jobId = paste("tac", i, paste(settingVal, collapse = "_"), sep = "_")
+          )
         )
       }
     }
-  } else{
+  } else {
     settings <- c()
   }
 
@@ -956,97 +969,105 @@ getAggregateCovariatesJobs <- function(
   Sys.sleep(time = 2)
 
   # get all combinations of TnOs, then split by treads
-  caseCombinations <- do.call(what = 'rbind',
-                              args =
-                                lapply(
-                                  1:length(characterizationSettings),
-                                  function(i){
-                                    result <- expand.grid(
-                                      targetId = characterizationSettings[[i]]$targetIds,
-                                      outcomeId = characterizationSettings[[i]]$outcomeIds
-                                    )
-                                    result$minPriorObservation = characterizationSettings[[i]]$minPriorObservation
-                                    result$outcomeWashoutDays = characterizationSettings[[i]]$outcomeWashoutDays
+  caseCombinations <- do.call(
+    what = "rbind",
+    args =
+      lapply(
+        1:length(characterizationSettings),
+        function(i) {
+          result <- expand.grid(
+            targetId = characterizationSettings[[i]]$targetIds,
+            outcomeId = characterizationSettings[[i]]$outcomeIds
+          )
+          result$minPriorObservation <- characterizationSettings[[i]]$minPriorObservation
+          result$outcomeWashoutDays <- characterizationSettings[[i]]$outcomeWashoutDays
 
-                                    result$riskWindowStart = characterizationSettings[[i]]$riskWindowStart
-                                    result$startAnchor = characterizationSettings[[i]]$startAnchor
-                                    result$riskWindowEnd = characterizationSettings[[i]]$riskWindowEnd
-                                    result$endAnchor = characterizationSettings[[i]]$endAnchor
+          result$riskWindowStart <- characterizationSettings[[i]]$riskWindowStart
+          result$startAnchor <- characterizationSettings[[i]]$startAnchor
+          result$riskWindowEnd <- characterizationSettings[[i]]$riskWindowEnd
+          result$endAnchor <- characterizationSettings[[i]]$endAnchor
 
-                                    result$casePreTargetDuration = characterizationSettings[[i]]$casePreTargetDuration
-                                    result$casePostOutcomeDuration = characterizationSettings[[i]]$casePostOutcomeDuration
+          result$casePreTargetDuration <- characterizationSettings[[i]]$casePreTargetDuration
+          result$casePostOutcomeDuration <- characterizationSettings[[i]]$casePostOutcomeDuration
 
-                                    result$covariateSettingsJson = as.character(ParallelLogger::convertSettingsToJson(characterizationSettings[[i]]$covariateSettings))
-                                    result$caseCovariateSettingsJson = as.character(ParallelLogger::convertSettingsToJson(characterizationSettings[[i]]$caseCovariateSettings))
-                                    return(result)
-                                  }
-                                )
+          result$covariateSettingsJson <- as.character(ParallelLogger::convertSettingsToJson(characterizationSettings[[i]]$covariateSettings))
+          result$caseCovariateSettingsJson <- as.character(ParallelLogger::convertSettingsToJson(characterizationSettings[[i]]$caseCovariateSettings))
+          return(result)
+        }
+      )
   )
 
   # create executionIds
-  settingCols <- c('minPriorObservation', 'outcomeWashoutDays',
-                   'casePreTargetDuration', 'casePostOutcomeDuration',
-                   'riskWindowStart', 'startAnchor',
-                   'riskWindowEnd', 'endAnchor')
-  executionSettings <- unique(caseCombinations[,settingCols])
+  settingCols <- c(
+    "minPriorObservation", "outcomeWashoutDays",
+    "casePreTargetDuration", "casePostOutcomeDuration",
+    "riskWindowStart", "startAnchor",
+    "riskWindowEnd", "endAnchor"
+  )
+  executionSettings <- unique(caseCombinations[, settingCols])
   executionSettings$settingId <- createExecutionIds(nrow(executionSettings))
   caseCombinations <- merge(caseCombinations, executionSettings, by = settingCols)
 
   # create thread split
   threadCombinations <- caseCombinations %>%
-    dplyr::select("targetId",
-                  "minPriorObservation",
-                  "outcomeWashoutDays",
-                  "casePreTargetDuration",
-                  "casePostOutcomeDuration"
+    dplyr::select(
+      "targetId",
+      "minPriorObservation",
+      "outcomeWashoutDays",
+      "casePreTargetDuration",
+      "casePostOutcomeDuration"
     ) %>%
     dplyr::distinct()
-  threadCombinations$thread <- rep(1:threads, ceiling(nrow(threadCombinations)/threads))[1:nrow(threadCombinations)]
-  caseCombinations <- merge(caseCombinations, threadCombinations, by = c("targetId",
-                                                                         "minPriorObservation",
-                                                                         "outcomeWashoutDays",
-                                                                         "casePreTargetDuration",
-                                                                         "casePostOutcomeDuration"
+  threadCombinations$thread <- rep(1:threads, ceiling(nrow(threadCombinations) / threads))[1:nrow(threadCombinations)]
+  caseCombinations <- merge(caseCombinations, threadCombinations, by = c(
+    "targetId",
+    "minPriorObservation",
+    "outcomeWashoutDays",
+    "casePreTargetDuration",
+    "casePostOutcomeDuration"
   ))
 
-  executionCols <- c('minPriorObservation', 'outcomeWashoutDays',
-                     'casePreTargetDuration', 'casePostOutcomeDuration')
-  executions <- unique(caseCombinations[,executionCols])
+  executionCols <- c(
+    "minPriorObservation", "outcomeWashoutDays",
+    "casePreTargetDuration", "casePostOutcomeDuration"
+  )
+  executions <- unique(caseCombinations[, executionCols])
 
   # now create the settings
-  for(j in 1:nrow(executions)){
-    settingVal <- executions[j,]
+  for (j in 1:nrow(executions)) {
+    settingVal <- executions[j, ]
 
     restrictedData <- caseCombinations %>%
       dplyr::inner_join(settingVal, by = executionCols)
 
-    for(i in unique(restrictedData$thread)){
+    for (i in unique(restrictedData$thread)) {
       ind <- restrictedData$thread == i
-      settings <- rbind(settings,
-                        data.frame(
-                          functionName = 'computeCaseAggregateCovariateAnalyses',
-                          settings = as.character(ParallelLogger::convertSettingsToJson(
-                            list(
-                              targetIds = unique(restrictedData$targetId[ind]),
-                              outcomeIds = unique(restrictedData$outcomeId[ind]),
-                              minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
-                              outcomeWashoutDays = unique(restrictedData$outcomeWashoutDays[ind]),
-                              tar = unique(data.frame(
-                                riskWindowStart = restrictedData$riskWindowStart[ind],
-                                startAnchor = restrictedData$startAnchor[ind],
-                                riskWindowEnd = restrictedData$riskWindowEnd[ind],
-                                endAnchor = restrictedData$endAnchor[ind]
-                              )),
-                              casePreTargetDuration = unique(restrictedData$casePreTargetDuration[ind]),
-                              casePostOutcomeDuration = unique(restrictedData$casePostOutcomeDuration[ind]),
-                              covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind])),
-                              caseCovariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$caseCovariateSettingsJson[ind])),
-                              settingIds = unique(restrictedData$settingId[ind])
-                            )
-                          )),
-                          executionFolder = paste('cac', i, paste0(settingVal, collapse = '_'), sep = '_'),
-                          jobId = paste('cac', i, paste0(settingVal, collapse = '_'), sep = '_')
-                        )
+      settings <- rbind(
+        settings,
+        data.frame(
+          functionName = "computeCaseAggregateCovariateAnalyses",
+          settings = as.character(ParallelLogger::convertSettingsToJson(
+            list(
+              targetIds = unique(restrictedData$targetId[ind]),
+              outcomeIds = unique(restrictedData$outcomeId[ind]),
+              minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
+              outcomeWashoutDays = unique(restrictedData$outcomeWashoutDays[ind]),
+              tar = unique(data.frame(
+                riskWindowStart = restrictedData$riskWindowStart[ind],
+                startAnchor = restrictedData$startAnchor[ind],
+                riskWindowEnd = restrictedData$riskWindowEnd[ind],
+                endAnchor = restrictedData$endAnchor[ind]
+              )),
+              casePreTargetDuration = unique(restrictedData$casePreTargetDuration[ind]),
+              casePostOutcomeDuration = unique(restrictedData$casePostOutcomeDuration[ind]),
+              covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind])),
+              caseCovariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$caseCovariateSettingsJson[ind])),
+              settingIds = unique(restrictedData$settingId[ind])
+            )
+          )),
+          executionFolder = paste("cac", i, paste0(settingVal, collapse = "_"), sep = "_"),
+          jobId = paste("cac", i, paste0(settingVal, collapse = "_"), sep = "_")
+        )
       )
     }
   }

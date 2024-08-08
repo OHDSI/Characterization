@@ -1,13 +1,11 @@
 createIncrementalLog <- function(
     executionFolder,
-    logname = 'execution.csv'
-    ){
-
-  if(!dir.exists(executionFolder)){
+    logname = "execution.csv") {
+  if (!dir.exists(executionFolder)) {
     dir.create(executionFolder, recursive = T)
   }
 
-  if(!file.exists(file.path(executionFolder,  logname))){
+  if (!file.exists(file.path(executionFolder, logname))) {
     x <- data.frame(
       run_date_time = Sys.time(),
       job_id = 0,
@@ -16,23 +14,22 @@ createIncrementalLog <- function(
     )
     readr::write_csv(
       x = x,
-      file = file.path(executionFolder,  logname)
-      )
+      file = file.path(executionFolder, logname)
+    )
   }
-
 }
 
-loadIncrementalFiles <- function(executionFolder){
-  if(file.exists(file.path(executionFolder, 'execution.csv'))){
-    executed <- utils::read.csv(file.path(executionFolder, 'execution.csv'))
-  } else{
-    stop('execution.csv missing')
+loadIncrementalFiles <- function(executionFolder) {
+  if (file.exists(file.path(executionFolder, "execution.csv"))) {
+    executed <- utils::read.csv(file.path(executionFolder, "execution.csv"))
+  } else {
+    stop("execution.csv missing")
   }
 
-  if(file.exists(file.path(executionFolder, 'completed.csv'))){
-    completed <- utils::read.csv(file.path(executionFolder, 'completed.csv'))
-  } else{
-    stop('completed.csv missing')
+  if (file.exists(file.path(executionFolder, "completed.csv"))) {
+    completed <- utils::read.csv(file.path(executionFolder, "completed.csv"))
+  } else {
+    stop("completed.csv missing")
   }
   return(list(
     executed = executed,
@@ -42,9 +39,7 @@ loadIncrementalFiles <- function(executionFolder){
 
 getExecutionJobIssues <- function(
     executed,
-    completed
-){
-
+    completed) {
   executedJobs <- unique(executed$job_id)
   completedJobs <- unique(completed$job_id)
 
@@ -62,9 +57,7 @@ getExecutionJobIssues <- function(
 #'
 #' @export
 cleanIncremental <- function(
-    executionFolder
-){
-
+    executionFolder) {
   incrementalFiles <- loadIncrementalFiles(
     executionFolder
   )
@@ -74,12 +67,12 @@ cleanIncremental <- function(
     completed = incrementalFiles$completed
   )
 
-  if(length(issues) > 0 ){
+  if (length(issues) > 0) {
     # delete contents inside folder
-    for(i in 1:length(issues)){
-      files <- dir(file.path(executionFolder,issues[i]), full.names = T)
-      for(file in files){
-        message(paste0('Deleting incomplete result file ', file))
+    for (i in 1:length(issues)) {
+      files <- dir(file.path(executionFolder, issues[i]), full.names = T)
+      for (file in files) {
+        message(paste0("Deleting incomplete result file ", file))
         file.remove(file)
       }
     }
@@ -87,21 +80,19 @@ cleanIncremental <- function(
 
   # now update the execution to remove the issue rows
   executionFile <- utils::read.csv(
-    file = file.path(executionFolder, 'execution.csv')
+    file = file.path(executionFolder, "execution.csv")
   )
-  fixedExecution <- executionFile[!executionFile$job_id %in% issues,]
+  fixedExecution <- executionFile[!executionFile$job_id %in% issues, ]
   utils::write.csv(
     x = fixedExecution,
-    file = file.path(executionFolder, 'execution.csv')
-    )
+    file = file.path(executionFolder, "execution.csv")
+  )
 
-return(invisible(NULL))
+  return(invisible(NULL))
 }
 
 checkResultFilesIncremental <- function(
-    executionFolder
-    ){
-
+    executionFolder) {
   incrementalFiles <- loadIncrementalFiles(
     executionFolder
   )
@@ -111,14 +102,14 @@ checkResultFilesIncremental <- function(
     completed = incrementalFiles$completed
   )
 
-    if(length(issues) > 0 ){
-      stop(paste0('jobIds: ', paste0(issues, collapse = ','), 'executed but not completed.  Please run cleanIncremental() to remove incomplete results.'))
-    }
+  if (length(issues) > 0) {
+    stop(paste0("jobIds: ", paste0(issues, collapse = ","), "executed but not completed.  Please run cleanIncremental() to remove incomplete results."))
+  }
 
   return(invisible(NULL))
 }
 
-findCompletedJobs <- function(executionFolder){
+findCompletedJobs <- function(executionFolder) {
   incrementalFiles <- loadIncrementalFiles(executionFolder)
   return(unique(incrementalFiles$completed$job_id))
 }
@@ -130,9 +121,8 @@ recordIncremental <- function(
     jobId,
     startTime,
     endTime,
-    logname = 'execution.csv'
-){
-  if(file.exists(file.path(executionFolder, logname))){
+    logname = "execution.csv") {
+  if (file.exists(file.path(executionFolder, logname))) {
     x <- data.frame(
       run_date_time = runDateTime,
       job_id = jobId,
@@ -141,13 +131,12 @@ recordIncremental <- function(
     )
     readr::write_csv(
       x = x,
-      file = file.path(executionFolder,  logname),
+      file = file.path(executionFolder, logname),
       append = T
     )
-  } else{
-    warning(paste0(logname, ' file missing so no logging possible'))
+  } else {
+    warning(paste0(logname, " file missing so no logging possible"))
   }
-
 }
 
 #' Removes csv files from the execution folder as there should be no csv files
@@ -160,35 +149,35 @@ recordIncremental <- function(
 #'
 #' @export
 cleanNonIncremental <- function(
-    executionFolder
-    ){
+    executionFolder) {
   # remove all files from the executionFolder
   files <- dir(
     path = executionFolder,
     recursive = T,
     full.names = T,
-    pattern = '.csv'
-    )
-  if(length(files) > 0 ){
-    for(file in files){
-      message(paste0('Deleting file ', file))
+    pattern = ".csv"
+  )
+  if (length(files) > 0) {
+    for (file in files) {
+      message(paste0("Deleting file ", file))
       file.remove(file)
     }
   }
 }
 
 checkResultFilesNonIncremental <- function(
-    executionFolder
-){
+    executionFolder) {
   files <- dir(
     path = executionFolder,
     recursive = T,
     full.names = T,
-    pattern = '.csv'
+    pattern = ".csv"
   )
-  if(length(files) > 0 ){
-    errorMessage <- paste0('Running in non-incremental but csv files exist in execution folder.',
-                           ' please delete manually or using cleanNonIncremental()')
+  if (length(files) > 0) {
+    errorMessage <- paste0(
+      "Running in non-incremental but csv files exist in execution folder.",
+      " please delete manually or using cleanNonIncremental()"
+    )
     stop(errorMessage)
   }
 

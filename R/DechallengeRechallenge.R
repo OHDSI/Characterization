@@ -104,10 +104,9 @@ computeDechallengeRechallengeAnalyses <- function(
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
     databaseId = "database 1",
-    outputFolder = file.path(getwd(),'results'),
+    outputFolder = file.path(getwd(), "results"),
     minCellCount = 0,
-    ...
-    ) {
+    ...) {
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
@@ -210,7 +209,7 @@ computeDechallengeRechallengeAnalyses <- function(
     )
 
     # export results to csv
-    message('exporting to csv file')
+    message("exporting to csv file")
     exportDechallengeRechallengeToCsv(
       result = result,
       saveDirectory = outputFolder,
@@ -248,10 +247,9 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     settings,
     databaseId = "database 1",
     showSubjectId = F,
-    outputFolder = file.path(getwd(),'results'),
+    outputFolder = file.path(getwd(), "results"),
     minCellCount = 0,
-    ...
-    ){
+    ...) {
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
@@ -353,7 +351,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     )
 
     # add the csv export here
-    message('exporting to csv file')
+    message("exporting to csv file")
     exportRechallengeFailCaseSeriesToCsv(
       result = result,
       saveDirectory = outputFolder
@@ -365,35 +363,42 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
 
 getDechallengeRechallengeJobs <- function(
     characterizationSettings,
-    threads
-){
-
+    threads) {
   characterizationSettings <- characterizationSettings$dechallengeRechallengeSettings
-  if(length(characterizationSettings) == 0){
+  if (length(characterizationSettings) == 0) {
     return(NULL)
   }
   ind <- 1:length(characterizationSettings)
-  targetIds <- lapply(ind, function(i){characterizationSettings[[i]]$targetCohortDefinitionIds})
-  outcomeIds <- lapply(ind, function(i){characterizationSettings[[i]]$outcomeCohortDefinitionIds})
-  dechallengeStopIntervals <- lapply(ind, function(i){characterizationSettings[[i]]$dechallengeStopInterval})
-  dechallengeEvaluationWindows <- lapply(ind, function(i){characterizationSettings[[i]]$dechallengeEvaluationWindow})
+  targetIds <- lapply(ind, function(i) {
+    characterizationSettings[[i]]$targetCohortDefinitionIds
+  })
+  outcomeIds <- lapply(ind, function(i) {
+    characterizationSettings[[i]]$outcomeCohortDefinitionIds
+  })
+  dechallengeStopIntervals <- lapply(ind, function(i) {
+    characterizationSettings[[i]]$dechallengeStopInterval
+  })
+  dechallengeEvaluationWindows <- lapply(ind, function(i) {
+    characterizationSettings[[i]]$dechallengeEvaluationWindow
+  })
 
   # get all combinations of TnOs, then split by treads
 
-  combinations <- do.call(what = 'rbind',
-                          args =
-                            lapply(
-                              1:length(targetIds),
-                              function(i){
-                                result <- expand.grid(
-                                  targetId = targetIds[[i]],
-                                  outcomeId = outcomeIds[[i]]
-                                )
-                                result$dechallengeStopInterval <- dechallengeStopIntervals[[i]]
-                                result$dechallengeEvaluationWindow <- dechallengeEvaluationWindows[[i]]
-                                return(result)
-                              }
-                            )
+  combinations <- do.call(
+    what = "rbind",
+    args =
+      lapply(
+        1:length(targetIds),
+        function(i) {
+          result <- expand.grid(
+            targetId = targetIds[[i]],
+            outcomeId = outcomeIds[[i]]
+          )
+          result$dechallengeStopInterval <- dechallengeStopIntervals[[i]]
+          result$dechallengeEvaluationWindow <- dechallengeEvaluationWindows[[i]]
+          return(result)
+        }
+      )
   )
   # find out whether more Ts or more Os
   tcount <- nrow(
@@ -414,35 +419,35 @@ getDechallengeRechallengeJobs <- function(
       )
   )
 
-  if(threads > max(tcount, ocount)){
-    message('Tnput parameter threads greater than number of targets and outcomes')
-    message(paste0('Only using ', max(tcount, ocount) ,' threads for TimeToEvent'))
+  if (threads > max(tcount, ocount)) {
+    message("Tnput parameter threads greater than number of targets and outcomes")
+    message(paste0("Only using ", max(tcount, ocount), " threads for TimeToEvent"))
   }
 
-  if(tcount >= ocount){
+  if (tcount >= ocount) {
     threadDf <- combinations %>%
       dplyr::count(
         .data$targetId,
         .data$dechallengeStopInterval,
         .data$dechallengeEvaluationWindow
       )
-    threadDf$thread = rep(1:threads, ceiling(tcount/threads))[1:tcount]
-    mergeColumn <- c('targetId','dechallengeStopInterval', 'dechallengeEvaluationWindow')
-  } else{
+    threadDf$thread <- rep(1:threads, ceiling(tcount / threads))[1:tcount]
+    mergeColumn <- c("targetId", "dechallengeStopInterval", "dechallengeEvaluationWindow")
+  } else {
     threadDf <- combinations %>%
       dplyr::count(
         .data$outcomeId,
         .data$dechallengeStopInterval,
         .data$dechallengeEvaluationWindow
       )
-    threadDf$thread = rep(1:threads, ceiling(ocount/threads))[1:ocount]
-    mergeColumn <- c('outcomeId','dechallengeStopInterval', 'dechallengeEvaluationWindow')
+    threadDf$thread <- rep(1:threads, ceiling(ocount / threads))[1:ocount]
+    mergeColumn <- c("outcomeId", "dechallengeStopInterval", "dechallengeEvaluationWindow")
   }
 
   combinations <- merge(combinations, threadDf, by = mergeColumn)
   sets <- lapply(
     X = 1:max(threadDf$thread),
-    FUN = function(i){
+    FUN = function(i) {
       createDechallengeRechallengeSettings(
         targetIds = unique(combinations$targetId[combinations$thread == i]),
         outcomeIds = unique(combinations$outcomeId[combinations$thread == i]),
@@ -454,28 +459,29 @@ getDechallengeRechallengeJobs <- function(
 
   # recreate settings
   settings <- c()
-  for(i in 1:length(sets)){
-    settings <- rbind(settings,
-                      data.frame(
-                        functionName = 'computeDechallengeRechallengeAnalyses',
-                        settings = as.character(ParallelLogger::convertSettingsToJson(
-                          sets[[i]]
-                        )),
-                        executionFolder = paste0('dr_', i),
-                        jobId = paste0('dr_', i)
-                      )
+  for (i in 1:length(sets)) {
+    settings <- rbind(
+      settings,
+      data.frame(
+        functionName = "computeDechallengeRechallengeAnalyses",
+        settings = as.character(ParallelLogger::convertSettingsToJson(
+          sets[[i]]
+        )),
+        executionFolder = paste0("dr_", i),
+        jobId = paste0("dr_", i)
+      )
     )
-    settings <- rbind(settings,
-                      data.frame(
-                        functionName = 'computeRechallengeFailCaseSeriesAnalyses',
-                        settings = as.character(ParallelLogger::convertSettingsToJson(
-                          sets[[i]]
-                        )),
-                        executionFolder = paste0('rfcs_', i),
-                        jobId = paste0('rfcs_', i)
-                      )
+    settings <- rbind(
+      settings,
+      data.frame(
+        functionName = "computeRechallengeFailCaseSeriesAnalyses",
+        settings = as.character(ParallelLogger::convertSettingsToJson(
+          sets[[i]]
+        )),
+        executionFolder = paste0("rfcs_", i),
+        jobId = paste0("rfcs_", i)
+      )
     )
-
   }
 
   return(settings)

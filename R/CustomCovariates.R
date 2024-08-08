@@ -52,10 +52,10 @@
 #'
 #' @examples
 #' settings <- createDuringCovariateSettings(
-#'    useConditionOccurrenceDuring = TRUE,
-#'    useConditionOccurrencePrimaryInpatientDuring = FALSE,
-#'    useConditionEraDuring = FALSE,
-#'    useConditionGroupEraDuring = FALSE
+#'   useConditionOccurrenceDuring = TRUE,
+#'   useConditionOccurrencePrimaryInpatientDuring = FALSE,
+#'   useConditionEraDuring = FALSE,
+#'   useConditionGroupEraDuring = FALSE
 #' )
 #'
 #' @export
@@ -64,7 +64,6 @@ createDuringCovariateSettings <- function(
     useConditionOccurrencePrimaryInpatientDuring = F,
     useConditionEraDuring = F,
     useConditionGroupEraDuring = F,
-
     useDrugExposureDuring = F,
     useDrugEraDuring = F,
     useDrugGroupEraDuring = F,
@@ -74,14 +73,11 @@ createDuringCovariateSettings <- function(
     useObservationDuring = F,
     useVisitCountDuring = F,
     useVisitConceptCountDuring = F,
-
     includedCovariateConceptIds = c(),
     addDescendantsToInclude = F,
     excludedCovariateConceptIds = c(),
     addDescendantsToExclude = F,
-    includedCovariateIds = c()
-){
-
+    includedCovariateIds = c()) {
   covariateSettings <- list(
     temporal = FALSE, # needed?
     temporalSequence = FALSE
@@ -143,14 +139,13 @@ getDbDuringCovariateData <- function(
     cohortIds = c(-1),
     covariateSettings,
     minCharacterizationMean = 0,
-    ...
-) {
+    ...) {
   writeLines("Constructing during cohort covariates")
   if (!aggregated) {
     stop("Only aggregation supported")
   }
 
-  getDomainSettings <- utils::read.csv(system.file('csv/PrespecAnalyses.csv', package = 'Characterization'))
+  getDomainSettings <- utils::read.csv(system.file("csv/PrespecAnalyses.csv", package = "Characterization"))
 
 
   # create Tables
@@ -166,10 +161,10 @@ getDbDuringCovariateData <- function(
   sql <- SqlRender::translate(
     sql = sql,
     targetDialect = DatabaseConnector::dbms(connection)
-      )
+  )
   DatabaseConnector::executeSql(connection, sql = sql)
 
-  sql <-  "DROP TABLE IF EXISTS #analysis_ref;
+  sql <- "DROP TABLE IF EXISTS #analysis_ref;
   CREATE TABLE #analysis_ref(
    analysis_id int,
    analysis_name varchar(100),
@@ -183,16 +178,16 @@ getDbDuringCovariateData <- function(
     sql = sql,
     targetDialect = DatabaseConnector::dbms(connection)
   )
-  DatabaseConnector::executeSql(connection,sql)
+  DatabaseConnector::executeSql(connection, sql)
 
   # included covariates
-  includedCovTable <- ''
-  if(length(covariateSettings$includedCovariateIds) > 0 ){
+  includedCovTable <- ""
+  if (length(covariateSettings$includedCovariateIds) > 0) {
     # create-
-    includedCovTable <- '#included_cov'
+    includedCovTable <- "#included_cov"
     DatabaseConnector::insertTable(
       connection = connection,
-      tableName =  includedCovTable,
+      tableName = includedCovTable,
       dropTableIfExists = T,
       createTable = T,
       tempTable = T,
@@ -202,23 +197,23 @@ getDbDuringCovariateData <- function(
   }
 
   # including concept ids
-  includedConceptTable <- ''
-  if(length(covariateSettings$includedCovariateConceptIds) > 0 ){
-    includedConceptTable <- '#include_concepts'
+  includedConceptTable <- ""
+  if (length(covariateSettings$includedCovariateConceptIds) > 0) {
+    includedConceptTable <- "#include_concepts"
     DatabaseConnector::insertTable(
       connection = connection,
-      tableName =  includedConceptTable,
+      tableName = includedConceptTable,
       dropTableIfExists = T,
       createTable = T,
       tempTable = T,
       data = data.frame(id = covariateSettings$includedCovariateConceptIds),
       camelCaseToSnakeCase = T
-   )
+    )
 
-    if(covariateSettings$addDescendantsToInclude){
+    if (covariateSettings$addDescendantsToInclude) {
       SqlRender::loadRenderTranslateSql(
-        sqlFilename = 'IncludeDescendants.sql',
-        packageName = 'Characterization',
+        sqlFilename = "IncludeDescendants.sql",
+        packageName = "Characterization",
         dbms = DatabaseConnector::dbms(connection),
         table_name = includedConceptTable,
         cdm_database_schema = cdmDatabaseSchema
@@ -227,12 +222,12 @@ getDbDuringCovariateData <- function(
   }
 
   # exlcuding concept ids
-  excludedConceptTable <- ''
-  if(length(covariateSettings$excludedCovariateConceptIds) > 0 ){
-    excludedConceptTable <- '#exclude_concepts'
+  excludedConceptTable <- ""
+  if (length(covariateSettings$excludedCovariateConceptIds) > 0) {
+    excludedConceptTable <- "#exclude_concepts"
     DatabaseConnector::insertTable(
       connection = connection,
-      tableName =  excludedConceptTable,
+      tableName = excludedConceptTable,
       dropTableIfExists = T,
       createTable = T,
       tempTable = T,
@@ -240,10 +235,10 @@ getDbDuringCovariateData <- function(
       camelCaseToSnakeCase = T
     )
 
-    if(covariateSettings$addDescendantsToInclude){
+    if (covariateSettings$addDescendantsToInclude) {
       SqlRender::loadRenderTranslateSql(
-        sqlFilename = 'IncludeDescendants.sql',
-        packageName = 'Characterization',
+        sqlFilename = "IncludeDescendants.sql",
+        packageName = "Characterization",
         dbms = DatabaseConnector::dbms(connection),
         table_name = excludedConceptTable,
         cdm_database_schema = cdmDatabaseSchema
@@ -259,23 +254,23 @@ getDbDuringCovariateData <- function(
   useContinuous <- F
   result <- Andromeda::andromeda()
 
-  for(domainSettingsIndex in domainSettingsIndexes){
+  for (domainSettingsIndex in domainSettingsIndexes) {
     i <- i + 1
 
-    if(getDomainSettings$isBinary[domainSettingsIndex] == 'Y'){
+    if (getDomainSettings$isBinary[domainSettingsIndex] == "Y") {
       binaryInd <- c(i, binaryInd)
       useBinary <- T
-    } else{
+    } else {
       continuousInd <- c(i, continuousInd)
       useContinuous <- T
     }
     # Load template sql and fill
     sql <- SqlRender::loadRenderTranslateSql(
       sqlFilename = getDomainSettings$sqlFileName[domainSettingsIndex],
-      packageName = 'Characterization',
-      dbms =  attr(connection, "dbms"),
+      packageName = "Characterization",
+      dbms = attr(connection, "dbms"),
       cohort_table = cohortTable,
-      #cohort_ids = cohortIds,
+      # cohort_ids = cohortIds,
       cohort_definition_id = cohortIds, # added?
       row_id_field = rowIdField,
       cdm_database_schema = cdmDatabaseSchema,
@@ -291,62 +286,60 @@ getDbDuringCovariateData <- function(
       included_cov_table = includedCovTable,
       included_concept_table = includedConceptTable,
       excluded_concept_table = excludedConceptTable,
-      covariate_table = paste0('#cov_',i)
+      covariate_table = paste0("#cov_", i)
     )
-    message(paste0('Executing during sql code for ', getDomainSettings$analysisName[domainSettingsIndex]))
+    message(paste0("Executing during sql code for ", getDomainSettings$analysisName[domainSettingsIndex]))
     start <- Sys.time()
     DatabaseConnector::executeSql(
       connection = connection,
       sql = sql,
       progressBar = T
-      )
+    )
     time <- Sys.time() - start
-    message(paste0('Execution took ', round(time, digits = 2), ' ', units(time)))
-
+    message(paste0("Execution took ", round(time, digits = 2), " ", units(time)))
   }
 
   # all_covariates.cohort_definition_id,\n  all_covariates.covariate_id,\n  all_covariates.sum_value,\n  CAST(all_covariates.sum_value / (1.0 * total.total_count) AS FLOAT) AS average_value
 
-  message(paste0('Extracting covariates'))
+  message(paste0("Extracting covariates"))
   start <- Sys.time()
   # Retrieve the covariate:
-  if(useBinary){
-
+  if (useBinary) {
     sql <- paste0(
-      'select temp.*, CAST(temp.sum_value / (1.0 * total.total_count) AS FLOAT) AS average_value from (',
-      paste0(paste0('select cohort_definition_id, covariate_id, sum_value from #cov_', binaryInd), collapse = ' union '),
-      ') temp inner join
+      "select temp.*, CAST(temp.sum_value / (1.0 * total.total_count) AS FLOAT) AS average_value from (",
+      paste0(paste0("select cohort_definition_id, covariate_id, sum_value from #cov_", binaryInd), collapse = " union "),
+      ") temp inner join
       (SELECT cohort_definition_id, COUNT(*) AS total_count
       FROM @cohort_table {@cohort_definition_id != -1} ? {\nWHERE cohort_definition_id IN (@cohort_definition_id)}
       GROUP BY cohort_definition_id ) total
-       on temp.cohort_definition_id = total.cohort_definition_id;'
+       on temp.cohort_definition_id = total.cohort_definition_id;"
     )
     sql <- SqlRender::render(
       sql = sql,
       cohort_table = cohortTable,
-      cohort_definition_id = paste0(c(-1), collapse = ',')
-      )
+      cohort_definition_id = paste0(c(-1), collapse = ",")
+    )
     sql <- SqlRender::translate(
       sql = sql,
       targetDialect = DatabaseConnector::dbms(connection)
-        )
+    )
 
     DatabaseConnector::querySqlToAndromeda(
       connection = connection,
       sql = sql,
       andromeda = result,
-      andromedaTableName = 'covariates',
+      andromedaTableName = "covariates",
       appendToTable = F,
       snakeCaseToCamelCase = TRUE
     )
-    if(minCharacterizationMean != 0 && "averageValue" %in% colnames(result$covariates)){
+    if (minCharacterizationMean != 0 && "averageValue" %in% colnames(result$covariates)) {
       result$covariates <- result$covariates %>%
         dplyr::filter(.data$averageValue >= minCharacterizationMean)
     }
   }
 
-  if(useContinuous){
-    sql <- paste0(paste0('select * from #cov_', continuousInd), collapse = ' union ')
+  if (useContinuous) {
+    sql <- paste0(paste0("select * from #cov_", continuousInd), collapse = " union ")
     sql <- SqlRender::translate(
       sql = sql,
       targetDialect = DatabaseConnector::dbms(connection)
@@ -355,7 +348,7 @@ getDbDuringCovariateData <- function(
       connection = connection,
       sql = sql,
       andromeda = result,
-      andromedaTableName = 'covariatesContinuous',
+      andromedaTableName = "covariatesContinuous",
       appendToTable = F,
       snakeCaseToCamelCase = TRUE
     )
@@ -364,11 +357,11 @@ getDbDuringCovariateData <- function(
   DatabaseConnector::querySqlToAndromeda(
     connection = connection,
     sql = SqlRender::translate(
-      sql = 'select * from #cov_ref;',
+      sql = "select * from #cov_ref;",
       targetDialect = DatabaseConnector::dbms(connection)
     ),
     andromeda = result,
-    andromedaTableName = 'covariateRef',
+    andromedaTableName = "covariateRef",
     appendToTable = F,
     snakeCaseToCamelCase = TRUE
   )
@@ -377,26 +370,26 @@ getDbDuringCovariateData <- function(
   DatabaseConnector::querySqlToAndromeda(
     connection = connection,
     sql = SqlRender::translate(
-      sql = 'select * from #analysis_ref;',
+      sql = "select * from #analysis_ref;",
       targetDialect = DatabaseConnector::dbms(connection)
     ),
     andromeda = result,
-    andromedaTableName = 'analysisRef',
+    andromedaTableName = "analysisRef",
     appendToTable = F,
     snakeCaseToCamelCase = TRUE
   )
   time <- Sys.time() - start
-  message(paste0('Extracting covariates took ', round(time, digits = 2), ' ', units(time)))
+  message(paste0("Extracting covariates took ", round(time, digits = 2), " ", units(time)))
 
   # clean up: drop tables...
   if (length(c(binaryInd, continuousInd)) != 0) {
-    message(paste0('Removing temp covariate tables'))
+    message(paste0("Removing temp covariate tables"))
     for (i in c(binaryInd, continuousInd)) {
       sql <- "TRUNCATE TABLE #cov_@id;\nDROP TABLE #cov_@id;\n"
       sql <- SqlRender::render(
         sql,
         id = i
-        )
+      )
       sql <- SqlRender::translate(
         sql = sql,
         targetDialect = attr(connection, "dbms"),

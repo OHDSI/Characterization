@@ -1,7 +1,7 @@
 context("ViewShiny")
 
 # create a folder with results for the shiny app
-resultLocation <- file.path(tempdir(),paste0('d_', paste0(sample(100,3), collapse = '_'), sep = ''), "shinyResults")
+resultLocation <- file.path(tempdir(), paste0("d_", paste0(sample(100, 3), collapse = "_"), sep = ""), "shinyResults")
 if (!dir.exists(resultLocation)) {
   dir.create(resultLocation, recursive = T)
 }
@@ -85,8 +85,8 @@ test_that("prepareCharacterizationShiny works", {
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     characterizationSettings = characterizationSettings,
-    outputDirectory = file.path(resultLocation, 'result'),
-    executionPath = file.path(resultLocation, 'execution'),
+    outputDirectory = file.path(resultLocation, "result"),
+    executionPath = file.path(resultLocation, "execution"),
     csvFilePrefix = "c_",
     databaseId = "1",
     threads = 1,
@@ -96,7 +96,7 @@ test_that("prepareCharacterizationShiny works", {
   )
 
   settings <- Characterization:::prepareCharacterizationShiny(
-    resultFolder = file.path(resultLocation,'result'),
+    resultFolder = file.path(resultLocation, "result"),
     cohortDefinitionSet = NULL,
     sqliteLocation = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
   )
@@ -128,7 +128,7 @@ test_that("prepareCharacterizationShiny works", {
 
 test_that("shiny app works", {
   settings <- prepareCharacterizationShiny(
-    resultFolder  = file.path(resultLocation,'result'),
+    resultFolder = file.path(resultLocation, "result"),
     cohortDefinitionSet = NULL,
     sqliteLocation = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
   )
