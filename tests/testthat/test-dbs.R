@@ -8,7 +8,7 @@ dbmsPlatforms <- c(
   "snowflake",
   "spark",
   "sql server"
-  )
+)
 
 getPlatformConnectionDetails <- function(dbmsPlatform) {
   # Get drivers for test platform
@@ -52,7 +52,7 @@ getPlatformConnectionDetails <- function(dbmsPlatform) {
         vocabularyDatabaseSchema <- Sys.getenv("CDM_BIG_QUERY_CDM_SCHEMA")
         cohortDatabaseSchema <- Sys.getenv("CDM_BIG_QUERY_OHDSI_SCHEMA")
         options(sqlRenderTempEmulationSchema = Sys.getenv("CDM_BIG_QUERY_OHDSI_SCHEMA"))
-     } else {
+      } else {
         return(NULL)
       }
     } else if (dbmsPlatform == "oracle") {
@@ -103,19 +103,18 @@ getPlatformConnectionDetails <- function(dbmsPlatform) {
       options(sqlRenderTempEmulationSchema = Sys.getenv("CDM_SNOWFLAKE_OHDSI_SCHEMA"))
     } else if (dbmsPlatform == "spark") {
       if (.Platform$OS.type == "windows") { # skipping Mac for GHA due to JAVA issue
-      connectionDetails <- DatabaseConnector::createConnectionDetails(
-        dbms = dbmsPlatform,
-        user = Sys.getenv("CDM5_SPARK_USER"),
-        password = URLdecode(Sys.getenv("CDM5_SPARK_PASSWORD")),
-        connectionString = Sys.getenv("CDM5_SPARK_CONNECTION_STRING"),
-        pathToDriver = jdbcDriverFolder
-      )
-      cdmDatabaseSchema <- Sys.getenv("CDM5_SPARK_CDM_SCHEMA")
-      vocabularyDatabaseSchema <- Sys.getenv("CDM5_SPARK_CDM_SCHEMA")
-      cohortDatabaseSchema <- Sys.getenv("CDM5_SPARK_OHDSI_SCHEMA")
-      options(sqlRenderTempEmulationSchema = Sys.getenv("CDM5_SPARK_OHDSI_SCHEMA"))
-      }
-      else{
+        connectionDetails <- DatabaseConnector::createConnectionDetails(
+          dbms = dbmsPlatform,
+          user = Sys.getenv("CDM5_SPARK_USER"),
+          password = URLdecode(Sys.getenv("CDM5_SPARK_PASSWORD")),
+          connectionString = Sys.getenv("CDM5_SPARK_CONNECTION_STRING"),
+          pathToDriver = jdbcDriverFolder
+        )
+        cdmDatabaseSchema <- Sys.getenv("CDM5_SPARK_CDM_SCHEMA")
+        vocabularyDatabaseSchema <- Sys.getenv("CDM5_SPARK_CDM_SCHEMA")
+        cohortDatabaseSchema <- Sys.getenv("CDM5_SPARK_OHDSI_SCHEMA")
+        options(sqlRenderTempEmulationSchema = Sys.getenv("CDM5_SPARK_OHDSI_SCHEMA"))
+      } else {
         return(NULL)
       }
     } else if (dbmsPlatform == "sql server") {
@@ -147,13 +146,13 @@ getPlatformConnectionDetails <- function(dbmsPlatform) {
   ))
 }
 
-for(dbmsPlatform in dbmsPlatforms){
-  if(Sys.getenv('CI') == 'true' & .Platform$OS.type == "windows"){
+for (dbmsPlatform in dbmsPlatforms) {
+  if (Sys.getenv("CI") == "true" & .Platform$OS.type == "windows") {
     tempFolder <- tempfile(paste0("Characterization_", dbmsPlatform))
     on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
 
     dbmsDetails <- getPlatformConnectionDetails(dbmsPlatform)
-    if(!is.null(dbmsDetails)){
+    if (!is.null(dbmsDetails)) {
       con <- DatabaseConnector::connect(dbmsDetails$connectionDetails)
       on.exit(DatabaseConnector::disconnect(con))
     }
@@ -161,11 +160,10 @@ for(dbmsPlatform in dbmsPlatforms){
 
   # This file contains platform specific tests
   test_that(paste0("platform specific test ", dbmsPlatform), {
-    skip_if(Sys.getenv('CI') != 'true' | .Platform$OS.type != "windows", 'not run locally')
+    skip_if(Sys.getenv("CI") != "true" | .Platform$OS.type != "windows", "not run locally")
     if (is.null(dbmsDetails)) {
       print(paste("No platform details available for", dbmsPlatform))
     } else {
-
       # create a cohort table
       DatabaseConnector::insertTable(
         bulkLoad = F,
@@ -175,9 +173,10 @@ for(dbmsPlatform in dbmsPlatforms){
         data = data.frame(
           subject_id = 1:10,
           cohort_definition_id = sample(4, 10, replace = T),
-          cohort_start_date = rep(as.Date('2010-01-01'), 10),
-          cohort_end_date = rep(as.Date('2010-01-01'), 10)
-        ))
+          cohort_start_date = rep(as.Date("2010-01-01"), 10),
+          cohort_end_date = rep(as.Date("2010-01-01"), 10)
+        )
+      )
 
       targetIds <- c(1, 2, 4)
       outcomeIds <- c(3)
@@ -246,9 +245,9 @@ for(dbmsPlatform in dbmsPlatforms){
         outcomeDatabaseSchema = dbmsDetails$cohortDatabaseSchema,
         outcomeTable = dbmsDetails$cohortTable,
         characterizationSettings = characterizationSettings,
-        outputDirectory = file.path(tempFolder, 'csv'),
-        executionPath = file.path(tempFolder, 'execution'),
-        csvFilePrefix =  "c_",
+        outputDirectory = file.path(tempFolder, "csv"),
+        executionPath = file.path(tempFolder, "execution"),
+        csvFilePrefix = "c_",
         threads = 1,
         databaseId = dbmsDetails$connectionDetails$dbms
       )

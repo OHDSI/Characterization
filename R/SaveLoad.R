@@ -27,8 +27,7 @@
 exportTimeToEventToCsv <- function(
     result,
     saveDirectory,
-    minCellCount = 0
-    ) {
+    minCellCount = 0) {
   if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
@@ -99,7 +98,7 @@ exportDechallengeRechallengeToCsv <- function(
   )
   message("Writing ", countN, " rows to csv")
 
-  if(!dir.exists(saveDirectory)){
+  if (!dir.exists(saveDirectory)) {
     dir.create(saveDirectory, recursive = T)
   }
 
@@ -215,8 +214,7 @@ exportDechallengeRechallengeToCsv <- function(
 #' @export
 exportRechallengeFailCaseSeriesToCsv <- function(
     result,
-    saveDirectory
-    ) {
+    saveDirectory) {
   if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
