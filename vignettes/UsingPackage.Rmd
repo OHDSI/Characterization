@@ -54,7 +54,7 @@ Eunomia::createCohorts(connectionDetails = connectionDetails)
 We also need to have the Characterization package installed and loaded
 ```{r tidy=TRUE,eval=FALSE}
 remotes::install_github("ohdsi/FeatureExtraction")
-remotes::install_github("ohdsi/Characterization")
+remotes::install_github("ohdsi/Characterization", ref = "new_approach")
 ```
 
 ```{r tidy=TRUE,eval=TRUE}
@@ -83,7 +83,7 @@ exampleTargetIds <- c(1, 2, 4)
 exampleOutcomeIds <- 3
 ```
 
-If we want to get information on the sex assigned at birth, age at index and Charlson Comorbidity index we can create the settings using `FeatureExtraction::createCovariateSettings`:
+If we want to get information on the sex, age at index and Charlson Comorbidity index we can create the settings using `FeatureExtraction::createCovariateSettings`:
 
 ```{r eval=TRUE}
 exampleCovariateSettings <- FeatureExtraction::createCovariateSettings(
@@ -93,7 +93,16 @@ exampleCovariateSettings <- FeatureExtraction::createCovariateSettings(
 )
 ```
 
-If we want to create the aggregate features for all our target cohorts, our outcome cohort and each target cohort restricted to those with a record of the outcome 1 day after target cohort start date until 365 days after target cohort end date, excluding mean values below 0.01, we can run:
+There is an additional covariate setting require that is calculated for the cases (patients in the target cohort with have the outcome during the time-at-risk).  This is called caseCovariateSettings and should be created using the createDuringCovariateSettings function.  The user can pick conditions, drugs, measurements, procedures and observations.  In this example, we just include condition eras groups by vocabulary heirarchy.  We also need to specify two related variables `casePreTargetDuration` which is the number of days before target index to extract features for the cases (answers what happens shortly before the target index) and `casePostOutcomeDuration` which is the number of days after the outcome date to extract features for the cases (answers what happens after the outcome).  The case covariates are also extracted between target index and outcome (answers the question what happens during target exposure).
+
+```{r eval=TRUE}
+caseCovariateSettings <- Characterization::createDuringCovariateSettings(
+  useConditionGroupEraDuring = T
+)
+```
+
+
+If we want to create the aggregate features for all our target cohorts, our outcome cohort and each target cohort restricted to those with a record of the outcome 1 day after target cohort start date until 365 days after target cohort end date with a outcome washout of 9999 (meaning we only include outcomes that are the first occurrence in the past 9999 days) and only include targets or outcomes where the patient was observed for 365 days or more prior, we can run:
 
 ```{r eval=TRUE}
 exampleAggregateCovariateSettings <- createAggregateCovariateSettings(
@@ -101,57 +110,39 @@ exampleAggregateCovariateSettings <- createAggregateCovariateSettings(
   outcomeIds = exampleOutcomeIds,
   riskWindowStart = 1, startAnchor = "cohort start",
   riskWindowEnd = 365, endAnchor = "cohort start",
+  outcomeWashoutDays = 9999,
+  minPriorObservation = 365,
   covariateSettings = exampleCovariateSettings,
-  minCharacterizationMean = 0.01
+  caseCovariateSettings = caseCovariateSettings,
+  casePreTargetDuration = 90,
+  casePostOutcomeDuration = 90
 )
 ```
 
-Next we need to use the `exampleAggregateCovariateSettings` as the settings to `computeAggregateCovariateAnalyses`, we need to use the Eunomia connectionDetails and in Eunomia the OMOP CDM data and cohort table are in the 'main' schema.  The cohort table name is 'cohort'.  The following code will apply the aggregated covariates analysis using the previously specified settings on the simulated Eunomia data:
+Next we need to use the `exampleAggregateCovariateSettings` as the settings to `computeAggregateCovariateAnalyses`, we need to use the Eunomia connectionDetails and in Eunomia the OMOP CDM data and cohort table are in the 'main' schema.  The cohort table name is 'cohort'.  The following code will apply the aggregated covariates analysis using the previously specified settings on the simulated Eunomia data, but we can specify the `minCharacterizationMean` to exclude covarites with mean values below 0.01, and we must specify the `outputFolder` where the csv results will be written to.
 
-```{r eval=TRUE,results='hide',error=FALSE,warning=FALSE,message=FALSE}
-agc <- computeAggregateCovariateAnalyses(
+```{r eval=FALSE,results='hide',error=FALSE,warning=FALSE,message=FALSE}
+runCharacterizationAnalyses(
   connectionDetails = connectionDetails,
   cdmDatabaseSchema = "main",
-  cdmVersion = 5,
   targetDatabaseSchema = "main",
   targetTable = "cohort",
-  aggregateCovariateSettings = exampleAggregateCovariateSettings,
+  outcomeDatabaseSchema = "main",
+  outcomeTable = "cohort",
+  characterizationSettings = createCharacterizationSettings(
+    aggregateCovariateSettings = exampleAggregateCovariateSettings
+  ),
   databaseId = "Eunomia",
-  runId = 1
+  runId = 1,
+  minCharacterizationMean = 0.01,
+  outputDirectory = file.path(getwd(), "example_char", "results"), executionPath = file.path(getwd(), "example_char", "execution"),
+  minCellCount = 10,
+  incremental = F,
+  threads = 1
 )
 ```
 
-If you would like to save the results you can use the function `saveAggregateCovariateAnalyses` and this can then be loaded using `loadAggregateCovariateAnalyses`.
-
-The results are Andromeda objects that can we viewed using `dplyr`.  There are four tables:
- 
-- covariates:
-```{r eval=TRUE}
-agc$covariates %>%
-  collect() %>%
-  kableExtra::kbl()
-```
-
-- covariatesContinuous:
-```{r eval=TRUE}
-agc$covariatesContinuous %>%
-  collect() %>%
-  kableExtra::kbl()
-```
-
-- covariateRef:
-```{r eval=TRUE}
-agc$covariateRef %>%
-  collect() %>%
-  kableExtra::kbl()
-```
-
-- analysisRef:
-```{r eval=TRUE}
-agc$analysisRef %>%
-  collect() %>%
-  kableExtra::kbl()
-```
+You can then see the results in the location `file.path(getwd(), 'example_char', 'results')` where you will find csv files.
 
 ## Dechallenge Rechallenge
 
@@ -180,48 +171,34 @@ exampleDechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
 )
 ```
 
-We can then run  the analysis on the Eunomia data using `computeDechallengeRechallengeAnalyses` and the settings previously specified:
+We can then run  the analysis on the Eunomia data using `computeDechallengeRechallengeAnalyses` and the settings previously specified, with `minCellCount` removing values less than the specified value:
 
-```{r eval=TRUE}
+```{r eval=FALSE}
 dc <- computeDechallengeRechallengeAnalyses(
   connectionDetails = connectionDetails,
   targetDatabaseSchema = "main",
   targetTable = "cohort",
-  dechallengeRechallengeSettings = exampleDechallengeRechallengeSettings,
-  databaseId = "Eunomia"
+  settings = exampleDechallengeRechallengeSettings,
+  databaseId = "Eunomia",
+  outcomeTable = file.path(getwd(), "example_char", "results"),
+  minCellCount = 5
 )
 ```
 
-If you would like to save the results you can use the function `saveDechallengeRechallengeAnalyses` and this can then be loaded using `loadDechallengeRechallengeAnalyses`.
+Next it is possible to compute the failed rechallenge cases
 
-The results are Andromeda objects that can we viewed using `dplyr`.  There is just one table named dechallengeRechallenge:
- 
-```{r eval=TRUE}
-dc$dechallengeRechallenge %>%
-  collect() %>%
-  kableExtra::kbl()
-```
-
-Next it is possible to computer and extract the failed rechallenge cases
-
-```{r eval=TRUE}
+```{r eval=FALSE}
 failed <- computeRechallengeFailCaseSeriesAnalyses(
   connectionDetails = connectionDetails,
   targetDatabaseSchema = "main",
   targetTable = "cohort",
-  dechallengeRechallengeSettings = exampleDechallengeRechallengeSettings,
+  settings = exampleDechallengeRechallengeSettings,
   outcomeDatabaseSchema = "main",
   outcomeTable = "cohort",
-  databaseId = "Eunomia"
+  databaseId = "Eunomia",
+  outcomeTable = file.path(getwd(), "example_char", "results"),
+  minCellCount = 5
 )
-```
-
-The results are Andromeda objects that can we viewed using `dplyr`.  There is just one table named rechallengeFailCaseSeries:
- 
-```{r eval=TRUE}
-failed$rechallengeFailCaseSeries %>%
-  collect() %>%
-  kableExtra::kbl()
 ```
 
 ## Time to Event
@@ -240,28 +217,18 @@ exampleTimeToEventSettings <- createTimeToEventSettings(
 
 We can then run  the analysis on the Eunomia data using `computeTimeToEventAnalyses` and the settings previously specified:
 
-```{r eval=TRUE}
+```{r eval=FALSE}
 tte <- computeTimeToEventAnalyses(
   connectionDetails = connectionDetails,
   cdmDatabaseSchema = "main",
   targetDatabaseSchema = "main",
   targetTable = "cohort",
-  timeToEventSettings = exampleTimeToEventSettings,
-  databaseId = "Eunomia"
+  settings = exampleTimeToEventSettings,
+  databaseId = "Eunomia",
+  outcomeTable = file.path(getwd(), "example_char", "results"),
+  minCellCount = 5
 )
 ```
-
-If you would like to save the results you can use the function `saveTimeToEventAnalyses` and this can then be loaded using `loadTimeToEventAnalyses`.
-
-The results are Andromeda objects that can we viewed using `dplyr`.  There is just one table named timeToEvent:
- 
-```{r eval=TRUE}
-tte$timeToEvent %>%
-  collect() %>%
-  top_n(10) %>%
-  kableExtra::kbl()
-```
-
 
 ## Run Multiple 
 
@@ -275,9 +242,7 @@ characterizationSettings <- createCharacterizationSettings(
   dechallengeRechallengeSettings = list(
     exampleDechallengeRechallengeSettings
   ),
-  aggregateCovariateSettings = list(
-    exampleAggregateCovariateSettings
-  )
+  aggregateCovariateSettings = exampleAggregateCovariateSettings
 )
 
 # save the settings using
@@ -299,25 +264,21 @@ runCharacterizationAnalyses(
   outcomeDatabaseSchema = "main",
   outcomeTable = "cohort",
   characterizationSettings = characterizationSettings,
-  saveDirectory = file.path(tempdir(), "example"),
-  tablePrefix = "c_",
-  databaseId = "1"
+  outputDirectory = file.path(tempdir(), "example", "results"),
+  executionPath = file.path(tempdir(), "example", "execution"),
+  csvFilePrefix = "c_",
+  databaseId = "1",
+  incremental = F,
+  minCharacterizationMean = 0.01,
+  minCellCount = 5
 )
 ```
 
-This will create an SQLITE database with all the analyses saved into the saveDirectory.  You can export the results as csv files using:
+This will create csv files with the results in the saveDirectory.  You can run the following code to view the results in a shiny app:
 
 ```{r eval=FALSE}
-connectionDetailsT <- DatabaseConnector::createConnectionDetails(
-  dbms = "sqlite",
-  server = file.path(tempdir(), "example", "sqliteCharacterization", "sqlite.sqlite")
-)
-
-exportDatabaseToCsv(
-  connectionDetails = connectionDetailsT,
-  resultSchema = "main",
-  targetDialect = "sqlite",
-  tablePrefix = "c_",
-  saveDirectory = file.path(tempdir(), "csv")
+viewCharacterization(
+  resultFolder = file.path(tempdir(), "example", "results"),
+  cohortDefinitionSet = NULL
 )
 ```

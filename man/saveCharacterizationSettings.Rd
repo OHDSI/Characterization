@@ -20,3 +20,10 @@ This function converts the settings into a json object and saves it
 \details{
 Input the characterization settings and output a json file to a file named 'characterizationSettings.json' inside the saveDirectory
 }
+\seealso{
+Other {LargeScale}: 
+\code{\link{createCharacterizationSettings}()},
+\code{\link{loadCharacterizationSettings}()},
+\code{\link{runCharacterizationAnalyses}()}
+}
+\concept{{LargeScale}}

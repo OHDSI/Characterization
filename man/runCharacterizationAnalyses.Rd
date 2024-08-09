@@ -10,14 +10,18 @@ runCharacterizationAnalyses(
   targetTable,
   outcomeDatabaseSchema,
   outcomeTable,
-  tempEmulationSchema = NULL,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   cdmDatabaseSchema,
   characterizationSettings,
-  saveDirectory,
-  tablePrefix = "c_",
+  outputDirectory,
+  executionPath = file.path(outputDirectory, "execution"),
+  csvFilePrefix = "c_",
   databaseId = "1",
   showSubjectId = F,
-  minCellCount = 0
+  minCellCount = 0,
+  incremental = T,
+  threads = 1,
+  minCharacterizationMean = 0.01
 )
 }
 \arguments{
@@ -43,19 +47,26 @@ can be created}
 
 \item{characterizationSettings}{The study settings created using \code{createCharacterizationSettings}}
 
-\item{saveDirectory}{The location to save the results to}
+\item{outputDirectory}{The location to save the final csv files to}
 
-\item{tablePrefix}{A string to append the tables in the results}
+\item{executionPath}{The location where intermediate results are saved to}
+
+\item{csvFilePrefix}{A string to append the csv files in the outputDirectory}
 
 \item{databaseId}{The unique identifier for the cdm database}
 
 \item{showSubjectId}{Whether to include subjectId of failed rechallenge case series or hide}
 
 \item{minCellCount}{The minimum count value that is calculated}
+
+\item{incremental}{If TRUE then skip previously executed analyses that completed}
+
+\item{threads}{The number of threads to use when running aggregate covariates}
+
+\item{minCharacterizationMean}{The minimum mean threshold to extract when running aggregate covariates}
 }
 \value{
-An sqlite database with the results is saved into the saveDirectory and a csv file named tacker.csv
-details which analyses have run to completion.
+Multiple csv files in the outputDirectory.
 }
 \description{
 Specify the database connection containing the CDM data, the cohort database schemas/tables,
@@ -65,3 +76,10 @@ the characterization settings and the directory to save the results to
 The results of the characterization will be saved into an sqlite database inside the
 specified saveDirectory
 }
+\seealso{
+Other {LargeScale}: 
+\code{\link{createCharacterizationSettings}()},
+\code{\link{loadCharacterizationSettings}()},
+\code{\link{saveCharacterizationSettings}()}
+}
+\concept{{LargeScale}}

@@ -8,7 +8,7 @@
 #' @param timeToEventSettings    A list of timeToEvent settings
 #' @param dechallengeRechallengeSettings A list of dechallengeRechallenge settings
 #' @param aggregateCovariateSettings A list of aggregateCovariate settings
-#'
+#' @family {LargeScale}
 #' @return
 #' Returns the connection to the sqlite database
 #'
@@ -54,6 +54,7 @@ createCharacterizationSettings <- function(
   return(settings)
 }
 
+
 #' Save the characterization settings as a json
 #' @description
 #' This function converts the settings into a json object and saves it
@@ -63,7 +64,7 @@ createCharacterizationSettings <- function(
 #'
 #' @param settings    An object of class characterizationSettings created using \code{createCharacterizationSettings}
 #' @param fileName  The location to save the json settings
-#'
+#' @family {LargeScale}
 #' @return
 #' Returns the location of the directory containing the json settings
 #'
@@ -90,7 +91,7 @@ saveCharacterizationSettings <- function(
 #'
 #' @return
 #' Returns the json settings as an R object
-#'
+#' @family {LargeScale}
 #' @export
 loadCharacterizationSettings <- function(
     fileName) {
@@ -115,15 +116,18 @@ loadCharacterizationSettings <- function(
 #' @template TempEmulationSchema
 #' @param cdmDatabaseSchema The schema with the OMOP CDM data
 #' @param characterizationSettings The study settings created using \code{createCharacterizationSettings}
-#' @param saveDirectory The location to save the results to
-#' @param tablePrefix A string to append the tables in the results
+#' @param outputDirectory The location to save the final csv files to
+#' @param executionPath The location where intermediate results are saved to
+#' @param csvFilePrefix A string to append the csv files in the outputDirectory
 #' @param databaseId The unique identifier for the cdm database
 #' @param showSubjectId  Whether to include subjectId of failed rechallenge case series or hide
 #' @param minCellCount  The minimum count value that is calculated
-#'
+#' @param incremental If TRUE then skip previously executed analyses that completed
+#' @param threads    The number of threads to use when running aggregate covariates
+#' @param minCharacterizationMean The minimum mean threshold to extract when running aggregate covariates
+#' @family {LargeScale}
 #' @return
-#' An sqlite database with the results is saved into the saveDirectory and a csv file named tacker.csv
-#' details which analyses have run to completion.
+#' Multiple csv files in the outputDirectory.
 #'
 #' @export
 runCharacterizationAnalyses <- function(
@@ -132,14 +136,18 @@ runCharacterizationAnalyses <- function(
     targetTable,
     outcomeDatabaseSchema,
     outcomeTable,
-    tempEmulationSchema = NULL,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     cdmDatabaseSchema,
     characterizationSettings,
-    saveDirectory,
-    tablePrefix = "c_",
+    outputDirectory,
+    executionPath = file.path(outputDirectory, "execution"),
+    csvFilePrefix = "c_",
     databaseId = "1",
     showSubjectId = F,
-    minCellCount = 0) {
+    minCellCount = 0,
+    incremental = T,
+    threads = 1,
+    minCharacterizationMean = 0.01) {
   # inputs checks
   errorMessages <- checkmate::makeAssertCollection()
   .checkCharacterizationSettings(
@@ -147,290 +155,324 @@ runCharacterizationAnalyses <- function(
     errorMessages = errorMessages
   )
   .checkTablePrefix(
-    tablePrefix = tablePrefix,
+    tablePrefix = csvFilePrefix,
     errorMessages = errorMessages
   )
   checkmate::reportAssertions(
     errorMessages
   )
 
-  # create the Database
-  conn <- createSqliteDatabase(
-    sqliteLocation = saveDirectory
+  runDateTime <- Sys.time()
+
+  createDirectory(outputDirectory)
+  createDirectory(executionPath)
+
+  logger <- createLogger(
+    logPath = file.path(executionPath),
+    logName = "log.txt"
   )
-  on.exit(
-    DatabaseConnector::disconnect(conn)
+  ParallelLogger::registerLogger(logger)
+  on.exit(ParallelLogger::unregisterLogger(logger))
+
+  jobs <- createJobs(
+    characterizationSettings = characterizationSettings,
+    threads = threads
   )
 
-  createCharacterizationTables(
-    conn = conn,
-    resultSchema = "main",
-    targetDialect = "sqlite",
-    deleteExistingTables = T,
-    createTables = T,
-    tablePrefix = tablePrefix
-  )
-
-  if (!is.null(characterizationSettings$timeToEventSettings)) {
-    for (i in 1:length(characterizationSettings$timeToEventSettings)) {
-      message("Running time to event analysis ", i)
-
-      result <- tryCatch(
-        {
-          computeTimeToEventAnalyses(
-            connectionDetails = connectionDetails,
-            targetDatabaseSchema = targetDatabaseSchema,
-            targetTable = targetTable,
-            outcomeDatabaseSchema = outcomeDatabaseSchema,
-            outcomeTable = outcomeTable,
-            tempEmulationSchema = tempEmulationSchema,
-            cdmDatabaseSchema = cdmDatabaseSchema,
-            timeToEventSettings = characterizationSettings$timeToEventSettings[[i]],
-            databaseId = databaseId
-          )
-        },
-        error = function(e) {
-          message(paste0("ERROR in time-to-event analysis: ", e$message))
-          return(NULL)
-        }
-      )
-
-      if (!is.null(result)) {
-        # log that run was sucessful
-        readr::write_csv(
-          x = data.frame(
-            analysis_type = "timeToEvent",
-            run_id = i,
-            database_id = databaseId,
-            date_time = as.character(Sys.time())
-          ),
-          file = file.path(saveDirectory, "tracker.csv"),
-          append = file.exists(file.path(saveDirectory, "tracker.csv"))
-        )
-
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = "main",
-          tableName = "time_to_event",
-          andromedaObject = result$timeToEvent,
-          tablePrefix = tablePrefix,
-          minCellCount = minCellCount,
-          minCellCountColumns = list("numEvents")
-        )
-      }
-    }
+  # save settings
+  if (!file.exists(file.path(executionPath, "settings.rds"))) {
+    saveRDS(
+      object = list(
+        characterizationSettings = characterizationSettings,
+        threads = threads
+      ),
+      file = file.path(executionPath, "settings.rds")
+    )
   }
 
-  if (!is.null(characterizationSettings$dechallengeRechallengeSettings)) {
-    for (i in 1:length(characterizationSettings$dechallengeRechallengeSettings)) {
-      ParallelLogger::logInfo(paste0("Running dechallenge rechallenge analysis ", i))
-
-      result <- tryCatch(
-        {
-          computeDechallengeRechallengeAnalyses(
-            connectionDetails = connectionDetails,
-            targetDatabaseSchema = targetDatabaseSchema,
-            targetTable = targetTable,
-            outcomeDatabaseSchema = outcomeDatabaseSchema,
-            outcomeTable = outcomeTable,
-            tempEmulationSchema = tempEmulationSchema,
-            dechallengeRechallengeSettings = characterizationSettings$dechallengeRechallengeSettings[[i]],
-            databaseId = databaseId
-          )
-        },
-        error = function(e) {
-          message(paste0("ERROR in dechallenge rechallenge analysis: ", e$message))
-          return(NULL)
-        }
-      )
-
-      if (!is.null(result)) {
-        # log that run was sucessful
-        readr::write_csv(
-          x = data.frame(
-            analysis_type = "dechallengeRechallenge",
-            run_id = i,
-            database_id = databaseId,
-            date_time = as.character(Sys.time())
-          ),
-          file = file.path(saveDirectory, "tracker.csv"),
-          append = file.exists(file.path(saveDirectory, "tracker.csv"))
-        )
-
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = "main",
-          tableName = "dechallenge_rechallenge",
-          andromedaObject = result$dechallengeRechallenge,
-          tablePrefix = tablePrefix,
-          minCellCount = minCellCount,
-          minCellCountColumns = list(
-            c("numCases"),
-            c("dechallengeAttempt"),
-            c("dechallengeFail", "dechallengeSuccess"),
-            c("rechallengeAttempt"),
-            c("rechallengeFail", "rechallengeSuccess")
-          )
-        )
-      }
-
-      # run failed analysis
-      message("Running rechallenge failed case analysis ", i)
-
-      result <- tryCatch(
-        {
-          computeRechallengeFailCaseSeriesAnalyses(
-            connectionDetails = connectionDetails,
-            targetDatabaseSchema = targetDatabaseSchema,
-            targetTable = targetTable,
-            outcomeDatabaseSchema = outcomeDatabaseSchema,
-            outcomeTable = outcomeTable,
-            tempEmulationSchema = tempEmulationSchema,
-            dechallengeRechallengeSettings = characterizationSettings$dechallengeRechallengeSettings[[i]],
-            databaseId = databaseId,
-            showSubjectId = showSubjectId
-          )
-        },
-        error = function(e) {
-          message(paste0("ERROR in rechallenge failed case analysis: ", e$message))
-          return(NULL)
-        }
-      )
-
-      if (!is.null(result)) {
-        # log that run was successful
-        readr::write_csv(
-          x = data.frame(
-            analysis_type = "rechallengeFailCaseSeries",
-            run_id = i,
-            database_id = databaseId,
-            date_time = as.character(Sys.time())
-          ),
-          file = file.path(saveDirectory, "tracker.csv"),
-          append = file.exists(file.path(saveDirectory, "tracker.csv"))
-        )
-
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = "main",
-          tableName = "rechallenge_fail_case_series",
-          andromedaObject = result$rechallengeFailCaseSeries,
-          tablePrefix = tablePrefix
-        )
-      }
+  if (incremental) {
+    # check for any issues with current incremental
+    oldSettings <- readRDS(
+      file = file.path(executionPath, "settings.rds")
+    )
+    if (!identical(characterizationSettings, oldSettings$characterizationSettings)) {
+      stop("Settings have changed - please turn off incremental")
     }
+    if (!identical(threads, oldSettings$threads)) {
+      stop("Cannot change number of threads in incremental model")
+    }
+
+    # create logs if not exists
+    createIncrementalLog(
+      executionFolder = executionPath,
+      logname = "execution.csv"
+    )
+    createIncrementalLog(
+      executionFolder = executionPath,
+      logname = "completed.csv"
+    )
+
+    checkResultFilesIncremental(
+      executionFolder = executionPath
+    )
+
+    # remove any previously completed jobs
+    completedJobIds <- findCompletedJobs(executionFolder = executionPath)
+
+    completedJobIndex <- jobs$jobId %in% completedJobIds
+    if (sum(completedJobIndex) > 0) {
+      message(paste0("Removing ", sum(completedJobIndex), " previously completed jobs"))
+      jobs <- jobs[!completedJobIndex, ]
+    }
+
+    if (nrow(jobs) == 0) {
+      message("No jobs left")
+      return(invisible(T))
+    }
+  } else {
+    # check for any csv files in folder
+    checkResultFilesNonIncremental(
+      executionFolder = executionPath
+    )
   }
 
 
-  if (!is.null(characterizationSettings$aggregateCovariateSettings)) {
-    ParallelLogger::logInfo("Running aggregate covariate analyses")
 
-    for (i in 1:length(characterizationSettings$aggregateCovariateSettings)) {
-      result <- tryCatch(
-        {
-          computeAggregateCovariateAnalyses(
-            connectionDetails = connectionDetails,
-            cdmDatabaseSchema = cdmDatabaseSchema,
-            targetDatabaseSchema = targetDatabaseSchema,
-            targetTable = targetTable,
-            outcomeDatabaseSchema = outcomeDatabaseSchema,
-            outcomeTable = outcomeTable,
-            tempEmulationSchema = tempEmulationSchema,
-            aggregateCovariateSettings = characterizationSettings$aggregateCovariateSettings[[i]],
-            databaseId = databaseId,
-            runId = i
-          )
-        },
-        error = function(e) {
-          message(paste0("ERROR in aggregate covariate analyses: ", e$message))
-          message(e)
-          return(NULL)
-        }
+  # Now loop over the jobs
+  inputSettings <- list(
+    connectionDetails = connectionDetails,
+    targetDatabaseSchema = targetDatabaseSchema,
+    targetTable = targetTable,
+    outcomeDatabaseSchema = outcomeDatabaseSchema,
+    outcomeTable = outcomeTable,
+    tempEmulationSchema = tempEmulationSchema,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    databaseId = databaseId,
+    showSubjectId = showSubjectId,
+    minCellCount = minCellCount,
+    minCharacterizationMean = minCharacterizationMean,
+    executionPath = executionPath,
+    incremental = incremental
+  )
+
+  # convert jobList to list with extra inputs
+  jobList <- lapply(
+    X = 1:nrow(jobs),
+    FUN = function(ind) {
+      inputs <- inputSettings
+      inputs$settings <- jobs$settings[ind]
+      inputs$functionName <- jobs$functionName[ind]
+      inputs$executionFolder <- jobs$executionFolder[ind]
+      inputs$jobId <- jobs$jobId[ind]
+      inputs$runDateTime <- runDateTime
+      return(inputs)
+    }
+  )
+
+  message("Creating new cluster")
+  cluster <- ParallelLogger::makeCluster(
+    numberOfThreads = threads,
+    singleThreadToMain = T,
+    setAndromedaTempFolder = T
+  )
+
+  ParallelLogger::clusterApply(
+    cluster = cluster,
+    x = jobList,
+    fun = runCharacterizationsInParallel
+  )
+
+  # code to export all csvs into one file
+  aggregateCsvs(
+    outputFolder = outputDirectory,
+    executionPath = executionPath,
+    executionFolders = jobs$executionFolder,
+    csvFilePrefix = csvFilePrefix
+  )
+
+  invisible(outputDirectory)
+}
+
+createDirectory <- function(x) {
+  if (!dir.exists(x)) {
+    message(paste0("Creating directory ", x))
+    dir.create(x, recursive = T)
+  }
+}
+
+createLogger <- function(logPath, logName) {
+  createDirectory(logPath)
+  ParallelLogger::createLogger(
+    name = "Characterization",
+    threshold = "INFO",
+    appenders = list(
+      ParallelLogger::createFileAppender(
+        fileName = file.path(logPath, logName),
+        layout = ParallelLogger::layoutParallel,
+        expirationTime = 60 * 60 * 48
       )
+    )
+  )
+}
 
-      if (!is.null(result)) {
-        # log that run was successful
-        readr::write_csv(
-          x = data.frame(
-            analysis_type = "aggregateCovariates",
-            run_id = i,
-            database_id = databaseId,
-            date_time = as.character(Sys.time())
-          ),
-          file = file.path(saveDirectory, "tracker.csv"),
-          append = file.exists(file.path(saveDirectory, "tracker.csv"))
+runCharacterizationsInParallel <- function(x) {
+  startTime <- Sys.time()
+
+  functionName <- x$functionName
+  inputSettings <- x
+  inputSettings$functionName <- NULL
+  inputSettings$settings <- ParallelLogger::convertJsonToSettings(inputSettings$settings)
+  inputSettings$outputFolder <- file.path(x$executionPath, x$executionFolder)
+
+  if (x$incremental) {
+    recordIncremental(
+      executionFolder = x$executionPath,
+      runDateTime = x$runDateTime,
+      jobId = x$jobId,
+      startTime = startTime,
+      endTime = startTime,
+      logname = "execution.csv"
+    )
+  }
+
+  completed <- tryCatch(
+    {
+      do.call(
+        what = eval(parse(text = functionName)),
+        args = inputSettings
+      )
+    },
+    error = function(e) {
+      print(e)
+      return(FALSE)
+    }
+  )
+
+  endTime <- Sys.time()
+
+  # if it completed without issues save it
+  if (x$incremental & completed) {
+    recordIncremental(
+      executionFolder = x$executionPath,
+      runDateTime = x$runDateTime,
+      jobId = x$jobId,
+      startTime = startTime,
+      endTime = endTime,
+      logname = "completed.csv"
+    )
+  }
+}
+
+createJobs <- function(
+    characterizationSettings,
+    threads) {
+  jobDf <- rbind(
+    getTimeToEventJobs(
+      characterizationSettings,
+      threads
+    ),
+    getDechallengeRechallengeJobs(
+      characterizationSettings,
+      threads
+    ),
+    getAggregateCovariatesJobs(
+      characterizationSettings,
+      threads
+    )
+  )
+
+  # data.frame(
+  #  functionName,
+  #  settings # json,
+  #  executionFolder,
+  #  jobId
+  # )
+
+  return(jobDf)
+}
+
+
+
+aggregateCsvs <- function(
+    executionPath,
+    outputFolder,
+    executionFolders, # needed?
+    csvFilePrefix) {
+  tables <- c(
+    "cohort_details.csv", "settings.csv", "covariates.csv",
+    "covariates_continuous.csv", "covariate_ref.csv",
+    "analysis_ref.csv", "cohort_counts.csv",
+    "time_to_event.csv",
+    "rechallenge_fail_case_series.csv", "dechallenge_rechallenge.csv"
+  )
+
+  # this makes sure results are recreated
+  firstTracker <- data.frame(
+    table = tables,
+    first = rep(T, length(tables))
+  )
+
+  analysisRefTracker <- c()
+  covariateRefTracker <- c()
+  settingsTracker <- c()
+
+  # create outputFolder
+
+  folderNames <- dir(executionPath)
+
+  # for each folder load covariates, covariates_continuous,
+  # covariate_ref and analysis_ref
+  for (folderName in folderNames) {
+    for (csvType in tables) {
+      loadPath <- file.path(executionPath, folderName, csvType)
+      savePath <- file.path(outputFolder, paste0(csvFilePrefix, csvType))
+      if (file.exists(loadPath)) {
+        # TODO do this in batches
+        data <- readr::read_csv(
+          file = loadPath,
+          show_col_types = F
         )
 
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = "main",
-          tableName = "settings",
-          andromedaObject = result$settings,
-          tablePrefix = tablePrefix
-        )
+        if (csvType == "analysis_ref.csv") {
+          data <- data %>%
+            dplyr::mutate(
+              unique_id = paste0(.data$setting_id, "-", .data$analysis_id)
+            ) %>%
+            dplyr::filter( # need to filter analysis_id and setting_id
+              !.data$unique_id %in% analysisRefTracker
+            ) %>%
+            dplyr::select(-"unique_id")
 
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = "main",
-          tableName = "cohort_counts",
-          andromedaObject = result$cohortCounts,
-          tablePrefix = tablePrefix
-        )
+          analysisRefTracker <- unique(c(analysisRefTracker, paste0(data$setting_id, "-", data$analysis_id)))
+        }
+        if (csvType == "covariate_ref.csv") { # this could be problematic as may have differnet covariate_ids
+          data <- data %>%
+            dplyr::mutate(
+              unique_id = paste0(.data$setting_id, "-", .data$covariate_id)
+            ) %>%
+            dplyr::filter( # need to filter covariate_id and setting_id
+              !.data$unique_id %in% covariateRefTracker
+            ) %>%
+            dplyr::select(-"unique_id")
 
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = "main",
-          tableName = "cohort_details",
-          andromedaObject = result$cohortDetails,
-          tablePrefix = tablePrefix
-        )
-
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = "main",
-          tableName = "analysis_ref",
-          andromedaObject = result$analysisRef,
-          tablePrefix = tablePrefix
-        )
-        insertAndromedaToDatabase(
-          connection = conn,
-          databaseSchema = "main",
-          tableName = "covariate_ref",
-          andromedaObject = result$covariateRef,
-          tablePrefix = tablePrefix
-        )
-
-        if (!is.null(result$covariates)) {
-          insertAndromedaToDatabase(
-            connection = conn,
-            databaseSchema = "main",
-            tableName = "covariates",
-            andromedaObject = result$covariates,
-            tablePrefix = tablePrefix,
-            minCellCount = minCellCount,
-            minCellCountColumns = list(
-              c("sumValue") # c('SUM_VALUE') #AVERAGE_VALUE
+          covariateRefTracker <- unique(c(covariateRefTracker, paste0(data$setting_id, "-", data$covariate_id)))
+        }
+        if (csvType == "settings.csv") {
+          data <- data %>%
+            dplyr::filter(
+              !.data$setting_id %in% settingsTracker
             )
-          )
+          settingsTracker <- c(settingsTracker, unique(data$setting_id))
         }
 
-        if (!is.null(result$covariatesContinuous)) {
-          insertAndromedaToDatabase(
-            connection = conn,
-            databaseSchema = "main",
-            tableName = "covariates_continuous",
-            andromedaObject = result$covariatesContinuous,
-            tablePrefix = tablePrefix,
-            minCellCount = minCellCount,
-            minCellCountColumns = list(
-              c("countValue")
-            )
-          )
-        }
+        append <- file.exists(savePath)
+        readr::write_csv(
+          x = data,
+          file = savePath, quote = "all",
+          append = append & !firstTracker$first[firstTracker$table == csvType]
+        )
+        firstTracker$first[firstTracker$table == csvType] <- F
       }
     }
   }
-
-
-  invisible(saveDirectory)
 }

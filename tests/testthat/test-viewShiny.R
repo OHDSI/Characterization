@@ -1,7 +1,7 @@
 context("ViewShiny")
 
 # create a folder with results for the shiny app
-resultLocation <- file.path(tempdir(), "shinyResults")
+resultLocation <- file.path(tempdir(), paste0("d_", paste0(sample(100, 3), collapse = "_"), sep = ""), "shinyResults")
 if (!dir.exists(resultLocation)) {
   dir.create(resultLocation, recursive = T)
 }
@@ -57,7 +57,9 @@ test_that("prepareCharacterizationShiny works", {
     riskWindowEnd = 365,
     endAnchor = "cohort start",
     covariateSettings = FeatureExtraction::createCovariateSettings(
-      useConditionOccurrenceLongTerm = T
+      useDemographicsGender = T,
+      useDemographicsAge = T,
+      useDemographicsRace = T
     )
   )
 
@@ -83,20 +85,25 @@ test_that("prepareCharacterizationShiny works", {
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     characterizationSettings = characterizationSettings,
-    saveDirectory = resultLocation,
-    tablePrefix = "c_",
-    databaseId = "1"
+    outputDirectory = file.path(resultLocation, "result"),
+    executionPath = file.path(resultLocation, "execution"),
+    csvFilePrefix = "c_",
+    databaseId = "1",
+    threads = 1,
+    incremental = T,
+    minCellCount = 0,
+    minCharacterizationMean = 0.01
   )
 
-  settings <- prepareCharacterizationShiny(
-    resultLocation = resultLocation,
-    cohortDefinitionSet = NULL
+  settings <- Characterization:::prepareCharacterizationShiny(
+    resultFolder = file.path(resultLocation, "result"),
+    cohortDefinitionSet = NULL,
+    sqliteLocation = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
   )
 
   testthat::expect_true(settings$schema == "main")
   testthat::expect_true(settings$tablePrefix == "c_")
   testthat::expect_true(settings$cohortTablePrefix == "cg_")
-  testthat::expect_true(settings$incidenceTablePrefix == "i_")
   testthat::expect_true(settings$databaseTable == "DATABASE_META_DATA")
 
   connectionDetailsTest <- do.call(
@@ -117,13 +124,13 @@ test_that("prepareCharacterizationShiny works", {
   # make sure the extra tables are added
   testthat::expect_true("cg_cohort_definition" %in% tables)
   testthat::expect_true("database_meta_data" %in% tables)
-  testthat::expect_true("i_incidence_summary" %in% tables)
 })
 
 test_that("shiny app works", {
   settings <- prepareCharacterizationShiny(
-    resultLocation = resultLocation,
-    cohortDefinitionSet = NULL
+    resultFolder = file.path(resultLocation, "result"),
+    cohortDefinitionSet = NULL,
+    sqliteLocation = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
   )
 
   app <- viewChars(

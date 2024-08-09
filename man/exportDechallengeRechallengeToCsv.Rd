@@ -19,3 +19,9 @@ A string specifying the directory the csv results are saved to
 \description{
 export the DechallengeRechallenge results as csv
 }
+\seealso{
+Other {SaveLoad}: 
+\code{\link{exportRechallengeFailCaseSeriesToCsv}()},
+\code{\link{exportTimeToEventToCsv}()}
+}
+\concept{{SaveLoad}}

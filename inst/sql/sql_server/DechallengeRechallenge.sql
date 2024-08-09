@@ -1,37 +1,41 @@
+IF OBJECT_ID('tempdb..#target_cohort', 'U') IS NOT NULL DROP TABLE #target_cohort;
 select * into #target_cohort
 from @target_database_schema.@target_table
 where cohort_definition_id in (@target_ids)
 ;
 
+IF OBJECT_ID('tempdb..#outcome_cohort', 'U') IS NOT NULL DROP TABLE #outcome_cohort;
 select * into #outcome_cohort
 from @outcome_database_schema.@outcome_table
 where cohort_definition_id in (@outcome_ids)
 ;
 
+IF OBJECT_ID('tempdb..#challenge', 'U') IS NOT NULL DROP TABLE #challenge;
 select
 '@database_id' as database_id,
 @dechallenge_stop_interval as dechallenge_stop_interval,
 @dechallenge_evaluation_window as dechallenge_evaluation_window,
 target_cohort_definition_id,
-	outcome_cohort_definition_id,
-	num_exposure_eras,
-	num_persons_exposed,
-	num_cases,
-	dechallenge_attempt,
-	dechallenge_fail,
-	dechallenge_success,
-	rechallenge_attempt,
-	rechallenge_fail,
-	rechallenge_success,
-	case when num_cases > 0 then 1.0*dechallenge_attempt / num_cases else null end as pct_dechallenge_attempt,
-	case when dechallenge_attempt > 0 then 1.0*dechallenge_success / dechallenge_attempt else null end as pct_dechallenge_success,
-	case when dechallenge_attempt > 0 then 1.0*dechallenge_fail / dechallenge_attempt else null end as pct_dechallenge_fail,
-	case when dechallenge_attempt > 0 then 1.0*rechallenge_attempt / dechallenge_attempt else null end as pct_rechallenge_attempt,
-	case when rechallenge_attempt > 0 then 1.0*rechallenge_success / rechallenge_attempt else null end as pct_rechallenge_success,
-	case when rechallenge_attempt > 0 then 1.0*rechallenge_fail / rechallenge_attempt else null end as pct_rechallenge_fail
+outcome_cohort_definition_id,
+num_exposure_eras,
+num_persons_exposed,
+num_cases,
+dechallenge_attempt,
+dechallenge_fail,
+dechallenge_success,
+rechallenge_attempt,
+rechallenge_fail,
+rechallenge_success,
+case when num_cases > 0 then 1.0*dechallenge_attempt / num_cases else null end as pct_dechallenge_attempt,
+case when dechallenge_attempt > 0 then 1.0*dechallenge_success / dechallenge_attempt else null end as pct_dechallenge_success,
+case when dechallenge_attempt > 0 then 1.0*dechallenge_fail / dechallenge_attempt else null end as pct_dechallenge_fail,
+case when dechallenge_attempt > 0 then 1.0*rechallenge_attempt / dechallenge_attempt else null end as pct_rechallenge_attempt,
+case when rechallenge_attempt > 0 then 1.0*rechallenge_success / rechallenge_attempt else null end as pct_rechallenge_success,
+case when rechallenge_attempt > 0 then 1.0*rechallenge_fail / rechallenge_attempt else null end as pct_rechallenge_fail
 
-	into #challenge
-from
+INTO #challenge
+
+FROM
 (
 	select cases.target_cohort_definition_id, cases.outcome_cohort_definition_id,
 		exposures.num_exposure_eras,
@@ -51,13 +55,38 @@ from
 	   group by cohort_definition_id
 	) exposures
 	inner join
+
   (
-	select dc1.cohort_definition_id as target_cohort_definition_id, io1.cohort_definition_id as outcome_cohort_definition_id, count(dc1.subject_id) as num_cases
+  select
+  target_cohort_definition_id,
+  outcome_cohort_definition_id,
+  sum(num_cases) as num_cases
+
+  from
+  (
+	select dc1.cohort_definition_id as target_cohort_definition_id,
+	io1.cohort_definition_id as outcome_cohort_definition_id,
+	count(dc1.subject_id) as num_cases
 	from #target_cohort dc1
 	inner join #outcome_cohort io1
 	on dc1.subject_id = io1.subject_id
 	and io1.cohort_start_date > dc1.cohort_start_date  and io1.cohort_start_date <= dc1.cohort_end_date
 	group by dc1.cohort_definition_id, io1.cohort_definition_id
+
+	--union
+
+	--select distinct
+	--dc1_temp.cohort_definition_id as target_cohort_definition_id,
+	--io1_temp.cohort_definition_id as outcome_cohort_definition_id,
+	--0 as num_cases
+	--from #target_cohort dc1_temp
+	--cross join #outcome_cohort io1_temp
+
+	) temp_cases
+	group by
+	target_cohort_definition_id,
+  outcome_cohort_definition_id
+
 	) cases
 	on exposures.cohort_definition_id = cases.target_cohort_definition_id
 	left join
@@ -84,7 +113,7 @@ from
 	on dc1.subject_id = ro1.subject_id
 	and io1.cohort_definition_id = ro1.cohort_definition_id
 	and ro1.cohort_start_date > dc1.cohort_end_date
-	and ro1.cohort_start_date <= dateadd(day, @dechallenge_evaluation_window, dc1.cohort_end_date)   --this should be parameterized to be the dechallenge window required for success/failure
+	and ro1.cohort_start_date <= dateadd(day, @dechallenge_evaluation_window, dc1.cohort_end_date)
 	group by dc1.cohort_definition_id, io1.cohort_definition_id
 	) dechallenge_fail
 	on cases.target_cohort_definition_id = dechallenge_fail.target_cohort_definition_id
@@ -101,12 +130,12 @@ from
 	on dc1.subject_id = ro0.subject_id
 	and io1.cohort_definition_id = ro0.cohort_definition_id
 	and ro0.cohort_start_date > dc1.cohort_end_date
-	and ro0.cohort_start_date <= dateadd(day, @dechallenge_evaluation_window, dc1.cohort_end_date)   --this should be parameterized to be the dechallenge window required for success/failure
+	and ro0.cohort_start_date <= dateadd(day, @dechallenge_evaluation_window, dc1.cohort_end_date)
 	inner join #target_cohort de1
 	on dc1.subject_id = de1.subject_id
 	and dc1.cohort_definition_id = de1.cohort_definition_id
-	and de1.cohort_start_date > dateadd(day, @dechallenge_evaluation_window, dc1.cohort_end_date)   --using same dechallenge window to detrmine when rechallenge attempt can start
-	where ro0.subject_id is null --not a dechallenge fail
+	and de1.cohort_start_date > dateadd(day, @dechallenge_evaluation_window, dc1.cohort_end_date)
+	where ro0.subject_id is null
 	group by dc1.cohort_definition_id, io1.cohort_definition_id
 	) rechallenge_attempt
 	on cases.target_cohort_definition_id = rechallenge_attempt.target_cohort_definition_id
@@ -123,17 +152,17 @@ from
 	on dc1.subject_id = ro0.subject_id
 	and io1.cohort_definition_id = ro0.cohort_definition_id
 	and ro0.cohort_start_date > dc1.cohort_end_date
-	and ro0.cohort_start_date <= dateadd(day, @dechallenge_evaluation_window, dc1.cohort_end_date)   --this should be parameterized to be the dechallenge window required for success/failure
+	and ro0.cohort_start_date <= dateadd(day, @dechallenge_evaluation_window, dc1.cohort_end_date)
 	inner join #target_cohort de1
 	on dc1.subject_id = de1.subject_id
 	and dc1.cohort_definition_id = de1.cohort_definition_id
-	and de1.cohort_start_date > dateadd(day, @dechallenge_evaluation_window, dc1.cohort_end_date)   --using same dechallenge window to detrmine when rechallenge attempt can start
+	and de1.cohort_start_date > dateadd(day, @dechallenge_evaluation_window, dc1.cohort_end_date)
 	inner join #outcome_cohort ro1
 	on de1.subject_id = ro1.subject_id
 	and io1.cohort_definition_id = ro1.cohort_definition_id
 	and ro1.cohort_start_date > de1.cohort_start_date
 	and ro1.cohort_start_date <= de1.cohort_end_date
-	where ro0.subject_id is null --not a dechallenge fail
+	where ro0.subject_id is null
 	group by dc1.cohort_definition_id, io1.cohort_definition_id
 	) rechallenge_fail
 	on cases.target_cohort_definition_id = rechallenge_fail.target_cohort_definition_id

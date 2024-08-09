@@ -4,10 +4,10 @@
 \alias{viewCharacterization}
 \title{viewCharacterization - Interactively view the characterization results}
 \usage{
-viewCharacterization(resultLocation, cohortDefinitionSet = NULL)
+viewCharacterization(resultFolder, cohortDefinitionSet = NULL)
 }
 \arguments{
-\item{resultLocation}{The location of the results}
+\item{resultFolder}{The location of the csv results}
 
 \item{cohortDefinitionSet}{The cohortDefinitionSet extracted using webAPI}
 }
@@ -20,3 +20,4 @@ This is a shiny app for viewing interactive plots and tables
 \details{
 Input is the output of ...
 }
+\concept{{Shiny}}
