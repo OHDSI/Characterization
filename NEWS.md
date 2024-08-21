@@ -1,3 +1,7 @@
+Characterization 2.0.1
+======================
+- edited cohort_type in results to varchar(12)
+
 Characterization 2.0.0
 ======================
 - added tests for all HADES supported dbms

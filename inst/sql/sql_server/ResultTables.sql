@@ -87,7 +87,7 @@ CREATE TABLE @my_schema.@table_prefixcovariate_ref (
 CREATE TABLE @my_schema.@table_prefixcovariates (
     database_id varchar(100) NOT NULL,
     setting_id float NOT NULL,
-    cohort_type varchar(10),
+    cohort_type varchar(12),
     target_cohort_id int,
     outcome_cohort_id int,
     min_characterization_mean float,
@@ -100,7 +100,7 @@ CREATE TABLE @my_schema.@table_prefixcovariates (
 CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
     database_id varchar(100) NOT NULL,
     setting_id float NOT NULL,
-    cohort_type varchar(10),
+    cohort_type varchar(12),
     target_cohort_id int,
     outcome_cohort_id int,
     covariate_id bigint NOT NULL,
@@ -138,7 +138,7 @@ CREATE TABLE @my_schema.@table_prefixsettings (
 CREATE TABLE @my_schema.@table_prefixcohort_details (
     database_id varchar(100) NOT NULL,
     setting_id float NOT NULL,
-    cohort_type varchar(10),
+    cohort_type varchar(12),
     target_cohort_id int,
     outcome_cohort_id int,
     PRIMARY KEY (setting_id, database_id,target_cohort_id,outcome_cohort_id,cohort_type)
@@ -146,7 +146,7 @@ CREATE TABLE @my_schema.@table_prefixcohort_details (
 
 CREATE TABLE @my_schema.@table_prefixcohort_counts(
     database_id varchar(100) NOT NULL,
-    cohort_type varchar(10),
+    cohort_type varchar(12),
     target_cohort_id int,
     outcome_cohort_id int,
     risk_window_start int,
