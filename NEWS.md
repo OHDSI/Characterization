@@ -1,3 +1,8 @@
+Characterization 2.0.1
+======================
+- edited cohort_type in results to varchar(12)
+- fixed setting id being messed up by readr loading
+
 Characterization 2.0.0
 ======================
 - added tests for all HADES supported dbms

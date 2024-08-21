@@ -61,7 +61,7 @@ CREATE TABLE @my_schema.@table_prefixdechallenge_rechallenge (
 
 CREATE TABLE @my_schema.@table_prefixanalysis_ref (
     database_id varchar(100) NOT NULL,
-    setting_id float NOT NULL,
+    setting_id varchar(30) NOT NULL,
     analysis_id int NOT NULL,
     analysis_name varchar(max) NOT NULL,
     domain_id varchar(30),
@@ -74,7 +74,7 @@ CREATE TABLE @my_schema.@table_prefixanalysis_ref (
 
 CREATE TABLE @my_schema.@table_prefixcovariate_ref (
     database_id varchar(100) NOT NULL,
-    setting_id float NOT NULL,
+    setting_id varchar(30) NOT NULL,
     covariate_id bigint NOT NULL,
     covariate_name varchar(max) NOT NULL,
     analysis_id int NOT NULL,
@@ -86,8 +86,8 @@ CREATE TABLE @my_schema.@table_prefixcovariate_ref (
 
 CREATE TABLE @my_schema.@table_prefixcovariates (
     database_id varchar(100) NOT NULL,
-    setting_id float NOT NULL,
-    cohort_type varchar(10),
+    setting_id varchar(30) NOT NULL,
+    cohort_type varchar(12),
     target_cohort_id int,
     outcome_cohort_id int,
     min_characterization_mean float,
@@ -99,8 +99,8 @@ CREATE TABLE @my_schema.@table_prefixcovariates (
 
 CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
     database_id varchar(100) NOT NULL,
-    setting_id float NOT NULL,
-    cohort_type varchar(10),
+    setting_id varchar(30) NOT NULL,
+    cohort_type varchar(12),
     target_cohort_id int,
     outcome_cohort_id int,
     covariate_id bigint NOT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
 
 -- covariateSettings
 CREATE TABLE @my_schema.@table_prefixsettings (
-    setting_id float NOT NULL,
+    setting_id varchar(30) NOT NULL,
     database_id varchar(100) NOT NULL,
     covariate_setting_json varchar(MAX),
     case_covariate_setting_json varchar(MAX),
@@ -137,8 +137,8 @@ CREATE TABLE @my_schema.@table_prefixsettings (
 -- added this table
 CREATE TABLE @my_schema.@table_prefixcohort_details (
     database_id varchar(100) NOT NULL,
-    setting_id float NOT NULL,
-    cohort_type varchar(10),
+    setting_id varchar(30) NOT NULL,
+    cohort_type varchar(12),
     target_cohort_id int,
     outcome_cohort_id int,
     PRIMARY KEY (setting_id, database_id,target_cohort_id,outcome_cohort_id,cohort_type)
@@ -146,7 +146,7 @@ CREATE TABLE @my_schema.@table_prefixcohort_details (
 
 CREATE TABLE @my_schema.@table_prefixcohort_counts(
     database_id varchar(100) NOT NULL,
-    cohort_type varchar(10),
+    cohort_type varchar(12),
     target_cohort_id int,
     outcome_cohort_id int,
     risk_window_start int,
