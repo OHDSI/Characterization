@@ -406,6 +406,14 @@ aggregateCsvs <- function(
     "rechallenge_fail_case_series.csv", "dechallenge_rechallenge.csv"
   )
 
+  colTypes <- c(
+    'ciicc','ciiiicciiccc', 'didciiccd',
+    'didddddddddciicc', 'dciicicc',
+    'icciicccc', 'iiciicciicddddd',
+    '????????',
+    '?????????????????', '????????????????????'
+  )
+
   # this makes sure results are recreated
   firstTracker <- data.frame(
     table = tables,
@@ -430,7 +438,8 @@ aggregateCsvs <- function(
         # TODO do this in batches
         data <- readr::read_csv(
           file = loadPath,
-          show_col_types = F
+          show_col_types = F,
+          col_types = colTypes[csvType == tables]
         )
 
         if (csvType == "analysis_ref.csv") {

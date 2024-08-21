@@ -45,7 +45,7 @@ dechallenge_rechallenge,pct_rechallenge_attempt,float,Yes,No,No,No,The percentag
 dechallenge_rechallenge,pct_rechallenge_success,float,Yes,No,No,No,The percentage of rechallenge success
 dechallenge_rechallenge,pct_rechallenge_fail,float,Yes,No,No,No,The percentage of rechallenge fails
 analysis_ref,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-analysis_ref,setting_id,float,Yes,Yes,No,No,The run identifier
+analysis_ref,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
 analysis_ref,analysis_id,int,Yes,Yes,No,No,The analysis identifier
 analysis_ref,analysis_name,varchar,Yes,No,No,No,The analysis name
 analysis_ref,domain_id,varchar,Yes,No,No,No,The domain id
@@ -54,7 +54,7 @@ analysis_ref,end_day,int,Yes,No,No,No,The end day
 analysis_ref,is_binary,varchar(1),Yes,No,No,No,Is this a binary analysis
 analysis_ref,missing_means_zero,varchar(1),Yes,No,No,No,Missing means zero
 covariate_ref,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-covariate_ref,setting_id,float,Yes,Yes,No,No,The run identifier
+covariate_ref,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
 covariate_ref,covariate_id,bigint,Yes,Yes,No,No,The covariate identifier
 covariate_ref,covariate_name,varchar,Yes,No,No,No,The covariate name
 covariate_ref,analysis_id,int,Yes,No,No,No,The analysis identifier
@@ -62,7 +62,7 @@ covariate_ref,concept_id,bigint,Yes,No,No,No,The concept identifier
 covariate_ref,value_as_concept_id,int,N,N,N,N,The value as concept_id for features created from observation or measurement values
 covariate_ref,collisions,int,N,N,N,N,The number of collisions found for the covariate_id
 covariates,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-covariates,setting_id,float,Yes,Yes,No,No,The run identifier
+covariates,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
 covariates,cohort_type,varchar(12),Yes,Yes,No,No,The cohort type
 covariates,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
 covariates,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
@@ -71,7 +71,7 @@ covariates,covariate_id,bigint,Yes,Yes,No,No,The covaraite id
 covariates,sum_value,int,Yes,No,No,No,The sum value
 covariates,average_value,float,No,No,No,No,The average value
 covariates_continuous,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-covariates_continuous,setting_id,float,Yes,Yes,No,No,The run identifier
+covariates_continuous,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
 covariates_continuous,cohort_type,varchar(12),Yes,Yes,No,No,The cohort type
 covariates_continuous,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
 covariates_continuous,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
@@ -86,7 +86,7 @@ covariates_continuous,p_10_value,float,No,No,No,No,The 10th percentile
 covariates_continuous,p_25_value,float,No,No,No,No,The 25th percentile
 covariates_continuous,p_75_value,float,No,No,No,No,The 75th percentile
 covariates_continuous,p_90_value,float,No,No,No,No,The 90th percentile
-settings,setting_id,float,Yes,Yes,No,No,The run identifier
+settings,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
 settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 settings,covariate_setting_json,varchar,Yes,No,No,No,The covariate settings JSON
 settings,case_covariate_setting_json,varchar,Yes,No,No,No,The during covariate settings JSON
@@ -99,7 +99,7 @@ settings,end_anchor,varchar(15),No,No,No,No,The end anchor
 settings,case_pre_target_duration,int,No,No,No,No,How far to look back before index for case features
 settings,case_post_outcome_duration,int,No,No,No,No,How far to look forward after outcome for case features
 cohort_details,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-cohort_details,setting_id,float,Yes,Yes,No,No,The run identifier
+cohort_details,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
 cohort_details,cohort_type,varchar(12),Yes,Yes,No,No,The cohort type
 cohort_details,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
 cohort_details,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
