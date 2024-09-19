@@ -50,7 +50,7 @@ and datediff(day, op.observation_period_start_date, o.cohort_start_date) >= @min
 IF OBJECT_ID('tempdb..#case_exclude', 'U') IS NOT NULL DROP TABLE #case_exclude;
 
 -- people with outcome prior
-select
+select distinct
 t.subject_id,
 t.cohort_start_date,
 t.cohort_end_date,
