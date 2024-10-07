@@ -4,16 +4,19 @@
     <loc>/404.html</loc>
   </url>
   <url>
-    <loc>/articles/index.html</loc>
+    <loc>/articles/InstallationGuide.html</loc>
   </url>
   <url>
-    <loc>/articles/InstallationGuide.html</loc>
+    <loc>/articles/Specification.html</loc>
   </url>
   <url>
     <loc>/articles/UsingCharacterizationPackage.html</loc>
   </url>
   <url>
     <loc>/articles/UsingPackage.html</loc>
+  </url>
+  <url>
+    <loc>/articles/index.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>
