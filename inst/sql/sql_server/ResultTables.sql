@@ -155,7 +155,7 @@ CREATE TABLE @my_schema.@table_prefixcohort_counts(
     end_anchor varchar(15),
     min_prior_observation int,
     outcome_washout_days int,
-    row_count int NOT NULL,
+    row_count bigint NOT NULL,
     person_count int NOT NULL,
     min_exposure_time int,
     mean_exposure_time int,
