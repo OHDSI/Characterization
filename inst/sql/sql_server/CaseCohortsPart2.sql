@@ -2,13 +2,13 @@
 
 -- 1) get all the people with the outcome in TAR
 IF OBJECT_ID('tempdb..#cases_tar', 'U') IS NOT NULL DROP TABLE #cases_tar;
--- cases
+-- cases (first outcome date)
 select
 t.subject_id,
 t.cohort_start_date,
 t.cohort_end_date,
-o.cohort_start_date as outcome_start_date,
-o.cohort_end_date as outcome_end_date,
+min(o.cohort_start_date) as outcome_start_date,
+min(o.cohort_end_date) as outcome_end_date,
 t.cohort_definition_id as target_cohort_id,
 o.cohort_definition_id as outcome_cohort_id
 into #cases_tar
@@ -19,7 +19,14 @@ where
 o.cohort_start_date <= dateadd(day, @tar_end, t.@tar_end_anchor)
 and
 -- outcome starts (ends?) after TAR start
-o.cohort_start_date >= dateadd(day, @tar_start, t.@tar_start_anchor);
+o.cohort_start_date >= dateadd(day, @tar_start, t.@tar_start_anchor)
+-- make sure to only get first outcome date during TAR
+group by
+t.subject_id,
+t.cohort_start_date,
+t.cohort_end_date,
+t.cohort_definition_id,
+o.cohort_definition_id;
 
 -- add the cases for specific TAR
 insert into #cases

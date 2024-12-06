@@ -1,3 +1,8 @@
+Characterization 2.1.0
+======================
+- risk factors and case series now restrict to first outcome only.
+- added documentation describing the different analyses with examples.
+
 Characterization 2.0.1
 ======================
 - edited cohort_type in results to varchar(12)

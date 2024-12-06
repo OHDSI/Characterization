@@ -97,10 +97,10 @@ creates an object specifying how during covariates should be constructed from da
 }
 \examples{
 settings <- createDuringCovariateSettings(
-   useConditionOccurrenceDuring = TRUE,
-   useConditionOccurrencePrimaryInpatientDuring = FALSE,
-   useConditionEraDuring = FALSE,
-   useConditionGroupEraDuring = FALSE
+  useConditionOccurrenceDuring = TRUE,
+  useConditionOccurrencePrimaryInpatientDuring = FALSE,
+  useConditionEraDuring = FALSE,
+  useConditionGroupEraDuring = FALSE
 )
 
 }
