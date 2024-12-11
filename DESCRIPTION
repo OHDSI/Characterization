@@ -1,15 +1,15 @@
 Package: Characterization
 Type: Package
 Title: Characterizations of Cohorts
-Version: 2.1.0
-Date: 2024-10-07
+Version: 2.1.1
+Date: 2024-12-11
 Authors@R: c(
 	person("Jenna", "Reps", , "reps@ohdsi.org", role = c("aut", "cre")),
 	person("Patrick", "Ryan", , "ryan@ohdsi.org", role = c("aut")),
 	person("Chris", "Knoll", , "knoll@ohdsi.org", role = c("aut"))
 	)
 Maintainer: Jenna Reps <reps@ohdsi.org>
-Description: Various characterizations of target and outcome cohorts.
+Description: Various characterizations of target and outcome cohorts for data mapped to the OMOP CDM.
 License: Apache License 2.0
 URL: https://ohdsi.github.io/Characterization, https://github.com/OHDSI/Characterization
 BugReports: https://github.com/OHDSI/Characterization/issues
