@@ -55,8 +55,8 @@ An \code{Andromeda::andromeda()} object containing the dechallenge rechallenge r
 Compute dechallenge rechallenge study
 }
 \seealso{
-Other {DechallengeRechallenge}: 
+Other DechallengeRechallenge: 
 \code{\link{computeRechallengeFailCaseSeriesAnalyses}()},
 \code{\link{createDechallengeRechallengeSettings}()}
 }
-\concept{{DechallengeRechallenge}}
+\concept{DechallengeRechallenge}

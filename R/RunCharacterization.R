@@ -8,7 +8,7 @@
 #' @param timeToEventSettings    A list of timeToEvent settings
 #' @param dechallengeRechallengeSettings A list of dechallengeRechallenge settings
 #' @param aggregateCovariateSettings A list of aggregateCovariate settings
-#' @family {LargeScale}
+#' @family LargeScale
 #' @return
 #' Returns the connection to the sqlite database
 #'
@@ -64,7 +64,7 @@ createCharacterizationSettings <- function(
 #'
 #' @param settings    An object of class characterizationSettings created using \code{createCharacterizationSettings}
 #' @param fileName  The location to save the json settings
-#' @family {LargeScale}
+#' @family LargeScale
 #' @return
 #' Returns the location of the directory containing the json settings
 #'
@@ -91,7 +91,7 @@ saveCharacterizationSettings <- function(
 #'
 #' @return
 #' Returns the json settings as an R object
-#' @family {LargeScale}
+#' @family LargeScale
 #' @export
 loadCharacterizationSettings <- function(
     fileName) {
@@ -125,7 +125,7 @@ loadCharacterizationSettings <- function(
 #' @param incremental If TRUE then skip previously executed analyses that completed
 #' @param threads    The number of threads to use when running aggregate covariates
 #' @param minCharacterizationMean The minimum mean threshold to extract when running aggregate covariates
-#' @family {LargeScale}
+#' @family LargeScale
 #' @return
 #' Multiple csv files in the outputDirectory.
 #'

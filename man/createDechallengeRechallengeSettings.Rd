@@ -27,8 +27,8 @@ A list with the settings
 Create dechallenge rechallenge study settings
 }
 \seealso{
-Other {DechallengeRechallenge}: 
+Other DechallengeRechallenge: 
 \code{\link{computeDechallengeRechallengeAnalyses}()},
 \code{\link{computeRechallengeFailCaseSeriesAnalyses}()}
 }
-\concept{{DechallengeRechallenge}}
+\concept{DechallengeRechallenge}
