@@ -229,7 +229,8 @@ computeTargetAggregateCovariateAnalyses <- function(
     tempTable = T,
     dropTableIfExists = T,
     createTable = T,
-    progressBar = F
+    progressBar = F,
+    tempEmulationSchema = tempEmulationSchema
   )
 
   message("Computing aggregate target cohorts")
@@ -270,7 +271,8 @@ computeTargetAggregateCovariateAnalyses <- function(
   group by cohort_definition_id;"
   sql <- SqlRender::translate(
     sql = sql,
-    targetDialect = connectionDetails$dbms
+    targetDialect = connectionDetails$dbms,
+    tempEmulationSchema = tempEmulationSchema
   )
   counts <- DatabaseConnector::querySql(
     connection = connection,
@@ -290,7 +292,8 @@ computeTargetAggregateCovariateAnalyses <- function(
     covariateSettings = ParallelLogger::convertJsonToSettings(covariateSettings),
     cdmVersion = cdmVersion,
     aggregated = T,
-    minCharacterizationMean = minCharacterizationMean
+    minCharacterizationMean = minCharacterizationMean,
+    tempEmulationSchema = tempEmulationSchema
   )
 
   # drop temp tables
@@ -410,7 +413,8 @@ computeCaseAggregateCovariateAnalyses <- function(
     tempTable = T,
     dropTableIfExists = T,
     createTable = T,
-    progressBar = F
+    progressBar = F,
+    tempEmulationSchema = tempEmulationSchema
   )
 
   message("Computing aggregate case covariate cohorts")
@@ -482,7 +486,8 @@ computeCaseAggregateCovariateAnalyses <- function(
   group by cohort_definition_id;"
   sql <- SqlRender::translate(
     sql = sql,
-    targetDialect = connectionDetails$dbms
+    targetDialect = connectionDetails$dbms,
+    tempEmulationSchema = tempEmulationSchema
   )
   counts <- DatabaseConnector::querySql(
     connection = connection,
@@ -502,7 +507,8 @@ computeCaseAggregateCovariateAnalyses <- function(
     covariateSettings = ParallelLogger::convertJsonToSettings(covariateSettings),
     cdmVersion = cdmVersion,
     aggregated = T,
-    minCharacterizationMean = minCharacterizationMean
+    minCharacterizationMean = minCharacterizationMean,
+    tempEmulationSchema = tempEmulationSchema
   )
 
   message("Computing aggregate during case covariate results")
@@ -519,7 +525,8 @@ computeCaseAggregateCovariateAnalyses <- function(
         covariateSettings = ParallelLogger::convertJsonToSettings(caseCovariateSettings),
         cdmVersion = cdmVersion,
         aggregated = T,
-        minCharacterizationMean = minCharacterizationMean
+        minCharacterizationMean = minCharacterizationMean,
+        tempEmulationSchema = tempEmulationSchema
       )
     },
     error = function(e) {

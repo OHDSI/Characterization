@@ -18,7 +18,7 @@ Removes csv files from folders that have not been marked as completed
 and removes the record of the execution file
 }
 \seealso{
-Other {Incremental}: 
+Other Incremental: 
 \code{\link{cleanNonIncremental}()}
 }
-\concept{{Incremental}}
+\concept{Incremental}

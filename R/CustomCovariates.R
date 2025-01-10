@@ -45,7 +45,7 @@
 #'                                                             to the list of concepts to exclude?
 #' @param includedCovariateIds                                 A list of covariate IDs that should be
 #'                                                             restricted to.
-#' @family {CovariateSetting}
+#' @family CovariateSetting
 #'
 #' @return
 #' An object of type \code{covariateSettings}, to be used in other functions.
@@ -122,8 +122,9 @@ createDuringCovariateSettings <- function(
 #' @param cohortIds  cohort id for the target cohort
 #' @param covariateSettings  settings for the covariate cohorts and time periods
 #' @param minCharacterizationMean the minimum value for a covariate to be extracted
+#' @template tempEmulationSchema
 #' @param ...  additional arguments from FeatureExtraction
-#' @family {CovariateSetting}
+#' @family CovariateSetting
 #' @return
 #' The the during covariates based on user settings
 #'
@@ -139,6 +140,7 @@ getDbDuringCovariateData <- function(
     cohortIds = c(-1),
     covariateSettings,
     minCharacterizationMean = 0,
+    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     ...) {
   writeLines("Constructing during cohort covariates")
   if (!aggregated) {
@@ -160,7 +162,8 @@ getDbDuringCovariateData <- function(
   );"
   sql <- SqlRender::translate(
     sql = sql,
-    targetDialect = DatabaseConnector::dbms(connection)
+    targetDialect = DatabaseConnector::dbms(connection),
+    tempEmulationSchema = tempEmulationSchema
   )
   DatabaseConnector::executeSql(connection, sql = sql)
 
@@ -176,7 +179,8 @@ getDbDuringCovariateData <- function(
   );"
   sql <- SqlRender::translate(
     sql = sql,
-    targetDialect = DatabaseConnector::dbms(connection)
+    targetDialect = DatabaseConnector::dbms(connection),
+    tempEmulationSchema = tempEmulationSchema
   )
   DatabaseConnector::executeSql(connection, sql)
 
@@ -192,7 +196,8 @@ getDbDuringCovariateData <- function(
       createTable = T,
       tempTable = T,
       data = data.frame(id = covariateSettings$includedCovariateIds),
-      camelCaseToSnakeCase = T
+      camelCaseToSnakeCase = T,
+      tempEmulationSchema = tempEmulationSchema
     )
   }
 
@@ -207,7 +212,8 @@ getDbDuringCovariateData <- function(
       createTable = T,
       tempTable = T,
       data = data.frame(id = covariateSettings$includedCovariateConceptIds),
-      camelCaseToSnakeCase = T
+      camelCaseToSnakeCase = T,
+      tempEmulationSchema = tempEmulationSchema
     )
 
     if (covariateSettings$addDescendantsToInclude) {
@@ -216,7 +222,8 @@ getDbDuringCovariateData <- function(
         packageName = "Characterization",
         dbms = DatabaseConnector::dbms(connection),
         table_name = includedConceptTable,
-        cdm_database_schema = cdmDatabaseSchema
+        cdm_database_schema = cdmDatabaseSchema,
+        tempEmulationSchema = tempEmulationSchema
       )
     }
   }
@@ -232,7 +239,8 @@ getDbDuringCovariateData <- function(
       createTable = T,
       tempTable = T,
       data = data.frame(id = covariateSettings$excludedCovariateConceptIds),
-      camelCaseToSnakeCase = T
+      camelCaseToSnakeCase = T,
+      tempEmulationSchema = tempEmulationSchema
     )
 
     if (covariateSettings$addDescendantsToInclude) {
@@ -241,7 +249,8 @@ getDbDuringCovariateData <- function(
         packageName = "Characterization",
         dbms = DatabaseConnector::dbms(connection),
         table_name = excludedConceptTable,
-        cdm_database_schema = cdmDatabaseSchema
+        cdm_database_schema = cdmDatabaseSchema,
+        tempEmulationSchema = tempEmulationSchema
       )
     }
   }
@@ -286,7 +295,8 @@ getDbDuringCovariateData <- function(
       included_cov_table = includedCovTable,
       included_concept_table = includedConceptTable,
       excluded_concept_table = excludedConceptTable,
-      covariate_table = paste0("#cov_", i)
+      covariate_table = paste0("#cov_", i),
+      tempEmulationSchema = tempEmulationSchema
     )
     message(paste0("Executing during sql code for ", getDomainSettings$analysisName[domainSettingsIndex]))
     start <- Sys.time()
@@ -321,7 +331,8 @@ getDbDuringCovariateData <- function(
     )
     sql <- SqlRender::translate(
       sql = sql,
-      targetDialect = DatabaseConnector::dbms(connection)
+      targetDialect = DatabaseConnector::dbms(connection),
+      tempEmulationSchema = tempEmulationSchema
     )
 
     DatabaseConnector::querySqlToAndromeda(
@@ -393,7 +404,8 @@ getDbDuringCovariateData <- function(
       sql <- SqlRender::translate(
         sql = sql,
         targetDialect = attr(connection, "dbms"),
-        oracleTempSchema = oracleTempSchema
+        oracleTempSchema = oracleTempSchema,
+        tempEmulationSchema = tempEmulationSchema
       )
       DatabaseConnector::executeSql(connection, sql, progressBar = FALSE, reportOverallTime = FALSE)
     }

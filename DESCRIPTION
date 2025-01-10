@@ -1,8 +1,8 @@
 Package: Characterization
 Type: Package
 Title: Characterizations of Cohorts
-Version: 2.1.0
-Date: 2024-10-07
+Version: 2.1.2
+Date: 2024-1-10
 Authors@R: c(
 	person("Jenna", "Reps", , "reps@ohdsi.org", role = c("aut", "cre")),
 	person("Patrick", "Ryan", , "ryan@ohdsi.org", role = c("aut")),
@@ -34,12 +34,10 @@ Suggests:
 	knitr,
 	markdown,
 	rmarkdown,
-	ShinyAppBuilder,
+	OhdsiShinyAppBuilder,
 	shiny,
 	withr
-Remotes:
-	ohdsi/ShinyAppBuilder
 NeedsCompilation: no
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Encoding: UTF-8
 VignetteBuilder: knitr

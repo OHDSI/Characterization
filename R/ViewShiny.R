@@ -128,7 +128,7 @@ prepareCharacterizationShiny <- function(
 viewChars <- function(
     databaseSettings,
     testApp = F) {
-  ensure_installed("ShinyAppBuilder")
+  ensure_installed("OhdsiShinyAppBuilder")
   ensure_installed("ResultModelManager")
 
   connectionDetails <- do.call(
@@ -151,12 +151,12 @@ viewChars <- function(
     )
 
     if (!testApp) {
-      ShinyAppBuilder::viewShiny(
+      OhdsiShinyAppBuilder::viewShiny(
         config = config,
         connection = connection
       )
     } else {
-      ShinyAppBuilder::createShinyApp(config = config, connection = connection)
+      OhdsiShinyAppBuilder::createShinyApp(config = config, connection = connection)
     }
   } else {
     # use new method
@@ -175,13 +175,13 @@ viewChars <- function(
     databaseSettings$cgTable <- "cohort_definition"
 
     if (!testApp) {
-      ShinyAppBuilder::viewShiny(
+      OhdsiShinyAppBuilder::viewShiny(
         config = config,
         connection = connection,
         resultDatabaseSettings = databaseSettings
       )
     } else {
-      ShinyAppBuilder::createShinyApp(
+      OhdsiShinyAppBuilder::createShinyApp(
         config = config,
         connection = connection,
         resultDatabaseSettings = databaseSettings
@@ -223,19 +223,7 @@ ensure_installed <- function(pkg) {
     if (interactive()) {
       message(msg, "\nWould you like to install it?")
       if (utils::menu(c("Yes", "No")) == 1) {
-        if (pkg %in% c("ShinyAppBuilder", "ResultModelManager")) {
-          # add code to check for devtools...
-          dvtCheck <- tryCatch(utils::packageVersion("devtools"),
-            error = function(e) NA
-          )
-          if (is.na(dvtCheck)) {
-            utils::install.packages("devtools")
-          }
-
-          devtools::install_github(paste0("OHDSI/", pkg))
-        } else {
           utils::install.packages(pkg)
-        }
       } else {
         stop(msg, call. = FALSE)
       }

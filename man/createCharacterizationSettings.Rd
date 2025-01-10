@@ -27,9 +27,9 @@ This function creates a list of settings for different characterization studies
 Specify one or more timeToEvent, dechallengeRechallenge and aggregateCovariate settings
 }
 \seealso{
-Other {LargeScale}: 
+Other LargeScale: 
 \code{\link{loadCharacterizationSettings}()},
 \code{\link{runCharacterizationAnalyses}()},
 \code{\link{saveCharacterizationSettings}()}
 }
-\concept{{LargeScale}}
+\concept{LargeScale}

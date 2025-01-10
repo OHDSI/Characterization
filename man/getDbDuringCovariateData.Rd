@@ -15,6 +15,7 @@ getDbDuringCovariateData(
   cohortIds = c(-1),
   covariateSettings,
   minCharacterizationMean = 0,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   ...
 )
 }
@@ -39,6 +40,10 @@ getDbDuringCovariateData(
 
 \item{minCharacterizationMean}{the minimum value for a covariate to be extracted}
 
+\item{tempEmulationSchema}{Some database platforms like Oracle and Impala do not truly support temp tables.
+To emulate temp tables, provide a schema with write privileges where temp tables
+can be created}
+
 \item{...}{additional arguments from FeatureExtraction}
 }
 \value{
@@ -51,7 +56,7 @@ Extracts covariates that occur during a cohort
 The user specifies a what during covariates they want and this executes them using FE
 }
 \seealso{
-Other {CovariateSetting}: 
+Other CovariateSetting: 
 \code{\link{createDuringCovariateSettings}()}
 }
-\concept{{CovariateSetting}}
+\concept{CovariateSetting}
