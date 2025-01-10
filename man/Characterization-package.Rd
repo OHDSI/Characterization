@@ -6,7 +6,7 @@
 \alias{Characterization-package}
 \title{Characterization: Characterizations of Cohorts}
 \description{
-Various characterizations of target and outcome cohorts.
+Various characterizations of target and outcome cohorts for data mapped to the OMOP CDM.
 }
 \seealso{
 Useful links:
