@@ -9,7 +9,7 @@ Authors@R: c(
 	person("Chris", "Knoll", , "knoll@ohdsi.org", role = c("aut"))
 	)
 Maintainer: Jenna Reps <reps@ohdsi.org>
-Description: Various characterizations of target and outcome cohorts.
+Description: Various characterizations of target and outcome cohorts for data mapped to the OMOP CDM.
 License: Apache License 2.0
 URL: https://ohdsi.github.io/Characterization, https://github.com/OHDSI/Characterization
 BugReports: https://github.com/OHDSI/Characterization/issues
