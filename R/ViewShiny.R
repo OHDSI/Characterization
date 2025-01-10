@@ -127,9 +127,9 @@ prepareCharacterizationShiny <- function(
 
 viewChars <- function(
     databaseSettings,
-    testApp = F) {
+    testApp = F
+    ) {
   ensure_installed("OhdsiShinyAppBuilder")
-  ensure_installed("ResultModelManager")
 
   connectionDetails <- do.call(
     DatabaseConnector::createConnectionDetails,
@@ -138,29 +138,7 @@ viewChars <- function(
   connection <- ResultModelManager::ConnectionHandler$new(connectionDetails)
   databaseSettings$connectionDetailsSettings <- NULL
 
-  if (utils::packageVersion("ShinyAppBuilder") < "1.2.0") {
-    # use old method
-    # set database settings into system variables
-    Sys.setenv("resultDatabaseDetails_characterization" = as.character(ParallelLogger::convertSettingsToJson(databaseSettings)))
-
-    config <- ParallelLogger::loadSettingsFromJson(
-      fileName = system.file(
-        "shinyConfig.json",
-        package = "Characterization"
-      )
-    )
-
-    if (!testApp) {
-      OhdsiShinyAppBuilder::viewShiny(
-        config = config,
-        connection = connection
-      )
-    } else {
-      OhdsiShinyAppBuilder::createShinyApp(config = config, connection = connection)
-    }
-  } else {
     # use new method
-
     config <- ParallelLogger::loadSettingsFromJson(
       fileName = system.file(
         "shinyConfigUpdate.json",
@@ -187,7 +165,6 @@ viewChars <- function(
         resultDatabaseSettings = databaseSettings
       )
     }
-  }
 }
 
 
