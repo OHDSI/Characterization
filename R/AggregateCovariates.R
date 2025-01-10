@@ -188,6 +188,9 @@ computeTargetAggregateCovariateAnalyses <- function(
     minCharacterizationMean = 0,
     minCellCount = 0,
     ...) {
+
+  message("Target Aggregate:  starting")
+
   # get settings
   settingId <- unique(settings$settingId)
   targetIds <- unique(settings$targetId)
@@ -233,7 +236,7 @@ computeTargetAggregateCovariateAnalyses <- function(
     tempEmulationSchema = tempEmulationSchema
   )
 
-  message("Computing aggregate target cohorts")
+  message("Target Aggregate: Computing aggregate target cohorts")
   start <- Sys.time()
 
   sql <- SqlRender::loadRenderTranslateSql(
@@ -256,7 +259,7 @@ computeTargetAggregateCovariateAnalyses <- function(
   )
   completionTime <- Sys.time() - start
 
-  message(paste0("Computing target cohorts took ", round(completionTime, digits = 1), " ", units(completionTime)))
+  message(paste0("Target Aggregate: Computing target cohorts took ", round(completionTime, digits = 1), " ", units(completionTime)))
   ## get counts
   message("Extracting target cohort counts")
   sql <- "select
@@ -280,11 +283,10 @@ computeTargetAggregateCovariateAnalyses <- function(
     snakeCaseToCamelCase = T,
   )
 
-  message("Computing aggregate target covariate results")
+  message("Target Aggregate: Computing aggregate target covariate results")
 
   result <- FeatureExtraction::getDbCovariateData(
     connection = connection,
-    oracleTempSchema = tempEmulationSchema,
     cdmDatabaseSchema = cdmDatabaseSchema,
     cohortTable = "#agg_cohorts_before",
     cohortTableIsTemp = T,
@@ -297,7 +299,7 @@ computeTargetAggregateCovariateAnalyses <- function(
   )
 
   # drop temp tables
-  message("Dropping temp tables")
+  message("Target Aggregate: Dropping temp tables")
   sql <- SqlRender::loadRenderTranslateSql(
     sqlFilename = "DropTargetCovariate.sql",
     packageName = "Characterization",
@@ -311,6 +313,7 @@ computeTargetAggregateCovariateAnalyses <- function(
   )
 
   # export all results to csv files
+  message("Target Aggregate: Exporting to csv")
   exportAndromedaToCsv(
     andromeda = result,
     outputFolder = outputFolder,
@@ -320,6 +323,8 @@ computeTargetAggregateCovariateAnalyses <- function(
     minCharacterizationMean = minCharacterizationMean,
     minCellCount = minCellCount
   )
+
+  message("Target Aggregate:  ending")
 
   return(invisible(T))
 }
@@ -340,6 +345,8 @@ computeCaseAggregateCovariateAnalyses <- function(
     minCharacterizationMean = 0,
     minCellCount = 0,
     ...) {
+
+  message("Case Aggregates:  starting")
   # check inputs
 
   # create cohortDetails - all Ts, minPriorObservation, twice (type = Tall, Target)
@@ -417,7 +424,7 @@ computeCaseAggregateCovariateAnalyses <- function(
     tempEmulationSchema = tempEmulationSchema
   )
 
-  message("Computing aggregate case covariate cohorts")
+  message("Case Aggregates: Computing aggregate case covariate cohorts")
   start <- Sys.time()
 
   # this is run for all tars
@@ -471,10 +478,10 @@ computeCaseAggregateCovariateAnalyses <- function(
   }
   completionTime <- Sys.time() - start
 
-  message(paste0("Computing case cohorts took ", round(completionTime, digits = 1), " ", units(completionTime)))
+  message(paste0("Case Aggregates:  Computing case cohorts took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
   ## get counts
-  message("Extracting case cohort counts")
+  message("Case Aggregates:  Extracting case cohort counts")
   sql <- "select
   cohort_definition_id,
   count(*) row_count,
@@ -495,11 +502,10 @@ computeCaseAggregateCovariateAnalyses <- function(
     snakeCaseToCamelCase = T,
   )
 
-  message("Computing aggregate before case covariate results")
+  message("Case Aggregates: Computing aggregate before case covariate results")
 
   result <- FeatureExtraction::getDbCovariateData(
     connection = connection,
-    oracleTempSchema = tempEmulationSchema,
     cdmDatabaseSchema = cdmDatabaseSchema,
     cohortTable = "#cases",
     cohortTableIsTemp = T,
@@ -511,13 +517,12 @@ computeCaseAggregateCovariateAnalyses <- function(
     tempEmulationSchema = tempEmulationSchema
   )
 
-  message("Computing aggregate during case covariate results")
+  message("Case Aggregates:  Computing aggregate during case covariate results")
 
   result2 <- tryCatch(
     {
       FeatureExtraction::getDbCovariateData(
         connection = connection,
-        oracleTempSchema = tempEmulationSchema,
         cdmDatabaseSchema = cdmDatabaseSchema,
         cohortTable = "#case_series",
         cohortTableIsTemp = T,
@@ -539,7 +544,7 @@ computeCaseAggregateCovariateAnalyses <- function(
   }
 
   # drop temp tables
-  message("Dropping temp tables")
+  message("Case Aggregates: Dropping temp tables")
   sql <- SqlRender::loadRenderTranslateSql(
     sqlFilename = "DropCaseCovariate.sql",
     packageName = "Characterization",
@@ -553,7 +558,7 @@ computeCaseAggregateCovariateAnalyses <- function(
   )
 
   # export all results to csv files
-  message("Exporting results to csv")
+  message("Case Aggregates:  Exporting results to csv")
   exportAndromedaToCsv( # TODO combine export of result and result2
     andromeda = result,
     outputFolder = outputFolder,
@@ -573,6 +578,8 @@ computeCaseAggregateCovariateAnalyses <- function(
     includeSettings = F,
     minCellCount = minCellCount
   )
+
+  message("Case Aggregates:  ending")
 
   return(invisible(T))
 }
