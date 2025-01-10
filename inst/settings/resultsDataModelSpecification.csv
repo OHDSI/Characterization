@@ -113,7 +113,7 @@ cohort_counts,start_anchor,varchar(15),No,No,No,No,The start anchor
 cohort_counts,end_anchor,varchar(15),No,No,No,No,The end anchor
 cohort_counts,min_prior_observation,int,No,No,No,No,Minimum time observed before index
 cohort_counts,outcome_washout_days,int,No,No,No,No,Patients with outcome during washout are excluded
-cohort_counts,row_count,int,Yes,No,No,No,The number of rows in each cohort
+cohort_counts,row_count,bigint,Yes,No,No,No,The number of rows in each cohort
 cohort_counts,person_count,int,Yes,No,No,No,The number of distinct people in each cohort
 cohort_counts,min_exposure_time,bigint,No,No,No,No,Minimum exposure time across cohort
 cohort_counts,mean_exposure_time,bigint,No,No,No,No,Mean exposure time across cohort
