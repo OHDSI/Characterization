@@ -149,22 +149,13 @@ viewChars <- function(
     databaseSettings$cgTablePrefix <- databaseSettings$cohortTablePrefix
     databaseSettings$databaseTable <- "DATABASE_META_DATA"
     databaseSettings$databaseTablePrefix <- ""
-    # databaseSettings$iTablePrefix <- databaseSettings$incidenceTablePrefix
     databaseSettings$cgTable <- "cohort_definition"
 
-    if (!testApp) {
       OhdsiShinyAppBuilder::viewShiny(
         config = config,
         connection = connection,
         resultDatabaseSettings = databaseSettings
       )
-    } else {
-      OhdsiShinyAppBuilder::createShinyApp(
-        config = config,
-        connection = connection,
-        resultDatabaseSettings = databaseSettings
-      )
-    }
 }
 
 
