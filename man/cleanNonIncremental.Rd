@@ -18,7 +18,7 @@ Removes csv files from the execution folder as there should be no csv files
 when running in non-incremental model
 }
 \seealso{
-Other {Incremental}: 
+Other Incremental: 
 \code{\link{cleanIncremental}()}
 }
-\concept{{Incremental}}
+\concept{Incremental}

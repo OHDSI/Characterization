@@ -1,15 +1,15 @@
 Package: Characterization
 Type: Package
 Title: Characterizations of Cohorts
-Version: 2.1.0
-Date: 2024-10-07
+Version: 2.1.2
+Date: 2024-1-22
 Authors@R: c(
 	person("Jenna", "Reps", , "reps@ohdsi.org", role = c("aut", "cre")),
 	person("Patrick", "Ryan", , "ryan@ohdsi.org", role = c("aut")),
 	person("Chris", "Knoll", , "knoll@ohdsi.org", role = c("aut"))
 	)
 Maintainer: Jenna Reps <reps@ohdsi.org>
-Description: Various characterizations of target and outcome cohorts.
+Description: Various characterizations of target and outcome cohorts for data mapped to the OMOP CDM.
 License: Apache License 2.0
 URL: https://ohdsi.github.io/Characterization, https://github.com/OHDSI/Characterization
 BugReports: https://github.com/OHDSI/Characterization/issues
@@ -34,12 +34,10 @@ Suggests:
 	knitr,
 	markdown,
 	rmarkdown,
-	ShinyAppBuilder,
+	OhdsiShinyAppBuilder,
 	shiny,
 	withr
-Remotes:
-	ohdsi/ShinyAppBuilder
 NeedsCompilation: no
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Encoding: UTF-8
 VignetteBuilder: knitr

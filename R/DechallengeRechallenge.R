@@ -20,7 +20,7 @@
 #' @param outcomeIds   A list of cohortIds for the outcome cohorts
 #' @param dechallengeStopInterval  An integer specifying the how much time to add to the cohort_end when determining whether the event starts during cohort and ends after
 #' @param dechallengeEvaluationWindow An integer specifying the period of time after the cohort_end when you cannot see an outcome for a dechallenge success
-#' @family {DechallengeRechallenge}
+#' @family DechallengeRechallenge
 #' @return
 #' A list with the settings
 #'
@@ -90,7 +90,7 @@ createDechallengeRechallengeSettings <- function(
 #' @param outputFolder A directory to save the results as csv files
 #' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
 #' @param ... extra inputs
-#' @family {DechallengeRechallenge}
+#' @family DechallengeRechallenge
 #' @return
 #' An \code{Andromeda::andromeda()} object containing the dechallenge rechallenge results
 #'
@@ -232,7 +232,7 @@ computeDechallengeRechallengeAnalyses <- function(
 #' @param outputFolder A directory to save the results as csv files
 #' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
 #' @param ... extra inputs
-#' @family {DechallengeRechallenge}
+#' @family DechallengeRechallenge
 #' @return
 #' An \code{Andromeda::andromeda()} object with the case series details of the failed rechallenge
 #'

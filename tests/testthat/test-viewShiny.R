@@ -125,26 +125,3 @@ test_that("prepareCharacterizationShiny works", {
   testthat::expect_true("cg_cohort_definition" %in% tables)
   testthat::expect_true("database_meta_data" %in% tables)
 })
-
-test_that("shiny app works", {
-  settings <- prepareCharacterizationShiny(
-    resultFolder = file.path(resultLocation, "result"),
-    cohortDefinitionSet = NULL,
-    sqliteLocation = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
-  )
-
-  app <- viewChars(
-    databaseSettings = settings,
-    testApp = T
-  )
-
-  shiny::testServer(
-    app = app,
-    args = list(),
-    expr = {
-      testthat::expect_equal(runServer[["About"]], 0)
-      session$setInputs(menu = "About")
-      testthat::expect_equal(runServer[["About"]], 1)
-    }
-  )
-})

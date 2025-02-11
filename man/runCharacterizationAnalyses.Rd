@@ -77,9 +77,9 @@ The results of the characterization will be saved into an sqlite database inside
 specified saveDirectory
 }
 \seealso{
-Other {LargeScale}: 
+Other LargeScale: 
 \code{\link{createCharacterizationSettings}()},
 \code{\link{loadCharacterizationSettings}()},
 \code{\link{saveCharacterizationSettings}()}
 }
-\concept{{LargeScale}}
+\concept{LargeScale}

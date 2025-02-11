@@ -1,3 +1,11 @@
+Characterization 2.1.2
+======================
+- added input ignoreWhenEmpty to cleanIncremental() that does not run incrementalClean if there are no incremental files
+
+Characterization 2.1.1
+======================
+- fixed result database column type for mean_exposure_time
+
 Characterization 2.1.0
 ======================
 - risk factors and case series now restrict to first outcome only.

@@ -20,8 +20,8 @@ A string specifying the directory the csv results are saved to
 export the DechallengeRechallenge results as csv
 }
 \seealso{
-Other {SaveLoad}: 
+Other SaveLoad: 
 \code{\link{exportRechallengeFailCaseSeriesToCsv}()},
 \code{\link{exportTimeToEventToCsv}()}
 }
-\concept{{SaveLoad}}
+\concept{SaveLoad}

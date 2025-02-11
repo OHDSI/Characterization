@@ -19,6 +19,17 @@ createIncrementalLog <- function(
   }
 }
 
+# check whether the execution.csv and completed.csv both exist
+checkIncrementalFilesExist <- function(executionFolder) {
+
+  incrementalExists <- file.exists(file.path(executionFolder, "execution.csv")) &&
+    file.exists(file.path(executionFolder, "completed.csv"))
+
+  # NOTE: what happens if one exists and the other doesnt?
+  return(incrementalExists)
+
+}
+
 loadIncrementalFiles <- function(executionFolder) {
   if (file.exists(file.path(executionFolder, "execution.csv"))) {
     executed <- utils::read.csv(file.path(executionFolder, "execution.csv"))
@@ -51,42 +62,51 @@ getExecutionJobIssues <- function(
 #' and removes the record of the execution file
 #'
 #' @param executionFolder   The folder that has the execution files
-#' @family {Incremental}
+#' @param ignoreWhenEmpty   When TRUE, if there are no incremental logs then nothing is run
+#' @family Incremental
 #' @return
 #' A list with the settings
 #'
 #' @export
 cleanIncremental <- function(
-    executionFolder) {
-  incrementalFiles <- loadIncrementalFiles(
-    executionFolder
-  )
+    executionFolder,
+    ignoreWhenEmpty = FALSE
+    ) {
 
-  issues <- getExecutionJobIssues(
-    executed = incrementalFiles$executed,
-    completed = incrementalFiles$completed
-  )
+  # check whether incremental files exists
+  fileExist <- checkIncrementalFilesExist(executionFolder = executionFolder)
 
-  if (length(issues) > 0) {
-    # delete contents inside folder
-    for (i in 1:length(issues)) {
-      files <- dir(file.path(executionFolder, issues[i]), full.names = T)
-      for (file in files) {
-        message(paste0("Deleting incomplete result file ", file))
-        file.remove(file)
+  if(fileExist || !ignoreWhenEmpty){
+    incrementalFiles <- loadIncrementalFiles(
+      executionFolder
+    )
+
+    issues <- getExecutionJobIssues(
+      executed = incrementalFiles$executed,
+      completed = incrementalFiles$completed
+    )
+
+    if (length(issues) > 0) {
+      # delete contents inside folder
+      for (i in 1:length(issues)) {
+        files <- dir(file.path(executionFolder, issues[i]), full.names = T)
+        for (file in files) {
+          message(paste0("Deleting incomplete result file ", file))
+          file.remove(file)
+        }
       }
     }
-  }
 
-  # now update the execution to remove the issue rows
-  executionFile <- utils::read.csv(
-    file = file.path(executionFolder, "execution.csv")
-  )
-  fixedExecution <- executionFile[!executionFile$job_id %in% issues, ]
-  utils::write.csv(
-    x = fixedExecution,
-    file = file.path(executionFolder, "execution.csv")
-  )
+    # now update the execution to remove the issue rows
+    executionFile <- utils::read.csv(
+      file = file.path(executionFolder, "execution.csv")
+    )
+    fixedExecution <- executionFile[!executionFile$job_id %in% issues, ]
+    utils::write.csv(
+      x = fixedExecution,
+      file = file.path(executionFolder, "execution.csv")
+    )
+  }
 
   return(invisible(NULL))
 }
@@ -143,7 +163,7 @@ recordIncremental <- function(
 #' when running in non-incremental model
 #'
 #' @param executionFolder   The folder that has the execution files
-#' @family {Incremental}
+#' @family Incremental
 #' @return
 #' A list with the settings
 #'

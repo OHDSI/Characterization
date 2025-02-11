@@ -19,8 +19,8 @@ This function creates a connection to an sqlite database
 This function creates a sqlite database and connection
 }
 \seealso{
-Other {Database}: 
+Other Database: 
 \code{\link{createCharacterizationTables}()},
 \code{\link{insertResultsToDatabase}()}
 }
-\concept{{Database}}
+\concept{Database}

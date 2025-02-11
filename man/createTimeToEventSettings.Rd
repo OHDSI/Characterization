@@ -18,7 +18,7 @@ An list with the time to event settings
 Create time to event study settings
 }
 \seealso{
-Other {TimeToEvent}: 
+Other TimeToEvent: 
 \code{\link{computeTimeToEventAnalyses}()}
 }
-\concept{{TimeToEvent}}
+\concept{TimeToEvent}

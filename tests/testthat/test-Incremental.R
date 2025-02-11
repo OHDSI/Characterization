@@ -13,9 +13,13 @@ on.exit(unlink(logFolder5))
 logFolder6 <- file.path(tempdir(), "log6")
 on.exit(unlink(logFolder6))
 
+logFolder7 <- file.path(tempdir(), "log7")
+on.exit(unlink(logFolder7))
+
 for (folder in c(
   logFolder, logFolder2, logFolder3,
-  logFolder4, logFolder5, logFolder6
+  logFolder4, logFolder5, logFolder6,
+  logFolder7
 )) {
   if (!dir.exists(folder)) {
     dir.create(folder)
@@ -39,6 +43,35 @@ test_that("createIncrementalLog", {
   testthat::expect_true("madeup.csv" %in% dir(logFolder))
 })
 
+
+# add test for checkIncrementalFilesExist
+test_that("checkIncrementalFilesExist", {
+
+  # should return false as no csv files
+  testthat::expect_false(checkIncrementalFilesExist(executionFolder = logFolder7))
+
+  # cleanIncremental should fail unless ignoreWhenEmpty is TRUE
+  testthat::expect_error(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = FALSE))
+  testthat::expect_true(is.null(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = T)))
+
+  # now add the csvs and check should be true
+  Characterization:::createIncrementalLog(
+    executionFolder = logFolder7,
+    logname = "execution.csv"
+  )
+  Characterization:::createIncrementalLog(
+    executionFolder = logFolder7,
+    logname = "completed.csv"
+  )
+
+  testthat::expect_true(checkIncrementalFilesExist(
+    executionFolder = logFolder7
+  ))
+  # make sure it runs now there are results
+  testthat::expect_true(is.null(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = F)))
+  testthat::expect_true(is.null(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = T)))
+
+})
 
 test_that("loadIncrementalFiles", {
   # should error as not completed.csv

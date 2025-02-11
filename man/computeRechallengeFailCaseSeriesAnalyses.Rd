@@ -58,8 +58,8 @@ An \code{Andromeda::andromeda()} object with the case series details of the fail
 Compute fine the subjects that fail the dechallenge rechallenge study
 }
 \seealso{
-Other {DechallengeRechallenge}: 
+Other DechallengeRechallenge: 
 \code{\link{computeDechallengeRechallengeAnalyses}()},
 \code{\link{createDechallengeRechallengeSettings}()}
 }
-\concept{{DechallengeRechallenge}}
+\concept{DechallengeRechallenge}
