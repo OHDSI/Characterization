@@ -15,21 +15,12 @@ output:
   html_document:
     number_sections: yes
     toc: yes
-  word_document:
-    toc: yes
-  pdf_document:
-    includes:
-      in_header: preamble.tex
-    number_sections: yes
-    toc: yes
+vignette: >
+  %\VignetteIndexEntry{Specification}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
 ---
 
-```{=html}
-<!--
-%\VignetteEngine{knitr}
-%\VignetteIndexEntry{Characterization_Package_Specification}
--->
-```
 # Time-to-event
 
 ## Inputs

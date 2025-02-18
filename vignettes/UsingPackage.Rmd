@@ -12,21 +12,14 @@ header-includes:
     - \renewcommand{\headrulewidth}{0.4pt}
     - \renewcommand{\footrulewidth}{0.4pt}
 output:
-  pdf_document:
-    includes:
-      in_header: preamble.tex
-    number_sections: yes
-    toc: yes
-  word_document:
-    toc: yes
   html_document:
     number_sections: yes
     toc: yes
+vignette: >
+  %\VignetteIndexEntry{Using_Package}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
 ---
-<!--
-%\VignetteEngine{knitr}
-%\VignetteIndexEntry{Using_Characterization_Package}
--->
 
 # Introduction
 This vignette describes how you can use the Characterization package for various descriptive studies using OMOP CDM data. The Characterization package currently contains three different types of analyses:
@@ -40,8 +33,7 @@ This vignette describes how you can use the Characterization package for various
 In this vignette we will show working examples using the `Eunomia` R package that contains simulated data.  Run the following code to install the `Eunomia` R package:
 
 ```{r tidy=TRUE,eval=FALSE}
-install.packages("remotes")
-remotes::install_github("ohdsi/Eunomia")
+install.packages(c("Eunomia", "remotes"))
 ```
 
 Eunomia can be used to create a temporary SQLITE database with the simulated data.  The function `getEunomiaConnectionDetails` creates a SQLITE connection to a temporary location. The function `createCohorts` then populates the temporary SQLITE database with the simulated data ready to be used.
@@ -53,8 +45,7 @@ Eunomia::createCohorts(connectionDetails = connectionDetails)
 
 We also need to have the Characterization package installed and loaded
 ```{r tidy=TRUE,eval=FALSE}
-remotes::install_github("ohdsi/FeatureExtraction")
-remotes::install_github("ohdsi/Characterization", ref = "new_approach")
+remotes::install_github("ohdsi/Characterization")
 ```
 
 ```{r tidy=TRUE,eval=TRUE}

@@ -1,6 +1,12 @@
 template:
+  bootstrap: 5
   params:
     bootswatch: cosmo
+  light-switch: false
+
+development:
+  mode: auto
+  development: docs/dev
 
 home:
   links:
@@ -9,29 +15,27 @@ home:
 
 navbar:
   structure:
-    left:
-    - home
-    - intro
-    - reference
-    - articles
-    - news
+    left: [home, intro, reference, articles, news]
     right: [hades, github]
   components:
     home:
       icon: fa-home fa-lg
       href: index.html
     reference:
+      icon: fa-info-circle fa-lg
       text: Reference
       href: reference/index.html
     intro:
+      icon: fa-download fa-lg
       text: Get started
       href: articles/InstallationGuide.html
     news:
+      icon: fa-newspaper-o fa-lg
       text: Changelog
       href: news/index.html
     github:
       icon: fa-github fa-lg
-      href: https://github.com/OHDSI/PatientLevelPrediction
+      href: https://github.com/OHDSI/Characterization
     hades:
       text: hadesLogo
       href: https://ohdsi.github.io/Hades
