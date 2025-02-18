@@ -12,21 +12,14 @@ header-includes:
     - \renewcommand{\headrulewidth}{0.4pt}
     - \renewcommand{\footrulewidth}{0.4pt}
 output:
-  pdf_document:
-    includes:
-      in_header: preamble.tex
-    number_sections: yes
-    toc: yes
-  word_document:
-    toc: yes
   html_document:
     number_sections: yes
     toc: yes
+vignette: >
+  %\VignetteIndexEntry{Installation_guide}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
 ---
-<!--
-%\VignetteEngine{knitr}
-%\VignetteIndexEntry{Installation_guide}
--->
 
 # Introduction
 This vignette describes how you need to install the Observational Health Data Sciences and Informatics (OHDSI) [`Characterization`](http://github.com/OHDSI/Characterization) package under Windows, Mac, and Linux.
