@@ -30,27 +30,21 @@ This vignette describes how you can use the Characterization package for various
 
 # Setup
 
-In this vignette we will show working examples using the `Eunomia` R package that contains simulated data.  Run the following code to install the `Eunomia` R package:
-
-```{r tidy=TRUE,eval=FALSE}
-install.packages(c("Eunomia", "remotes"))
-```
-
-Eunomia can be used to create a temporary SQLITE database with the simulated data.  The function `getEunomiaConnectionDetails` creates a SQLITE connection to a temporary location. The function `createCohorts` then populates the temporary SQLITE database with the simulated data ready to be used.
-
-```{r tidy=TRUE,eval=TRUE}
-connectionDetails <- Eunomia::getEunomiaConnectionDetails()
-Eunomia::createCohorts(connectionDetails = connectionDetails)
-```
-
-We also need to have the Characterization package installed and loaded
+First we need to install the `Characterization` package:
 ```{r tidy=TRUE,eval=FALSE}
 remotes::install_github("ohdsi/Characterization")
 ```
 
+and then load it:
 ```{r tidy=TRUE,eval=TRUE}
 library(Characterization)
 library(dplyr)
+```
+
+In this vignette we will show working examples using a sample of the `Eunomia` R package GI Bleed simulated data. The function `exampleOmopConnectionDetails` creates a connection details object for a SQLITE database containing an example observational medical outcomes partnership (OMOP) common data model (CDM) data in a temporary location. 
+
+```{r tidy=TRUE,eval=TRUE}
+connectionDetails <- Characterization::exampleOmopConnectionDetails()
 ```
 
 # Examples 
@@ -126,14 +120,15 @@ runCharacterizationAnalyses(
   databaseId = "Eunomia",
   runId = 1,
   minCharacterizationMean = 0.01,
-  outputDirectory = file.path(getwd(), "example_char", "results"), executionPath = file.path(getwd(), "example_char", "execution"),
+  outputDirectory = file.path(tempdir(), "example_char", "results"), 
+  executionPath = file.path(tempdir(), "example_char", "execution"),
   minCellCount = 10,
   incremental = F,
   threads = 1
 )
 ```
 
-You can then see the results in the location `file.path(getwd(), 'example_char', 'results')` where you will find csv files.
+You can then see the results in the location `file.path(tempdir(), 'example_char', 'results')` where you will find csv files.
 
 ## Dechallenge Rechallenge
 
@@ -171,7 +166,7 @@ dc <- computeDechallengeRechallengeAnalyses(
   targetTable = "cohort",
   settings = exampleDechallengeRechallengeSettings,
   databaseId = "Eunomia",
-  outcomeTable = file.path(getwd(), "example_char", "results"),
+  outcomeFolder = file.path(tempdir(), "example_char", "results"),
   minCellCount = 5
 )
 ```
@@ -187,7 +182,7 @@ failed <- computeRechallengeFailCaseSeriesAnalyses(
   outcomeDatabaseSchema = "main",
   outcomeTable = "cohort",
   databaseId = "Eunomia",
-  outcomeTable = file.path(getwd(), "example_char", "results"),
+  outcomeFolder = file.path(tempdir(), "example_char", "results"),
   minCellCount = 5
 )
 ```
@@ -216,7 +211,7 @@ tte <- computeTimeToEventAnalyses(
   targetTable = "cohort",
   settings = exampleTimeToEventSettings,
   databaseId = "Eunomia",
-  outcomeTable = file.path(getwd(), "example_char", "results"),
+  outcomefolder = file.path(tempdir(), "example_char", "results"),
   minCellCount = 5
 )
 ```

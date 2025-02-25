@@ -17,9 +17,9 @@ runCharacterizationAnalyses(
   executionPath = file.path(outputDirectory, "execution"),
   csvFilePrefix = "c_",
   databaseId = "1",
-  showSubjectId = F,
+  showSubjectId = FALSE,
   minCellCount = 0,
-  incremental = T,
+  incremental = TRUE,
   threads = 1,
   minCharacterizationMean = 0.01
 )
@@ -75,6 +75,31 @@ the characterization settings and the directory to save the results to
 \details{
 The results of the characterization will be saved into an sqlite database inside the
 specified saveDirectory
+}
+\examples{
+
+conDet <- exampleOmopConnectionDetails()
+
+drSet <- createDechallengeRechallengeSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+cSet <- createCharacterizationSettings(
+  dechallengeRechallengeSettings = drSet
+)
+
+runCharacterizationAnalyses(
+  connectionDetails = conDet,
+  targetDatabaseSchema = 'main',
+  targetTable = 'cohort',
+  outcomeDatabaseSchema = 'main',
+  outcomeTable = 'cohort',
+  cdmDatabaseSchema = 'main',
+  characterizationSettings = cSet,
+  outputDirectory = tempdir()
+)
+
 }
 \seealso{
 Other LargeScale: 

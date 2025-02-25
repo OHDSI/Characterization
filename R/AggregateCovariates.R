@@ -30,6 +30,21 @@
 #' @return
 #' A list with the settings
 #'
+#' @examples
+#'
+#' aggregateSetting <- createAggregateCovariateSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = c(3),
+#'   minPriorObservation = 365,
+#'   outcomeWashoutDays = 90,
+#'   riskWindowStart = 1,
+#'   startAnchor = "cohort start",
+#'   riskWindowEnd = 365,
+#'   endAnchor = "cohort start",
+#'   casePreTargetDuration = 365,
+#'   casePostOutcomeDuration = 365
+#' )
+#'
 #' @export
 createAggregateCovariateSettings <- function(
     targetIds,
@@ -41,47 +56,47 @@ createAggregateCovariateSettings <- function(
     riskWindowEnd = 365,
     endAnchor = "cohort start",
     covariateSettings = FeatureExtraction::createCovariateSettings(
-      useDemographicsGender = T,
-      useDemographicsAge = T,
-      useDemographicsAgeGroup = T,
-      useDemographicsRace = T,
-      useDemographicsEthnicity = T,
-      useDemographicsIndexYear = T,
-      useDemographicsIndexMonth = T,
-      useDemographicsTimeInCohort = T,
-      useDemographicsPriorObservationTime = T,
-      useDemographicsPostObservationTime = T,
-      useConditionGroupEraLongTerm = T,
-      useDrugGroupEraOverlapping = T,
-      useDrugGroupEraLongTerm = T,
-      useProcedureOccurrenceLongTerm = T,
-      useMeasurementLongTerm = T,
-      useObservationLongTerm = T,
-      useDeviceExposureLongTerm = T,
-      useVisitConceptCountLongTerm = T,
-      useConditionGroupEraShortTerm = T,
-      useDrugGroupEraShortTerm = T,
-      useProcedureOccurrenceShortTerm = T,
-      useMeasurementShortTerm = T,
-      useObservationShortTerm = T,
-      useDeviceExposureShortTerm = T,
-      useVisitConceptCountShortTerm = T,
+      useDemographicsGender = TRUE,
+      useDemographicsAge = TRUE,
+      useDemographicsAgeGroup = TRUE,
+      useDemographicsRace = TRUE,
+      useDemographicsEthnicity = TRUE,
+      useDemographicsIndexYear = TRUE,
+      useDemographicsIndexMonth = TRUE,
+      useDemographicsTimeInCohort = TRUE,
+      useDemographicsPriorObservationTime = TRUE,
+      useDemographicsPostObservationTime = TRUE,
+      useConditionGroupEraLongTerm = TRUE,
+      useDrugGroupEraOverlapping = TRUE,
+      useDrugGroupEraLongTerm = TRUE,
+      useProcedureOccurrenceLongTerm = TRUE,
+      useMeasurementLongTerm = TRUE,
+      useObservationLongTerm = TRUE,
+      useDeviceExposureLongTerm = TRUE,
+      useVisitConceptCountLongTerm = TRUE,
+      useConditionGroupEraShortTerm = TRUE,
+      useDrugGroupEraShortTerm = TRUE,
+      useProcedureOccurrenceShortTerm = TRUE,
+      useMeasurementShortTerm = TRUE,
+      useObservationShortTerm = TRUE,
+      useDeviceExposureShortTerm = TRUE,
+      useVisitConceptCountShortTerm = TRUE,
       endDays = 0,
       longTermStartDays = -365,
       shortTermStartDays = -30
     ),
     caseCovariateSettings = createDuringCovariateSettings(
-      useConditionGroupEraDuring = T,
-      useDrugGroupEraDuring = T,
-      useProcedureOccurrenceDuring = T,
-      useDeviceExposureDuring = T,
-      useMeasurementDuring = T,
-      useObservationDuring = T,
-      useVisitConceptCountDuring = T
+      useConditionGroupEraDuring = TRUE,
+      useDrugGroupEraDuring = TRUE,
+      useProcedureOccurrenceDuring = TRUE,
+      useDeviceExposureDuring = TRUE,
+      useMeasurementDuring = TRUE,
+      useObservationDuring = TRUE,
+      useVisitConceptCountDuring = TRUE
     ),
     casePreTargetDuration = 365,
     casePostOutcomeDuration = 365,
-    extractNonCaseCovariates = T) {
+    extractNonCaseCovariates = TRUE) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
   .checkCohortIds(
@@ -184,10 +199,14 @@ computeTargetAggregateCovariateAnalyses <- function(
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
     databaseId = "database 1",
-    outputFolder = file.path(getwd(), "characterization_results"),
+    outputFolder,
     minCharacterizationMean = 0,
     minCellCount = 0,
     ...) {
+
+  if(missing(outputFolder)){
+    stop('Please enter a output path value for outputFolder')
+  }
 
   message("Target Aggregate:  starting")
 
@@ -226,13 +245,13 @@ computeTargetAggregateCovariateAnalyses <- function(
   # create the temp table with cohort_details
   DatabaseConnector::insertTable(
     data = cohortDetails[, c("settingId", "targetCohortId", "outcomeCohortId", "cohortType", "cohortDefinitionId")],
-    camelCaseToSnakeCase = T,
+    camelCaseToSnakeCase = TRUE,
     connection = connection,
     tableName = "#cohort_details",
-    tempTable = T,
-    dropTableIfExists = T,
-    createTable = T,
-    progressBar = F,
+    tempTable = TRUE,
+    dropTableIfExists = TRUE,
+    createTable = TRUE,
+    progressBar = FALSE,
     tempEmulationSchema = tempEmulationSchema
   )
 
@@ -280,7 +299,7 @@ computeTargetAggregateCovariateAnalyses <- function(
   counts <- DatabaseConnector::querySql(
     connection = connection,
     sql = sql,
-    snakeCaseToCamelCase = T,
+    snakeCaseToCamelCase = TRUE,
   )
 
   message("Target Aggregate: Computing aggregate target covariate results")
@@ -289,11 +308,11 @@ computeTargetAggregateCovariateAnalyses <- function(
     connection = connection,
     cdmDatabaseSchema = cdmDatabaseSchema,
     cohortTable = "#agg_cohorts_before",
-    cohortTableIsTemp = T,
+    cohortTableIsTemp = TRUE,
     cohortIds = -1,
     covariateSettings = ParallelLogger::convertJsonToSettings(covariateSettings),
     cdmVersion = cdmVersion,
-    aggregated = T,
+    aggregated = TRUE,
     minCharacterizationMean = minCharacterizationMean,
     tempEmulationSchema = tempEmulationSchema
   )
@@ -326,7 +345,7 @@ computeTargetAggregateCovariateAnalyses <- function(
 
   message("Target Aggregate:  ending")
 
-  return(invisible(T))
+  return(invisible(TRUE))
 }
 
 
@@ -341,10 +360,14 @@ computeCaseAggregateCovariateAnalyses <- function(
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
     databaseId = "database 1",
-    outputFolder = file.path(getwd(), "characterization_results"),
+    outputFolder,
     minCharacterizationMean = 0,
     minCellCount = 0,
     ...) {
+
+  if(missing(outputFolder)){
+    stop('Please enter a output path value for outputFolder')
+  }
 
   message("Case Aggregates:  starting")
   # check inputs
@@ -414,13 +437,13 @@ computeCaseAggregateCovariateAnalyses <- function(
   # create the temp table with cohort_details
   DatabaseConnector::insertTable(
     data = cohortDetails[, c("targetCohortId", "outcomeCohortId", "cohortType", "cohortDefinitionId", "settingId")],
-    camelCaseToSnakeCase = T,
+    camelCaseToSnakeCase = TRUE,
     connection = connection,
     tableName = "#cohort_details",
-    tempTable = T,
-    dropTableIfExists = T,
-    createTable = T,
-    progressBar = F,
+    tempTable = TRUE,
+    dropTableIfExists = TRUE,
+    createTable = TRUE,
+    progressBar = FALSE,
     tempEmulationSchema = tempEmulationSchema
   )
 
@@ -499,7 +522,7 @@ computeCaseAggregateCovariateAnalyses <- function(
   counts <- DatabaseConnector::querySql(
     connection = connection,
     sql = sql,
-    snakeCaseToCamelCase = T,
+    snakeCaseToCamelCase = TRUE,
   )
 
   message("Case Aggregates: Computing aggregate before case covariate results")
@@ -508,11 +531,11 @@ computeCaseAggregateCovariateAnalyses <- function(
     connection = connection,
     cdmDatabaseSchema = cdmDatabaseSchema,
     cohortTable = "#cases",
-    cohortTableIsTemp = T,
+    cohortTableIsTemp = TRUE,
     cohortIds = -1,
     covariateSettings = ParallelLogger::convertJsonToSettings(covariateSettings),
     cdmVersion = cdmVersion,
-    aggregated = T,
+    aggregated = TRUE,
     minCharacterizationMean = minCharacterizationMean,
     tempEmulationSchema = tempEmulationSchema
   )
@@ -525,11 +548,11 @@ computeCaseAggregateCovariateAnalyses <- function(
         connection = connection,
         cdmDatabaseSchema = cdmDatabaseSchema,
         cohortTable = "#case_series",
-        cohortTableIsTemp = T,
+        cohortTableIsTemp = TRUE,
         cohortIds = -1,
         covariateSettings = ParallelLogger::convertJsonToSettings(caseCovariateSettings),
         cdmVersion = cdmVersion,
-        aggregated = T,
+        aggregated = TRUE,
         minCharacterizationMean = minCharacterizationMean,
         tempEmulationSchema = tempEmulationSchema
       )
@@ -575,13 +598,13 @@ computeCaseAggregateCovariateAnalyses <- function(
     counts = NULL, # previously added
     databaseId = databaseId,
     minCharacterizationMean = minCharacterizationMean,
-    includeSettings = F,
+    includeSettings = FALSE,
     minCellCount = minCellCount
   )
 
   message("Case Aggregates:  ending")
 
-  return(invisible(T))
+  return(invisible(TRUE))
 }
 
 
@@ -594,7 +617,8 @@ exportAndromedaToCsv <- function(
     minCharacterizationMean,
     batchSize = 100000,
     minCellCount = 0,
-    includeSettings = T) {
+    includeSettings = TRUE
+    ) {
   saveLocation <- outputFolder
   if (!dir.exists(saveLocation)) {
     dir.create(saveLocation, recursive = T)
@@ -615,9 +639,9 @@ exportAndromedaToCsv <- function(
         colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
 
         if (file.exists(file.path(saveLocation, "analysis_ref.csv"))) {
-          append <- T
+          append <- TRUE
         } else {
-          append <- F
+          append <- FALSE
         }
         readr::write_csv(
           x = formatDouble(data),
@@ -637,9 +661,9 @@ exportAndromedaToCsv <- function(
         colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
 
         if (file.exists(file.path(saveLocation, "covariate_ref.csv"))) {
-          append <- T
+          append <- TRUE
         } else {
-          append <- F
+          append <- FALSE
         }
         readr::write_csv(
           x = formatDouble(data),
@@ -677,9 +701,9 @@ exportAndromedaToCsv <- function(
         }
 
         if (file.exists(file.path(saveLocation, "covariates.csv"))) {
-          append <- T
+          append <- TRUE
         } else {
-          append <- F
+          append <- FALSE
         }
         readr::write_csv(
           x = formatDouble(data),
@@ -719,9 +743,9 @@ exportAndromedaToCsv <- function(
         }
 
         if (file.exists(file.path(saveLocation, "covariates_continuous.csv"))) {
-          append <- T
+          append <- TRUE
         } else {
-          append <- F
+          append <- FALSE
         }
         readr::write_csv(
           x = formatDouble(data),
@@ -773,9 +797,9 @@ exportAndromedaToCsv <- function(
     }
 
     if (file.exists(file.path(saveLocation, "cohort_counts.csv"))) {
-      append <- T
+      append <- TRUE
     } else {
-      append <- F
+      append <- FALSE
     }
     readr::write_csv(
       x = formatDouble(cohortCounts),
@@ -800,7 +824,7 @@ exportAndromedaToCsv <- function(
     readr::write_csv(
       x = settings,
       file = file.path(saveLocation, "settings.csv"),
-      append = F
+      append = FALSE
     )
 
     cohortDetails <- cohortDetails %>%
@@ -816,11 +840,11 @@ exportAndromedaToCsv <- function(
     readr::write_csv(
       x = cohortDetails,
       file = file.path(saveLocation, "cohort_details.csv"),
-      append = F
+      append = FALSE
     )
   }
 
-  return(invisible(T))
+  return(invisible(TRUE))
 }
 
 

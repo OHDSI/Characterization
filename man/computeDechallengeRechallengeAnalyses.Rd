@@ -13,7 +13,7 @@ computeDechallengeRechallengeAnalyses(
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   settings,
   databaseId = "database 1",
-  outputFolder = file.path(getwd(), "results"),
+  outputFolder,
   minCellCount = 0,
   ...
 )
@@ -53,6 +53,25 @@ An \code{Andromeda::andromeda()} object containing the dechallenge rechallenge r
 }
 \description{
 Compute dechallenge rechallenge study
+}
+\examples{
+
+conDet <- exampleOmopConnectionDetails()
+
+drSet <- createDechallengeRechallengeSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+computeDechallengeRechallengeAnalyses(
+  connectionDetails = conDet,
+  targetDatabaseSchema = 'main',
+  targetTable = 'cohort',
+  settings = drSet,
+  outputFolder = tempdir()
+)
+
+
 }
 \seealso{
 Other DechallengeRechallenge: 

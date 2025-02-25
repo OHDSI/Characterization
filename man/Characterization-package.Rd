@@ -4,21 +4,21 @@
 \name{Characterization-package}
 \alias{Characterization}
 \alias{Characterization-package}
-\title{Characterization: Characterizations of Cohorts}
+\title{Characterization: Implement Descriptive Studies Using the Common Data Model}
 \description{
-Various characterizations of target and outcome cohorts for data mapped to the OMOP CDM.
+An end-to-end framework that enables users to implement various descriptive studies for a given set of target and outcome cohorts for data mapped to the Observational Medical Outcomes Partnership Common Data Model.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://ohdsi.github.io/Characterization}
+  \item \url{https://ohdsi.github.io/Characterization/}
   \item \url{https://github.com/OHDSI/Characterization}
   \item Report bugs at \url{https://github.com/OHDSI/Characterization/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Jenna Reps \email{reps@ohdsi.org}
+\strong{Maintainer}: Jenna Reps \email{jreps@its.jnj.com}
 
 Authors:
 \itemize{

@@ -49,7 +49,7 @@ test_that("computeTimeToEventSettings", {
     show_col_types = F
   )
 
-  testthat::expect_true(nrow(tte) == 160)
+  testthat::expect_true(nrow(tte) == 102)
   testthat::expect_true("database_id" %in% colnames(tte))
   testthat::expect_true(tte$database_id[1] == "tte_test")
 

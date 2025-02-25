@@ -15,7 +15,7 @@ home:
 
 navbar:
   structure:
-    left: [home, intro, reference, articles, news]
+    left: [home, reference, articles, news]
     right: [hades, github]
   components:
     home:
@@ -25,10 +25,6 @@ navbar:
       icon: fa-info-circle fa-lg
       text: Reference
       href: reference/index.html
-    intro:
-      icon: fa-download fa-lg
-      text: Get started
-      href: articles/InstallationGuide.html
     news:
       icon: fa-newspaper-o fa-lg
       text: Changelog

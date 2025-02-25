@@ -25,11 +25,9 @@ Examples
 
 ```r
 
-library(Eunomia)
 library(Characterization)
 
-connectionDetails <- Eunomia::getEunomiaConnectionDetails()
-Eunomia::createCohorts(connectionDetails = connectionDetails)
+connectionDetails <- Characterization::exampleOmopConnectionDetails()
 
 targetIds <- c(1,2,4)
   outcomeIds <- c(3)

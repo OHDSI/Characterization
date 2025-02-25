@@ -14,16 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#' export the TimeToEvent results as csv
-#'
-#' @param result  The output of running \code{computeTimeToEventAnalyses()}
-#' @template saveDirectory
-#' @param minCellCount  The minimum value that will be displayed in count columns
-#' @family SaveLoad
-#' @return
-#' A string specifying the directory the csv results are saved to
-#'
-#' @export
 exportTimeToEventToCsv <- function(
     result,
     saveDirectory,
@@ -31,7 +21,7 @@ exportTimeToEventToCsv <- function(
   if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
-      recursive = T
+      recursive = TRUE
     )
   }
 
@@ -79,16 +69,6 @@ exportTimeToEventToCsv <- function(
 }
 
 
-#' export the DechallengeRechallenge results as csv
-#'
-#' @param result  The output of running \code{computeDechallengeRechallengeAnalyses()}
-#' @template saveDirectory
-#' @param minCellCount  The minimum value that will be displayed in count columns
-#' @family SaveLoad
-#' @return
-#' A string specifying the directory the csv results are saved to
-#'
-#' @export
 exportDechallengeRechallengeToCsv <- function(
     result,
     saveDirectory,
@@ -99,7 +79,7 @@ exportDechallengeRechallengeToCsv <- function(
   message("Writing ", countN, " rows to csv")
 
   if (!dir.exists(saveDirectory)) {
-    dir.create(saveDirectory, recursive = T)
+    dir.create(saveDirectory, recursive = TRUE)
   }
 
   Andromeda::batchApply(
@@ -203,22 +183,14 @@ exportDechallengeRechallengeToCsv <- function(
   )
 }
 
-#' export the RechallengeFailCaseSeries results as csv
-#'
-#' @param result  The output of running \code{computeRechallengeFailCaseSeriesAnalyses()}
-#' @template saveDirectory
-#' @family SaveLoad
-#' @return
-#' A string specifying the directory the csv results are saved to
-#'
-#' @export
+
 exportRechallengeFailCaseSeriesToCsv <- function(
     result,
     saveDirectory) {
   if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
-      recursive = T
+      recursive = TRUE
     )
   }
 

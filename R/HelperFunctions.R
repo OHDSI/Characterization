@@ -14,6 +14,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+#' create a connection detail for an example GI Bleed dataset from Eunomia
+#'
+#' @description
+#' This returns an object of class `ConnectionDetails` that lets you connect via `DatabaseConnector::connect()` to the example database.
+#'
+#' @details
+#' Finds the location of the example database in the package and calls `DatabaseConnector::createConnectionDetails` to create a `ConnectionDetails` object for connecting to the database.
+#'
+#' @param exdir a directory to unzip the example OMOP database into.  Default is tempdir().
+#'
+#' @return
+#' An object of class `ConnectionDetails` with the details to connect to the example OHDSI OMOP CDM database
+#'
+#' @family helper
+#'
+#' @export
+#' @examples
+#' conDet <- exampleOmopConnectionDetails()
+#'
+#' connectionHandler <- ResultModelManager::ConnectionHandler$new(conDet)
+#'
+exampleOmopConnectionDetails <- function(exdir = tempdir()) {
+
+  # unzip the data - it is compressed to save space
+  utils::unzip(
+    zipfile = system.file('exampleData','GiBleed.sqlite.zip', package = 'Characterization'),
+    exdir = exdir
+  )
+
+  server <- file.path(exdir, 'GiBleed.sqlite')
+  cd <- DatabaseConnector::createConnectionDetails(
+    dbms = "sqlite",
+    server = server
+  )
+  return(cd)
+}
+
 .checkConnection <- function(
     connection,
     errorMessages) {
@@ -234,7 +272,7 @@
     errorMessages) {
   checkmate::assertCount(
     x = minPriorObservation,
-    null.ok = F,
+    null.ok = FALSE,
     .var.name = "minPriorObservation",
     add = errorMessages
   )

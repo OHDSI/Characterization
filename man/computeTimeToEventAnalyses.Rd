@@ -14,7 +14,7 @@ computeTimeToEventAnalyses(
   cdmDatabaseSchema,
   settings,
   databaseId = "database 1",
-  outputFolder = file.path(getwd(), "results"),
+  outputFolder,
   minCellCount = 0,
   ...
 )
@@ -56,6 +56,28 @@ An \code{Andromeda::andromeda()} object containing the time to event results.
 }
 \description{
 Compute time to event study
+}
+\examples{
+# example code
+
+conDet <- exampleOmopConnectionDetails()
+
+tteSet <- createTimeToEventSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+result <- computeTimeToEventAnalyses(
+  connectionDetails = conDet,
+  targetDatabaseSchema = 'main',
+  targetTable = 'cohort',
+  cdmDatabaseSchema = 'main',
+  settings = tteSet,
+  outputFolder = file.path(tempdir(), 'tte')
+)
+
+
+
 }
 \seealso{
 Other TimeToEvent: 

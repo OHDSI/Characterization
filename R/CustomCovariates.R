@@ -60,23 +60,23 @@
 #'
 #' @export
 createDuringCovariateSettings <- function(
-    useConditionOccurrenceDuring = F,
-    useConditionOccurrencePrimaryInpatientDuring = F,
-    useConditionEraDuring = F,
-    useConditionGroupEraDuring = F,
-    useDrugExposureDuring = F,
-    useDrugEraDuring = F,
-    useDrugGroupEraDuring = F,
-    useProcedureOccurrenceDuring = F,
-    useDeviceExposureDuring = F,
-    useMeasurementDuring = F,
-    useObservationDuring = F,
-    useVisitCountDuring = F,
-    useVisitConceptCountDuring = F,
+    useConditionOccurrenceDuring = FALSE,
+    useConditionOccurrencePrimaryInpatientDuring = FALSE,
+    useConditionEraDuring = FALSE,
+    useConditionGroupEraDuring = FALSE,
+    useDrugExposureDuring = FALSE,
+    useDrugEraDuring = FALSE,
+    useDrugGroupEraDuring = FALSE,
+    useProcedureOccurrenceDuring = FALSE,
+    useDeviceExposureDuring = FALSE,
+    useMeasurementDuring = FALSE,
+    useObservationDuring = FALSE,
+    useVisitCountDuring = FALSE,
+    useVisitConceptCountDuring = FALSE,
     includedCovariateConceptIds = c(),
-    addDescendantsToInclude = F,
+    addDescendantsToInclude = FALSE,
     excludedCovariateConceptIds = c(),
-    addDescendantsToExclude = F,
+    addDescendantsToExclude = FALSE,
     includedCovariateIds = c()) {
   covariateSettings <- list(
     temporal = FALSE, # needed?
@@ -124,9 +124,31 @@ createDuringCovariateSettings <- function(
 #' @param minCharacterizationMean the minimum value for a covariate to be extracted
 #' @template tempEmulationSchema
 #' @param ...  additional arguments from FeatureExtraction
+#'
 #' @family CovariateSetting
+#'
+#' @examples
+#'
+#' conDet <- exampleOmopConnectionDetails()
+#' connection <- DatabaseConnector::connect(conDet)
+#'
+#' settings <- createDuringCovariateSettings(
+#'   useConditionOccurrenceDuring = TRUE,
+#'   useConditionOccurrencePrimaryInpatientDuring = FALSE,
+#'   useConditionEraDuring = FALSE,
+#'   useConditionGroupEraDuring = FALSE
+#' )
+#'
+#' duringData <- getDbDuringCovariateData(
+#'   connection <- connection,
+#'   cdmDatabaseSchema = 'main',
+#'   cohortIds = 1,
+#'   covariateSettings = settings,
+#'   cohortTable = 'cohort'
+#' )
+#'
 #' @return
-#' The the during covariates based on user settings
+#' A 'FeatureExtraction' covariateData object containing the during covariates based on user settings
 #'
 #' @export
 getDbDuringCovariateData <- function(
@@ -136,7 +158,7 @@ getDbDuringCovariateData <- function(
     cdmVersion = "5",
     cohortTable = "#cohort_person",
     rowIdField = "subject_id",
-    aggregated = T,
+    aggregated = TRUE,
     cohortIds = c(-1),
     covariateSettings,
     minCharacterizationMean = 0,
@@ -192,11 +214,11 @@ getDbDuringCovariateData <- function(
     DatabaseConnector::insertTable(
       connection = connection,
       tableName = includedCovTable,
-      dropTableIfExists = T,
-      createTable = T,
-      tempTable = T,
+      dropTableIfExists = TRUE,
+      createTable = TRUE,
+      tempTable = TRUE,
       data = data.frame(id = covariateSettings$includedCovariateIds),
-      camelCaseToSnakeCase = T,
+      camelCaseToSnakeCase = TRUE,
       tempEmulationSchema = tempEmulationSchema
     )
   }
@@ -208,11 +230,11 @@ getDbDuringCovariateData <- function(
     DatabaseConnector::insertTable(
       connection = connection,
       tableName = includedConceptTable,
-      dropTableIfExists = T,
-      createTable = T,
-      tempTable = T,
+      dropTableIfExists = TRUE,
+      createTable = TRUE,
+      tempTable = TRUE,
       data = data.frame(id = covariateSettings$includedCovariateConceptIds),
-      camelCaseToSnakeCase = T,
+      camelCaseToSnakeCase = TRUE,
       tempEmulationSchema = tempEmulationSchema
     )
 
@@ -235,11 +257,11 @@ getDbDuringCovariateData <- function(
     DatabaseConnector::insertTable(
       connection = connection,
       tableName = excludedConceptTable,
-      dropTableIfExists = T,
-      createTable = T,
-      tempTable = T,
+      dropTableIfExists = TRUE,
+      createTable = TRUE,
+      tempTable = TRUE,
       data = data.frame(id = covariateSettings$excludedCovariateConceptIds),
-      camelCaseToSnakeCase = T,
+      camelCaseToSnakeCase = TRUE,
       tempEmulationSchema = tempEmulationSchema
     )
 
@@ -259,8 +281,8 @@ getDbDuringCovariateData <- function(
   i <- 0
   binaryInd <- c()
   continuousInd <- c()
-  useBinary <- F
-  useContinuous <- F
+  useBinary <- FALSE
+  useContinuous <- FALSE
   result <- Andromeda::andromeda()
 
   for (domainSettingsIndex in domainSettingsIndexes) {
@@ -268,10 +290,10 @@ getDbDuringCovariateData <- function(
 
     if (getDomainSettings$isBinary[domainSettingsIndex] == "Y") {
       binaryInd <- c(i, binaryInd)
-      useBinary <- T
+      useBinary <- TRUE
     } else {
       continuousInd <- c(i, continuousInd)
-      useContinuous <- T
+      useContinuous <- TRUE
     }
     # Load template sql and fill
     sql <- SqlRender::loadRenderTranslateSql(
@@ -303,7 +325,7 @@ getDbDuringCovariateData <- function(
     DatabaseConnector::executeSql(
       connection = connection,
       sql = sql,
-      progressBar = T
+      progressBar = TRUE
     )
     time <- Sys.time() - start
     message(paste0("Execution took ", round(time, digits = 2), " ", units(time)))
@@ -340,7 +362,7 @@ getDbDuringCovariateData <- function(
       sql = sql,
       andromeda = result,
       andromedaTableName = "covariates",
-      appendToTable = F,
+      appendToTable = FALSE,
       snakeCaseToCamelCase = TRUE
     )
     if (minCharacterizationMean != 0 && "averageValue" %in% colnames(result$covariates)) {
@@ -360,7 +382,7 @@ getDbDuringCovariateData <- function(
       sql = sql,
       andromeda = result,
       andromedaTableName = "covariatesContinuous",
-      appendToTable = F,
+      appendToTable = FALSE,
       snakeCaseToCamelCase = TRUE
     )
   }
@@ -373,7 +395,7 @@ getDbDuringCovariateData <- function(
     ),
     andromeda = result,
     andromedaTableName = "covariateRef",
-    appendToTable = F,
+    appendToTable = FALSE,
     snakeCaseToCamelCase = TRUE
   )
 
@@ -386,7 +408,7 @@ getDbDuringCovariateData <- function(
     ),
     andromeda = result,
     andromedaTableName = "analysisRef",
-    appendToTable = F,
+    appendToTable = FALSE,
     snakeCaseToCamelCase = TRUE
   )
   time <- Sys.time() - start
