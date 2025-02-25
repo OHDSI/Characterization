@@ -16,12 +16,10 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../index.html"><span class="fa fa-home fa-lg"></span></a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/InstallationGuide.html"><span class="fa fa-download fa-lg"></span> Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html"><span class="fa fa-info-circle fa-lg"></span> Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/InstallationGuide.html">Characterization Installation Guide</a></li>
-    <li><a class="dropdown-item" href="../articles/Specification.html">Characterization Package Specification</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/Specification.html">Characterization Package Specification</a></li>
     <li><a class="dropdown-item" href="../articles/UsingPackage.html">Using Characterization Package</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html"><span class="fa fa-newspaper-o fa-lg"></span> Changelog</a></li>
@@ -56,26 +54,27 @@
 <span>  riskWindowEnd <span class="op">=</span> <span class="fl">365</span>,</span>
 <span>  endAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
 <span>  covariateSettings <span class="op">=</span> <span class="fu">FeatureExtraction</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">createCovariateSettings</a></span><span class="op">(</span>useDemographicsGender <span class="op">=</span></span>
-<span>    <span class="cn">T</span>, useDemographicsAge <span class="op">=</span> <span class="cn">T</span>, useDemographicsAgeGroup <span class="op">=</span> <span class="cn">T</span>, useDemographicsRace <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>    useDemographicsEthnicity <span class="op">=</span> <span class="cn">T</span>, useDemographicsIndexYear <span class="op">=</span> <span class="cn">T</span>, useDemographicsIndexMonth</span>
-<span>    <span class="op">=</span> <span class="cn">T</span>, useDemographicsTimeInCohort <span class="op">=</span> <span class="cn">T</span>, useDemographicsPriorObservationTime <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>    useDemographicsPostObservationTime <span class="op">=</span> <span class="cn">T</span>, useConditionGroupEraLongTerm <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>    useDrugGroupEraOverlapping <span class="op">=</span> <span class="cn">T</span>, useDrugGroupEraLongTerm <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>    useProcedureOccurrenceLongTerm <span class="op">=</span> <span class="cn">T</span>, useMeasurementLongTerm <span class="op">=</span> <span class="cn">T</span>, </span>
+<span>    <span class="cn">TRUE</span>, useDemographicsAge <span class="op">=</span> <span class="cn">TRUE</span>, useDemographicsAgeGroup <span class="op">=</span> <span class="cn">TRUE</span>, useDemographicsRace</span>
+<span>    <span class="op">=</span> <span class="cn">TRUE</span>, useDemographicsEthnicity <span class="op">=</span> <span class="cn">TRUE</span>, useDemographicsIndexYear <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    useDemographicsIndexMonth <span class="op">=</span> <span class="cn">TRUE</span>, useDemographicsTimeInCohort <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    useDemographicsPriorObservationTime <span class="op">=</span> <span class="cn">TRUE</span>, useDemographicsPostObservationTime <span class="op">=</span></span>
+<span>    <span class="cn">TRUE</span>, useConditionGroupEraLongTerm <span class="op">=</span> <span class="cn">TRUE</span>, useDrugGroupEraOverlapping <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    useDrugGroupEraLongTerm <span class="op">=</span> <span class="cn">TRUE</span>, useProcedureOccurrenceLongTerm <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>    </span>
-<span>    useObservationLongTerm <span class="op">=</span> <span class="cn">T</span>, useDeviceExposureLongTerm <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>    useVisitConceptCountLongTerm <span class="op">=</span> <span class="cn">T</span>, useConditionGroupEraShortTerm <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>    useDrugGroupEraShortTerm <span class="op">=</span> <span class="cn">T</span>, useProcedureOccurrenceShortTerm <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>    useMeasurementShortTerm <span class="op">=</span> <span class="cn">T</span>, useObservationShortTerm <span class="op">=</span> <span class="cn">T</span>, useDeviceExposureShortTerm</span>
-<span>    <span class="op">=</span> <span class="cn">T</span>, useVisitConceptCountShortTerm <span class="op">=</span> <span class="cn">T</span>, endDays <span class="op">=</span> <span class="fl">0</span>, longTermStartDays <span class="op">=</span> <span class="op">-</span><span class="fl">365</span>,</span>
+<span>    useMeasurementLongTerm <span class="op">=</span> <span class="cn">TRUE</span>, useObservationLongTerm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    useDeviceExposureLongTerm <span class="op">=</span> <span class="cn">TRUE</span>, useVisitConceptCountLongTerm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    useConditionGroupEraShortTerm <span class="op">=</span> <span class="cn">TRUE</span>, useDrugGroupEraShortTerm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    useProcedureOccurrenceShortTerm <span class="op">=</span> <span class="cn">TRUE</span>, useMeasurementShortTerm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    useObservationShortTerm <span class="op">=</span> <span class="cn">TRUE</span>, useDeviceExposureShortTerm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    useVisitConceptCountShortTerm <span class="op">=</span> <span class="cn">TRUE</span>, endDays <span class="op">=</span> <span class="fl">0</span>, longTermStartDays <span class="op">=</span> <span class="op">-</span><span class="fl">365</span>,</span>
 <span>    shortTermStartDays <span class="op">=</span> <span class="op">-</span><span class="fl">30</span><span class="op">)</span>,</span>
-<span>  caseCovariateSettings <span class="op">=</span> <span class="fu"><a href="createDuringCovariateSettings.html">createDuringCovariateSettings</a></span><span class="op">(</span>useConditionGroupEraDuring <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>    useDrugGroupEraDuring <span class="op">=</span> <span class="cn">T</span>, useProcedureOccurrenceDuring <span class="op">=</span> <span class="cn">T</span>, useDeviceExposureDuring</span>
-<span>    <span class="op">=</span> <span class="cn">T</span>, useMeasurementDuring <span class="op">=</span> <span class="cn">T</span>, useObservationDuring <span class="op">=</span> <span class="cn">T</span>, useVisitConceptCountDuring <span class="op">=</span></span>
-<span>    <span class="cn">T</span><span class="op">)</span>,</span>
+<span>  caseCovariateSettings <span class="op">=</span> <span class="fu"><a href="createDuringCovariateSettings.html">createDuringCovariateSettings</a></span><span class="op">(</span>useConditionGroupEraDuring <span class="op">=</span></span>
+<span>    <span class="cn">TRUE</span>, useDrugGroupEraDuring <span class="op">=</span> <span class="cn">TRUE</span>, useProcedureOccurrenceDuring <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    useDeviceExposureDuring <span class="op">=</span> <span class="cn">TRUE</span>, useMeasurementDuring <span class="op">=</span> <span class="cn">TRUE</span>, useObservationDuring <span class="op">=</span></span>
+<span>    <span class="cn">TRUE</span>, useVisitConceptCountDuring <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>  casePreTargetDuration <span class="op">=</span> <span class="fl">365</span>,</span>
 <span>  casePostOutcomeDuration <span class="op">=</span> <span class="fl">365</span>,</span>
-<span>  extractNonCaseCovariates <span class="op">=</span> <span class="cn">T</span></span>
+<span>  extractNonCaseCovariates <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -142,6 +141,24 @@ or `"cohort end"`.</p></dd>
     <p>A list with the settings</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">aggregateSetting</span> <span class="op">&lt;-</span> <span class="fu">createAggregateCovariateSettings</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  targetIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  outcomeIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  minPriorObservation <span class="op">=</span> <span class="fl">365</span>,</span></span>
+<span class="r-in"><span>  outcomeWashoutDays <span class="op">=</span> <span class="fl">90</span>,</span></span>
+<span class="r-in"><span>  riskWindowStart <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>  startAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span></span>
+<span class="r-in"><span>  riskWindowEnd <span class="op">=</span> <span class="fl">365</span>,</span></span>
+<span class="r-in"><span>  endAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span></span>
+<span class="r-in"><span>  casePreTargetDuration <span class="op">=</span> <span class="fl">365</span>,</span></span>
+<span class="r-in"><span>  casePostOutcomeDuration <span class="op">=</span> <span class="fl">365</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
