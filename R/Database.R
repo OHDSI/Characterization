@@ -294,6 +294,7 @@ createCharacterizationTables <- function(
     # add database migration here in the future
     migrateDataModel(
       connectionDetails = connectionDetails,
+      connection = conn,
       databaseSchema = resultSchema,
       tablePrefix = tablePrefix
     )
@@ -301,7 +302,12 @@ createCharacterizationTables <- function(
 }
 
 
-migrateDataModel <- function(connectionDetails, databaseSchema, tablePrefix = "") {
+migrateDataModel <- function(
+    connectionDetails,
+    connection,
+    databaseSchema,
+    tablePrefix = ""
+    ) {
   ParallelLogger::logInfo("Migrating data set")
   migrator <- getDataMigrator(
     connectionDetails = connectionDetails,
@@ -319,8 +325,10 @@ migrateDataModel <- function(connectionDetails, databaseSchema, tablePrefix = ""
     dbms = connectionDetails$dbms
   )
 
-  connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
-  on.exit(DatabaseConnector::disconnect(connection))
+  if(missing(connection)){
+    connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
+  }
   DatabaseConnector::executeSql(connection, updateVersionSql)
 }
 

@@ -73,3 +73,7 @@ reference:
     desc: >
       Code to run incremetal model
     contents: has_concept("Incremental")
+  - title: "Helpers"
+    desc: >
+      Helper functions such as example data for users
+    contents: has_concept("helper")

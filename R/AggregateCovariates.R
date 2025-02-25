@@ -26,7 +26,7 @@
 #' @param casePreTargetDuration    The number of days prior to case index we use for FeatureExtraction
 #' @param casePostOutcomeDuration    The number of days prior to case index we use for FeatureExtraction
 #' @param extractNonCaseCovariates Whether to extract aggregate covariates and counts for patients in the targets and outcomes in addition to the cases
-#' @family {Aggregate}
+#' @family Aggregate
 #' @return
 #' A list with the settings
 #'

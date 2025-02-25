@@ -88,4 +88,4 @@ aggregateSetting <- createAggregateCovariateSettings(
 )
 
 }
-\concept{{Aggregate}}
+\concept{Aggregate}

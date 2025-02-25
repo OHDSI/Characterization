@@ -50,4 +50,4 @@ viewCharacterization(
 
 
 }
-\concept{{Shiny}}
+\concept{Shiny}
