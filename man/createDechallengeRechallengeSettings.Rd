@@ -26,6 +26,14 @@ A list with the settings
 \description{
 Create dechallenge rechallenge study settings
 }
+\examples{
+drSet <- createDechallengeRechallengeSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+
+}
 \seealso{
 Other DechallengeRechallenge: 
 \code{\link{computeDechallengeRechallengeAnalyses}()},

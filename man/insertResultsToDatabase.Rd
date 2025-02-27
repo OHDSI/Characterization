@@ -32,6 +32,49 @@ This function uploads results in csv format into a result database
 \details{
 Calls ResultModelManager uploadResults function to upload the csv files
 }
+\examples{
+
+# generate results into resultsFolder
+conDet <- exampleOmopConnectionDetails()
+
+drSet <- createDechallengeRechallengeSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+cSet <- createCharacterizationSettings(
+  dechallengeRechallengeSettings = drSet
+)
+
+runCharacterizationAnalyses(
+  connectionDetails = conDet,
+  targetDatabaseSchema = 'main',
+  targetTable = 'cohort',
+  outcomeDatabaseSchema = 'main',
+  outcomeTable = 'cohort',
+  cdmDatabaseSchema = 'main',
+  characterizationSettings = cSet,
+  outputDirectory = tempdir()
+)
+
+# create sqlite database
+charResultDbCD <- createSqliteDatabase()
+
+# create database results tables
+createCharacterizationTables(
+   connectionDetails = charResultDbCD,
+   resultSchema = 'main'
+ )
+
+# insert results
+insertResultsToDatabase(
+ connectionDetails = charResultDbCD,
+ schema = 'main',
+ resultsFolder = tempdir()
+)
+
+
+}
 \seealso{
 Other Database: 
 \code{\link{createCharacterizationTables}()},

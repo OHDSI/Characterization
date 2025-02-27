@@ -20,4 +20,34 @@ This is a shiny app for viewing interactive plots and tables
 \details{
 Input is the output of ...
 }
-\concept{{Shiny}}
+\examples{
+
+conDet <- exampleOmopConnectionDetails()
+
+drSet <- createDechallengeRechallengeSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+cSet <- createCharacterizationSettings(
+  dechallengeRechallengeSettings = drSet
+)
+
+runCharacterizationAnalyses(
+  connectionDetails = conDet,
+  targetDatabaseSchema = 'main',
+  targetTable = 'cohort',
+  outcomeDatabaseSchema = 'main',
+  outcomeTable = 'cohort',
+  cdmDatabaseSchema = 'main',
+  characterizationSettings = cSet,
+  outputDirectory = file.path(tempdir(),'view')
+)
+
+viewCharacterization(
+  resultFolder = file.path(tempdir(),'view')
+)
+
+
+}
+\concept{Shiny}

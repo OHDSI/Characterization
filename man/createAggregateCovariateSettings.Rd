@@ -14,26 +14,27 @@ createAggregateCovariateSettings(
   riskWindowEnd = 365,
   endAnchor = "cohort start",
   covariateSettings = FeatureExtraction::createCovariateSettings(useDemographicsGender =
-    T, useDemographicsAge = T, useDemographicsAgeGroup = T, useDemographicsRace = T,
-    useDemographicsEthnicity = T, useDemographicsIndexYear = T, useDemographicsIndexMonth
-    = T, useDemographicsTimeInCohort = T, useDemographicsPriorObservationTime = T,
-    useDemographicsPostObservationTime = T, useConditionGroupEraLongTerm = T,
-    useDrugGroupEraOverlapping = T, useDrugGroupEraLongTerm = T,
-    useProcedureOccurrenceLongTerm = T, useMeasurementLongTerm = T, 
+    TRUE, useDemographicsAge = TRUE, useDemographicsAgeGroup = TRUE, useDemographicsRace
+    = TRUE, useDemographicsEthnicity = TRUE, useDemographicsIndexYear = TRUE,
+    useDemographicsIndexMonth = TRUE, useDemographicsTimeInCohort = TRUE,
+    useDemographicsPriorObservationTime = TRUE, useDemographicsPostObservationTime =
+    TRUE, useConditionGroupEraLongTerm = TRUE, useDrugGroupEraOverlapping = TRUE,
+    useDrugGroupEraLongTerm = TRUE, useProcedureOccurrenceLongTerm = TRUE, 
     
-    useObservationLongTerm = T, useDeviceExposureLongTerm = T,
-    useVisitConceptCountLongTerm = T, useConditionGroupEraShortTerm = T,
-    useDrugGroupEraShortTerm = T, useProcedureOccurrenceShortTerm = T,
-    useMeasurementShortTerm = T, useObservationShortTerm = T, useDeviceExposureShortTerm
-    = T, useVisitConceptCountShortTerm = T, endDays = 0, longTermStartDays = -365,
+    useMeasurementLongTerm = TRUE, useObservationLongTerm = TRUE,
+    useDeviceExposureLongTerm = TRUE, useVisitConceptCountLongTerm = TRUE,
+    useConditionGroupEraShortTerm = TRUE, useDrugGroupEraShortTerm = TRUE,
+    useProcedureOccurrenceShortTerm = TRUE, useMeasurementShortTerm = TRUE,
+    useObservationShortTerm = TRUE, useDeviceExposureShortTerm = TRUE,
+    useVisitConceptCountShortTerm = TRUE, endDays = 0, longTermStartDays = -365,
     shortTermStartDays = -30),
-  caseCovariateSettings = createDuringCovariateSettings(useConditionGroupEraDuring = T,
-    useDrugGroupEraDuring = T, useProcedureOccurrenceDuring = T, useDeviceExposureDuring
-    = T, useMeasurementDuring = T, useObservationDuring = T, useVisitConceptCountDuring =
-    T),
+  caseCovariateSettings = createDuringCovariateSettings(useConditionGroupEraDuring =
+    TRUE, useDrugGroupEraDuring = TRUE, useProcedureOccurrenceDuring = TRUE,
+    useDeviceExposureDuring = TRUE, useMeasurementDuring = TRUE, useObservationDuring =
+    TRUE, useVisitConceptCountDuring = TRUE),
   casePreTargetDuration = 365,
   casePostOutcomeDuration = 365,
-  extractNonCaseCovariates = T
+  extractNonCaseCovariates = TRUE
 )
 }
 \arguments{
@@ -71,4 +72,20 @@ A list with the settings
 \description{
 Create aggregate covariate study settings
 }
-\concept{{Aggregate}}
+\examples{
+
+aggregateSetting <- createAggregateCovariateSettings(
+  targetIds = c(1,2),
+  outcomeIds = c(3),
+  minPriorObservation = 365,
+  outcomeWashoutDays = 90,
+  riskWindowStart = 1,
+  startAnchor = "cohort start",
+  riskWindowEnd = 365,
+  endAnchor = "cohort start",
+  casePreTargetDuration = 365,
+  casePostOutcomeDuration = 365
+)
+
+}
+\concept{Aggregate}

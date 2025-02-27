@@ -26,6 +26,19 @@ This function creates a list of settings for different characterization studies
 \details{
 Specify one or more timeToEvent, dechallengeRechallenge and aggregateCovariate settings
 }
+\examples{
+# example code
+
+drSet <- createDechallengeRechallengeSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+cSet <- createCharacterizationSettings(
+  dechallengeRechallengeSettings = drSet
+)
+
+}
 \seealso{
 Other LargeScale: 
 \code{\link{loadCharacterizationSettings}()},

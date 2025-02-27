@@ -1,3 +1,7 @@
+Characterization 2.1.3
+======================
+- prepared for CRAN by adding examples, removing getwd(), replacing T/F with TRUE/FALSE and added example data inside package so no download required.
+
 Characterization 2.1.2
 ======================
 - added input ignoreWhenEmpty to cleanIncremental() that does not run incrementalClean if there are no incremental files

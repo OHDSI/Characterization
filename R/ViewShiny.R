@@ -6,20 +6,59 @@
 #' Input is the output of ...
 #' @param resultFolder   The location of the csv results
 #' @param cohortDefinitionSet  The cohortDefinitionSet extracted using webAPI
-#' @family {Shiny}
+#' @family Shiny
+#'
 #' @return
 #' Opens a shiny app for interactively viewing the results
+#'
+#' @examples
+#'
+#' conDet <- exampleOmopConnectionDetails()
+#'
+#' drSet <- createDechallengeRechallengeSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   dechallengeRechallengeSettings = drSet
+#' )
+#'
+#' runCharacterizationAnalyses(
+#'   connectionDetails = conDet,
+#'   targetDatabaseSchema = 'main',
+#'   targetTable = 'cohort',
+#'   outcomeDatabaseSchema = 'main',
+#'   outcomeTable = 'cohort',
+#'   cdmDatabaseSchema = 'main',
+#'   characterizationSettings = cSet,
+#'   outputDirectory = file.path(tempdir(),'view')
+#' )
+#'
+#' viewCharacterization(
+#'   resultFolder = file.path(tempdir(),'view')
+#' )
+#'
 #'
 #' @export
 viewCharacterization <- function(
     resultFolder,
     cohortDefinitionSet = NULL) {
+
+  # check there are csv files in resultFolder
+  if(length(dir(resultFolder, pattern = '.csv')) > 0 ){
+
   databaseSettings <- prepareCharacterizationShiny(
     resultFolder = resultFolder,
     cohortDefinitionSet = cohortDefinitionSet
   )
 
   viewChars(databaseSettings)
+  } else{
+    message('No csv results to view via shiny')
+    return(FALSE)
+  }
+
 }
 
 prepareCharacterizationShiny <- function(
@@ -29,7 +68,7 @@ prepareCharacterizationShiny <- function(
     tablePrefix = "",
     csvTablePrefix = "c_") {
   if (!dir.exists(dirname(sqliteLocation))) {
-    dir.create(dirname(sqliteLocation), recursive = T)
+    dir.create(dirname(sqliteLocation), recursive = TRUE)
   }
 
   # create sqlite connection
@@ -44,8 +83,8 @@ prepareCharacterizationShiny <- function(
     connectionDetails = connectionDetails,
     resultSchema = "main",
     targetDialect = "sqlite",
-    deleteExistingTables = T,
-    createTables = T,
+    deleteExistingTables = TRUE,
+    createTables = TRUE,
     tablePrefix = paste0(tablePrefix, csvTablePrefix)
   )
 
@@ -85,7 +124,7 @@ prepareCharacterizationShiny <- function(
         cohortDefinitionId = cohortIds,
         cohortName = getCohortNames(cohortIds, cohortDefinitionSet)
       ),
-      camelCaseToSnakeCase = T
+      camelCaseToSnakeCase = TRUE
     )
   }
 
@@ -106,7 +145,7 @@ prepareCharacterizationShiny <- function(
         databaseId = dbIds,
         cdmSourceAbbreviation = paste0("database ", dbIds)
       ),
-      camelCaseToSnakeCase = T
+      camelCaseToSnakeCase = TRUE
     )
   }
 
@@ -161,6 +200,12 @@ viewChars <- function(
 
 
 getCohortNames <- function(cohortIds, cohortDefinitionSet) {
+
+  if(is.null(cohortIds)){
+    warning('cohortIds is NULL')
+    return(NULL)
+  }
+
   if (!is.null(cohortDefinitionSet)) {
     cohortNames <- sapply(
       cohortIds,

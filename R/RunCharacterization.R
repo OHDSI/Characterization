@@ -9,8 +9,21 @@
 #' @param dechallengeRechallengeSettings A list of dechallengeRechallenge settings
 #' @param aggregateCovariateSettings A list of aggregateCovariate settings
 #' @family LargeScale
+#'
 #' @return
 #' Returns the connection to the sqlite database
+#'
+#' @examples
+#' # example code
+#'
+#' drSet <- createDechallengeRechallengeSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   dechallengeRechallengeSettings = drSet
+#' )
 #'
 #' @export
 createCharacterizationSettings <- function(
@@ -65,8 +78,24 @@ createCharacterizationSettings <- function(
 #' @param settings    An object of class characterizationSettings created using \code{createCharacterizationSettings}
 #' @param fileName  The location to save the json settings
 #' @family LargeScale
+#'
 #' @return
 #' Returns the location of the directory containing the json settings
+#'
+#' @examples
+#' drSet <- createDechallengeRechallengeSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   dechallengeRechallengeSettings = drSet
+#' )
+#'
+#' saveCharacterizationSettings(
+#'   settings = cSet,
+#'   fileName = file.path(tempdir(), 'cSet.json')
+#' )
 #'
 #' @export
 saveCharacterizationSettings <- function(
@@ -91,7 +120,31 @@ saveCharacterizationSettings <- function(
 #'
 #' @return
 #' Returns the json settings as an R object
+#'
 #' @family LargeScale
+#'
+#' @examples
+#' # example code
+#'
+#' setPath <- file.path(tempdir(), 'charSet.json')
+#'
+#' drSet <- createDechallengeRechallengeSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   dechallengeRechallengeSettings = drSet
+#' )
+#'
+#' saveCharacterizationSettings(
+#'   settings = cSet,
+#'   fileName = setPath
+#' )
+#'
+#' setting <- loadCharacterizationSettings(setPath)
+#'
+#'
 #' @export
 loadCharacterizationSettings <- function(
     fileName) {
@@ -126,8 +179,33 @@ loadCharacterizationSettings <- function(
 #' @param threads    The number of threads to use when running aggregate covariates
 #' @param minCharacterizationMean The minimum mean threshold to extract when running aggregate covariates
 #' @family LargeScale
+#'
 #' @return
 #' Multiple csv files in the outputDirectory.
+#'
+#' @examples
+#'
+#' conDet <- exampleOmopConnectionDetails()
+#'
+#' drSet <- createDechallengeRechallengeSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   dechallengeRechallengeSettings = drSet
+#' )
+#'
+#' runCharacterizationAnalyses(
+#'   connectionDetails = conDet,
+#'   targetDatabaseSchema = 'main',
+#'   targetTable = 'cohort',
+#'   outcomeDatabaseSchema = 'main',
+#'   outcomeTable = 'cohort',
+#'   cdmDatabaseSchema = 'main',
+#'   characterizationSettings = cSet,
+#'   outputDirectory = tempdir()
+#' )
 #'
 #' @export
 runCharacterizationAnalyses <- function(
@@ -143,9 +221,9 @@ runCharacterizationAnalyses <- function(
     executionPath = file.path(outputDirectory, "execution"),
     csvFilePrefix = "c_",
     databaseId = "1",
-    showSubjectId = F,
+    showSubjectId = FALSE,
     minCellCount = 0,
-    incremental = T,
+    incremental = TRUE,
     threads = 1,
     minCharacterizationMean = 0.01) {
   # inputs checks
@@ -227,7 +305,7 @@ runCharacterizationAnalyses <- function(
 
     if (nrow(jobs) == 0) {
       message("No jobs left")
-      return(invisible(T))
+      return(invisible(TRUE))
     }
   } else {
     # check for any csv files in folder
@@ -272,8 +350,8 @@ runCharacterizationAnalyses <- function(
   message("Creating new cluster")
   cluster <- ParallelLogger::makeCluster(
     numberOfThreads = threads,
-    singleThreadToMain = T,
-    setAndromedaTempFolder = T
+    singleThreadToMain = TRUE,
+    setAndromedaTempFolder = TRUE
   )
 
   ParallelLogger::clusterApply(
@@ -296,7 +374,7 @@ runCharacterizationAnalyses <- function(
 createDirectory <- function(x) {
   if (!dir.exists(x)) {
     message(paste0("Creating directory ", x))
-    dir.create(x, recursive = T)
+    dir.create(x, recursive = TRUE)
   }
 }
 
@@ -417,7 +495,7 @@ aggregateCsvs <- function(
   # this makes sure results are recreated
   firstTracker <- data.frame(
     table = tables,
-    first = rep(T, length(tables))
+    first = rep(TRUE, length(tables))
   )
 
   analysisRefTracker <- c()
@@ -438,7 +516,7 @@ aggregateCsvs <- function(
         # TODO do this in batches
         data <- readr::read_csv(
           file = loadPath,
-          show_col_types = F,
+          show_col_types = FALSE,
           col_types = colTypes[csvType == tables]
         )
 
@@ -480,7 +558,7 @@ aggregateCsvs <- function(
           file = savePath, quote = "all",
           append = append & !firstTracker$first[firstTracker$table == csvType]
         )
-        firstTracker$first[firstTracker$table == csvType] <- F
+        firstTracker$first[firstTracker$table == csvType] <- FALSE
       }
     }
   }

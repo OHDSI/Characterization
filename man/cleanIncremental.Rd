@@ -19,6 +19,15 @@ A list with the settings
 Removes csv files from folders that have not been marked as completed
 and removes the record of the execution file
 }
+\examples{
+
+cleanIncremental(
+  file.path(tempdir(), 'incremental'),
+  ignoreWhenEmpty = TRUE
+)
+
+
+}
 \seealso{
 Other Incremental: 
 \code{\link{cleanNonIncremental}()}

@@ -13,8 +13,8 @@ computeRechallengeFailCaseSeriesAnalyses(
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   settings,
   databaseId = "database 1",
-  showSubjectId = F,
-  outputFolder = file.path(getwd(), "results"),
+  showSubjectId = FALSE,
+  outputFolder,
   minCellCount = 0,
   ...
 )
@@ -56,6 +56,24 @@ An \code{Andromeda::andromeda()} object with the case series details of the fail
 }
 \description{
 Compute fine the subjects that fail the dechallenge rechallenge study
+}
+\examples{
+
+conDet <- exampleOmopConnectionDetails()
+
+drSet <- createDechallengeRechallengeSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+computeRechallengeFailCaseSeriesAnalyses(
+  connectionDetails = conDet,
+  targetDatabaseSchema = 'main',
+  targetTable = 'cohort',
+  settings = drSet,
+  outputFolder = tempdir()
+)
+
 }
 \seealso{
 Other DechallengeRechallenge: 

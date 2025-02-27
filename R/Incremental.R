@@ -64,8 +64,17 @@ getExecutionJobIssues <- function(
 #' @param executionFolder   The folder that has the execution files
 #' @param ignoreWhenEmpty   When TRUE, if there are no incremental logs then nothing is run
 #' @family Incremental
+#'
 #' @return
 #' A list with the settings
+#'
+#' @examples
+#'
+#' cleanIncremental(
+#'   file.path(tempdir(), 'incremental'),
+#'   ignoreWhenEmpty = TRUE
+#' )
+#'
 #'
 #' @export
 cleanIncremental <- function(
@@ -89,7 +98,7 @@ cleanIncremental <- function(
     if (length(issues) > 0) {
       # delete contents inside folder
       for (i in 1:length(issues)) {
-        files <- dir(file.path(executionFolder, issues[i]), full.names = T)
+        files <- dir(file.path(executionFolder, issues[i]), full.names = TRUE)
         for (file in files) {
           message(paste0("Deleting incomplete result file ", file))
           file.remove(file)
@@ -152,7 +161,7 @@ recordIncremental <- function(
     readr::write_csv(
       x = x,
       file = file.path(executionFolder, logname),
-      append = T
+      append = TRUE
     )
   } else {
     warning(paste0(logname, " file missing so no logging possible"))
@@ -167,14 +176,19 @@ recordIncremental <- function(
 #' @return
 #' A list with the settings
 #'
+#' @examples
+#' # example code
+#'
+#' cleanNonIncremental(file.path(tempdir(), 'incremental'))
+#'
 #' @export
 cleanNonIncremental <- function(
     executionFolder) {
   # remove all files from the executionFolder
   files <- dir(
     path = executionFolder,
-    recursive = T,
-    full.names = T,
+    recursive = TRUE,
+    full.names = TRUE,
     pattern = ".csv"
   )
   if (length(files) > 0) {
@@ -189,8 +203,8 @@ checkResultFilesNonIncremental <- function(
     executionFolder) {
   files <- dir(
     path = executionFolder,
-    recursive = T,
-    full.names = T,
+    recursive = TRUE,
+    full.names = TRUE,
     pattern = ".csv"
   )
   if (length(files) > 0) {

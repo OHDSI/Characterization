@@ -21,8 +21,16 @@
 #' @param dechallengeStopInterval  An integer specifying the how much time to add to the cohort_end when determining whether the event starts during cohort and ends after
 #' @param dechallengeEvaluationWindow An integer specifying the period of time after the cohort_end when you cannot see an outcome for a dechallenge success
 #' @family DechallengeRechallenge
+#'
 #' @return
 #' A list with the settings
+#'
+#' @examples
+#' drSet <- createDechallengeRechallengeSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
 #'
 #' @export
 createDechallengeRechallengeSettings <- function(
@@ -91,8 +99,27 @@ createDechallengeRechallengeSettings <- function(
 #' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
 #' @param ... extra inputs
 #' @family DechallengeRechallenge
+#'
 #' @return
 #' An \code{Andromeda::andromeda()} object containing the dechallenge rechallenge results
+#'
+#' @examples
+#'
+#' conDet <- exampleOmopConnectionDetails()
+#'
+#' drSet <- createDechallengeRechallengeSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' computeDechallengeRechallengeAnalyses(
+#'   connectionDetails = conDet,
+#'   targetDatabaseSchema = 'main',
+#'   targetTable = 'cohort',
+#'   settings = drSet,
+#'   outputFolder = tempdir()
+#' )
+#'
 #'
 #' @export
 computeDechallengeRechallengeAnalyses <- function(
@@ -104,9 +131,14 @@ computeDechallengeRechallengeAnalyses <- function(
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
     databaseId = "database 1",
-    outputFolder = file.path(getwd(), "results"),
+    outputFolder,
     minCellCount = 0,
     ...) {
+
+  if(missing(outputFolder)){
+    stop('Please enter a output path value for outputFolder')
+  }
+
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
@@ -233,8 +265,26 @@ computeDechallengeRechallengeAnalyses <- function(
 #' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
 #' @param ... extra inputs
 #' @family DechallengeRechallenge
+#'
 #' @return
 #' An \code{Andromeda::andromeda()} object with the case series details of the failed rechallenge
+#'
+#' @examples
+#'
+#' conDet <- exampleOmopConnectionDetails()
+#'
+#' drSet <- createDechallengeRechallengeSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' computeRechallengeFailCaseSeriesAnalyses(
+#'   connectionDetails = conDet,
+#'   targetDatabaseSchema = 'main',
+#'   targetTable = 'cohort',
+#'   settings = drSet,
+#'   outputFolder = tempdir()
+#' )
 #'
 #' @export
 computeRechallengeFailCaseSeriesAnalyses <- function(
@@ -246,10 +296,14 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
     databaseId = "database 1",
-    showSubjectId = F,
-    outputFolder = file.path(getwd(), "results"),
+    showSubjectId = FALSE,
+    outputFolder,
     minCellCount = 0,
     ...) {
+
+  if(missing(outputFolder)){
+    stop('Please enter a output path value for outputFolder')
+  }
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
