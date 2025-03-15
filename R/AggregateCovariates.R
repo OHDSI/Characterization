@@ -285,9 +285,9 @@ computeTargetAggregateCovariateAnalyses <- function(
   cohort_definition_id,
   count(*) row_count,
   count(distinct subject_id) person_count,
-  min(datediff(day, cohort_start_date, cohort_end_date)) min_exposure_time,
-  avg(datediff(day, cohort_start_date, cohort_end_date)) mean_exposure_time,
-  max(datediff(day, cohort_start_date, cohort_end_date)) max_exposure_time
+  min(cast(datediff(day, cohort_start_date, cohort_end_date) as bigint)) min_exposure_time,
+  avg(cast(datediff(day, cohort_start_date, cohort_end_date) as bigint)) mean_exposure_time,
+  max(cast(datediff(day, cohort_start_date, cohort_end_date) as bigint)) max_exposure_time
   from
   (select * from #agg_cohorts_before union select * from #agg_cohorts_extras) temp
   group by cohort_definition_id;"
