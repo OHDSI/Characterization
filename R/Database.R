@@ -97,7 +97,7 @@ createSqliteDatabase <- function(
 #'   outcomeTable = 'cohort',
 #'   cdmDatabaseSchema = 'main',
 #'   characterizationSettings = cSet,
-#'   outputDirectory = tempdir()
+#'   outputDirectory = file.path(tempdir(),'database')
 #' )
 #'
 #' # create sqlite database
@@ -113,7 +113,7 @@ createSqliteDatabase <- function(
 #' insertResultsToDatabase(
 #'  connectionDetails = charResultDbCD,
 #'  schema = 'main',
-#'  resultsFolder = tempdir(),
+#'  resultsFolder = file.path(tempdir(),'database'),
 #'  includedFiles = c('time_to_event')
 #' )
 #'
