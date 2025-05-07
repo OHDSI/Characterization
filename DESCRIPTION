@@ -28,6 +28,7 @@ Imports:
   rlang
 Suggests:
   devtools,
+  formatR,
   testthat,
   kableExtra,
   knitr,
