@@ -171,6 +171,8 @@ getDbDuringCovariateData <- function(
 
   getDomainSettings <- utils::read.csv(system.file("csv/PrespecAnalyses.csv", package = "Characterization"))
 
+  # not showing progress like FE
+  progressBar <- FALSE
 
   # create Tables
   sql <- "DROP TABLE IF EXISTS #cov_ref;
@@ -187,7 +189,7 @@ getDbDuringCovariateData <- function(
     targetDialect = DatabaseConnector::dbms(connection),
     tempEmulationSchema = tempEmulationSchema
   )
-  DatabaseConnector::executeSql(connection, sql = sql)
+  DatabaseConnector::executeSql(connection, sql = sql, progressBar = progressBar)
 
   sql <- "DROP TABLE IF EXISTS #analysis_ref;
   CREATE TABLE #analysis_ref(
@@ -204,7 +206,7 @@ getDbDuringCovariateData <- function(
     targetDialect = DatabaseConnector::dbms(connection),
     tempEmulationSchema = tempEmulationSchema
   )
-  DatabaseConnector::executeSql(connection, sql)
+  DatabaseConnector::executeSql(connection, sql, progressBar = progressBar)
 
   # included covariates
   includedCovTable <- ""
@@ -219,7 +221,8 @@ getDbDuringCovariateData <- function(
       tempTable = TRUE,
       data = data.frame(id = covariateSettings$includedCovariateIds),
       camelCaseToSnakeCase = TRUE,
-      tempEmulationSchema = tempEmulationSchema
+      tempEmulationSchema = tempEmulationSchema,
+      progressBar = progressBar
     )
   }
 
@@ -235,7 +238,8 @@ getDbDuringCovariateData <- function(
       tempTable = TRUE,
       data = data.frame(id = covariateSettings$includedCovariateConceptIds),
       camelCaseToSnakeCase = TRUE,
-      tempEmulationSchema = tempEmulationSchema
+      tempEmulationSchema = tempEmulationSchema,
+      progressBar = progressBar
     )
 
     if (covariateSettings$addDescendantsToInclude) {
@@ -262,7 +266,8 @@ getDbDuringCovariateData <- function(
       tempTable = TRUE,
       data = data.frame(id = covariateSettings$excludedCovariateConceptIds),
       camelCaseToSnakeCase = TRUE,
-      tempEmulationSchema = tempEmulationSchema
+      tempEmulationSchema = tempEmulationSchema,
+      progressBar = progressBar
     )
 
     if (covariateSettings$addDescendantsToInclude) {
@@ -325,7 +330,7 @@ getDbDuringCovariateData <- function(
     DatabaseConnector::executeSql(
       connection = connection,
       sql = sql,
-      progressBar = TRUE
+      progressBar = progressBar
     )
     time <- Sys.time() - start
     message(paste0("Execution took ", round(time, digits = 2), " ", units(time)))
