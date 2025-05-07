@@ -3,6 +3,11 @@ Characterization 2.1.4
 - fixed csv spec: made mean_exposure_time a float and specified that min_characterization_mean in covariate table must be non-null and is in the pk.
 - added migration SQL to change mean_exposure_time to be a float
 - changed Line 284 in AggregateCovariates.R to cast exposure_time summary values to bigint due to integer overflow in some dbms.
+- added dummy sql code to prevent warnings about missing variables
+- added code to save empty csv files when there are no rows as that way it is easier to see there are no results vs an error saving.
+- removed progress bar from custom during features
+- added option includedFiles in insertResultsToDatabase() where you can specify the csv files to upload to prevent warnings of missing csv files.
+- made sure all connections are disconnected after use
 
 Characterization 2.1.3
 ======================

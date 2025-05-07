@@ -191,7 +191,8 @@ computeTimeToEventAnalyses <- function(
 
     DatabaseConnector::executeSql(
       connection = connection,
-      sql = sql
+      sql = sql,
+      progressBar = interactive()
     )
 
     sql <- "select * from #two_tte_summary;"
@@ -218,7 +219,8 @@ computeTimeToEventAnalyses <- function(
 
     DatabaseConnector::executeSql(
       connection = connection,
-      sql = sql, progressBar = FALSE,
+      sql = sql,
+      progressBar = FALSE,
       reportOverallTime = FALSE
     )
 

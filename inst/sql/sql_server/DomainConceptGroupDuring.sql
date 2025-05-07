@@ -1,3 +1,8 @@
+-- add dummy code with all imputs to stop annoying warnings
+IF OBJECT_ID('tempdb..#fake', 'U') IS NOT NULL
+	DROP TABLE #fake;
+SELECT "@domain_end_date" as cname into #fake;
+
 IF OBJECT_ID('tempdb..#groups', 'U') IS NOT NULL
 	DROP TABLE #groups;
 

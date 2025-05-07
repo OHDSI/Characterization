@@ -198,7 +198,8 @@ computeDechallengeRechallengeAnalyses <- function(
     )
     DatabaseConnector::executeSql(
       connection = connection,
-      sql = sql
+      sql = sql,
+      progressBar = interactive()
     )
 
     sql <- "select * from #challenge;"
@@ -224,7 +225,8 @@ computeDechallengeRechallengeAnalyses <- function(
     )
     DatabaseConnector::executeSql(
       connection = connection,
-      sql = sql, progressBar = FALSE,
+      sql = sql,
+      progressBar = FALSE,
       reportOverallTime = FALSE
     )
 
@@ -362,7 +364,8 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     )
     DatabaseConnector::executeSql(
       connection = connection,
-      sql = sql
+      sql = sql,
+      progressBar = interactive()
     )
 
     sql <- "select * from #fail_case_series;"
@@ -388,7 +391,8 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     )
     DatabaseConnector::executeSql(
       connection = connection,
-      sql = sql, progressBar = FALSE,
+      sql = sql,
+      progressBar = FALSE,
       reportOverallTime = FALSE
     )
 

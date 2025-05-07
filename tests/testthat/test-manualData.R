@@ -15,6 +15,7 @@ test_that("manual data runCharacterizationAnalyses", {
     server = manualData
   )
   con <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  on.exit(DatabaseConnector::disconnect(con))
   schema <- "main"
 
   # add persons  - aggregate covs (age)
@@ -312,6 +313,7 @@ test_that("manual data checking exclude count works", {
     server = manualData2
   )
   con <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  on.exit(DatabaseConnector::disconnect(con))
   schema <- "main"
 
   # add persons  - aggregate covs (age)

@@ -147,6 +147,8 @@ createDuringCovariateSettings <- function(
 #'   cohortTable = 'cohort'
 #' )
 #'
+#' DatabaseConnector::disconnect(connection)
+#'
 #' @return
 #' A 'FeatureExtraction' covariateData object containing the during covariates based on user settings
 #'
