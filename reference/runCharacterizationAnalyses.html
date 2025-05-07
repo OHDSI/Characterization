@@ -185,9 +185,25 @@ specified saveDirectory</p>
 <span class="r-in"><span>  outcomeTable <span class="op">=</span> <span class="st">'cohort'</span>,</span></span>
 <span class="r-in"><span>  cdmDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span></span>
 <span class="r-in"><span>  characterizationSettings <span class="op">=</span> <span class="va">cSet</span>,</span></span>
-<span class="r-in"><span>  outputDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  outputDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,<span class="st">'runChar'</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in runCharacterizationAnalyses(connectionDetails = conDet, targetDatabaseSchema = "main",     targetTable = "cohort", outcomeDatabaseSchema = "main", outcomeTable = "cohort",     cdmDatabaseSchema = "main", characterizationSettings = cSet,     outputDirectory = tempdir()):</span> Settings have changed - please turn off incremental</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Creating directory /tmp/RtmpTu9o6g/runChar</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Creating directory /tmp/RtmpTu9o6g/runChar/execution</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Creating new cluster</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inputs checked</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Connecting using SQLite driver</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Computing dechallenge rechallenge results</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00781 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Computing dechallenge rechallenge for 2 target ids and 1 outcome ids took 0.0835 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> exporting to csv file</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Writing 0 rows to csv</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inputs checked</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Connecting using SQLite driver</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Computing dechallenge rechallenge fails results</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.0145 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Computing dechallenge failed case series for 2 target IDs and 1 outcome IDs took 0.0793 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> exporting to csv file</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Writing 0 rows to csv</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
