@@ -97,7 +97,7 @@ runCharacterizationAnalyses(
   outcomeTable = 'cohort',
   cdmDatabaseSchema = 'main',
   characterizationSettings = cSet,
-  outputDirectory = tempdir()
+  outputDirectory = file.path(tempdir(),'runChar')
 )
 
 }
