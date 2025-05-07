@@ -13,8 +13,8 @@ header-includes:
     - \fancyfoot[CO,CE]{Characterization Package Version `r    utils::packageVersion("Characterization")`}
 output:
   html_document:
-    number_sections: yes
-    toc: yes
+    number_sections: true
+    toc: true
 vignette: >
   %\VignetteIndexEntry{Specification}
   %\VignetteEngine{knitr::knitr}

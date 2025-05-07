@@ -171,7 +171,7 @@ getDbDuringCovariateData <- function(
 
   getDomainSettings <- utils::read.csv(system.file("csv/PrespecAnalyses.csv", package = "Characterization"))
 
-  # not showing progress like FE
+  # not showing progress
   progressBar <- FALSE
 
   # create Tables
