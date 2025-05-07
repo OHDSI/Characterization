@@ -94,7 +94,7 @@ CREATE TABLE @my_schema.@table_prefixcovariates (
     covariate_id bigint NOT NULL,
     sum_value int NOT NULL,
     average_value float,
-    PRIMARY KEY (database_id, setting_id, target_cohort_id, outcome_cohort_id, cohort_type , covariate_id)
+    PRIMARY KEY (database_id, setting_id, target_cohort_id, outcome_cohort_id, cohort_type , covariate_id, min_characterization_mean)
 );
 
 CREATE TABLE @my_schema.@table_prefixcovariates_continuous (

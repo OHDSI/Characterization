@@ -66,7 +66,7 @@ covariates,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
 covariates,cohort_type,varchar(12),Yes,Yes,No,No,The cohort type
 covariates,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
 covariates,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
-covariates,min_characterization_mean,float,No,Yes,No,No,Minimum fraction for feature extraction
+covariates,min_characterization_mean,float,Yes,Yes,No,No,Minimum fraction for feature extraction
 covariates,covariate_id,bigint,Yes,Yes,No,No,The covaraite id
 covariates,sum_value,int,Yes,No,No,No,The sum value
 covariates,average_value,float,No,No,No,No,The average value
@@ -115,6 +115,6 @@ cohort_counts,min_prior_observation,int,No,No,No,No,Minimum time observed before
 cohort_counts,outcome_washout_days,int,No,No,No,No,Patients with outcome during washout are excluded
 cohort_counts,row_count,int,Yes,No,No,No,The number of rows in each cohort
 cohort_counts,person_count,int,Yes,No,No,No,The number of distinct people in each cohort
-cohort_counts,min_exposure_time,bigint,No,No,No,No,Minimum exposure time across cohort
-cohort_counts,mean_exposure_time,bigint,No,No,No,No,Mean exposure time across cohort
-cohort_counts,max_exposure_time,bigint,No,No,No,No,Max exposure time across cohort
+cohort_counts,min_exposure_time,bigint,No,No,No,No,Minimum exposure time across cohort in days
+cohort_counts,mean_exposure_time,float,No,No,No,No,Mean exposure time across cohort in days
+cohort_counts,max_exposure_time,bigint,No,No,No,No,Max exposure time across cohort in days

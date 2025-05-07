@@ -1,3 +1,9 @@
+Characterization 2.1.4
+======================
+- fixed csv spec: made mean_exposure_time a float and specified that min_characterization_mean in covariate table must be non-null and is in the pk.
+- added migration SQL to change mean_exposure_time to be a float
+- changed Line 284 in AggregateCovariates.R to cast exposure_time summary values to bigint due to integer overflow in some dbms.
+
 Characterization 2.1.3
 ======================
 - prepared for CRAN by adding examples, removing getwd(), replacing T/F with TRUE/FALSE and added example data inside package so no download required.
