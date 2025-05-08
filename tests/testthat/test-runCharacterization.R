@@ -160,9 +160,9 @@ test_that("runCharacterizationAnalyses", {
   testthat::expect_true(
     file.exists(file.path(tempFolder, "result", "c_dechallenge_rechallenge.csv"))
   )
-  #testthat::expect_true(
-  #  file.exists(file.path(tempFolder, "result", "rechallenge_fail_case_series.csv"))
-  # )
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "result", "c_rechallenge_fail_case_series.csv"))
+   )
   testthat::expect_true(
     file.exists(file.path(tempFolder, "result", "c_time_to_event.csv"))
   )
