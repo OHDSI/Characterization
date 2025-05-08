@@ -80,13 +80,13 @@ specified saveDirectory
 
 conDet <- exampleOmopConnectionDetails()
 
-drSet <- createDechallengeRechallengeSettings(
+tteSet <- createTimeToEventSettings(
   targetIds = c(1,2),
   outcomeIds = 3
 )
 
 cSet <- createCharacterizationSettings(
-  dechallengeRechallengeSettings = drSet
+  timeToEventSettings = tteSet
 )
 
 runCharacterizationAnalyses(

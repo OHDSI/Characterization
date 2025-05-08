@@ -15,13 +15,13 @@
 #'
 #' conDet <- exampleOmopConnectionDetails()
 #'
-#' drSet <- createDechallengeRechallengeSettings(
+#' tteSet <- createTimeToEventSettings(
 #'   targetIds = c(1,2),
 #'   outcomeIds = 3
 #' )
 #'
 #' cSet <- createCharacterizationSettings(
-#'   dechallengeRechallengeSettings = drSet
+#'   timeToEventSettings = tteSet
 #' )
 #'
 #' runCharacterizationAnalyses(
@@ -48,12 +48,18 @@ viewCharacterization <- function(
   # check there are csv files in resultFolder
   if(length(dir(resultFolder, pattern = '.csv')) > 0 ){
 
-  databaseSettings <- prepareCharacterizationShiny(
-    resultFolder = resultFolder,
-    cohortDefinitionSet = cohortDefinitionSet
-  )
+    databaseSettings <- prepareCharacterizationShiny(
+      resultFolder = resultFolder,
+      cohortDefinitionSet = cohortDefinitionSet
+    )
 
-  viewChars(databaseSettings)
+    if(length(databaseSettings) == 0){
+      message('No actual results to view via shiny')
+      return(FALSE)
+    } else{
+      viewChars(databaseSettings)
+    }
+
   } else{
     message('No csv results to view via shiny')
     return(FALSE)
@@ -115,6 +121,12 @@ prepareCharacterizationShiny <- function(
         DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"))$OUTCOME_COHORT_DEFINITION_ID
       )
     )
+
+
+    if(length(cohortIds) == 0){
+      # if no cohortids then no results to view
+      return(invisible(list()))
+    }
 
     DatabaseConnector::insertTable(
       connection = con,
