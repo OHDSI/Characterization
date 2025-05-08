@@ -35,9 +35,12 @@
 #'   outputDirectory = file.path(tempdir(),'view')
 #' )
 #'
+#' # interactive shiny app
+#' \dontrun{
 #' viewCharacterization(
 #'   resultFolder = file.path(tempdir(),'view')
 #' )
+#' }
 #'
 #'
 #' @export
