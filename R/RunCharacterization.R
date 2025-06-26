@@ -650,8 +650,8 @@ aggregateCsvsBatch <- function(
           readr::write_csv(
             x = x,
             file = savePath, quote = "all",
-            #append = append & !firstTrackerCurrent & pos == 1
-            append = append | pos != 1
+            append = !firstTrackerCurrent | pos != 1
+            #append = append | pos != 1
           )
 
           saveRDS(tracker,csvTrackerFile)

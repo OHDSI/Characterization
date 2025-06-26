@@ -1,0 +1,93 @@
+covariate_id,covariate_name,analysis_id,concept_id,value_as_concept_id,collisions,setting_id,database_id
+8507001,gender = MALE,1,8507,NA,NA,20250626154219589895388166,1
+8532001,gender = FEMALE,1,8532,NA,NA,20250626154219589895388166,1
+   1002,age in years,2,   0,NA,NA,20250626154219589895388166,1
+   30753218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Esophagitis,218,   30753,NA,NA,20250626154219589895388166,1
+   78272218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Sprain of wrist,218,   78272,NA,NA,20250626154219589895388166,1
+   80180218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Osteoarthritis,218,   80180,NA,NA,20250626154219589895388166,1
+   81893218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Ulcerative colitis,218,   81893,NA,NA,20250626154219589895388166,1
+  134438218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Contact dermatitis,218,  134438,NA,NA,20250626154219589895388166,1
+  195588218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Cystitis,218,  195588,NA,NA,20250626154219589895388166,1
+  198199218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Pyelonephritis,218,  198199,NA,NA,20250626154219589895388166,1
+  260139218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Acute bronchitis,218,  260139,NA,NA,20250626154219589895388166,1
+  378001218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Concussion with no loss of consciousness,218,  378001,NA,NA,20250626154219589895388166,1
+  439777218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Anemia,218,  439777,NA,NA,20250626154219589895388166,1
+ 4001336218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Concussion injury of brain,218, 4001336,NA,NA,20250626154219589895388166,1
+ 4112343218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Acute viral pharyngitis,218, 4112343,NA,NA,20250626154219589895388166,1
+ 4113008218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Laceration of hand,218, 4113008,NA,NA,20250626154219589895388166,1
+ 4116491218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Escherichia coli urinary tract infection,218, 4116491,NA,NA,20250626154219589895388166,1
+ 4132546218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Traumatic brain injury,218, 4132546,NA,NA,20250626154219589895388166,1
+ 4152936218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Laceration of thigh,218, 4152936,NA,NA,20250626154219589895388166,1
+ 4155034218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Laceration of forearm,218, 4155034,NA,NA,20250626154219589895388166,1
+ 4266809218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Diverticular disease,218, 4266809,NA,NA,20250626154219589895388166,1
+ 4283893218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Sinusitis,218, 4283893,NA,NA,20250626154219589895388166,1
+ 4285898218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Polyp of colon,218, 4285898,NA,NA,20250626154219589895388166,1
+ 4310024218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Angiodysplasia of stomach,218, 4310024,NA,NA,20250626154219589895388166,1
+40481087218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Viral sinusitis,218,40481087,NA,NA,20250626154219589895388166,1
+   28060218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Streptococcal sore throat,218,   28060,NA,NA,20250626154219589895388166,1
+   81151218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Sprain of ankle,218,   81151,NA,NA,20250626154219589895388166,1
+  257012218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Chronic sinusitis,218,  257012,NA,NA,20250626154219589895388166,1
+  381316218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Cerebrovascular accident,218,  381316,NA,NA,20250626154219589895388166,1
+ 4294548218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Acute bacterial sinusitis,218, 4294548,NA,NA,20250626154219589895388166,1
+  258780218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Emphysematous bronchitis,218,  258780,NA,NA,20250626154219589895388166,1
+ 4094814218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Bullet wound,218, 4094814,NA,NA,20250626154219589895388166,1
+ 4296205218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Second degree burn,218, 4296205,NA,NA,20250626154219589895388166,1
+  192671218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Gastrointestinal hemorrhage,218,  192671,NA,NA,20250626154219589895388166,1
+ 4142905218,condition_era group (ConditionGroupEraDuring) starting between cohort start and cohort end: Fracture of rib,218, 4142905,NA,NA,20250626154219589895388166,1
+  738818418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Doxylamine,418,  738818,NA,NA,20250626154219589895388166,1
+  920293418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Nitrofurantoin,418,  920293,NA,NA,20250626154219589895388166,1
+  933724418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Phenazopyridine,418,  933724,NA,NA,20250626154219589895388166,1
+  975125418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Hydrocortisone,418,  975125,NA,NA,20250626154219589895388166,1
+ 1118084418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: celecoxib,418, 1118084,NA,NA,20250626154219589895388166,1
+ 1119510418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Dextromethorphan,418, 1119510,NA,NA,20250626154219589895388166,1
+ 1125315418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Acetaminophen,418, 1125315,NA,NA,20250626154219589895388166,1
+ 1150770418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Astemizole,418, 1150770,NA,NA,20250626154219589895388166,1
+ 1177480418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Ibuprofen,418, 1177480,NA,NA,20250626154219589895388166,1
+ 1713332418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Amoxicillin,418, 1713332,NA,NA,20250626154219589895388166,1
+ 1759842418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Clavulanate,418, 1759842,NA,NA,20250626154219589895388166,1
+ 1124300418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Diclofenac,418, 1124300,NA,NA,20250626154219589895388166,1
+ 1729720418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Penicillin V,418, 1729720,NA,NA,20250626154219589895388166,1
+ 1124957418,drug_era group (DrugGroupEraDuring) starting between cohort start and cohort end: Oxycodone,418, 1124957,NA,NA,20250626154219589895388166,1
+ 4037675505,procedure_occurrence during starting between cohort start and cohort end: Brief general examination,505, 4037675,NA,NA,20250626154219589895388166,1
+ 4107731505,procedure_occurrence during starting between cohort start and cohort end: Subcutaneous immunotherapy,505, 4107731,NA,NA,20250626154219589895388166,1
+ 4125906505,procedure_occurrence during starting between cohort start and cohort end: Suture open wound,505, 4125906,NA,NA,20250626154219589895388166,1
+ 4187458505,procedure_occurrence during starting between cohort start and cohort end: Review of systems,505, 4187458,NA,NA,20250626154219589895388166,1
+ 4191853505,procedure_occurrence during starting between cohort start and cohort end: Allergy screening test,505, 4191853,NA,NA,20250626154219589895388166,1
+ 4293740505,procedure_occurrence during starting between cohort start and cohort end: Injection of tetanus antitoxin,505, 4293740,NA,NA,20250626154219589895388166,1
+ 4326177505,procedure_occurrence during starting between cohort start and cohort end: Medication Reconciliation,505, 4326177,NA,NA,20250626154219589895388166,1
+ 4035793505,procedure_occurrence during starting between cohort start and cohort end: Pulmonary rehabilitation,505, 4035793,NA,NA,20250626154219589895388166,1
+ 4202451505,procedure_occurrence during starting between cohort start and cohort end: Percutaneous mechanical thrombectomy of portal vein using fluoroscopic guidance,505, 4202451,NA,NA,20250626154219589895388166,1
+ 4010253505,procedure_occurrence during starting between cohort start and cohort end: Nasal sinus endoscopy,505, 4010253,NA,NA,20250626154219589895388166,1
+ 4163872505,procedure_occurrence during starting between cohort start and cohort end: Plain chest X-ray,505, 4163872,NA,NA,20250626154219589895388166,1
+ 4170947505,procedure_occurrence during starting between cohort start and cohort end: Bone immobilization,505, 4170947,NA,NA,20250626154219589895388166,1
+ 3000876713,measurement during starting between cohort start and cohort end: Codfish IgE Ab [Units/volume] in Serum,713, 3000876,NA,NA,20250626154219589895388166,1
+ 3000963713,measurement during starting between cohort start and cohort end: Hemoglobin,713, 3000963,NA,NA,20250626154219589895388166,1
+ 3001247713,measurement during starting between cohort start and cohort end: Common Ragweed IgE Ab [Units/volume] in Serum,713, 3001247,NA,NA,20250626154219589895388166,1
+ 3001488713,measurement during starting between cohort start and cohort end: Cow milk IgE Ab [Units/volume] in Serum,713, 3001488,NA,NA,20250626154219589895388166,1
+ 3005136713,measurement during starting between cohort start and cohort end: Cladosporium herbarum IgE Ab [Units/volume] in Serum,713, 3005136,NA,NA,20250626154219589895388166,1
+ 3006322713,measurement during starting between cohort start and cohort end: Oral temperature,713, 3006322,NA,NA,20250626154219589895388166,1
+ 3006451713,measurement during starting between cohort start and cohort end: Walnut IgE Ab [Units/volume] in Serum,713, 3006451,NA,NA,20250626154219589895388166,1
+ 3006734713,measurement during starting between cohort start and cohort end: White Oak IgE Ab [Units/volume] in Serum,713, 3006734,NA,NA,20250626154219589895388166,1
+ 3009542713,measurement during starting between cohort start and cohort end: Hematocrit,713, 3009542,NA,NA,20250626154219589895388166,1
+ 3011505713,measurement during starting between cohort start and cohort end: FEV1/FVC,713, 3011505,NA,NA,20250626154219589895388166,1
+ 3012494713,measurement during starting between cohort start and cohort end: Peanut IgE Ab [Units/volume] in Serum,713, 3012494,NA,NA,20250626154219589895388166,1
+ 3014599713,measurement during starting between cohort start and cohort end: Egg white IgE Ab [Units/volume] in Serum,713, 3014599,NA,NA,20250626154219589895388166,1
+ 3015076713,measurement during starting between cohort start and cohort end: Soybean IgE Ab [Units/volume] in Serum,713, 3015076,NA,NA,20250626154219589895388166,1
+ 3019406713,measurement during starting between cohort start and cohort end: Latex IgE Ab [Units/volume] in Serum,713, 3019406,NA,NA,20250626154219589895388166,1
+ 3020655713,measurement during starting between cohort start and cohort end: Honey bee IgE Ab [Units/volume] in Serum,713, 3020655,NA,NA,20250626154219589895388166,1
+ 3021226713,measurement during starting between cohort start and cohort end: Shrimp IgE Ab [Units/volume] in Serum,713, 3021226,NA,NA,20250626154219589895388166,1
+ 3023430713,measurement during starting between cohort start and cohort end: Cat dander IgE Ab [Units/volume] in Serum,713, 3023430,NA,NA,20250626154219589895388166,1
+ 3027231713,measurement during starting between cohort start and cohort end: Wheat IgE Ab [Units/volume] in Serum,713, 3027231,NA,NA,20250626154219589895388166,1
+ 3036780713,measurement during starting between cohort start and cohort end: American house dust mite IgE Ab [Units/volume] in Serum,713, 3036780,NA,NA,20250626154219589895388166,1
+ 4024958713,measurement during starting between cohort start and cohort end: Throat culture,713, 4024958,NA,NA,20250626154219589895388166,1
+ 4052083713,measurement during starting between cohort start and cohort end: Measurement of respiratory function,713, 4052083,NA,NA,20250626154219589895388166,1
+ 4133840713,measurement during starting between cohort start and cohort end: Spirometry,713, 4133840,NA,NA,20250626154219589895388166,1
+40769179713,measurement during starting between cohort start and cohort end: Percentage area affected by eczema Head and Neck [PhenX],713,40769179,NA,NA,20250626154219589895388166,1
+40769184713,measurement during starting between cohort start and cohort end: Percentage area affected by eczema Upper extremity - bilateral [PhenX],713,40769184,NA,NA,20250626154219589895388166,1
+40769189713,measurement during starting between cohort start and cohort end: Percentage area affected by eczema Trunk [PhenX],713,40769189,NA,NA,20250626154219589895388166,1
+40769194713,measurement during starting between cohort start and cohort end: Percentage area affected by eczema Lower extremity - bilateral [PhenX],713,40769194,NA,NA,20250626154219589895388166,1
+ 3051031713,measurement during starting between cohort start and cohort end: History of Hospitalizations+Outpatient visits Narrative,713, 3051031,NA,NA,20250626154219589895388166,1
+40758406713,measurement during starting between cohort start and cohort end: HIV status,713,40758406,NA,NA,20250626154219589895388166,1
+40766240713,measurement during starting between cohort start and cohort end: Are you covered by health insurance or some other kind of health care plan [PhenX],713,40766240,NA,NA,20250626154219589895388166,1
+46235214713,measurement during starting between cohort start and cohort end: Sexual orientation,713,46235214,NA,NA,20250626154219589895388166,1
+    9201927,visit_occurrence concept count during day cohort start through cohort end concept_count relative to index: Inpatient Visit,927,       0,NA,NA,20250626154219589895388166,1

@@ -487,4 +487,20 @@ for(i in 1:length(files)){
   testthat::expect_true(all.equal(d1,d2))
 }
 
+# make sure it still works if re-executed (no left over files)
+Characterization:::aggregateCsvsBatch(
+  executionPath = executionPath,
+  outputFolder = file.path(tempFolder,'aggCvs3'),
+  csvFilePrefix = '',
+  batchSize = 1
+)
+files <- dir(file.path(tempFolder,'aggCvs'), pattern = 'csv')
+for(i in 1:length(files)){
+  d1 <- readr::read_csv(file.path(tempFolder,'aggCvs', files[i]),
+                        show_col_types = F)
+  d2 <- readr::read_csv(file.path(tempFolder,'aggCvs3', files[i]),
+                        show_col_types = F)
+  testthat::expect_true(all.equal(d1,d2))
+}
+
 })
