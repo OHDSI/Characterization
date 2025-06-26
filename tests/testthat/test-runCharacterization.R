@@ -427,3 +427,64 @@ test_that("min cell count works", {
   testthat::expect_true(sum(is.na(res$min_value)) == length(res$min_value))
   testthat::expect_true(sum(is.na(res$max_value)) == length(res$max_value))
 })
+
+
+
+test_that("checking the batch csv aggregation", {
+
+  tempFolder <- tempfile("Characterization")
+  on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
+
+  executionPath <- testthat::test_path("testdata", "execution")
+
+  if(!dir.exists(file.path(tempFolder,'aggCvs'))){
+    dir.create(file.path(tempFolder,'aggCvs'), recursive = T)
+  }
+  if(!dir.exists(file.path(tempFolder,'aggCvs2'))){
+    dir.create(file.path(tempFolder,'aggCvs2'), recursive = T)
+  }
+  if(!dir.exists(file.path(tempFolder,'aggCvs3'))){
+    dir.create(file.path(tempFolder,'aggCvs3'), recursive = T)
+  }
+
+# checking the batch csv aggregation
+Characterization:::aggregateCsvs(
+  executionPath = executionPath,
+  outputFolder = file.path(tempFolder,'aggCvs'),
+  csvFilePrefix = ''
+)
+
+Characterization:::aggregateCsvsBatch(
+  executionPath = executionPath,
+  outputFolder = file.path(tempFolder,'aggCvs2'),
+  csvFilePrefix = ''
+)
+
+Characterization:::aggregateCsvsBatch(
+  executionPath = executionPath,
+  outputFolder = file.path(tempFolder,'aggCvs3'),
+  csvFilePrefix = '',
+  batchSize = 1
+)
+
+#check files are the same using default batch
+files <- dir(file.path(tempFolder,'aggCvs'), pattern = 'csv')
+for(i in 1:length(files)){
+  d1 <- readr::read_csv(file.path(tempFolder,'aggCvs', files[i]),
+                        show_col_types = F)
+  d2 <- readr::read_csv(file.path(tempFolder,'aggCvs2', files[i]),
+                        show_col_types = F)
+  testthat::expect_true(all.equal(d1,d2))
+}
+
+# when batchsize is 1
+files <- dir(file.path(tempFolder,'aggCvs'), pattern = 'csv')
+for(i in 1:length(files)){
+  d1 <- readr::read_csv(file.path(tempFolder,'aggCvs', files[i]),
+                        show_col_types = F)
+  d2 <- readr::read_csv(file.path(tempFolder,'aggCvs3', files[i]),
+                        show_col_types = F)
+  testthat::expect_true(all.equal(d1,d2))
+}
+
+})

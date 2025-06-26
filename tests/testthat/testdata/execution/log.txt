@@ -1,0 +1,6 @@
+2025-06-26 15:42:20	[Main thread]	INFO	FeatureExtraction		Constructing features on server
+2025-06-26 15:42:20	[Main thread]	INFO	FeatureExtraction		Fetching data from server
+2025-06-26 15:42:21	[Main thread]	INFO	FeatureExtraction		Fetching data took 1.12 secs
+2025-06-26 15:42:22	[Main thread]	INFO	FeatureExtraction		Constructing features on server
+2025-06-26 15:42:22	[Main thread]	INFO	FeatureExtraction		Fetching data from server
+2025-06-26 15:42:22	[Main thread]	INFO	FeatureExtraction		Fetching data took 0.256 secs
