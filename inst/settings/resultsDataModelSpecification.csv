@@ -14,15 +14,15 @@ rechallenge_fail_case_series,target_cohort_definition_id,bigint,Yes,Yes,No,No,Th
 rechallenge_fail_case_series,outcome_cohort_definition_id,bigint,Yes,Yes,No,No,The cohort definition id for the outcome cohort
 rechallenge_fail_case_series,person_key,int,Yes,Yes,No,No,The dense rank for the patient (an identifier that is not the same as the database)
 rechallenge_fail_case_series,subject_id,bigint,No,No,No,No,The person identifier for the failed case series (optional)
-rechallenge_fail_case_series,dechallenge_exposure_number,int,Yes,No,No,No,The number of times a dechallenge has occurred
+rechallenge_fail_case_series,dechallenge_exposure_number,int,Yes,Yes,No,No,The number of times a dechallenge has occurred
 rechallenge_fail_case_series,dechallenge_exposure_start_date_offset,int,Yes,No,No,No,The offset for the dechallenge start (number of days after index)
 rechallenge_fail_case_series,dechallenge_exposure_end_date_offset,int,Yes,No,No,No,The offset for the dechallenge end (number of days after index)
-rechallenge_fail_case_series,dechallenge_outcome_number,int,Yes,No,No,No,The number of times an outcome has occurred during the dechallenge
+rechallenge_fail_case_series,dechallenge_outcome_number,int,Yes,Yes,No,No,The number of times an outcome has occurred during the dechallenge
 rechallenge_fail_case_series,dechallenge_outcome_start_date_offset,int,Yes,No,No,No,The offset for the outcome start (number of days after index)
-rechallenge_fail_case_series,rechallenge_exposure_number,int,Yes,No,No,No,The number of times a rechallenge exposure has occurred
+rechallenge_fail_case_series,rechallenge_exposure_number,int,Yes,Yes,No,No,The number of times a rechallenge exposure has occurred
 rechallenge_fail_case_series,rechallenge_exposure_start_date_offset,int,Yes,No,No,No,The offset for the rechallenge start (number of days after index)
 rechallenge_fail_case_series,rechallenge_exposure_end_date_offset,int,Yes,No,No,No,The offset for the rechallenge end (number of days after index)
-rechallenge_fail_case_series,rechallenge_outcome_number,int,Yes,No,No,No,The number of times the outcome has occurred during the rechallenge
+rechallenge_fail_case_series,rechallenge_outcome_number,int,Yes,Yes,No,No,The number of times the outcome has occurred during the rechallenge
 rechallenge_fail_case_series,rechallenge_outcome_start_date_offset,int,Yes,No,No,No,The offset for the outcome start (number of days after index)
 dechallenge_rechallenge,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 dechallenge_rechallenge,dechallenge_stop_interval,int,Yes,Yes,No,No,The dechallenge stop interval
