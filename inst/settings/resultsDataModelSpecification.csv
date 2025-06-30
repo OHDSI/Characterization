@@ -66,7 +66,7 @@ covariates,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
 covariates,cohort_type,varchar(12),Yes,Yes,No,No,The cohort type
 covariates,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
 covariates,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
-covariates,min_characterization_mean,float,Yes,No,No,No,Minimum fraction for feature extraction
+covariates,min_characterization_mean,float,Yes,Yes,No,No,Minimum fraction for feature extraction
 covariates,covariate_id,bigint,Yes,Yes,No,No,The covaraite id
 covariates,sum_value,int,Yes,No,No,No,The sum value
 covariates,average_value,float,No,No,No,No,The average value
