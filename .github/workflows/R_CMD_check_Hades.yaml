@@ -77,7 +77,10 @@ jobs:
       - name: Install system requirements
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get install -y make
+          sudo apt-get install -y libcurl4-openssl-dev
           sudo apt-get install -y libssh-dev
+          sudo apt-get install -y libssl-dev
           Rscript -e 'install.packages("remotes")'
           while read -r cmd
           do
