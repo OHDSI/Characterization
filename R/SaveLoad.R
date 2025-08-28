@@ -14,27 +14,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#' export the TimeToEvent results as csv
-#'
-#' @param result  The output of running \code{computeTimeToEventAnalyses()}
-#' @template saveDirectory
-#' @param minCellCount  The minimum value that will be displayed in count columns
-#' @family {SaveLoad}
-#' @return
-#' A string specifying the directory the csv results are saved to
-#'
-#' @export
 exportTimeToEventToCsv <- function(
     result,
     saveDirectory,
-    minCellCount = 0) {
+    minCellCount = 0
+    ) {
+
+  countN <- dplyr::pull(
+    dplyr::count(result$timeToEvent)
+  )
+
+  message("Writing ", countN, " rows to csv")
+
   if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
-      recursive = T
+      recursive = TRUE
     )
   }
 
+  if(countN == 0){
+    # save empty csv
+    dat <- as.data.frame(result$timeToEvent)
+    colnames(dat) <- SqlRender::camelCaseToSnakeCase(
+      string = colnames(dat)
+    )
+
+    readr::write_csv(
+      x = dat,
+      file = file.path(saveDirectory,"time_to_event.csv")
+      )
+  } else{
+    # save in batches
   Andromeda::batchApply(
     tbl = result$timeToEvent,
     fun = function(x) {
@@ -69,6 +80,7 @@ exportTimeToEventToCsv <- function(
       )
     }
   )
+}
 
   invisible(
     file.path(
@@ -79,29 +91,34 @@ exportTimeToEventToCsv <- function(
 }
 
 
-#' export the DechallengeRechallenge results as csv
-#'
-#' @param result  The output of running \code{computeDechallengeRechallengeAnalyses()}
-#' @template saveDirectory
-#' @param minCellCount  The minimum value that will be displayed in count columns
-#' @family {SaveLoad}
-#' @return
-#' A string specifying the directory the csv results are saved to
-#'
-#' @export
 exportDechallengeRechallengeToCsv <- function(
     result,
     saveDirectory,
-    minCellCount = 0) {
+    minCellCount = 0
+    ) {
+
   countN <- dplyr::pull(
     dplyr::count(result$dechallengeRechallenge)
   )
   message("Writing ", countN, " rows to csv")
 
   if (!dir.exists(saveDirectory)) {
-    dir.create(saveDirectory, recursive = T)
+    dir.create(saveDirectory, recursive = TRUE)
   }
 
+  if(countN == 0){
+    # save empty csv
+    dat <- as.data.frame(result$dechallengeRechallenge)
+    colnames(dat) <- SqlRender::camelCaseToSnakeCase(
+      string = colnames(dat)
+    )
+
+    readr::write_csv(
+      x = dat,
+      file = file.path(saveDirectory,"dechallenge_rechallenge.csv")
+      )
+  } else{
+  # export in batches
   Andromeda::batchApply(
     tbl = result$dechallengeRechallenge,
     fun = function(x) {
@@ -194,6 +211,7 @@ exportDechallengeRechallengeToCsv <- function(
       )
     }
   )
+  }
 
   invisible(
     file.path(
@@ -203,22 +221,14 @@ exportDechallengeRechallengeToCsv <- function(
   )
 }
 
-#' export the RechallengeFailCaseSeries results as csv
-#'
-#' @param result  The output of running \code{computeRechallengeFailCaseSeriesAnalyses()}
-#' @template saveDirectory
-#' @family {SaveLoad}
-#' @return
-#' A string specifying the directory the csv results are saved to
-#'
-#' @export
+
 exportRechallengeFailCaseSeriesToCsv <- function(
     result,
     saveDirectory) {
   if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
-      recursive = T
+      recursive = TRUE
     )
   }
 
@@ -228,6 +238,18 @@ exportRechallengeFailCaseSeriesToCsv <- function(
 
   message("Writing ", countN, " rows to csv")
 
+  if(countN == 0){
+    # save empty csv
+    dat <- as.data.frame(result$rechallengeFailCaseSeries)
+    colnames(dat) <- SqlRender::camelCaseToSnakeCase(
+      string = colnames(dat)
+    )
+    readr::write_csv(
+      x = dat,
+      file = file.path(saveDirectory,"rechallenge_fail_case_series.csv")
+    )
+  } else{
+    # save in batches
   Andromeda::batchApply(
     tbl = result$rechallengeFailCaseSeries,
     fun = function(x) {
@@ -257,6 +279,7 @@ exportRechallengeFailCaseSeriesToCsv <- function(
       )
     }
   )
+  }
 
   invisible(
     file.path(

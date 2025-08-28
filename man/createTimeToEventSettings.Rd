@@ -17,8 +17,18 @@ An list with the time to event settings
 \description{
 Create time to event study settings
 }
+\examples{
+# example code
+
+tteSet <- createTimeToEventSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+
+}
 \seealso{
-Other {TimeToEvent}: 
+Other TimeToEvent: 
 \code{\link{computeTimeToEventAnalyses}()}
 }
-\concept{{TimeToEvent}}
+\concept{TimeToEvent}

@@ -18,10 +18,33 @@ This function converts the json file back into an R object
 \details{
 Input the directory containing the 'characterizationSettings.json' file and load the settings into R
 }
+\examples{
+# example code
+
+setPath <- file.path(tempdir(), 'charSet.json')
+
+drSet <- createDechallengeRechallengeSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+cSet <- createCharacterizationSettings(
+  dechallengeRechallengeSettings = drSet
+)
+
+saveCharacterizationSettings(
+  settings = cSet,
+  fileName = setPath
+)
+
+setting <- loadCharacterizationSettings(setPath)
+
+
+}
 \seealso{
-Other {LargeScale}: 
+Other LargeScale: 
 \code{\link{createCharacterizationSettings}()},
 \code{\link{runCharacterizationAnalyses}()},
 \code{\link{saveCharacterizationSettings}()}
 }
-\concept{{LargeScale}}
+\concept{LargeScale}

@@ -8,9 +8,22 @@
 #' @param timeToEventSettings    A list of timeToEvent settings
 #' @param dechallengeRechallengeSettings A list of dechallengeRechallenge settings
 #' @param aggregateCovariateSettings A list of aggregateCovariate settings
-#' @family {LargeScale}
+#' @family LargeScale
+#'
 #' @return
 #' Returns the connection to the sqlite database
+#'
+#' @examples
+#' # example code
+#'
+#' drSet <- createDechallengeRechallengeSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   dechallengeRechallengeSettings = drSet
+#' )
 #'
 #' @export
 createCharacterizationSettings <- function(
@@ -64,9 +77,25 @@ createCharacterizationSettings <- function(
 #'
 #' @param settings    An object of class characterizationSettings created using \code{createCharacterizationSettings}
 #' @param fileName  The location to save the json settings
-#' @family {LargeScale}
+#' @family LargeScale
+#'
 #' @return
 #' Returns the location of the directory containing the json settings
+#'
+#' @examples
+#' drSet <- createDechallengeRechallengeSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   dechallengeRechallengeSettings = drSet
+#' )
+#'
+#' saveCharacterizationSettings(
+#'   settings = cSet,
+#'   fileName = file.path(tempdir(), 'cSet.json')
+#' )
 #'
 #' @export
 saveCharacterizationSettings <- function(
@@ -91,7 +120,31 @@ saveCharacterizationSettings <- function(
 #'
 #' @return
 #' Returns the json settings as an R object
-#' @family {LargeScale}
+#'
+#' @family LargeScale
+#'
+#' @examples
+#' # example code
+#'
+#' setPath <- file.path(tempdir(), 'charSet.json')
+#'
+#' drSet <- createDechallengeRechallengeSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   dechallengeRechallengeSettings = drSet
+#' )
+#'
+#' saveCharacterizationSettings(
+#'   settings = cSet,
+#'   fileName = setPath
+#' )
+#'
+#' setting <- loadCharacterizationSettings(setPath)
+#'
+#'
 #' @export
 loadCharacterizationSettings <- function(
     fileName) {
@@ -125,9 +178,34 @@ loadCharacterizationSettings <- function(
 #' @param incremental If TRUE then skip previously executed analyses that completed
 #' @param threads    The number of threads to use when running aggregate covariates
 #' @param minCharacterizationMean The minimum mean threshold to extract when running aggregate covariates
-#' @family {LargeScale}
+#' @family LargeScale
+#'
 #' @return
 #' Multiple csv files in the outputDirectory.
+#'
+#' @examples
+#'
+#' conDet <- exampleOmopConnectionDetails()
+#'
+#' tteSet <- createTimeToEventSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   timeToEventSettings = tteSet
+#' )
+#'
+#' runCharacterizationAnalyses(
+#'   connectionDetails = conDet,
+#'   targetDatabaseSchema = 'main',
+#'   targetTable = 'cohort',
+#'   outcomeDatabaseSchema = 'main',
+#'   outcomeTable = 'cohort',
+#'   cdmDatabaseSchema = 'main',
+#'   characterizationSettings = cSet,
+#'   outputDirectory = file.path(tempdir(),'runChar')
+#' )
 #'
 #' @export
 runCharacterizationAnalyses <- function(
@@ -143,9 +221,9 @@ runCharacterizationAnalyses <- function(
     executionPath = file.path(outputDirectory, "execution"),
     csvFilePrefix = "c_",
     databaseId = "1",
-    showSubjectId = F,
+    showSubjectId = FALSE,
     minCellCount = 0,
-    incremental = T,
+    incremental = TRUE,
     threads = 1,
     minCharacterizationMean = 0.01) {
   # inputs checks
@@ -227,7 +305,7 @@ runCharacterizationAnalyses <- function(
 
     if (nrow(jobs) == 0) {
       message("No jobs left")
-      return(invisible(T))
+      return(invisible(TRUE))
     }
   } else {
     # check for any csv files in folder
@@ -272,8 +350,8 @@ runCharacterizationAnalyses <- function(
   message("Creating new cluster")
   cluster <- ParallelLogger::makeCluster(
     numberOfThreads = threads,
-    singleThreadToMain = T,
-    setAndromedaTempFolder = T
+    singleThreadToMain = TRUE,
+    setAndromedaTempFolder = TRUE
   )
 
   ParallelLogger::clusterApply(
@@ -283,7 +361,7 @@ runCharacterizationAnalyses <- function(
   )
 
   # code to export all csvs into one file
-  aggregateCsvs(
+  aggregateCsvsBatch(
     outputFolder = outputDirectory,
     executionPath = executionPath,
     executionFolders = jobs$executionFolder,
@@ -296,7 +374,7 @@ runCharacterizationAnalyses <- function(
 createDirectory <- function(x) {
   if (!dir.exists(x)) {
     message(paste0("Creating directory ", x))
-    dir.create(x, recursive = T)
+    dir.create(x, recursive = TRUE)
   }
 }
 
@@ -381,13 +459,6 @@ createJobs <- function(
     )
   )
 
-  # data.frame(
-  #  functionName,
-  #  settings # json,
-  #  executionFolder,
-  #  jobId
-  # )
-
   return(jobDf)
 }
 
@@ -417,7 +488,7 @@ aggregateCsvs <- function(
   # this makes sure results are recreated
   firstTracker <- data.frame(
     table = tables,
-    first = rep(T, length(tables))
+    first = rep(TRUE, length(tables))
   )
 
   analysisRefTracker <- c()
@@ -438,7 +509,7 @@ aggregateCsvs <- function(
         # TODO do this in batches
         data <- readr::read_csv(
           file = loadPath,
-          show_col_types = F,
+          show_col_types = FALSE,
           col_types = colTypes[csvType == tables]
         )
 
@@ -480,7 +551,131 @@ aggregateCsvs <- function(
           file = savePath, quote = "all",
           append = append & !firstTracker$first[firstTracker$table == csvType]
         )
-        firstTracker$first[firstTracker$table == csvType] <- F
+        firstTracker$first[firstTracker$table == csvType] <- FALSE
+      }
+    }
+  }
+}
+
+
+aggregateCsvsBatch <- function(
+    executionPath,
+    outputFolder,
+    executionFolders, # needed?
+    csvFilePrefix,
+    batchSize = 100000
+    ) {
+  tables <- c(
+    "cohort_details.csv", "settings.csv", "covariates.csv",
+    "covariates_continuous.csv", "covariate_ref.csv",
+    "analysis_ref.csv", "cohort_counts.csv",
+    "time_to_event.csv",
+    "rechallenge_fail_case_series.csv", "dechallenge_rechallenge.csv"
+  )
+
+  colTypes <- c(
+    'ciicc','ciiiicciiccc', 'didciiccd',
+    'didddddddddciicc', 'dciicicc',
+    'icciicccc', 'iiciicciicddddd',
+    '????????',
+    '?????????????????', '????????????????????'
+  )
+
+  # this makes sure results are recreated
+  firstTracker <- data.frame(
+    table = tables,
+    first = rep(TRUE, length(tables))
+  )
+
+  csvTrackerFile <- file.path(outputFolder,'tracker.rds')
+  tracker <- list(
+    analysisRefTracker = c(),
+    covariateRefTracker = c(),
+    settingsTracker = c()
+  )
+  saveRDS(tracker, csvTrackerFile)
+
+  # create outputFolder
+
+  folderNames <- dir(executionPath)
+
+  # for each folder load covariates, covariates_continuous,
+  # covariate_ref and analysis_ref
+  for (folderName in folderNames) {
+    for (csvType in tables) {
+      loadPath <- file.path(executionPath, folderName, csvType)
+      savePath <- file.path(outputFolder, paste0(csvFilePrefix, csvType))
+      if (file.exists(loadPath)) {
+
+        firstTrackerCurrent <- firstTracker$first[firstTracker$table == csvType]
+        append <- file.exists(savePath)
+
+        # code to save results in batches
+        processCsv <- function(x, pos){
+
+          tracker <- readRDS(csvTrackerFile)
+
+          if (csvType == "analysis_ref.csv") {
+            x <- x %>%
+              dplyr::mutate(
+                unique_id = paste0(.data$setting_id, "-", .data$analysis_id)
+              ) %>%
+              dplyr::filter( # need to filter analysis_id and setting_id
+                !.data$unique_id %in% tracker$analysisRefTracker
+              ) %>%
+              dplyr::select(-"unique_id")
+
+            tracker$analysisRefTracker <- unique(c(tracker$analysisRefTracker, paste0(x$setting_id, "-", x$analysis_id)))
+          }
+          if (csvType == "covariate_ref.csv") { # this could be problematic as may have differnet covariate_ids
+            x <- x %>%
+              dplyr::mutate(
+                unique_id = paste0(.data$setting_id, "-", .data$covariate_id)
+              ) %>%
+              dplyr::filter( # need to filter covariate_id and setting_id
+                !.data$unique_id %in% tracker$covariateRefTracker
+              ) %>%
+              dplyr::select(-"unique_id")
+
+            tracker$covariateRefTracker <- unique(c(tracker$covariateRefTracker, paste0(x$setting_id, "-", x$covariate_id)))
+          }
+          if (csvType == "settings.csv") {
+            x <- x %>%
+              dplyr::filter(
+                !.data$setting_id %in% tracker$settingsTracker
+              )
+            tracker$settingsTracker <- c(tracker$settingsTracker, unique(x$setting_id))
+          }
+
+          # this does not work if the csv is empty - only
+          # works if the csv has rows.
+          readr::write_csv(
+            x = x,
+            file = savePath, quote = "all",
+            append = !firstTrackerCurrent | pos != 1
+            #append = append | pos != 1
+          )
+
+          saveRDS(tracker,csvTrackerFile)
+
+        }
+
+        readr::read_csv_chunked(
+          file = loadPath,
+          callback = readr::SideEffectChunkCallback$new(processCsv),
+          chunk_size = batchSize,
+          col_types = colTypes[csvType == tables],
+          show_col_types = FALSE
+        )
+
+        # readr::read_csv_chunked only works if the csv
+        # has 1 row or more.  This code will copy the
+        # csv with no rows to we always get a complete set of csv files
+        if(!file.exists(savePath) & file.exists(loadPath)){
+          file.copy(from = loadPath, to = savePath)
+        }
+
+        firstTracker$first[firstTracker$table == csvType] <- FALSE
       }
     }
   }

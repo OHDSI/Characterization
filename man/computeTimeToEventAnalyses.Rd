@@ -14,8 +14,9 @@ computeTimeToEventAnalyses(
   cdmDatabaseSchema,
   settings,
   databaseId = "database 1",
-  outputFolder = file.path(getwd(), "results"),
+  outputFolder,
   minCellCount = 0,
+  progressBar = interactive(),
   ...
 )
 }
@@ -49,6 +50,8 @@ can be created}
 
 \item{minCellCount}{The minimum cell value to display, values less than this will be replaced by -1}
 
+\item{progressBar}{Whether to display a progress bar while the analysis is running}
+
 \item{...}{extra inputs}
 }
 \value{
@@ -57,8 +60,30 @@ An \code{Andromeda::andromeda()} object containing the time to event results.
 \description{
 Compute time to event study
 }
+\examples{
+# example code
+
+conDet <- exampleOmopConnectionDetails()
+
+tteSet <- createTimeToEventSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+result <- computeTimeToEventAnalyses(
+  connectionDetails = conDet,
+  targetDatabaseSchema = 'main',
+  targetTable = 'cohort',
+  cdmDatabaseSchema = 'main',
+  settings = tteSet,
+  outputFolder = file.path(tempdir(), 'tte')
+)
+
+
+
+}
 \seealso{
-Other {TimeToEvent}: 
+Other TimeToEvent: 
 \code{\link{createTimeToEventSettings}()}
 }
-\concept{{TimeToEvent}}
+\concept{TimeToEvent}

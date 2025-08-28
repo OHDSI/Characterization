@@ -9,7 +9,8 @@ insertResultsToDatabase(
   schema,
   resultsFolder,
   tablePrefix = "",
-  csvTablePrefix = "c_"
+  csvTablePrefix = "c_",
+  includedFiles = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ insertResultsToDatabase(
 \item{tablePrefix}{A prefix to append to the result tables for the characterization results}
 
 \item{csvTablePrefix}{The prefix added to the csv results - default is 'c_'}
+
+\item{includedFiles}{Specify the csv files to upload or NULL to upload all in directory}
 }
 \value{
 Returns the connection to the sqlite database
@@ -32,9 +35,53 @@ This function uploads results in csv format into a result database
 \details{
 Calls ResultModelManager uploadResults function to upload the csv files
 }
+\examples{
+
+# generate results into resultsFolder
+conDet <- exampleOmopConnectionDetails()
+
+tteSet <- createTimeToEventSettings(
+targetIds = c(1,2),
+  outcomeIds = 3
+  )
+
+cSet <- createCharacterizationSettings(
+  timeToEventSettings = tteSet
+)
+
+runCharacterizationAnalyses(
+  connectionDetails = conDet,
+  targetDatabaseSchema = 'main',
+  targetTable = 'cohort',
+  outcomeDatabaseSchema = 'main',
+  outcomeTable = 'cohort',
+  cdmDatabaseSchema = 'main',
+  characterizationSettings = cSet,
+  outputDirectory = file.path(tempdir(),'database')
+)
+
+# create sqlite database
+charResultDbCD <- createSqliteDatabase()
+
+# create database results tables
+createCharacterizationTables(
+   connectionDetails = charResultDbCD,
+   resultSchema = 'main'
+ )
+
+# insert results
+insertResultsToDatabase(
+ connectionDetails = charResultDbCD,
+ schema = 'main',
+ resultsFolder = file.path(tempdir(),'database'),
+ includedFiles = c('time_to_event')
+)
+
+
+}
 \seealso{
-Other {Database}: 
+Other Database: 
 \code{\link{createCharacterizationTables}()},
 \code{\link{createSqliteDatabase}()}
 }
-\concept{{Database}}
+\concept{Database}

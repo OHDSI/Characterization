@@ -20,10 +20,26 @@ This function converts the settings into a json object and saves it
 \details{
 Input the characterization settings and output a json file to a file named 'characterizationSettings.json' inside the saveDirectory
 }
+\examples{
+drSet <- createDechallengeRechallengeSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+cSet <- createCharacterizationSettings(
+  dechallengeRechallengeSettings = drSet
+)
+
+saveCharacterizationSettings(
+  settings = cSet,
+  fileName = file.path(tempdir(), 'cSet.json')
+)
+
+}
 \seealso{
-Other {LargeScale}: 
+Other LargeScale: 
 \code{\link{createCharacterizationSettings}()},
 \code{\link{loadCharacterizationSettings}()},
 \code{\link{runCharacterizationAnalyses}()}
 }
-\concept{{LargeScale}}
+\concept{LargeScale}

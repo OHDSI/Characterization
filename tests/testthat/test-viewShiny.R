@@ -95,7 +95,7 @@ test_that("prepareCharacterizationShiny works", {
     minCharacterizationMean = 0.01
   )
 
-  settings <- Characterization:::prepareCharacterizationShiny(
+  settings <- prepareCharacterizationShiny(
     resultFolder = file.path(resultLocation, "result"),
     cohortDefinitionSet = NULL,
     sqliteLocation = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
@@ -114,6 +114,7 @@ test_that("prepareCharacterizationShiny works", {
     )
   )
   conTest <- DatabaseConnector::connect(connectionDetailsTest)
+  on.exit(DatabaseConnector::disconnect(conTest))
   tables <- tolower(
     DatabaseConnector::getTableNames(
       connection = conTest,
@@ -124,27 +125,4 @@ test_that("prepareCharacterizationShiny works", {
   # make sure the extra tables are added
   testthat::expect_true("cg_cohort_definition" %in% tables)
   testthat::expect_true("database_meta_data" %in% tables)
-})
-
-test_that("shiny app works", {
-  settings <- prepareCharacterizationShiny(
-    resultFolder = file.path(resultLocation, "result"),
-    cohortDefinitionSet = NULL,
-    sqliteLocation = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
-  )
-
-  app <- viewChars(
-    databaseSettings = settings,
-    testApp = T
-  )
-
-  shiny::testServer(
-    app = app,
-    args = list(),
-    expr = {
-      testthat::expect_equal(runServer[["About"]], 0)
-      session$setInputs(menu = "About")
-      testthat::expect_equal(runServer[["About"]], 1)
-    }
-  )
 })

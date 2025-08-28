@@ -5,23 +5,23 @@
 \title{Create during covariate settings}
 \usage{
 createDuringCovariateSettings(
-  useConditionOccurrenceDuring = F,
-  useConditionOccurrencePrimaryInpatientDuring = F,
-  useConditionEraDuring = F,
-  useConditionGroupEraDuring = F,
-  useDrugExposureDuring = F,
-  useDrugEraDuring = F,
-  useDrugGroupEraDuring = F,
-  useProcedureOccurrenceDuring = F,
-  useDeviceExposureDuring = F,
-  useMeasurementDuring = F,
-  useObservationDuring = F,
-  useVisitCountDuring = F,
-  useVisitConceptCountDuring = F,
+  useConditionOccurrenceDuring = FALSE,
+  useConditionOccurrencePrimaryInpatientDuring = FALSE,
+  useConditionEraDuring = FALSE,
+  useConditionGroupEraDuring = FALSE,
+  useDrugExposureDuring = FALSE,
+  useDrugEraDuring = FALSE,
+  useDrugGroupEraDuring = FALSE,
+  useProcedureOccurrenceDuring = FALSE,
+  useDeviceExposureDuring = FALSE,
+  useMeasurementDuring = FALSE,
+  useObservationDuring = FALSE,
+  useVisitCountDuring = FALSE,
+  useVisitConceptCountDuring = FALSE,
   includedCovariateConceptIds = c(),
-  addDescendantsToInclude = F,
+  addDescendantsToInclude = FALSE,
   excludedCovariateConceptIds = c(),
-  addDescendantsToExclude = F,
+  addDescendantsToExclude = FALSE,
   includedCovariateIds = c()
 )
 }
@@ -97,15 +97,15 @@ creates an object specifying how during covariates should be constructed from da
 }
 \examples{
 settings <- createDuringCovariateSettings(
-   useConditionOccurrenceDuring = TRUE,
-   useConditionOccurrencePrimaryInpatientDuring = FALSE,
-   useConditionEraDuring = FALSE,
-   useConditionGroupEraDuring = FALSE
+  useConditionOccurrenceDuring = TRUE,
+  useConditionOccurrencePrimaryInpatientDuring = FALSE,
+  useConditionEraDuring = FALSE,
+  useConditionGroupEraDuring = FALSE
 )
 
 }
 \seealso{
-Other {CovariateSetting}: 
+Other CovariateSetting: 
 \code{\link{getDbDuringCovariateData}()}
 }
-\concept{{CovariateSetting}}
+\concept{CovariateSetting}

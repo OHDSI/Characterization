@@ -1,0 +1,40 @@
+setting_id,min_prior_observation,outcome_washout_days,risk_window_start,risk_window_end,start_anchor,end_anchor,case_pre_target_duration,case_post_outcome_duration,covariate_setting_json,case_covariate_setting_json,database_id
+20250626154219589895388166,0,0,1,365,cohort start,cohort start,365,365,"[
+  {
+    ""temporal"": false,
+    ""temporalSequence"": false,
+    ""DemographicsGender"": true,
+    ""DemographicsAge"": true,
+    ""DemographicsRace"": true,
+    ""longTermStartDays"": -365,
+    ""mediumTermStartDays"": -180,
+    ""shortTermStartDays"": -30,
+    ""endDays"": 0,
+    ""includedCovariateConceptIds"": [],
+    ""addDescendantsToInclude"": false,
+    ""excludedCovariateConceptIds"": [],
+    ""addDescendantsToExclude"": false,
+    ""includedCovariateIds"": [],
+    ""attr_class"": ""covariateSettings"",
+    ""attr_fun"": ""getDbDefaultCovariateData""
+  }
+]","[
+  {
+    ""temporal"": false,
+    ""temporalSequence"": false,
+    ""ConditionGroupEraDuring"": true,
+    ""DrugGroupEraDuring"": true,
+    ""ProcedureOccurrenceDuring"": true,
+    ""DeviceExposureDuring"": true,
+    ""MeasurementDuring"": true,
+    ""ObservationDuring"": true,
+    ""VisitConceptCountDuring"": true,
+    ""includedCovariateConceptIds"": [],
+    ""addDescendantsToInclude"": false,
+    ""excludedCovariateConceptIds"": [],
+    ""addDescendantsToExclude"": false,
+    ""includedCovariateIds"": [],
+    ""attr_class"": ""covariateSettings"",
+    ""attr_fun"": ""Characterization::getDbDuringCovariateData""
+  }
+]",1

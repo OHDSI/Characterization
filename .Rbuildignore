@@ -11,3 +11,6 @@ compare_versions
 .github
 docs
 .idea
+^README\.md$
+^NEWS\.md$
+^\.Rhistory$

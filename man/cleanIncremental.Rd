@@ -5,10 +5,12 @@
 \title{Removes csv files from folders that have not been marked as completed
 and removes the record of the execution file}
 \usage{
-cleanIncremental(executionFolder)
+cleanIncremental(executionFolder, ignoreWhenEmpty = FALSE)
 }
 \arguments{
 \item{executionFolder}{The folder that has the execution files}
+
+\item{ignoreWhenEmpty}{When TRUE, if there are no incremental logs then nothing is run}
 }
 \value{
 A list with the settings
@@ -17,8 +19,17 @@ A list with the settings
 Removes csv files from folders that have not been marked as completed
 and removes the record of the execution file
 }
+\examples{
+
+cleanIncremental(
+  file.path(tempdir(), 'incremental'),
+  ignoreWhenEmpty = TRUE
+)
+
+
+}
 \seealso{
-Other {Incremental}: 
+Other Incremental: 
 \code{\link{cleanNonIncremental}()}
 }
-\concept{{Incremental}}
+\concept{Incremental}

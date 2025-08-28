@@ -17,8 +17,14 @@ A list with the settings
 Removes csv files from the execution folder as there should be no csv files
 when running in non-incremental model
 }
+\examples{
+# example code
+
+cleanNonIncremental(file.path(tempdir(), 'incremental'))
+
+}
 \seealso{
-Other {Incremental}: 
+Other Incremental: 
 \code{\link{cleanIncremental}()}
 }
-\concept{{Incremental}}
+\concept{Incremental}

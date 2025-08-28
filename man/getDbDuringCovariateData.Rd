@@ -11,10 +11,11 @@ getDbDuringCovariateData(
   cdmVersion = "5",
   cohortTable = "#cohort_person",
   rowIdField = "subject_id",
-  aggregated = T,
+  aggregated = TRUE,
   cohortIds = c(-1),
   covariateSettings,
   minCharacterizationMean = 0,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   ...
 )
 }
@@ -39,10 +40,14 @@ getDbDuringCovariateData(
 
 \item{minCharacterizationMean}{the minimum value for a covariate to be extracted}
 
+\item{tempEmulationSchema}{Some database platforms like Oracle and Impala do not truly support temp tables.
+To emulate temp tables, provide a schema with write privileges where temp tables
+can be created}
+
 \item{...}{additional arguments from FeatureExtraction}
 }
 \value{
-The the during covariates based on user settings
+A 'FeatureExtraction' covariateData object containing the during covariates based on user settings
 }
 \description{
 Extracts covariates that occur during a cohort
@@ -50,8 +55,31 @@ Extracts covariates that occur during a cohort
 \details{
 The user specifies a what during covariates they want and this executes them using FE
 }
+\examples{
+
+conDet <- exampleOmopConnectionDetails()
+connection <- DatabaseConnector::connect(conDet)
+
+settings <- createDuringCovariateSettings(
+  useConditionOccurrenceDuring = TRUE,
+  useConditionOccurrencePrimaryInpatientDuring = FALSE,
+  useConditionEraDuring = FALSE,
+  useConditionGroupEraDuring = FALSE
+)
+
+duringData <- getDbDuringCovariateData(
+  connection <- connection,
+  cdmDatabaseSchema = 'main',
+  cohortIds = 1,
+  covariateSettings = settings,
+  cohortTable = 'cohort'
+)
+
+DatabaseConnector::disconnect(connection)
+
+}
 \seealso{
-Other {CovariateSetting}: 
+Other CovariateSetting: 
 \code{\link{createDuringCovariateSettings}()}
 }
-\concept{{CovariateSetting}}
+\concept{CovariateSetting}

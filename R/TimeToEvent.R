@@ -18,9 +18,19 @@
 #'
 #' @param targetIds   A list of cohortIds for the target cohorts
 #' @param outcomeIds   A list of cohortIds for the outcome cohorts
-#' @family {TimeToEvent}
+#' @family TimeToEvent
+#'
 #' @return
 #' An list with the time to event settings
+#'
+#' @examples
+#' # example code
+#'
+#' tteSet <- createTimeToEventSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
 #'
 #' @export
 createTimeToEventSettings <- function(
@@ -63,10 +73,33 @@ createTimeToEventSettings <- function(
 #' @param databaseId An identifier for the database (string)
 #' @param outputFolder A directory to save the results as csv files
 #' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
+#' @param progressBar Whether to display a progress bar while the analysis is running
 #' @param ... extra inputs
-#' @family {TimeToEvent}
+#' @family TimeToEvent
+#'
 #' @return
 #' An \code{Andromeda::andromeda()} object containing the time to event results.
+#'
+#' @examples
+#' # example code
+#'
+#' conDet <- exampleOmopConnectionDetails()
+#'
+#' tteSet <- createTimeToEventSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' result <- computeTimeToEventAnalyses(
+#'   connectionDetails = conDet,
+#'   targetDatabaseSchema = 'main',
+#'   targetTable = 'cohort',
+#'   cdmDatabaseSchema = 'main',
+#'   settings = tteSet,
+#'   outputFolder = file.path(tempdir(), 'tte')
+#' )
+#'
+#'
 #'
 #' @export
 computeTimeToEventAnalyses <- function(
@@ -79,9 +112,15 @@ computeTimeToEventAnalyses <- function(
     cdmDatabaseSchema,
     settings,
     databaseId = "database 1",
-    outputFolder = file.path(getwd(), "results"),
+    outputFolder,
     minCellCount = 0,
+    progressBar = interactive(),
     ...) {
+
+  if(missing(outputFolder)){
+    stop('Please enter a output path value for outputFolder')
+  }
+
   # check inputs
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
@@ -134,7 +173,7 @@ computeTimeToEventAnalyses <- function(
       createTable = TRUE,
       tempTable = TRUE,
       tempEmulationSchema = tempEmulationSchema,
-      progressBar = FALSE,
+      progressBar = progressBar,
       camelCaseToSnakeCase = TRUE
     )
 
@@ -154,7 +193,8 @@ computeTimeToEventAnalyses <- function(
 
     DatabaseConnector::executeSql(
       connection = connection,
-      sql = sql
+      sql = sql,
+      progressBar = progressBar
     )
 
     sql <- "select * from #two_tte_summary;"
@@ -181,7 +221,8 @@ computeTimeToEventAnalyses <- function(
 
     DatabaseConnector::executeSql(
       connection = connection,
-      sql = sql, progressBar = FALSE,
+      sql = sql,
+      progressBar = progressBar,
       reportOverallTime = FALSE
     )
 

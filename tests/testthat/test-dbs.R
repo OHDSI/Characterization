@@ -21,7 +21,7 @@ getPlatformConnectionDetails <- function(dbmsPlatform) {
 
   options("sqlRenderTempEmulationSchema" = NULL)
   if (dbmsPlatform == "sqlite") {
-    connectionDetails <- Eunomia::getEunomiaConnectionDetails()
+    connectionDetails <- Characterization::exampleOmopConnectionDetails()
     cdmDatabaseSchema <- "main"
     vocabularyDatabaseSchema <- "main"
     cohortDatabaseSchema <- "main"

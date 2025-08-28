@@ -1,9 +1,8 @@
-connectionDetails <- Eunomia::getEunomiaConnectionDetails(databaseFile = "testEunomia.sqlite")
-Eunomia::createCohorts(connectionDetails = connectionDetails)
-
+connectionDetails <- Characterization::exampleOmopConnectionDetails()
+readr::local_edition(1)
 withr::defer(
   {
-    unlink("testEunomia.sqlite", recursive = TRUE, force = TRUE)
+    unlink(file.path(tempdir(),"GiBleed.sqlite"), recursive = TRUE, force = TRUE)
   },
   testthat::teardown_env()
 )

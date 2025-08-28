@@ -24,13 +24,20 @@
 #' This function creates a sqlite database and connection
 #'
 #' @param sqliteLocation    The location of the sqlite database
-#' @family {Database}
+#' @family Database
+#'
+#' @examples
+#'
+#' charResultDbCD <- createSqliteDatabase()
+#'
+#'
 #' @return
-#' Returns the connection to the sqlite database
+#' Returns the connection detail object to the sqlite database
 #'
 #' @export
 createSqliteDatabase <- function(
-    sqliteLocation = tempdir()) {
+    sqliteLocation = tempdir()
+    ) {
   sqliteLocation <- file.path(
     sqliteLocation,
     "sqliteCharacterization"
@@ -39,7 +46,7 @@ createSqliteDatabase <- function(
   if (!dir.exists(sqliteLocation)) {
     dir.create(
       path = sqliteLocation,
-      recursive = T
+      recursive = TRUE
     )
   }
 
@@ -63,9 +70,53 @@ createSqliteDatabase <- function(
 #' @param resultsFolder        The folder containing the csv results
 #' @param tablePrefix          A prefix to append to the result tables for the characterization results
 #' @param csvTablePrefix      The prefix added to the csv results - default is 'c_'
-#' @family {Database}
+#' @param includedFiles      Specify the csv files to upload or NULL to upload all in directory
+#' @family Database
 #' @return
 #' Returns the connection to the sqlite database
+#'
+#' @examples
+#'
+#' # generate results into resultsFolder
+#' conDet <- exampleOmopConnectionDetails()
+#'
+#' tteSet <- createTimeToEventSettings(
+#' targetIds = c(1,2),
+#'   outcomeIds = 3
+#'   )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   timeToEventSettings = tteSet
+#' )
+#'
+#' runCharacterizationAnalyses(
+#'   connectionDetails = conDet,
+#'   targetDatabaseSchema = 'main',
+#'   targetTable = 'cohort',
+#'   outcomeDatabaseSchema = 'main',
+#'   outcomeTable = 'cohort',
+#'   cdmDatabaseSchema = 'main',
+#'   characterizationSettings = cSet,
+#'   outputDirectory = file.path(tempdir(),'database')
+#' )
+#'
+#' # create sqlite database
+#' charResultDbCD <- createSqliteDatabase()
+#'
+#' # create database results tables
+#' createCharacterizationTables(
+#'    connectionDetails = charResultDbCD,
+#'    resultSchema = 'main'
+#'  )
+#'
+#' # insert results
+#' insertResultsToDatabase(
+#'  connectionDetails = charResultDbCD,
+#'  schema = 'main',
+#'  resultsFolder = file.path(tempdir(),'database'),
+#'  includedFiles = c('time_to_event')
+#' )
+#'
 #'
 #' @export
 insertResultsToDatabase <- function(
@@ -73,11 +124,16 @@ insertResultsToDatabase <- function(
     schema,
     resultsFolder,
     tablePrefix = "",
-    csvTablePrefix = "c_") {
+    csvTablePrefix = "c_",
+    includedFiles = NULL
+    ) {
   specLoc <- system.file("settings", "resultsDataModelSpecification.csv",
     package = "Characterization"
   )
   specs <- utils::read.csv(specLoc)
+  if(!is.null(includedFiles)){
+    specs <- specs[specs$table_name %in% includedFiles,]
+  }
   colnames(specs) <- SqlRender::snakeCaseToCamelCase(colnames(specs))
   specs$tableName <- paste0(csvTablePrefix, specs$tableName)
   ResultModelManager::uploadResults(
@@ -86,7 +142,7 @@ insertResultsToDatabase <- function(
     resultsFolder = resultsFolder,
     tablePrefix = tablePrefix,
     specifications = specs,
-    purgeSiteDataBeforeUploading = F
+    purgeSiteDataBeforeUploading = FALSE
   )
 
   return(invisible(NULL))
@@ -136,17 +192,29 @@ removeMinCell <- function(
 #' @param createTables                 If true the Characterization result tables will be created
 #' @param tablePrefix                  A string appended to the Characterization result tables
 #' @param tempEmulationSchema          The temp schema used when the database management system is oracle
-#' @family {Database}
+#'
+#' @family Database
+#'
 #' @return
 #' Returns NULL but creates the required tables into the specified database schema.
+#'
+#' @examples
+#' # create sqlite database
+#' charResultDbCD <- createSqliteDatabase()
+#'
+#' # create database results tables
+#' createCharacterizationTables(
+#'    connectionDetails = charResultDbCD,
+#'    resultSchema = 'main'
+#'  )
 #'
 #' @export
 createCharacterizationTables <- function(
     connectionDetails,
     resultSchema,
     targetDialect = "postgresql",
-    deleteExistingTables = T,
-    createTables = T,
+    deleteExistingTables = TRUE,
+    createTables = TRUE,
     tablePrefix = "c_",
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")) {
   errorMessages <- checkmate::makeAssertCollection()
@@ -192,7 +260,8 @@ createCharacterizationTables <- function(
         )
         DatabaseConnector::executeSql(
           connection = conn,
-          sql = sql
+          sql = sql,
+          progressBar = FALSE
         )
 
         sql <- "DROP TABLE @my_schema.@table"
@@ -208,7 +277,8 @@ createCharacterizationTables <- function(
         )
         DatabaseConnector::executeSql(
           connection = conn,
-          sql = sql
+          sql = sql,
+          progressBar = FALSE
         )
       }
     }
@@ -227,12 +297,14 @@ createCharacterizationTables <- function(
 
     DatabaseConnector::executeSql(
       connection = conn,
-      sql = renderedSql
+      sql = renderedSql,
+      progressBar = FALSE
     )
 
-    # add database migration here in the future
+    ## add database migration here in the future
     migrateDataModel(
       connectionDetails = connectionDetails,
+      connection = conn,
       databaseSchema = resultSchema,
       tablePrefix = tablePrefix
     )
@@ -240,7 +312,12 @@ createCharacterizationTables <- function(
 }
 
 
-migrateDataModel <- function(connectionDetails, databaseSchema, tablePrefix = "") {
+migrateDataModel <- function(
+    connectionDetails,
+    connection,
+    databaseSchema,
+    tablePrefix = ""
+    ) {
   ParallelLogger::logInfo("Migrating data set")
   migrator <- getDataMigrator(
     connectionDetails = connectionDetails,
@@ -258,9 +335,15 @@ migrateDataModel <- function(connectionDetails, databaseSchema, tablePrefix = ""
     dbms = connectionDetails$dbms
   )
 
-  connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
-  on.exit(DatabaseConnector::disconnect(connection))
-  DatabaseConnector::executeSql(connection, updateVersionSql)
+  if(missing(connection)){
+    connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
+  }
+  DatabaseConnector::executeSql(
+    connection = connection,
+    sql = updateVersionSql,
+    progressBar = FALSE
+    )
 }
 
 
@@ -297,7 +380,7 @@ getResultTables <- function() {
 # Removes scientific notation for any columns that are
 # formatted as doubles. Based on this GitHub issue:
 # https://github.com/tidyverse/readr/issues/671#issuecomment-300567232
-formatDouble <- function(x, scientific = F, ...) {
+formatDouble <- function(x, scientific = FALSE, ...) {
   doubleCols <- vapply(x, is.double, logical(1))
   x[doubleCols] <- lapply(x[doubleCols], format, scientific = scientific, ...)
 

@@ -13,9 +13,10 @@ computeRechallengeFailCaseSeriesAnalyses(
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   settings,
   databaseId = "database 1",
-  showSubjectId = F,
-  outputFolder = file.path(getwd(), "results"),
+  showSubjectId = FALSE,
+  outputFolder,
   minCellCount = 0,
+  progressBar = interactive(),
   ...
 )
 }
@@ -49,6 +50,8 @@ can be created}
 
 \item{minCellCount}{The minimum cell value to display, values less than this will be replaced by -1}
 
+\item{progressBar}{Whether to display a progress bar while the analysis is running}
+
 \item{...}{extra inputs}
 }
 \value{
@@ -57,9 +60,27 @@ An \code{Andromeda::andromeda()} object with the case series details of the fail
 \description{
 Compute fine the subjects that fail the dechallenge rechallenge study
 }
+\examples{
+
+conDet <- exampleOmopConnectionDetails()
+
+drSet <- createDechallengeRechallengeSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+computeRechallengeFailCaseSeriesAnalyses(
+  connectionDetails = conDet,
+  targetDatabaseSchema = 'main',
+  targetTable = 'cohort',
+  settings = drSet,
+  outputFolder = tempdir()
+)
+
+}
 \seealso{
-Other {DechallengeRechallenge}: 
+Other DechallengeRechallenge: 
 \code{\link{computeDechallengeRechallengeAnalyses}()},
 \code{\link{createDechallengeRechallengeSettings}()}
 }
-\concept{{DechallengeRechallenge}}
+\concept{DechallengeRechallenge}

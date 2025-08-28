@@ -6,20 +6,68 @@
 #' Input is the output of ...
 #' @param resultFolder   The location of the csv results
 #' @param cohortDefinitionSet  The cohortDefinitionSet extracted using webAPI
-#' @family {Shiny}
+#' @family Shiny
+#'
 #' @return
 #' Opens a shiny app for interactively viewing the results
+#'
+#' @examples
+#'
+#' conDet <- exampleOmopConnectionDetails()
+#'
+#' tteSet <- createTimeToEventSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   timeToEventSettings = tteSet
+#' )
+#'
+#' runCharacterizationAnalyses(
+#'   connectionDetails = conDet,
+#'   targetDatabaseSchema = 'main',
+#'   targetTable = 'cohort',
+#'   outcomeDatabaseSchema = 'main',
+#'   outcomeTable = 'cohort',
+#'   cdmDatabaseSchema = 'main',
+#'   characterizationSettings = cSet,
+#'   outputDirectory = file.path(tempdir(),'view')
+#' )
+#'
+#' # interactive shiny app
+#' \dontrun{
+#' viewCharacterization(
+#'   resultFolder = file.path(tempdir(),'view')
+#' )
+#' }
+#'
 #'
 #' @export
 viewCharacterization <- function(
     resultFolder,
     cohortDefinitionSet = NULL) {
-  databaseSettings <- prepareCharacterizationShiny(
-    resultFolder = resultFolder,
-    cohortDefinitionSet = cohortDefinitionSet
-  )
 
-  viewChars(databaseSettings)
+  # check there are csv files in resultFolder
+  if(length(dir(resultFolder, pattern = '.csv')) > 0 ){
+
+    databaseSettings <- prepareCharacterizationShiny(
+      resultFolder = resultFolder,
+      cohortDefinitionSet = cohortDefinitionSet
+    )
+
+    if(length(databaseSettings) == 0){
+      message('No actual results to view via shiny')
+      return(FALSE)
+    } else{
+      viewChars(databaseSettings)
+    }
+
+  } else{
+    message('No csv results to view via shiny')
+    return(FALSE)
+  }
+
 }
 
 prepareCharacterizationShiny <- function(
@@ -29,7 +77,7 @@ prepareCharacterizationShiny <- function(
     tablePrefix = "",
     csvTablePrefix = "c_") {
   if (!dir.exists(dirname(sqliteLocation))) {
-    dir.create(dirname(sqliteLocation), recursive = T)
+    dir.create(dirname(sqliteLocation), recursive = TRUE)
   }
 
   # create sqlite connection
@@ -44,8 +92,8 @@ prepareCharacterizationShiny <- function(
     connectionDetails = connectionDetails,
     resultSchema = "main",
     targetDialect = "sqlite",
-    deleteExistingTables = T,
-    createTables = T,
+    deleteExistingTables = TRUE,
+    createTables = TRUE,
     tablePrefix = paste0(tablePrefix, csvTablePrefix)
   )
 
@@ -77,6 +125,12 @@ prepareCharacterizationShiny <- function(
       )
     )
 
+
+    if(length(cohortIds) == 0){
+      # if no cohortids then no results to view
+      return(invisible(list()))
+    }
+
     DatabaseConnector::insertTable(
       connection = con,
       databaseSchema = "main",
@@ -85,7 +139,7 @@ prepareCharacterizationShiny <- function(
         cohortDefinitionId = cohortIds,
         cohortName = getCohortNames(cohortIds, cohortDefinitionSet)
       ),
-      camelCaseToSnakeCase = T
+      camelCaseToSnakeCase = TRUE
     )
   }
 
@@ -106,7 +160,7 @@ prepareCharacterizationShiny <- function(
         databaseId = dbIds,
         cdmSourceAbbreviation = paste0("database ", dbIds)
       ),
-      camelCaseToSnakeCase = T
+      camelCaseToSnakeCase = TRUE
     )
   }
 
@@ -127,9 +181,9 @@ prepareCharacterizationShiny <- function(
 
 viewChars <- function(
     databaseSettings,
-    testApp = F) {
-  ensure_installed("ShinyAppBuilder")
-  ensure_installed("ResultModelManager")
+    testApp = F
+    ) {
+  ensure_installed("OhdsiShinyAppBuilder")
 
   connectionDetails <- do.call(
     DatabaseConnector::createConnectionDetails,
@@ -138,29 +192,7 @@ viewChars <- function(
   connection <- ResultModelManager::ConnectionHandler$new(connectionDetails)
   databaseSettings$connectionDetailsSettings <- NULL
 
-  if (utils::packageVersion("ShinyAppBuilder") < "1.2.0") {
-    # use old method
-    # set database settings into system variables
-    Sys.setenv("resultDatabaseDetails_characterization" = as.character(ParallelLogger::convertSettingsToJson(databaseSettings)))
-
-    config <- ParallelLogger::loadSettingsFromJson(
-      fileName = system.file(
-        "shinyConfig.json",
-        package = "Characterization"
-      )
-    )
-
-    if (!testApp) {
-      ShinyAppBuilder::viewShiny(
-        config = config,
-        connection = connection
-      )
-    } else {
-      ShinyAppBuilder::createShinyApp(config = config, connection = connection)
-    }
-  } else {
     # use new method
-
     config <- ParallelLogger::loadSettingsFromJson(
       fileName = system.file(
         "shinyConfigUpdate.json",
@@ -171,28 +203,24 @@ viewChars <- function(
     databaseSettings$cgTablePrefix <- databaseSettings$cohortTablePrefix
     databaseSettings$databaseTable <- "DATABASE_META_DATA"
     databaseSettings$databaseTablePrefix <- ""
-    # databaseSettings$iTablePrefix <- databaseSettings$incidenceTablePrefix
     databaseSettings$cgTable <- "cohort_definition"
 
-    if (!testApp) {
-      ShinyAppBuilder::viewShiny(
+      OhdsiShinyAppBuilder::viewShiny(
         config = config,
         connection = connection,
         resultDatabaseSettings = databaseSettings
       )
-    } else {
-      ShinyAppBuilder::createShinyApp(
-        config = config,
-        connection = connection,
-        resultDatabaseSettings = databaseSettings
-      )
-    }
-  }
 }
 
 
 
 getCohortNames <- function(cohortIds, cohortDefinitionSet) {
+
+  if(is.null(cohortIds)){
+    warning('cohortIds is NULL')
+    return(NULL)
+  }
+
   if (!is.null(cohortDefinitionSet)) {
     cohortNames <- sapply(
       cohortIds,
@@ -223,19 +251,7 @@ ensure_installed <- function(pkg) {
     if (interactive()) {
       message(msg, "\nWould you like to install it?")
       if (utils::menu(c("Yes", "No")) == 1) {
-        if (pkg %in% c("ShinyAppBuilder", "ResultModelManager")) {
-          # add code to check for devtools...
-          dvtCheck <- tryCatch(utils::packageVersion("devtools"),
-            error = function(e) NA
-          )
-          if (is.na(dvtCheck)) {
-            utils::install.packages("devtools")
-          }
-
-          devtools::install_github(paste0("OHDSI/", pkg))
-        } else {
           utils::install.packages(pkg)
-        }
       } else {
         stop(msg, call. = FALSE)
       }

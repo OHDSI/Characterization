@@ -8,8 +8,8 @@ createCharacterizationTables(
   connectionDetails,
   resultSchema,
   targetDialect = "postgresql",
-  deleteExistingTables = T,
-  createTables = T,
+  deleteExistingTables = TRUE,
+  createTables = TRUE,
   tablePrefix = "c_",
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
 )
@@ -40,9 +40,20 @@ This function executes a large set of SQL statements to create tables that can s
 \details{
 This function can be used to create (or delete) Characterization result tables
 }
+\examples{
+# create sqlite database
+charResultDbCD <- createSqliteDatabase()
+
+# create database results tables
+createCharacterizationTables(
+   connectionDetails = charResultDbCD,
+   resultSchema = 'main'
+ )
+
+}
 \seealso{
-Other {Database}: 
+Other Database: 
 \code{\link{createSqliteDatabase}()},
 \code{\link{insertResultsToDatabase}()}
 }
-\concept{{Database}}
+\concept{Database}

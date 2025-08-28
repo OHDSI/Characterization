@@ -1,0 +1,9 @@
+target_cohort_id,outcome_cohort_id,cohort_type,risk_window_start,risk_window_end,start_anchor,end_anchor,min_prior_observation,outcome_washout_days,database_id,row_count,person_count,min_exposure_time,mean_exposure_time,max_exposure_time
+1,0,Target,NA,NA,NA,NA,0,NA,1,549,549,0,0,0
+2,0,Target,NA,NA,NA,NA,0,NA,1,242,242,0,0,0
+3,0,Target,NA,NA,NA,NA,0,NA,1,150,150,1,1,1
+4,0,Target,NA,NA,NA,NA,0,NA,1,791,791,0,0,0
+1,0,Tall,NA,NA,NA,NA,0,NA,1,565,565,0,0,0
+2,0,Tall,NA,NA,NA,NA,0,NA,1,244,244,0,0,0
+3,0,Tall,NA,NA,NA,NA,0,NA,1,150,150,1,1,1
+4,0,Tall,NA,NA,NA,NA,0,NA,1,809,809,0,0,0

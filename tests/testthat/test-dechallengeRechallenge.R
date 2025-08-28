@@ -122,6 +122,9 @@ test_that("computeDechallengeRechallengeAnalyses", {
     dropTableIfExists = T,
     camelCaseToSnakeCase = F
   )
+
+  DatabaseConnector::disconnect(con)
+
   res <- createDechallengeRechallengeSettings(
     targetIds = 1,
     outcomeIds = 2,
@@ -199,6 +202,7 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
     dropTableIfExists = T,
     camelCaseToSnakeCase = F
   )
+  DatabaseConnector::disconnect(con)
 
   res <- createDechallengeRechallengeSettings(
     targetIds = 1,
