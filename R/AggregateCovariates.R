@@ -284,8 +284,8 @@ computeTargetAggregateCovariateAnalyses <- function(
   message("Extracting target cohort counts")
   sql <- "select
   cohort_definition_id,
-  count(*) row_count,
-  count(distinct subject_id) person_count,
+  count_big(*) row_count,
+  count_big(distinct subject_id) person_count,
   min(cast(datediff(day, cohort_start_date, cohort_end_date) as bigint)) min_exposure_time,
   avg(cast(datediff(day, cohort_start_date, cohort_end_date) as bigint)) mean_exposure_time,
   max(cast(datediff(day, cohort_start_date, cohort_end_date) as bigint)) max_exposure_time
