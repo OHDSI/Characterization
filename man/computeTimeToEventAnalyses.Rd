@@ -12,8 +12,12 @@ computeTimeToEventAnalyses(
   outcomeTable = targetTable,
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   cdmDatabaseSchema,
-  timeToEventSettings,
-  databaseId = "database 1"
+  settings,
+  databaseId = "database 1",
+  outputFolder,
+  minCellCount = 0,
+  progressBar = interactive(),
+  ...
 )
 }
 \arguments{
@@ -38,9 +42,17 @@ can be created}
 
 \item{cdmDatabaseSchema}{The database schema containing the OMOP CDM data}
 
-\item{timeToEventSettings}{The settings for the timeToEvent study}
+\item{settings}{The settings for the timeToEvent study}
 
 \item{databaseId}{An identifier for the database (string)}
+
+\item{outputFolder}{A directory to save the results as csv files}
+
+\item{minCellCount}{The minimum cell value to display, values less than this will be replaced by -1}
+
+\item{progressBar}{Whether to display a progress bar while the analysis is running}
+
+\item{...}{extra inputs}
 }
 \value{
 An \code{Andromeda::andromeda()} object containing the time to event results.
@@ -48,3 +60,30 @@ An \code{Andromeda::andromeda()} object containing the time to event results.
 \description{
 Compute time to event study
 }
+\examples{
+# example code
+
+conDet <- exampleOmopConnectionDetails()
+
+tteSet <- createTimeToEventSettings(
+  targetIds = c(1,2),
+  outcomeIds = 3
+)
+
+result <- computeTimeToEventAnalyses(
+  connectionDetails = conDet,
+  targetDatabaseSchema = 'main',
+  targetTable = 'cohort',
+  cdmDatabaseSchema = 'main',
+  settings = tteSet,
+  outputFolder = file.path(tempdir(), 'tte')
+)
+
+
+
+}
+\seealso{
+Other TimeToEvent: 
+\code{\link{createTimeToEventSettings}()}
+}
+\concept{TimeToEvent}

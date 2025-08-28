@@ -3,6 +3,8 @@ Characterization
 
 [![Build Status](https://github.com/OHDSI/Characterization/workflows/R-CMD-check/badge.svg)](https://github.com/OHDSI/Characterization/actions?query=workflow%3AR-CMD-check)
 [![codecov.io](https://codecov.io/github/OHDSI/Characterization/coverage.svg?branch=main)](https://codecov.io/github/OHDSI/Characterization?branch=main)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/Characterization)](https://cran.r-project.org/package=Characterization)
+[![CRAN_Status_Badge](https://cranlogs.r-pkg.org/badges/Characterization)](https://cran.r-project.org/package=Characterization)
 
 Characterization is part of [HADES](https://ohdsi.github.io/Hades/).
 
@@ -25,11 +27,9 @@ Examples
 
 ```r
 
-library(Eunomia)
 library(Characterization)
 
-connectionDetails <- Eunomia::getEunomiaConnectionDetails()
-Eunomia::createCohorts(connectionDetails = connectionDetails)
+connectionDetails <- Characterization::exampleOmopConnectionDetails()
 
 targetIds <- c(1,2,4)
   outcomeIds <- c(3)
@@ -97,9 +97,10 @@ runCharacterizationAnalyses(
   targetTable = 'cohort',
   outcomeDatabaseSchema = 'main',
   outcomeTable = 'cohort',
-  characterizationSettings = characterizationSettings,
-  saveDirectory = file.path(tempdir(), 'example'),
-  tablePrefix = 'c_',
+  characterizationSettings = characterizationSettings,   
+  outputDirectory = file.path(tempdir(), 'example', 'results'),
+  executionPath = file.path(tempdir(), 'example', 'execution'),
+  csvFilePrefix = 'c_',
   databaseId = 'Eunomia'
 )
 ```

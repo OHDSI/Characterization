@@ -1,0 +1,11 @@
+analysis_id,analysis_name,domain_id,start_day,end_day,is_binary,missing_means_zero,setting_id,database_id
+1,DemographicsGender,Demographics,NA,NA,Y,NA,20250626154219589895388166,1
+4,DemographicsRace,Demographics,NA,NA,Y,NA,20250626154219589895388166,1
+2,DemographicsAge,Demographics,NA,NA,N,Y,20250626154219589895388166,1
+218,ConditionGroupEraDuring,Condition,NA,NA,Y,NA,20250626154219589895388166,1
+418,DrugGroupEraDuring,Drug,NA,NA,Y,NA,20250626154219589895388166,1
+505,ProcedureOccurrenceDuring,Procedure,NA,NA,Y,NA,20250626154219589895388166,1
+605,DeviceExposureDuring,Device,NA,NA,Y,NA,20250626154219589895388166,1
+713,MeasurementDuring,Measurement,NA,NA,Y,NA,20250626154219589895388166,1
+805,ObservationDuring,Observation,NA,NA,Y,NA,20250626154219589895388166,1
+927,VisitConceptCountDuring,Visit,NA,NA,N,Y,20250626154219589895388166,1

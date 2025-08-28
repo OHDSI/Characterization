@@ -14,55 +14,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-colnamesLower <- function(data) {
-  colnames(data) <- tolower(
-    x = colnames(data)
-  )
-  return(data)
-}
-
-#' Save the TimeToEvent results
-#'
-#' @param result  The output of running \code{computeTimeToEventAnalyses()}
-#' @template FileName
-#'
-#' @return
-#' A string specifying the directory the results are saved to
-#'
-#' @export
-saveTimeToEventAnalyses <- function(
-    result,
-    fileName) {
-  Andromeda::saveAndromeda(
-    andromeda = result,
-    fileName = fileName,
-    maintainConnection = T
-  )
-
-  invisible(fileName)
-}
-
-#' export the TimeToEvent results as csv
-#'
-#' @param result  The output of running \code{computeTimeToEventAnalyses()}
-#' @template saveDirectory
-#' @param minCellCount  The minimum value that will be displayed in count columns
-#'
-#' @return
-#' A string specifying the directory the csv results are saved to
-#'
-#' @export
 exportTimeToEventToCsv <- function(
     result,
     saveDirectory,
-    minCellCount = 0) {
+    minCellCount = 0
+    ) {
+
+  countN <- dplyr::pull(
+    dplyr::count(result$timeToEvent)
+  )
+
+  message("Writing ", countN, " rows to csv")
+
   if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
-      recursive = T
+      recursive = TRUE
     )
   }
 
+  if(countN == 0){
+    # save empty csv
+    dat <- as.data.frame(result$timeToEvent)
+    colnames(dat) <- SqlRender::camelCaseToSnakeCase(
+      string = colnames(dat)
+    )
+
+    readr::write_csv(
+      x = dat,
+      file = file.path(saveDirectory,"time_to_event.csv")
+      )
+  } else{
+    # save in batches
   Andromeda::batchApply(
     tbl = result$timeToEvent,
     fun = function(x) {
@@ -82,13 +65,13 @@ exportTimeToEventToCsv <- function(
         string = colnames(dat)
       )
 
-      if (sum(dat$NUM_EVENTS < minCellCount) > 0) {
-        ParallelLogger::logInfo(paste0("Removing NUM_EVENTS less than ", minCellCount))
-        dat$NUM_EVENTS[dat$NUM_EVENTS < minCellCount] <- -1
+      if (sum(dat$num_events < minCellCount) > 0) {
+        ParallelLogger::logInfo(paste0("Removing num_events less than ", minCellCount))
+        dat$num_events[dat$num_events < minCellCount] <- -minCellCount
       }
 
       readr::write_csv(
-        x = dat,
+        x = formatDouble(x = dat),
         file = file.path(
           saveDirectory,
           "time_to_event.csv"
@@ -97,6 +80,7 @@ exportTimeToEventToCsv <- function(
       )
     }
   )
+}
 
   invisible(
     file.path(
@@ -106,110 +90,35 @@ exportTimeToEventToCsv <- function(
   )
 }
 
-#' Load the TimeToEvent results
-#'
-#' @template FileName
-#'
-#' @return
-#' A data.frame with the TimeToEvent results
-#'
-#' @export
-loadTimeToEventAnalyses <- function(fileName) {
-  result <- Andromeda::loadAndromeda(fileName)
-  return(result)
-}
 
-#' Save the DechallengeRechallenge results
-#'
-#' @param result  The output of running \code{computeDechallengeRechallengeAnalyses()}
-#' @template FileName
-#'
-#' @return
-#' A string specifying the directory the results are saved to
-#'
-#' @export
-saveDechallengeRechallengeAnalyses <- function(
-    result,
-    fileName) {
-  Andromeda::saveAndromeda(
-    andromeda = result,
-    fileName = fileName,
-    maintainConnection = T
-  )
-
-  invisible(fileName)
-}
-
-
-#' Save the RechallengeFailCaseSeries results
-#'
-#' @param result  The output of running \code{computeRechallengeFailCaseSeriesAnalyses()}
-#' @template FileName
-#'
-#' @return
-#' A string specifying the directory the results are saved to
-#'
-#' @export
-saveRechallengeFailCaseSeriesAnalyses <- function(
-    result,
-    fileName) {
-  Andromeda::saveAndromeda(
-    andromeda = result,
-    fileName = fileName,
-    maintainConnection = T
-  )
-
-  invisible(fileName)
-}
-
-
-#' Load the DechallengeRechallenge results
-#'
-#' @template FileName
-#'
-#' @return
-#' A data.frame with the DechallengeRechallenge results
-#'
-#' @export
-loadDechallengeRechallengeAnalyses <- function(
-    fileName) {
-  result <- Andromeda::loadAndromeda(fileName)
-  return(result)
-}
-
-#' Load the RechallengeFailCaseSeries results
-#'
-#' @template FileName
-#'
-#' @return
-#' A data.frame with the RechallengeFailCaseSeries results
-#'
-#' @export
-loadRechallengeFailCaseSeriesAnalyses <- function(
-    fileName) {
-  result <- Andromeda::loadAndromeda(fileName)
-  return(result)
-}
-
-#' export the DechallengeRechallenge results as csv
-#'
-#' @param result  The output of running \code{computeDechallengeRechallengeAnalyses()}
-#' @template saveDirectory
-#' @param minCellCount  The minimum value that will be displayed in count columns
-#'
-#' @return
-#' A string specifying the directory the csv results are saved to
-#'
-#' @export
 exportDechallengeRechallengeToCsv <- function(
     result,
     saveDirectory,
-    minCellCount = 0) {
+    minCellCount = 0
+    ) {
+
   countN <- dplyr::pull(
     dplyr::count(result$dechallengeRechallenge)
   )
   message("Writing ", countN, " rows to csv")
 
+  if (!dir.exists(saveDirectory)) {
+    dir.create(saveDirectory, recursive = TRUE)
+  }
+
+  if(countN == 0){
+    # save empty csv
+    dat <- as.data.frame(result$dechallengeRechallenge)
+    colnames(dat) <- SqlRender::camelCaseToSnakeCase(
+      string = colnames(dat)
+    )
+
+    readr::write_csv(
+      x = dat,
+      file = file.path(saveDirectory,"dechallenge_rechallenge.csv")
+      )
+  } else{
+  # export in batches
   Andromeda::batchApply(
     tbl = result$dechallengeRechallenge,
     fun = function(x) {
@@ -228,50 +137,72 @@ exportDechallengeRechallengeToCsv <- function(
         string = colnames(dat)
       )
 
-      removeInd <- dat$NUM_EVENTS < minCellCount
+      removeInd <- dat$num_exposure_eras < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing NUM_EVENTS counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Censoring num_exposure_eras counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
-          dat$NUM_CASES[removeInd] <- -1
+          dat$num_exposure_eras[removeInd] <- -minCellCount
         }
       }
 
-      removeInd <- dat$DECHALLENGE_ATTEMPT < minCellCount
+      removeInd <- dat$num_persons_exposed < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing DECHALLENGE_ATTEMPT counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Censoring num_persons_exposed counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
-          dat$DECHALLENGE_ATTEMPT[removeInd] <- -1
+          dat$num_persons_exposed[removeInd] <- -minCellCount
         }
       }
 
-      removeInd <- dat$DECHALLENGE_FAIL < minCellCount | dat$DECHALLENGE_SUCCESS < minCellCount
+      removeInd <- dat$num_cases < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing DECHALLENGE FAIL or SUCCESS counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Censoring num_cases counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
-          dat$DECHALLENGE_FAIL[removeInd] <- -1
-          dat$DECHALLENGE_SUCCESS[removeInd] <- -1
+          dat$num_cases[removeInd] <- -minCellCount
         }
       }
 
-      removeInd <- dat$RECHALLENGE_ATTEMPT < minCellCount
+      removeInd <- dat$dechallenge_attempt < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing RECHALLENGE_ATTEMPT counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Censoring/removing dechallenge_attempt counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
-          dat$RECHALLENGE_ATTEMPT[removeInd] <- -1
+          dat$dechallenge_attempt[removeInd] <- -minCellCount
+          dat$pct_dechallenge_attempt[removeInd] <- NA
         }
       }
 
-      removeInd <- dat$RECHALLENGE_FAIL < minCellCount | dat$RECHALLENGE_SUCCESS < minCellCount
+      removeInd <- dat$dechallenge_fail < minCellCount | dat$dechallenge_success < minCellCount
       if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing RECHALLENGE FAIL or SUCCESS counts less than ", minCellCount))
+        ParallelLogger::logInfo(paste0("Censoring/removing DECHALLENGE FAIL or SUCCESS counts less than ", minCellCount))
         if (sum(removeInd) > 0) {
-          dat$RECHALLENGE_FAIL[removeInd] <- -1
-          dat$RECHALLENGE_SUCCESS[removeInd] <- -1
+          dat$dechallenge_fail[removeInd] <- -minCellCount
+          dat$dechallenge_success[removeInd] <- -minCellCount
+          dat$pct_dechallenge_fail[removeInd] <- NA
+          dat$pct_dechallenge_success[removeInd] <- NA
+        }
+      }
+
+      removeInd <- dat$rechallenge_attempt < minCellCount
+      if (sum(removeInd) > 0) {
+        ParallelLogger::logInfo(paste0("Censoring/removing rechallenge_attempt counts less than ", minCellCount))
+        if (sum(removeInd) > 0) {
+          dat$rechallenge_attempt[removeInd] <- -minCellCount
+          dat$pct_rechallenge_attempt[removeInd] <- NA
+        }
+      }
+
+      removeInd <- dat$rechallenge_fail < minCellCount | dat$rechallenge_success < minCellCount
+      if (sum(removeInd) > 0) {
+        ParallelLogger::logInfo(paste0("Censoring/removing rechallenge_fail or rechallenge_success counts less than ", minCellCount))
+        if (sum(removeInd) > 0) {
+          dat$rechallenge_fail[removeInd] <- -minCellCount
+          dat$rechallenge_success[removeInd] <- -minCellCount
+          dat$pct_rechallenge_fail[removeInd] <- NA
+          dat$pct_rechallenge_success[removeInd] <- NA
         }
       }
 
       readr::write_csv(
-        x = dat,
+        x = formatDouble(x = dat),
         file = file.path(
           saveDirectory,
           "dechallenge_rechallenge.csv"
@@ -280,6 +211,7 @@ exportDechallengeRechallengeToCsv <- function(
       )
     }
   )
+  }
 
   invisible(
     file.path(
@@ -289,22 +221,14 @@ exportDechallengeRechallengeToCsv <- function(
   )
 }
 
-#' export the RechallengeFailCaseSeries results as csv
-#'
-#' @param result  The output of running \code{computeRechallengeFailCaseSeriesAnalyses()}
-#' @template saveDirectory
-#'
-#' @return
-#' A string specifying the directory the csv results are saved to
-#'
-#' @export
+
 exportRechallengeFailCaseSeriesToCsv <- function(
     result,
     saveDirectory) {
   if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
-      recursive = T
+      recursive = TRUE
     )
   }
 
@@ -314,6 +238,18 @@ exportRechallengeFailCaseSeriesToCsv <- function(
 
   message("Writing ", countN, " rows to csv")
 
+  if(countN == 0){
+    # save empty csv
+    dat <- as.data.frame(result$rechallengeFailCaseSeries)
+    colnames(dat) <- SqlRender::camelCaseToSnakeCase(
+      string = colnames(dat)
+    )
+    readr::write_csv(
+      x = dat,
+      file = file.path(saveDirectory,"rechallenge_fail_case_series.csv")
+    )
+  } else{
+    # save in batches
   Andromeda::batchApply(
     tbl = result$rechallengeFailCaseSeries,
     fun = function(x) {
@@ -334,7 +270,7 @@ exportRechallengeFailCaseSeriesToCsv <- function(
       )
 
       readr::write_csv(
-        x = dat,
+        x = formatDouble(x = dat),
         file = file.path(
           saveDirectory,
           "rechallenge_fail_case_series.csv"
@@ -343,315 +279,12 @@ exportRechallengeFailCaseSeriesToCsv <- function(
       )
     }
   )
+  }
 
   invisible(
     file.path(
       saveDirectory,
       "rechallenge_fail_case_series.csv"
-    )
-  )
-}
-
-#' Save the AggregateCovariate results
-#'
-#' @param result  The output of running \code{computeAggregateCovariateAnalyses()}
-#' @template FileName
-#'
-#' @return
-#' A string specifying the directory the results are saved to
-#'
-#' @export
-saveAggregateCovariateAnalyses <- function(
-    result,
-    fileName) {
-  Andromeda::saveAndromeda(
-    andromeda = result,
-    fileName = fileName,
-    maintainConnection = T
-  )
-
-  invisible(fileName)
-}
-
-#' Load the AggregateCovariate results
-#'
-#' @template FileName
-#'
-#' @return
-#' A list of data.frames with the AggregateCovariate results
-#'
-#' @export
-loadAggregateCovariateAnalyses <- function(
-    fileName) {
-  result <- Andromeda::loadAndromeda(
-    fileName = fileName
-  )
-
-  return(result)
-}
-
-#' export the AggregateCovariate results as csv
-#'
-#' @param result  The output of running \code{computeAggregateCovariateAnalyses()}
-#' @template saveDirectory
-#' @param minCellCount  The minimum value that will be displayed in count columns
-#'
-#' @return
-#' A string specifying the directory the csv results are saved to
-#'
-#' @export
-exportAggregateCovariateToCsv <- function(
-    result,
-    saveDirectory,
-    minCellCount = 0) {
-  if (!dir.exists(saveDirectory)) {
-    dir.create(saveDirectory, recursive = T)
-  }
-
-  # settings
-  Andromeda::batchApply(
-    tbl = result$settings,
-    fun = function(x) {
-      append <- file.exists(
-        file.path(
-          saveDirectory,
-          "settings.csv"
-        )
-      )
-
-      dat <- as.data.frame(
-        x %>%
-          dplyr::collect()
-      )
-
-      colnames(dat) <- SqlRender::camelCaseToSnakeCase(
-        string = colnames(dat)
-      )
-
-      readr::write_csv(
-        x = dat,
-        file = file.path(
-          saveDirectory,
-          "settings.csv"
-        ),
-        append = append
-      )
-    }
-  )
-  # cohort details
-  Andromeda::batchApply(
-    tbl = result$cohortCounts,
-    fun = function(x) {
-      append <- file.exists(
-        file.path(
-          saveDirectory,
-          "cohort_counts.csv"
-        )
-      )
-
-      dat <- as.data.frame(
-        x %>%
-          dplyr::collect()
-      )
-
-      colnames(dat) <- SqlRender::camelCaseToSnakeCase(
-        string = colnames(dat)
-      )
-
-      readr::write_csv(
-        x = dat,
-        file = file.path(
-          saveDirectory,
-          "cohort_counts.csv"
-        ),
-        append = append
-      )
-    }
-  )
-
-  # cohort details
-  Andromeda::batchApply(
-    tbl = result$cohortDetails,
-    fun = function(x) {
-      append <- file.exists(
-        file.path(
-          saveDirectory,
-          "cohort_details.csv"
-        )
-      )
-
-      dat <- as.data.frame(
-        x %>%
-          dplyr::collect()
-      )
-
-      colnames(dat) <- SqlRender::camelCaseToSnakeCase(
-        string = colnames(dat)
-      )
-
-      readr::write_csv(
-        x = dat,
-        file = file.path(
-          saveDirectory,
-          "cohort_details.csv"
-        ),
-        append = append
-      )
-    }
-  )
-
-  # analysisRef
-  Andromeda::batchApply(
-    tbl = result$analysisRef,
-    fun = function(x) {
-      append <- file.exists(
-        file.path(
-          saveDirectory,
-          "analysis_ref.csv"
-        )
-      )
-
-      dat <- as.data.frame(
-        x %>%
-          dplyr::collect()
-      )
-
-      colnames(dat) <- SqlRender::camelCaseToSnakeCase(
-        string = colnames(dat)
-      )
-
-      readr::write_csv(
-        x = dat,
-        file = file.path(
-          saveDirectory,
-          "analysis_ref.csv"
-        ),
-        append = append
-      )
-    }
-  )
-
-  # covariateRef
-  Andromeda::batchApply(
-    tbl = result$covariateRef,
-    fun = function(x) {
-      append <- file.exists(
-        file.path(
-          saveDirectory,
-          "covariate_ref.csv"
-        )
-      )
-
-      dat <- as.data.frame(
-        x %>%
-          dplyr::collect()
-      )
-
-      colnames(dat) <- SqlRender::camelCaseToSnakeCase(
-        string = colnames(dat)
-      )
-
-      readr::write_csv(
-        x = dat,
-        file = file.path(
-          saveDirectory,
-          "covariate_ref.csv"
-        ),
-        append = append
-      )
-    }
-  )
-
-  # covariates
-  Andromeda::batchApply(
-    tbl = result$covariates,
-    fun = function(x) {
-      append <- file.exists(
-        file.path(
-          saveDirectory,
-          "covariates.csv"
-        )
-      )
-
-      dat <- as.data.frame(
-        x %>%
-          dplyr::collect()
-      )
-
-      colnames(dat) <- SqlRender::camelCaseToSnakeCase(
-        string = colnames(dat)
-      )
-
-      removeInd <- dat$SUM_VALUE < minCellCount
-      if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing SUM_VALUE counts less than ", minCellCount))
-        if (sum(removeInd) > 0) {
-          dat$SUM_VALUE[removeInd] <- -1
-          dat$AVERAGE_VALUE[removeInd] <- -1
-        }
-      }
-
-      readr::write_csv(
-        x = dat,
-        file = file.path(
-          saveDirectory,
-          "covariates.csv"
-        ),
-        append = append
-      )
-    }
-  )
-
-  # covariatesContinuous
-  Andromeda::batchApply(
-    tbl = result$covariatesContinuous,
-    fun = function(x) {
-      append <- file.exists(
-        file.path(
-          saveDirectory,
-          "covariates_continuous.csv"
-        )
-      )
-
-      dat <- as.data.frame(
-        x %>%
-          dplyr::collect()
-      )
-
-      colnames(dat) <- SqlRender::camelCaseToSnakeCase(
-        string = colnames(dat)
-      )
-
-      removeInd <- dat$COUNT_VALUE < minCellCount
-      if (sum(removeInd) > 0) {
-        ParallelLogger::logInfo(paste0("Removing COUNT_VALUE counts less than ", minCellCount))
-        if (sum(removeInd) > 0) {
-          dat$COUNT_VALUE[removeInd] <- -1
-        }
-      }
-
-      readr::write_csv(
-        x = dat,
-        file = file.path(
-          saveDirectory,
-          "covariates_continuous.csv"
-        ),
-        append = append
-      )
-    }
-  )
-  invisible(
-    file.path(
-      saveDirectory,
-      c(
-        "cohort_details.csv",
-        "settings.csv",
-        "analysis_ref.csv",
-        "covariate_ref.csv",
-        "covariates.csv",
-        "covariates_continuous.csv",
-        "cohort_counts.csv"
-      )
     )
   )
 }

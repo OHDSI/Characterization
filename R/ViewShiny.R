@@ -4,54 +4,132 @@
 #' This is a shiny app for viewing interactive plots and tables
 #' @details
 #' Input is the output of ...
-#' @param resultLocation   The location of the results
+#' @param resultFolder   The location of the csv results
 #' @param cohortDefinitionSet  The cohortDefinitionSet extracted using webAPI
+#' @family Shiny
+#'
 #' @return
 #' Opens a shiny app for interactively viewing the results
 #'
+#' @examples
+#'
+#' conDet <- exampleOmopConnectionDetails()
+#'
+#' tteSet <- createTimeToEventSettings(
+#'   targetIds = c(1,2),
+#'   outcomeIds = 3
+#' )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   timeToEventSettings = tteSet
+#' )
+#'
+#' runCharacterizationAnalyses(
+#'   connectionDetails = conDet,
+#'   targetDatabaseSchema = 'main',
+#'   targetTable = 'cohort',
+#'   outcomeDatabaseSchema = 'main',
+#'   outcomeTable = 'cohort',
+#'   cdmDatabaseSchema = 'main',
+#'   characterizationSettings = cSet,
+#'   outputDirectory = file.path(tempdir(),'view')
+#' )
+#'
+#' # interactive shiny app
+#' \dontrun{
+#' viewCharacterization(
+#'   resultFolder = file.path(tempdir(),'view')
+#' )
+#' }
+#'
+#'
 #' @export
 viewCharacterization <- function(
-    resultLocation,
+    resultFolder,
     cohortDefinitionSet = NULL) {
-  databaseSettings <- prepareCharacterizationShiny(
-    resultLocation = resultLocation,
-    cohortDefinitionSet = cohortDefinitionSet
-  )
 
-  viewChars(databaseSettings)
+  # check there are csv files in resultFolder
+  if(length(dir(resultFolder, pattern = '.csv')) > 0 ){
+
+    databaseSettings <- prepareCharacterizationShiny(
+      resultFolder = resultFolder,
+      cohortDefinitionSet = cohortDefinitionSet
+    )
+
+    if(length(databaseSettings) == 0){
+      message('No actual results to view via shiny')
+      return(FALSE)
+    } else{
+      viewChars(databaseSettings)
+    }
+
+  } else{
+    message('No csv results to view via shiny')
+    return(FALSE)
+  }
+
 }
 
 prepareCharacterizationShiny <- function(
-    resultLocation,
-    cohortDefinitionSet) {
-  server <- file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
+    resultFolder,
+    cohortDefinitionSet,
+    sqliteLocation = file.path(tempdir(), "results.sqlite"),
+    tablePrefix = "",
+    csvTablePrefix = "c_") {
+  if (!dir.exists(dirname(sqliteLocation))) {
+    dir.create(dirname(sqliteLocation), recursive = TRUE)
+  }
 
-  connectionDetailsSettings <- list(
+  # create sqlite connection
+  server <- sqliteLocation
+  connectionDetails <- DatabaseConnector::createConnectionDetails(
     dbms = "sqlite",
     server = server
   )
 
-  connectionDetails <- do.call(
-    what = DatabaseConnector::createConnectionDetails,
-    args = connectionDetailsSettings
+  # create the tables
+  createCharacterizationTables(
+    connectionDetails = connectionDetails,
+    resultSchema = "main",
+    targetDialect = "sqlite",
+    deleteExistingTables = TRUE,
+    createTables = TRUE,
+    tablePrefix = paste0(tablePrefix, csvTablePrefix)
   )
 
+  # upload the results
+  insertResultsToDatabase(
+    connectionDetails = connectionDetails,
+    schema = "main",
+    resultsFolder = resultFolder,
+    tablePrefix = tablePrefix,
+    csvTablePrefix = csvTablePrefix
+  )
+
+  # add extra tables (cohorts and databases)
   con <- DatabaseConnector::connect(connectionDetails)
   on.exit(DatabaseConnector::disconnect(con))
 
   tables <- tolower(DatabaseConnector::getTableNames(con, "main"))
 
+  # this now works for different prefixes
   if (!"cg_cohort_definition" %in% tables) {
     cohortIds <- unique(
       c(
-        DatabaseConnector::querySql(con, "select distinct TARGET_COHORT_ID from c_cohort_details where TARGET_COHORT_ID != 0;")$TARGET_COHORT_ID,
-        DatabaseConnector::querySql(con, "select distinct OUTCOME_COHORT_ID from c_cohort_details where OUTCOME_COHORT_ID != 0;")$OUTCOME_COHORT_ID,
-        DatabaseConnector::querySql(con, "select distinct TARGET_COHORT_DEFINITION_ID from c_time_to_event;")$TARGET_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, "select distinct OUTCOME_COHORT_DEFINITION_ID from c_time_to_event;")$OUTCOME_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, "select distinct TARGET_COHORT_DEFINITION_ID from c_rechallenge_fail_case_series;")$TARGET_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, "select distinct OUTCOME_COHORT_DEFINITION_ID from c_rechallenge_fail_case_series;")$OUTCOME_COHORT_DEFINITION_ID
+        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'Target';"))$TARGET_COHORT_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'TnO';"))$OUTCOME_COHORT_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$TARGET_COHORT_DEFINITION_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$OUTCOME_COHORT_DEFINITION_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"))$TARGET_COHORT_DEFINITION_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"))$OUTCOME_COHORT_DEFINITION_ID
       )
     )
+
+
+    if(length(cohortIds) == 0){
+      # if no cohortids then no results to view
+      return(invisible(list()))
+    }
 
     DatabaseConnector::insertTable(
       connection = con,
@@ -61,16 +139,16 @@ prepareCharacterizationShiny <- function(
         cohortDefinitionId = cohortIds,
         cohortName = getCohortNames(cohortIds, cohortDefinitionSet)
       ),
-      camelCaseToSnakeCase = T
+      camelCaseToSnakeCase = TRUE
     )
   }
 
   if (!"database_meta_data" %in% tables) {
     dbIds <- unique(
       c(
-        DatabaseConnector::querySql(con, "select distinct DATABASE_ID from c_analysis_ref;")$DATABASE_ID,
-        DatabaseConnector::querySql(con, "select distinct DATABASE_ID from c_dechallenge_rechallenge;")$DATABASE_ID,
-        DatabaseConnector::querySql(con, "select distinct DATABASE_ID from c_time_to_event;")$DATABASE_ID
+        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "analysis_ref;"))$DATABASE_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "dechallenge_rechallenge;"))$DATABASE_ID,
+        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$DATABASE_ID
       )
     )
 
@@ -82,45 +160,19 @@ prepareCharacterizationShiny <- function(
         databaseId = dbIds,
         cdmSourceAbbreviation = paste0("database ", dbIds)
       ),
-      camelCaseToSnakeCase = T
+      camelCaseToSnakeCase = TRUE
     )
   }
 
-  if (!"i_incidence_summary" %in% tables) {
-    x <- c(
-      "refId", "databaseId", "sourceName",
-      "targetCohortDefinitionId", "targetName", "tarId",
-      "tarStartWith", "tarStartOffset", "tarEndWith", "tarEndOffset",
-      "subgroupId", "subgroupName",
-      "outcomeId", "outcomeCohortDefinitionId", "outcomeName",
-      "clean_window",
-      "ageId", "ageGroupName",
-      "genderId", "genderName",
-      "startYear", "personsAtRiskPe", "personsAtRisk",
-      "personDaysPe", "personDays",
-      "personOutcomesPe", "personOutcomes",
-      "outcomesPe", "outcomes",
-      "incidenceProportionP100p",
-      "incidenceRateP100py"
-    )
-    df <- data.frame(matrix(ncol = length(x), nrow = 0))
-    colnames(df) <- x
-
-    DatabaseConnector::insertTable(
-      connection = con,
-      databaseSchema = "main",
-      tableName = "i_incidence_summary",
-      data = df,
-      camelCaseToSnakeCase = T
-    )
-  }
-
+  # create the settings for the database
   databaseSettings <- list(
-    connectionDetailsSettings = connectionDetailsSettings,
+    connectionDetailsSettings = list(
+      dbms = "sqlite",
+      server = server
+    ),
     schema = "main",
-    tablePrefix = "c_",
+    tablePrefix = paste0(tablePrefix, csvTablePrefix),
     cohortTablePrefix = "cg_",
-    incidenceTablePrefix = "i_",
     databaseTable = "DATABASE_META_DATA"
   )
 
@@ -129,9 +181,9 @@ prepareCharacterizationShiny <- function(
 
 viewChars <- function(
     databaseSettings,
-    testApp = F) {
-  ensure_installed("ShinyAppBuilder")
-  ensure_installed("ResultModelManager")
+    testApp = F
+    ) {
+  ensure_installed("OhdsiShinyAppBuilder")
 
   connectionDetails <- do.call(
     DatabaseConnector::createConnectionDetails,
@@ -140,30 +192,7 @@ viewChars <- function(
   connection <- ResultModelManager::ConnectionHandler$new(connectionDetails)
   databaseSettings$connectionDetailsSettings <- NULL
 
-
-  if (utils::packageVersion("ShinyAppBuilder") < "1.2.0") {
-    # use old method
-    # set database settings into system variables
-    Sys.setenv("resultDatabaseDetails_characterization" = as.character(ParallelLogger::convertSettingsToJson(databaseSettings)))
-
-    config <- ParallelLogger::loadSettingsFromJson(
-      fileName = system.file(
-        "shinyConfig.json",
-        package = "Characterization"
-      )
-    )
-
-    if (!testApp) {
-      ShinyAppBuilder::viewShiny(
-        config = config,
-        connection = connection
-      )
-    } else {
-      ShinyAppBuilder::createShinyApp(config = config, connection = connection)
-    }
-  } else {
     # use new method
-
     config <- ParallelLogger::loadSettingsFromJson(
       fileName = system.file(
         "shinyConfigUpdate.json",
@@ -174,28 +203,24 @@ viewChars <- function(
     databaseSettings$cgTablePrefix <- databaseSettings$cohortTablePrefix
     databaseSettings$databaseTable <- "DATABASE_META_DATA"
     databaseSettings$databaseTablePrefix <- ""
-    databaseSettings$iTablePrefix <- databaseSettings$incidenceTablePrefix
     databaseSettings$cgTable <- "cohort_definition"
 
-    if (!testApp) {
-      ShinyAppBuilder::viewShiny(
+      OhdsiShinyAppBuilder::viewShiny(
         config = config,
         connection = connection,
         resultDatabaseSettings = databaseSettings
       )
-    } else {
-      ShinyAppBuilder::createShinyApp(
-        config = config,
-        connection = connection,
-        resultDatabaseSettings = databaseSettings
-      )
-    }
-  }
 }
 
 
 
 getCohortNames <- function(cohortIds, cohortDefinitionSet) {
+
+  if(is.null(cohortIds)){
+    warning('cohortIds is NULL')
+    return(NULL)
+  }
+
   if (!is.null(cohortDefinitionSet)) {
     cohortNames <- sapply(
       cohortIds,
@@ -212,11 +237,11 @@ getCohortNames <- function(cohortIds, cohortDefinitionSet) {
 
 
 # Borrowed from devtools: https://github.com/hadley/devtools/blob/ba7a5a4abd8258c52cb156e7b26bb4bf47a79f0b/R/utils.r#L44
-is_installed <- function(pkg, version = 0) {
+is_installed <- function(pkg) {
   installed_version <- tryCatch(utils::packageVersion(pkg),
     error = function(e) NA
   )
-  !is.na(installed_version) && installed_version >= version
+  !is.na(installed_version)
 }
 
 # Borrowed and adapted from devtools: https://github.com/hadley/devtools/blob/ba7a5a4abd8258c52cb156e7b26bb4bf47a79f0b/R/utils.r#L74
@@ -226,19 +251,7 @@ ensure_installed <- function(pkg) {
     if (interactive()) {
       message(msg, "\nWould you like to install it?")
       if (utils::menu(c("Yes", "No")) == 1) {
-        if (pkg %in% c("ShinyAppBuilder", "ResultModelManager")) {
-          # add code to check for devtools...
-          dvtCheck <- tryCatch(utils::packageVersion("devtools"),
-            error = function(e) NA
-          )
-          if (is.na(dvtCheck)) {
-            utils::install.packages("devtools")
-          }
-
-          devtools::install_github(paste0("OHDSI/", pkg))
-        } else {
           utils::install.packages(pkg)
-        }
       } else {
         stop(msg, call. = FALSE)
       }

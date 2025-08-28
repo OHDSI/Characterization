@@ -10,7 +10,7 @@ createSqliteDatabase(sqliteLocation = tempdir())
 \item{sqliteLocation}{The location of the sqlite database}
 }
 \value{
-Returns the connection to the sqlite database
+Returns the connection detail object to the sqlite database
 }
 \description{
 This function creates a connection to an sqlite database
@@ -18,3 +18,15 @@ This function creates a connection to an sqlite database
 \details{
 This function creates a sqlite database and connection
 }
+\examples{
+
+charResultDbCD <- createSqliteDatabase()
+
+
+}
+\seealso{
+Other Database: 
+\code{\link{createCharacterizationTables}()},
+\code{\link{insertResultsToDatabase}()}
+}
+\concept{Database}

@@ -24,13 +24,20 @@
 #' This function creates a sqlite database and connection
 #'
 #' @param sqliteLocation    The location of the sqlite database
+#' @family Database
+#'
+#' @examples
+#'
+#' charResultDbCD <- createSqliteDatabase()
+#'
 #'
 #' @return
-#' Returns the connection to the sqlite database
+#' Returns the connection detail object to the sqlite database
 #'
 #' @export
 createSqliteDatabase <- function(
-    sqliteLocation = tempdir()) {
+    sqliteLocation = tempdir()
+    ) {
   sqliteLocation <- file.path(
     sqliteLocation,
     "sqliteCharacterization"
@@ -39,7 +46,7 @@ createSqliteDatabase <- function(
   if (!dir.exists(sqliteLocation)) {
     dir.create(
       path = sqliteLocation,
-      recursive = T
+      recursive = TRUE
     )
   }
 
@@ -47,60 +54,101 @@ createSqliteDatabase <- function(
     dbms = "sqlite",
     server = file.path(sqliteLocation, "sqlite.sqlite")
   )
-  connection <- DatabaseConnector::connect(
-    connectionDetails = connectionDetails
-  )
 
-  return(connection)
+  return(connectionDetails)
 }
 
-# move Andromeda to sqlite database
-insertAndromedaToDatabase <- function(
-    connection,
-    databaseSchema,
-    tableName,
-    andromedaObject,
-    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-    bulkLoad = T,
-    tablePrefix = "c_",
-    minCellCount = 0,
-    minCellCountColumns = list()) {
-  errorMessages <- checkmate::makeAssertCollection()
-  .checkTablePrefix(
+#' Upload the results into a result database
+#' @description
+#' This function uploads results in csv format into a result database
+#'
+#' @details
+#' Calls ResultModelManager uploadResults function to upload the csv files
+#'
+#' @param connectionDetails    The connection details to the result database
+#' @param schema               The schema for the result database
+#' @param resultsFolder        The folder containing the csv results
+#' @param tablePrefix          A prefix to append to the result tables for the characterization results
+#' @param csvTablePrefix      The prefix added to the csv results - default is 'c_'
+#' @param includedFiles      Specify the csv files to upload or NULL to upload all in directory
+#' @family Database
+#' @return
+#' Returns the connection to the sqlite database
+#'
+#' @examples
+#'
+#' # generate results into resultsFolder
+#' conDet <- exampleOmopConnectionDetails()
+#'
+#' tteSet <- createTimeToEventSettings(
+#' targetIds = c(1,2),
+#'   outcomeIds = 3
+#'   )
+#'
+#' cSet <- createCharacterizationSettings(
+#'   timeToEventSettings = tteSet
+#' )
+#'
+#' runCharacterizationAnalyses(
+#'   connectionDetails = conDet,
+#'   targetDatabaseSchema = 'main',
+#'   targetTable = 'cohort',
+#'   outcomeDatabaseSchema = 'main',
+#'   outcomeTable = 'cohort',
+#'   cdmDatabaseSchema = 'main',
+#'   characterizationSettings = cSet,
+#'   outputDirectory = file.path(tempdir(),'database')
+#' )
+#'
+#' # create sqlite database
+#' charResultDbCD <- createSqliteDatabase()
+#'
+#' # create database results tables
+#' createCharacterizationTables(
+#'    connectionDetails = charResultDbCD,
+#'    resultSchema = 'main'
+#'  )
+#'
+#' # insert results
+#' insertResultsToDatabase(
+#'  connectionDetails = charResultDbCD,
+#'  schema = 'main',
+#'  resultsFolder = file.path(tempdir(),'database'),
+#'  includedFiles = c('time_to_event')
+#' )
+#'
+#'
+#' @export
+insertResultsToDatabase <- function(
+    connectionDetails,
+    schema,
+    resultsFolder,
+    tablePrefix = "",
+    csvTablePrefix = "c_",
+    includedFiles = NULL
+    ) {
+  specLoc <- system.file("settings", "resultsDataModelSpecification.csv",
+    package = "Characterization"
+  )
+  specs <- utils::read.csv(specLoc)
+  if(!is.null(includedFiles)){
+    specs <- specs[specs$table_name %in% includedFiles,]
+  }
+  colnames(specs) <- SqlRender::snakeCaseToCamelCase(colnames(specs))
+  specs$tableName <- paste0(csvTablePrefix, specs$tableName)
+  ResultModelManager::uploadResults(
+    connectionDetails = connectionDetails,
+    schema = schema,
+    resultsFolder = resultsFolder,
     tablePrefix = tablePrefix,
-    errorMessages = errorMessages
-  )
-  checkmate::reportAssertions(errorMessages)
-
-  message("Inserting Andromeda table into database table ", tablePrefix, tableName)
-
-  Andromeda::batchApply(
-    tbl = andromedaObject,
-    fun = function(x) {
-      data <- as.data.frame(x %>% dplyr::collect()) # apply minCellCount
-      data <- removeMinCell(
-        data = data,
-        minCellCount = minCellCount,
-        minCellCountColumns = minCellCountColumns
-      )
-
-      DatabaseConnector::insertTable(
-        connection = connection,
-        databaseSchema = databaseSchema,
-        tableName = paste0(tablePrefix, tableName),
-        data = data,
-        dropTableIfExists = F,
-        createTable = F,
-        tempEmulationSchema = tempEmulationSchema,
-        bulkLoad = bulkLoad,
-        camelCaseToSnakeCase = T
-      )
-    }
+    specifications = specs,
+    purgeSiteDataBeforeUploading = FALSE
   )
 
-  return(TRUE)
+  return(invisible(NULL))
 }
 
+## TODO add this into the csv exporting
 removeMinCell <- function(
     data,
     minCellCount = 0,
@@ -128,7 +176,6 @@ removeMinCell <- function(
 }
 
 
-
 #' Create the results tables to store characterization results into a database
 #' @description
 #' This function executes a large set of SQL statements to create tables that can store results
@@ -136,8 +183,8 @@ removeMinCell <- function(
 #' @details
 #' This function can be used to create (or delete) Characterization result tables
 #'
-#' @param conn                         A connection to a database created by using the
-#'                                     function \code{connect} in the
+#' @param connectionDetails            The connectionDetails to a database created by using the
+#'                                     function \code{createConnectDetails} in the
 #'                                     \code{DatabaseConnector} package.
 #' @param resultSchema                 The name of the database schema that the result tables will be created.
 #' @param targetDialect                The database management system being used
@@ -146,16 +193,28 @@ removeMinCell <- function(
 #' @param tablePrefix                  A string appended to the Characterization result tables
 #' @param tempEmulationSchema          The temp schema used when the database management system is oracle
 #'
+#' @family Database
+#'
 #' @return
 #' Returns NULL but creates the required tables into the specified database schema.
 #'
+#' @examples
+#' # create sqlite database
+#' charResultDbCD <- createSqliteDatabase()
+#'
+#' # create database results tables
+#' createCharacterizationTables(
+#'    connectionDetails = charResultDbCD,
+#'    resultSchema = 'main'
+#'  )
+#'
 #' @export
 createCharacterizationTables <- function(
-    conn,
+    connectionDetails,
     resultSchema,
     targetDialect = "postgresql",
-    deleteExistingTables = T,
-    createTables = T,
+    deleteExistingTables = TRUE,
+    createTables = TRUE,
     tablePrefix = "c_",
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")) {
   errorMessages <- checkmate::makeAssertCollection()
@@ -165,18 +224,26 @@ createCharacterizationTables <- function(
   )
   checkmate::reportAssertions(errorMessages)
 
+  conn <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  on.exit(DatabaseConnector::disconnect(conn))
+
+  alltables <- tolower(
+    DatabaseConnector::getTableNames(
+      connection = conn,
+      databaseSchema = resultSchema
+    )
+  )
+  tables <- getResultTables()
+  tables <- paste0(tablePrefix, tables)
+
+  # adding this to not create tables if all tables esist
+  if (sum(tables %in% alltables) == length(tables) & !deleteExistingTables) {
+    message("All tables exist so no need to recreate")
+    createTables <- FALSE
+  }
 
   if (deleteExistingTables) {
     message("Deleting existing tables")
-    tables <- getResultTables()
-    tables <- paste0(tablePrefix, tables)
-
-    alltables <- tolower(
-      DatabaseConnector::getTableNames(
-        connection = conn,
-        databaseSchema = resultSchema
-      )
-    )
 
     for (tb in tables) {
       if (tb %in% alltables) {
@@ -193,7 +260,8 @@ createCharacterizationTables <- function(
         )
         DatabaseConnector::executeSql(
           connection = conn,
-          sql = sql
+          sql = sql,
+          progressBar = FALSE
         )
 
         sql <- "DROP TABLE @my_schema.@table"
@@ -209,7 +277,8 @@ createCharacterizationTables <- function(
         )
         DatabaseConnector::executeSql(
           connection = conn,
-          sql = sql
+          sql = sql,
+          progressBar = FALSE
         )
       }
     }
@@ -228,197 +297,80 @@ createCharacterizationTables <- function(
 
     DatabaseConnector::executeSql(
       connection = conn,
-      sql = renderedSql
+      sql = renderedSql,
+      progressBar = FALSE
     )
 
-    # add database migration here in the future
+    ## add database migration here in the future
+    migrateDataModel(
+      connectionDetails = connectionDetails,
+      connection = conn,
+      databaseSchema = resultSchema,
+      tablePrefix = tablePrefix
+    )
   }
 }
 
-#' Exports all tables in the result database to csv files
-#' @description
-#' This function extracts the database tables into csv files
-#'
-#' @details
-#' This function extracts the database tables into csv files
-#'
-#' @param connectionDetails         The connection details to input into the
-#'                                     function \code{connect} in the
-#'                                     \code{DatabaseConnector} package.
-#' @param resultSchema                 The name of the database schema that the result tables will be created.
-#' @param targetDialect                DEPRECATED: derived from \code{connectionDetails}.
-#' @param tablePrefix                  The table prefix to apply to the characterization result tables
-#' @param filePrefix                   The prefix to apply to the files
-#' @param tempEmulationSchema          The temp schema used when the database management system is oracle
-#' @param saveDirectory                The directory to save the csv results
-#' @param minMeanCovariateValue        The minimum mean covariate value (i.e. the minimum proportion for
-#'                                     binary covariates) for a covariate to be included in covariate table.
-#'                                     Other covariates are removed to save space.
-#'
-#' @return
-#' csv file per table into the saveDirectory
-#'
-#' @export
-exportDatabaseToCsv <- function(
+
+migrateDataModel <- function(
     connectionDetails,
-    resultSchema,
-    targetDialect = NULL,
-    tablePrefix = "c_",
-    filePrefix = NULL,
-    tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-    saveDirectory,
-    minMeanCovariateValue = 0.001) {
-  errorMessages <- checkmate::makeAssertCollection()
-  .checkConnectionDetails(connectionDetails, errorMessages)
-  .checkTablePrefix(
+    connection,
+    databaseSchema,
+    tablePrefix = ""
+    ) {
+  ParallelLogger::logInfo("Migrating data set")
+  migrator <- getDataMigrator(
+    connectionDetails = connectionDetails,
+    databaseSchema = databaseSchema,
+    tablePrefix = tablePrefix
+  )
+  migrator$executeMigrations()
+  migrator$finalize()
+
+  ParallelLogger::logInfo("Updating version number")
+  updateVersionSql <- SqlRender::loadRenderTranslateSql("UpdateVersionNumber.sql",
+    packageName = utils::packageName(),
+    database_schema = databaseSchema,
+    table_prefix = tablePrefix,
+    dbms = connectionDetails$dbms
+  )
+
+  if(missing(connection)){
+    connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
+  }
+  DatabaseConnector::executeSql(
+    connection = connection,
+    sql = updateVersionSql,
+    progressBar = FALSE
+    )
+}
+
+
+getDataMigrator <- function(connectionDetails, databaseSchema, tablePrefix = "") {
+  ResultModelManager::DataMigrationManager$new(
+    connectionDetails = connectionDetails,
+    databaseSchema = databaseSchema,
     tablePrefix = tablePrefix,
-    errorMessages = errorMessages
+    migrationPath = "migrations",
+    packageName = utils::packageName()
   )
-  checkmate::reportAssertions(errorMessages)
-  if (!is.null(targetDialect)) {
-    warning("The targetDialect argument is deprecated")
-  }
-
-  if (is.null(filePrefix)) {
-    filePrefix <- ""
-  }
-
-  # connect to result database
-  connection <- DatabaseConnector::connect(
-    connectionDetails = connectionDetails
-  )
-  on.exit(
-    DatabaseConnector::disconnect(connection)
-  )
-
-  # create the folder to save the csv files
-  if (!dir.exists(saveDirectory)) {
-    dir.create(
-      path = saveDirectory,
-      recursive = T
-    )
-  }
-
-  # max number of rows extracted at a time
-  maxRowCount <- 1e6
-
-  # get the table names using the function in uploadToDatabase.R
-  tables <- getResultTables()
-
-  # extract result per table
-  for (table in tables) {
-    ParallelLogger::logInfo(paste0("Exporting rows from ", table, " to csv file"))
-    # get row count and figure out number of loops
-    sql <- "select count(*) as N from @resultSchema.@appendtotable@tablename;"
-    sql <- SqlRender::render(
-      sql = sql,
-      resultSchema = resultSchema,
-      appendtotable = tablePrefix,
-      tablename = table
-    )
-    sql <- SqlRender::translate(
-      sql = sql,
-      targetDialect = connectionDetails$dbms,
-      tempEmulationSchema = tempEmulationSchema
-    )
-    countN <- DatabaseConnector::querySql(
-      connection = connection,
-      sql = sql,
-      snakeCaseToCamelCase = F
-    )$N
-
-    # get column names
-    sql <- "select * from @resultSchema.@appendtotable@tablename where 1=0;"
-    sql <- SqlRender::render(
-      sql = sql,
-      resultSchema = resultSchema,
-      appendtotable = tablePrefix,
-      tablename = table
-    )
-    sql <- SqlRender::translate(
-      sql = sql,
-      targetDialect = connectionDetails$dbms,
-      tempEmulationSchema = tempEmulationSchema
-    )
-    cnames <- colnames(DatabaseConnector::querySql(
-      connection = connection,
-      sql = sql,
-      snakeCaseToCamelCase = F
-    ))
-
-    inds <- floor(countN / maxRowCount)
-    tableAppend <- F
-    # NOTE: If the table has 0 rows (countN == 0),
-    # then setting the txtProgressBar will fail since
-    # min < max. So, setting max = countN+1 for this
-    # reason.
-    pb <- utils::txtProgressBar(min = 0, max = countN + 1, initial = 0)
-
-    for (i in 1:length(inds)) {
-      startRow <- (i - 1) * maxRowCount + 1
-      endRow <- min(i * maxRowCount, countN)
-
-      sql <- "select @cnames from
-    (select *,
-    ROW_NUMBER() OVER(ORDER BY @cnames) AS row
-    from @resultSchema.@appendtotable@tablename
-    ) temp
-    where
-    temp.row >= @start_row and
-    temp.row <= @end_row;"
-      sql <- SqlRender::render(
-        sql = sql,
-        resultSchema = resultSchema,
-        appendtotable = tablePrefix,
-        tablename = table,
-        cnames = paste(cnames, collapse = ","),
-        start_row = startRow,
-        end_row = endRow
-      )
-      sql <- SqlRender::translate(
-        sql = sql,
-        targetDialect = connectionDetails$dbms,
-        tempEmulationSchema = tempEmulationSchema
-      )
-      result <- DatabaseConnector::querySql(
-        connection = connection,
-        sql = sql,
-        snakeCaseToCamelCase = F
-      )
-      result <- formatDouble(result)
-
-      # save the results as a csv
-      readr::write_csv(
-        x = result,
-        file = file.path(saveDirectory, paste0(tolower(filePrefix), table, ".csv")),
-        append = tableAppend
-      )
-      tableAppend <- T
-      # NOTE: Handling progresss bar per note on txtProgressBar
-      # above. Otherwise the progress bar doesn't show that it completed.
-      if (endRow == countN) {
-        utils::setTxtProgressBar(pb, countN + 1)
-      } else {
-        utils::setTxtProgressBar(pb, endRow)
-      }
-    }
-    close(pb)
-  }
-
-  invisible(saveDirectory)
 }
 
 getResultTables <- function() {
   return(
     unique(
-      readr::read_csv(
-        file = system.file(
-          "settings",
-          "resultsDataModelSpecification.csv",
-          package = "Characterization"
-        ),
-        show_col_types = FALSE
-      )$table_name
+      c(
+        readr::read_csv(
+          file = system.file(
+            "settings",
+            "resultsDataModelSpecification.csv",
+            package = "Characterization"
+          ),
+          show_col_types = FALSE
+        )$table_name,
+        "migration", "package_version"
+      )
     )
   )
 }
@@ -428,7 +380,7 @@ getResultTables <- function() {
 # Removes scientific notation for any columns that are
 # formatted as doubles. Based on this GitHub issue:
 # https://github.com/tidyverse/readr/issues/671#issuecomment-300567232
-formatDouble <- function(x, scientific = F, ...) {
+formatDouble <- function(x, scientific = FALSE, ...) {
   doubleCols <- vapply(x, is.double, logical(1))
   x[doubleCols] <- lapply(x[doubleCols], format, scientific = scientific, ...)
 

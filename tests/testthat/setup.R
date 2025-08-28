@@ -4,7 +4,7 @@ Eunomia::createCohorts(connectionDetails = connectionDetails)
 
 withr::defer(
   {
-    unlink("testEunomia.sqlite", recursive = TRUE, force = TRUE)
+    unlink(file.path(tempdir(),"GiBleed.sqlite"), recursive = TRUE, force = TRUE)
   },
   testthat::teardown_env()
 )

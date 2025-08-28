@@ -1,0 +1,4 @@
+analysis_id,analysis_name,domain_id,start_day,end_day,is_binary,missing_means_zero,setting_id,database_id
+1,DemographicsGender,Demographics,NA,NA,Y,NA,20250626154217500852269034,1
+4,DemographicsRace,Demographics,NA,NA,Y,NA,20250626154217500852269034,1
+2,DemographicsAge,Demographics,NA,NA,N,Y,20250626154217500852269034,1

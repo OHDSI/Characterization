@@ -1,3 +1,67 @@
+Characterization 2.2.0
+======================
+- fixed csv spec: made mean_exposure_time a float and specified that min_characterization_mean in covariate table must be non-null and is in the pk.
+- changed Line 284 in AggregateCovariates.R to cast exposure_time summary values to bigint due to integer overflow in some dbms.
+- added dummy sql code to prevent warnings about missing variables
+- added code to save empty csv files when there are no rows as that way it is easier to see there are no results vs an error saving.
+- removed progress bar from custom during features
+- added option includedFiles in insertResultsToDatabase() where you can specify the csv files to upload to prevent warnings of missing csv files.
+- made sure all connections are disconnected after use
+
+Characterization 2.1.3
+======================
+- prepared for CRAN by adding examples, removing getwd(), replacing T/F with TRUE/FALSE and added example data inside package so no download required.
+
+Characterization 2.1.2
+======================
+- added input ignoreWhenEmpty to cleanIncremental() that does not run incrementalClean if there are no incremental files
+
+Characterization 2.1.1
+======================
+- fixed result database column type for mean_exposure_time
+
+Characterization 2.1.0
+======================
+- risk factors and case series now restrict to first outcome only.
+- added documentation describing the different analyses with examples.
+
+Characterization 2.0.1
+======================
+- edited cohort_type in results to varchar(12)
+- fixed setting id being messed up by readr loading
+
+Characterization 2.0.0
+======================
+- added tests for all HADES supported dbms
+- updated minCellCount censoring 
+- fixed issues with incremental
+- made the code more modular to enable new characterizations to be added
+- added job optimization code to optimize the distributuion of jobs
+- fixed tests and made minor bug updates
+
+Characterization 1.0.0
+======================
+- Added parallelization in the aggregate covariates analysis
+- Extact all results as csv files 
+- Removed sqlite result creation
+- now using ResultModelManager to upload results into database
+
+Characterization 0.3.1
+======================
+- Removed DatabaseConnector from Remotes in DESCRIPTION. Fixes GitHb issue 38.
+- Added check to covariateSettings input in createAggregateCovariateSettings to error if temporal is T
+- adding during cohort covariate settings
+- added a case covariate settings inputs to aggregate covariates
+- added casePreTargetDuration and casePostTreatmentDuration integer inputs to aggregate covariates
+
+Characterization 0.3.0
+======================
+- Added new outcomeWashoutDays parameter to createAggregateCovariateSettings to remove outcome occurances that are continuations of a prior outcome occurrence
+- Changed the way cohort definition ids are created in createAggregateCovariateSettings to use hash of target id, outcome id and type.  This lets users combine different studies into a single result database.
+- Added database migration capability and created new migrations for the recent updates.
+
+
+
 Characterization 0.2.0
 ======================
 Updated dependency to FeatureExtraction (>= 3.5.0) to support minCharacterizationMean paramater.

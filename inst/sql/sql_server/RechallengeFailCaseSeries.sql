@@ -1,13 +1,15 @@
+IF OBJECT_ID('tempdb..#target_cohort', 'U') IS NOT NULL DROP TABLE #target_cohort;
 select * into #target_cohort
 from @target_database_schema.@target_table
 where cohort_definition_id in (@target_ids)
 ;
-
+IF OBJECT_ID('tempdb..#outcome_cohort', 'U') IS NOT NULL DROP TABLE #outcome_cohort;
 select * into #outcome_cohort
 from @outcome_database_schema.@outcome_table
 where cohort_definition_id in (@outcome_ids)
 ;
 
+IF OBJECT_ID('tempdb..#fail_case_series', 'U') IS NOT NULL DROP TABLE #fail_case_series;
 --extract persons that are rechallenge fails
 select
 
