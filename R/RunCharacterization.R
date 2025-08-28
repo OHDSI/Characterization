@@ -647,6 +647,8 @@ aggregateCsvsBatch <- function(
             tracker$settingsTracker <- c(tracker$settingsTracker, unique(x$setting_id))
           }
 
+          # this does not work if the csv is empty - only
+          # works if the csv has rows.
           readr::write_csv(
             x = x,
             file = savePath, quote = "all",
@@ -665,6 +667,13 @@ aggregateCsvsBatch <- function(
           col_types = colTypes[csvType == tables],
           show_col_types = FALSE
         )
+
+        # readr::read_csv_chunked only works if the csv
+        # has 1 row or more.  This code will copy the
+        # csv with no rows to we always get a complete set of csv files
+        if(!file.exists(savePath) & file.exists(loadPath)){
+          file.copy(from = loadPath, to = savePath)
+        }
 
         firstTracker$first[firstTracker$table == csvType] <- FALSE
       }

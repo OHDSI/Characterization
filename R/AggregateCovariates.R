@@ -202,6 +202,7 @@ computeTargetAggregateCovariateAnalyses <- function(
     outputFolder,
     minCharacterizationMean = 0,
     minCellCount = 0,
+    progressBar = interactive(),
     ...) {
 
   if(missing(outputFolder)){
@@ -251,7 +252,7 @@ computeTargetAggregateCovariateAnalyses <- function(
     tempTable = TRUE,
     dropTableIfExists = TRUE,
     createTable = TRUE,
-    progressBar = FALSE,
+    progressBar = progressBar,
     tempEmulationSchema = tempEmulationSchema
   )
 
@@ -273,7 +274,7 @@ computeTargetAggregateCovariateAnalyses <- function(
   DatabaseConnector::executeSql(
     connection = connection,
     sql = sql,
-    progressBar = FALSE,
+    progressBar = progressBar,
     reportOverallTime = FALSE
   )
   completionTime <- Sys.time() - start
@@ -299,7 +300,7 @@ computeTargetAggregateCovariateAnalyses <- function(
   counts <- DatabaseConnector::querySql(
     connection = connection,
     sql = sql,
-    snakeCaseToCamelCase = TRUE,
+    snakeCaseToCamelCase = TRUE
   )
 
   message("Target Aggregate: Computing aggregate target covariate results")
@@ -327,7 +328,8 @@ computeTargetAggregateCovariateAnalyses <- function(
   )
   DatabaseConnector::executeSql(
     connection = connection,
-    sql = sql, progressBar = FALSE,
+    sql = sql,
+    progressBar = progressBar,
     reportOverallTime = FALSE
   )
 
@@ -363,6 +365,7 @@ computeCaseAggregateCovariateAnalyses <- function(
     outputFolder,
     minCharacterizationMean = 0,
     minCellCount = 0,
+    progressBar = interactive(),
     ...) {
 
   if(missing(outputFolder)){
@@ -443,7 +446,7 @@ computeCaseAggregateCovariateAnalyses <- function(
     tempTable = TRUE,
     dropTableIfExists = TRUE,
     createTable = TRUE,
-    progressBar = FALSE,
+    progressBar = progressBar,
     tempEmulationSchema = tempEmulationSchema
   )
 
@@ -469,7 +472,7 @@ computeCaseAggregateCovariateAnalyses <- function(
   DatabaseConnector::executeSql(
     connection = connection,
     sql = sql,
-    progressBar = FALSE,
+    progressBar = progressBar,
     reportOverallTime = FALSE
   )
 
@@ -495,7 +498,7 @@ computeCaseAggregateCovariateAnalyses <- function(
     DatabaseConnector::executeSql(
       connection = connection,
       sql = sql,
-      progressBar = FALSE,
+      progressBar = progressBar,
       reportOverallTime = FALSE
     )
   }
@@ -522,7 +525,7 @@ computeCaseAggregateCovariateAnalyses <- function(
   counts <- DatabaseConnector::querySql(
     connection = connection,
     sql = sql,
-    snakeCaseToCamelCase = TRUE,
+    snakeCaseToCamelCase = TRUE
   )
 
   message("Case Aggregates: Computing aggregate before case covariate results")
@@ -576,7 +579,8 @@ computeCaseAggregateCovariateAnalyses <- function(
   )
   DatabaseConnector::executeSql(
     connection = connection,
-    sql = sql, progressBar = FALSE,
+    sql = sql,
+    progressBar = progressBar,
     reportOverallTime = FALSE
   )
 

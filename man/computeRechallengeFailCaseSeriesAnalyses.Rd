@@ -16,6 +16,7 @@ computeRechallengeFailCaseSeriesAnalyses(
   showSubjectId = FALSE,
   outputFolder,
   minCellCount = 0,
+  progressBar = interactive(),
   ...
 )
 }
@@ -48,6 +49,8 @@ can be created}
 \item{outputFolder}{A directory to save the results as csv files}
 
 \item{minCellCount}{The minimum cell value to display, values less than this will be replaced by -1}
+
+\item{progressBar}{Whether to display a progress bar while the analysis is running}
 
 \item{...}{extra inputs}
 }
