@@ -1,7 +1,7 @@
 -- adding lines below to prevent warning
 IF OBJECT_ID('tempdb..#fake', 'U') IS NOT NULL
 	DROP TABLE #fake;
-SELECT '@domain_end_date' as cname into #fake WHERE 1=1;
+SELECT '@domain_end_date' as cname into #fake FROM @cdm_database_schema.@domain_table WHERE 1 = 0;
 
 -- Feature construction
 SELECT
