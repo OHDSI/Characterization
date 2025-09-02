@@ -7,6 +7,8 @@ Characterization 2.2.0
 - removed progress bar from custom during features
 - added option includedFiles in insertResultsToDatabase() where you can specify the csv files to upload to prevent warnings of missing csv files.
 - made sure all connections are disconnected after use
+- fixed counts to use count_big (thanks Anthony Sena) to fix an issue where the number was bigger than an integer.
+- added code to copy csv files in batches this is needed when the csv files are very large.
 
 Characterization 2.1.3
 ======================
