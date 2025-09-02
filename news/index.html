@@ -46,6 +46,8 @@
 <li>removed progress bar from custom during features</li>
 <li>added option includedFiles in insertResultsToDatabase() where you can specify the csv files to upload to prevent warnings of missing csv files.</li>
 <li>made sure all connections are disconnected after use</li>
+<li>fixed counts to use count_big (thanks Anthony Sena) to fix an issue where the number was bigger than an integer.</li>
+<li>added code to copy csv files in batches this is needed when the csv files are very large.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.1.3" id="characterization-213">Characterization 2.1.3<a class="anchor" aria-label="anchor" href="#characterization-213"></a></h2><p class="text-muted">CRAN release: 2025-03-04</p>
