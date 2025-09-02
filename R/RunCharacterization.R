@@ -421,7 +421,7 @@ runCharacterizationsInParallel <- function(x) {
       )
     },
     error = function(e) {
-      print(e)
+      rlang::inform(e)
       return(FALSE)
     }
   )
