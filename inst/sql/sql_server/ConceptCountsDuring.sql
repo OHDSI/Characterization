@@ -1,7 +1,7 @@
 -- adding line below to prevent warnings
 IF OBJECT_ID('tempdb..#fake', 'U') IS NOT NULL
 	DROP TABLE #fake;
-SELECT "@row_id_field" as cname into #fake;
+SELECT '@row_id_field' as cname into #fake FROM @cdm_database_schema.@domain_table WHERE 1 = 0;
 
 -- Feature construction
 {@aggregated} ? {
