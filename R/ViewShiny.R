@@ -116,12 +116,12 @@ prepareCharacterizationShiny <- function(
   if (!"cg_cohort_definition" %in% tables) {
     cohortIds <- unique(
       c(
-        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'Target';"))$TARGET_COHORT_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'TnO';"))$OUTCOME_COHORT_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$TARGET_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$OUTCOME_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"))$TARGET_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"))$OUTCOME_COHORT_DEFINITION_ID
+        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'Target';"))[, 1],
+        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'TnO';"))[, 1],
+        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))[, 1],
+        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))[, 1],
+        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"))[, 1],
+        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"))[, 1]
       )
     )
 
@@ -146,9 +146,9 @@ prepareCharacterizationShiny <- function(
   if (!"database_meta_data" %in% tables) {
     dbIds <- unique(
       c(
-        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "analysis_ref;"))$DATABASE_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "dechallenge_rechallenge;"))$DATABASE_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$DATABASE_ID
+        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "analysis_ref;"))[, 1],
+        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "dechallenge_rechallenge;"))[, 1],
+        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))[, 1]
       )
     )
 
