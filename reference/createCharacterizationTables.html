@@ -34,7 +34,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Create the results tables to store characterization results into a database</h1>
-      <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/develop/R/Database.R" class="external-link"><code>R/Database.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/main/R/Database.R" class="external-link"><code>R/Database.R</code></a></small>
       <div class="d-none name"><code>createCharacterizationTables.Rd</code></div>
     </div>
 
@@ -117,38 +117,38 @@ function <code>createConnectDetails</code> in the
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Connecting using SQLite driver</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Deleting existing tables</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Creating characterization results tables</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00788 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00817 secs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Migrating data set</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Migrator using SQL files in Characterization</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Connecting using SQLite driver</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Creating migrations table</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00353 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00333 secs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Migrations table created</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Executing migration: Migration_1-v0_3_0_store_version.sql</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00351 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00328 secs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Saving migration: Migration_1-v0_3_0_store_version.sql</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00301 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00283 secs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Migration complete Migration_1-v0_3_0_store_version.sql</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Executing migration: Migration_2-v2_1_1_mean_exposure_time_type.sql</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.0105 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00938 secs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Saving migration: Migration_2-v2_1_1_mean_exposure_time_type.sql</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00457 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.0044 secs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Migration complete Migration_2-v2_1_1_mean_exposure_time_type.sql</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Executing migration: Migration_3-v2_2_0_count_as_bigint.sql</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00305 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00295 secs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Saving migration: Migration_3-v2_2_0_count_as_bigint.sql</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00282 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00274 secs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Migration complete Migration_3-v2_2_0_count_as_bigint.sql</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Closing database connection</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Updating version number</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00337 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00685 secs</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
