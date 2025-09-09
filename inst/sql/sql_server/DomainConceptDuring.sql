@@ -1,3 +1,8 @@
+-- adding lines below to prevent warning
+IF OBJECT_ID('tempdb..#fake', 'U') IS NOT NULL
+	DROP TABLE #fake;
+SELECT '@domain_end_date' as cname into #fake FROM @cdm_database_schema.@domain_table WHERE 1 = 0;
+
 -- Feature construction
 SELECT
 	CAST(@domain_concept_id AS BIGINT) * 1000 + @analysis_id AS covariate_id,

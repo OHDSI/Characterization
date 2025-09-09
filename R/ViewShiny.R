@@ -15,13 +15,13 @@
 #'
 #' conDet <- exampleOmopConnectionDetails()
 #'
-#' drSet <- createDechallengeRechallengeSettings(
+#' tteSet <- createTimeToEventSettings(
 #'   targetIds = c(1,2),
 #'   outcomeIds = 3
 #' )
 #'
 #' cSet <- createCharacterizationSettings(
-#'   dechallengeRechallengeSettings = drSet
+#'   timeToEventSettings = tteSet
 #' )
 #'
 #' runCharacterizationAnalyses(
@@ -35,9 +35,12 @@
 #'   outputDirectory = file.path(tempdir(),'view')
 #' )
 #'
+#' # interactive shiny app
+#' \dontrun{
 #' viewCharacterization(
 #'   resultFolder = file.path(tempdir(),'view')
 #' )
+#' }
 #'
 #'
 #' @export
@@ -48,12 +51,18 @@ viewCharacterization <- function(
   # check there are csv files in resultFolder
   if(length(dir(resultFolder, pattern = '.csv')) > 0 ){
 
-  databaseSettings <- prepareCharacterizationShiny(
-    resultFolder = resultFolder,
-    cohortDefinitionSet = cohortDefinitionSet
-  )
+    databaseSettings <- prepareCharacterizationShiny(
+      resultFolder = resultFolder,
+      cohortDefinitionSet = cohortDefinitionSet
+    )
 
-  viewChars(databaseSettings)
+    if(length(databaseSettings) == 0){
+      message('No actual results to view via shiny')
+      return(FALSE)
+    } else{
+      viewChars(databaseSettings)
+    }
+
   } else{
     message('No csv results to view via shiny')
     return(FALSE)
@@ -107,14 +116,44 @@ prepareCharacterizationShiny <- function(
   if (!"cg_cohort_definition" %in% tables) {
     cohortIds <- unique(
       c(
-        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'Target';"))$TARGET_COHORT_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'TnO';"))$OUTCOME_COHORT_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$TARGET_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$OUTCOME_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"))$TARGET_COHORT_DEFINITION_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"))$OUTCOME_COHORT_DEFINITION_ID
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct TARGET_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'Target';"),
+          snakeCaseToCamelCase = TRUE
+          )$targetCohortId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct OUTCOME_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'TnO';"),
+          snakeCaseToCamelCase = TRUE
+          )$outcomeCohortId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
+          snakeCaseToCamelCase = TRUE
+            )$targetCohortDefinitionId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
+          snakeCaseToCamelCase = TRUE
+          )$outcomeCohortDefinitionId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"),
+          snakeCaseToCamelCase = TRUE
+          )$targetCohortDefinitionId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"),
+          snakeCaseToCamelCase = TRUE
+            )$outcomeCohortDefinitionId
       )
     )
+
+
+    if(length(cohortIds) == 0){
+      # if no cohortids then no results to view
+      return(invisible(list()))
+    }
 
     DatabaseConnector::insertTable(
       connection = con,
@@ -131,9 +170,21 @@ prepareCharacterizationShiny <- function(
   if (!"database_meta_data" %in% tables) {
     dbIds <- unique(
       c(
-        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "analysis_ref;"))$DATABASE_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "dechallenge_rechallenge;"))$DATABASE_ID,
-        DatabaseConnector::querySql(con, paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"))$DATABASE_ID
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "analysis_ref;"),
+          snakeCaseToCamelCase = TRUE
+          )$databaseId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "dechallenge_rechallenge;"),
+          snakeCaseToCamelCase = TRUE
+          )$databaseId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
+          snakeCaseToCamelCase = TRUE
+          )$databaseId
       )
     )
 

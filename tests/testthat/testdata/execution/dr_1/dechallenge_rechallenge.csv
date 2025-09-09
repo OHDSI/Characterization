@@ -1,0 +1,2 @@
+database_id,dechallenge_stop_interval,dechallenge_evaluation_window,target_cohort_definition_id,outcome_cohort_definition_id,num_exposure_eras,num_persons_exposed,num_cases,dechallenge_attempt,dechallenge_fail,dechallenge_success,rechallenge_attempt,rechallenge_fail,rechallenge_success,pct_dechallenge_attempt,pct_dechallenge_success,pct_dechallenge_fail,pct_rechallenge_attempt,pct_rechallenge_success,pct_rechallenge_fail
+1,30,30,1,2,13,10,6,5,0,5,3,1,2,0.8333333,1,0,0.6,0.6666667,0.3333333

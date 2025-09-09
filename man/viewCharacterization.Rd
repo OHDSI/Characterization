@@ -24,13 +24,13 @@ Input is the output of ...
 
 conDet <- exampleOmopConnectionDetails()
 
-drSet <- createDechallengeRechallengeSettings(
+tteSet <- createTimeToEventSettings(
   targetIds = c(1,2),
   outcomeIds = 3
 )
 
 cSet <- createCharacterizationSettings(
-  dechallengeRechallengeSettings = drSet
+  timeToEventSettings = tteSet
 )
 
 runCharacterizationAnalyses(
@@ -44,9 +44,12 @@ runCharacterizationAnalyses(
   outputDirectory = file.path(tempdir(),'view')
 )
 
+# interactive shiny app
+\dontrun{
 viewCharacterization(
   resultFolder = file.path(tempdir(),'view')
 )
+}
 
 
 }

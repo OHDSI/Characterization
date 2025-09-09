@@ -80,13 +80,13 @@ specified saveDirectory
 
 conDet <- exampleOmopConnectionDetails()
 
-drSet <- createDechallengeRechallengeSettings(
+tteSet <- createTimeToEventSettings(
   targetIds = c(1,2),
   outcomeIds = 3
 )
 
 cSet <- createCharacterizationSettings(
-  dechallengeRechallengeSettings = drSet
+  timeToEventSettings = tteSet
 )
 
 runCharacterizationAnalyses(
@@ -97,7 +97,7 @@ runCharacterizationAnalyses(
   outcomeTable = 'cohort',
   cdmDatabaseSchema = 'main',
   characterizationSettings = cSet,
-  outputDirectory = tempdir()
+  outputDirectory = file.path(tempdir(),'runChar')
 )
 
 }

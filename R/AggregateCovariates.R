@@ -202,6 +202,7 @@ computeTargetAggregateCovariateAnalyses <- function(
     outputFolder,
     minCharacterizationMean = 0,
     minCellCount = 0,
+    progressBar = interactive(),
     ...) {
 
   if(missing(outputFolder)){
@@ -251,7 +252,7 @@ computeTargetAggregateCovariateAnalyses <- function(
     tempTable = TRUE,
     dropTableIfExists = TRUE,
     createTable = TRUE,
-    progressBar = FALSE,
+    progressBar = progressBar,
     tempEmulationSchema = tempEmulationSchema
   )
 
@@ -273,7 +274,7 @@ computeTargetAggregateCovariateAnalyses <- function(
   DatabaseConnector::executeSql(
     connection = connection,
     sql = sql,
-    progressBar = FALSE,
+    progressBar = progressBar,
     reportOverallTime = FALSE
   )
   completionTime <- Sys.time() - start
@@ -283,11 +284,11 @@ computeTargetAggregateCovariateAnalyses <- function(
   message("Extracting target cohort counts")
   sql <- "select
   cohort_definition_id,
-  count(*) row_count,
-  count(distinct subject_id) person_count,
-  min(datediff(day, cohort_start_date, cohort_end_date)) min_exposure_time,
-  avg(datediff(day, cohort_start_date, cohort_end_date)) mean_exposure_time,
-  max(datediff(day, cohort_start_date, cohort_end_date)) max_exposure_time
+  count_big(*) row_count,
+  count_big(distinct subject_id) person_count,
+  min(cast(datediff(day, cohort_start_date, cohort_end_date) as bigint)) min_exposure_time,
+  avg(cast(datediff(day, cohort_start_date, cohort_end_date) as bigint)) mean_exposure_time,
+  max(cast(datediff(day, cohort_start_date, cohort_end_date) as bigint)) max_exposure_time
   from
   (select * from #agg_cohorts_before union select * from #agg_cohorts_extras) temp
   group by cohort_definition_id;"
@@ -299,7 +300,7 @@ computeTargetAggregateCovariateAnalyses <- function(
   counts <- DatabaseConnector::querySql(
     connection = connection,
     sql = sql,
-    snakeCaseToCamelCase = TRUE,
+    snakeCaseToCamelCase = TRUE
   )
 
   message("Target Aggregate: Computing aggregate target covariate results")
@@ -327,7 +328,8 @@ computeTargetAggregateCovariateAnalyses <- function(
   )
   DatabaseConnector::executeSql(
     connection = connection,
-    sql = sql, progressBar = FALSE,
+    sql = sql,
+    progressBar = progressBar,
     reportOverallTime = FALSE
   )
 
@@ -363,6 +365,7 @@ computeCaseAggregateCovariateAnalyses <- function(
     outputFolder,
     minCharacterizationMean = 0,
     minCellCount = 0,
+    progressBar = interactive(),
     ...) {
 
   if(missing(outputFolder)){
@@ -443,7 +446,7 @@ computeCaseAggregateCovariateAnalyses <- function(
     tempTable = TRUE,
     dropTableIfExists = TRUE,
     createTable = TRUE,
-    progressBar = FALSE,
+    progressBar = progressBar,
     tempEmulationSchema = tempEmulationSchema
   )
 
@@ -469,7 +472,7 @@ computeCaseAggregateCovariateAnalyses <- function(
   DatabaseConnector::executeSql(
     connection = connection,
     sql = sql,
-    progressBar = FALSE,
+    progressBar = progressBar,
     reportOverallTime = FALSE
   )
 
@@ -495,7 +498,7 @@ computeCaseAggregateCovariateAnalyses <- function(
     DatabaseConnector::executeSql(
       connection = connection,
       sql = sql,
-      progressBar = FALSE,
+      progressBar = progressBar,
       reportOverallTime = FALSE
     )
   }
@@ -522,7 +525,7 @@ computeCaseAggregateCovariateAnalyses <- function(
   counts <- DatabaseConnector::querySql(
     connection = connection,
     sql = sql,
-    snakeCaseToCamelCase = TRUE,
+    snakeCaseToCamelCase = TRUE
   )
 
   message("Case Aggregates: Computing aggregate before case covariate results")
@@ -576,7 +579,8 @@ computeCaseAggregateCovariateAnalyses <- function(
   )
   DatabaseConnector::executeSql(
     connection = connection,
-    sql = sql, progressBar = FALSE,
+    sql = sql,
+    progressBar = progressBar,
     reportOverallTime = FALSE
   )
 

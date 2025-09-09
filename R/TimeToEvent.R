@@ -73,6 +73,7 @@ createTimeToEventSettings <- function(
 #' @param databaseId An identifier for the database (string)
 #' @param outputFolder A directory to save the results as csv files
 #' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
+#' @param progressBar Whether to display a progress bar while the analysis is running
 #' @param ... extra inputs
 #' @family TimeToEvent
 #'
@@ -113,6 +114,7 @@ computeTimeToEventAnalyses <- function(
     databaseId = "database 1",
     outputFolder,
     minCellCount = 0,
+    progressBar = interactive(),
     ...) {
 
   if(missing(outputFolder)){
@@ -171,7 +173,7 @@ computeTimeToEventAnalyses <- function(
       createTable = TRUE,
       tempTable = TRUE,
       tempEmulationSchema = tempEmulationSchema,
-      progressBar = FALSE,
+      progressBar = progressBar,
       camelCaseToSnakeCase = TRUE
     )
 
@@ -191,7 +193,8 @@ computeTimeToEventAnalyses <- function(
 
     DatabaseConnector::executeSql(
       connection = connection,
-      sql = sql
+      sql = sql,
+      progressBar = progressBar
     )
 
     sql <- "select * from #two_tte_summary;"
@@ -218,7 +221,8 @@ computeTimeToEventAnalyses <- function(
 
     DatabaseConnector::executeSql(
       connection = connection,
-      sql = sql, progressBar = FALSE,
+      sql = sql,
+      progressBar = progressBar,
       reportOverallTime = FALSE
     )
 

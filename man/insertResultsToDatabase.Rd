@@ -9,7 +9,8 @@ insertResultsToDatabase(
   schema,
   resultsFolder,
   tablePrefix = "",
-  csvTablePrefix = "c_"
+  csvTablePrefix = "c_",
+  includedFiles = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ insertResultsToDatabase(
 \item{tablePrefix}{A prefix to append to the result tables for the characterization results}
 
 \item{csvTablePrefix}{The prefix added to the csv results - default is 'c_'}
+
+\item{includedFiles}{Specify the csv files to upload or NULL to upload all in directory}
 }
 \value{
 Returns the connection to the sqlite database
@@ -37,13 +40,13 @@ Calls ResultModelManager uploadResults function to upload the csv files
 # generate results into resultsFolder
 conDet <- exampleOmopConnectionDetails()
 
-drSet <- createDechallengeRechallengeSettings(
-  targetIds = c(1,2),
+tteSet <- createTimeToEventSettings(
+targetIds = c(1,2),
   outcomeIds = 3
-)
+  )
 
 cSet <- createCharacterizationSettings(
-  dechallengeRechallengeSettings = drSet
+  timeToEventSettings = tteSet
 )
 
 runCharacterizationAnalyses(
@@ -54,7 +57,7 @@ runCharacterizationAnalyses(
   outcomeTable = 'cohort',
   cdmDatabaseSchema = 'main',
   characterizationSettings = cSet,
-  outputDirectory = tempdir()
+  outputDirectory = file.path(tempdir(),'database')
 )
 
 # create sqlite database
@@ -70,7 +73,8 @@ createCharacterizationTables(
 insertResultsToDatabase(
  connectionDetails = charResultDbCD,
  schema = 'main',
- resultsFolder = tempdir()
+ resultsFolder = file.path(tempdir(),'database'),
+ includedFiles = c('time_to_event')
 )
 
 

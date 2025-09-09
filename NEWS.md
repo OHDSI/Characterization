@@ -1,3 +1,15 @@
+Characterization 2.2.0
+======================
+- fixed csv spec: made mean_exposure_time a float and specified that min_characterization_mean in covariate table must be non-null and is in the pk.
+- changed Line 284 in AggregateCovariates.R to cast exposure_time summary values to bigint due to integer overflow in some dbms.
+- added dummy sql code to prevent warnings about missing variables
+- added code to save empty csv files when there are no rows as that way it is easier to see there are no results vs an error saving.
+- removed progress bar from custom during features
+- added option includedFiles in insertResultsToDatabase() where you can specify the csv files to upload to prevent warnings of missing csv files.
+- made sure all connections are disconnected after use
+- fixed counts to use count_big (thanks Anthony Sena) to fix an issue where the number was bigger than an integer.
+- added code to copy csv files in batches this is needed when the csv files are very large.
+
 Characterization 2.1.3
 ======================
 - prepared for CRAN by adding examples, removing getwd(), replacing T/F with TRUE/FALSE and added example data inside package so no download required.

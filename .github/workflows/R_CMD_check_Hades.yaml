@@ -22,7 +22,7 @@ jobs:
         config:
           - {os: windows-latest, r: 'release'}
           - {os: macOS-latest, r: 'release'}
-          - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: ubuntu-22.04, r: 'release', rtools: ''}
 
     env:
       GITHUB_PAT: ${{ secrets.GH_TOKEN }}
@@ -77,12 +77,15 @@ jobs:
       - name: Install system requirements
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get install -y make
+          sudo apt-get install -y libcurl4-openssl-dev
           sudo apt-get install -y libssh-dev
+          sudo apt-get install -y libssl-dev
           Rscript -e 'install.packages("remotes")'
           while read -r cmd
           do
             eval sudo $cmd
-          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
+          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "22.04"))')
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

@@ -17,7 +17,15 @@
 exportTimeToEventToCsv <- function(
     result,
     saveDirectory,
-    minCellCount = 0) {
+    minCellCount = 0
+    ) {
+
+  countN <- dplyr::pull(
+    dplyr::count(result$timeToEvent)
+  )
+
+  message("Writing ", countN, " rows to csv")
+
   if (!dir.exists(saveDirectory)) {
     dir.create(
       path = saveDirectory,
@@ -25,6 +33,19 @@ exportTimeToEventToCsv <- function(
     )
   }
 
+  if(countN == 0){
+    # save empty csv
+    dat <- as.data.frame(result$timeToEvent)
+    colnames(dat) <- SqlRender::camelCaseToSnakeCase(
+      string = colnames(dat)
+    )
+
+    readr::write_csv(
+      x = dat,
+      file = file.path(saveDirectory,"time_to_event.csv")
+      )
+  } else{
+    # save in batches
   Andromeda::batchApply(
     tbl = result$timeToEvent,
     fun = function(x) {
@@ -59,6 +80,7 @@ exportTimeToEventToCsv <- function(
       )
     }
   )
+}
 
   invisible(
     file.path(
@@ -72,7 +94,9 @@ exportTimeToEventToCsv <- function(
 exportDechallengeRechallengeToCsv <- function(
     result,
     saveDirectory,
-    minCellCount = 0) {
+    minCellCount = 0
+    ) {
+
   countN <- dplyr::pull(
     dplyr::count(result$dechallengeRechallenge)
   )
@@ -82,6 +106,19 @@ exportDechallengeRechallengeToCsv <- function(
     dir.create(saveDirectory, recursive = TRUE)
   }
 
+  if(countN == 0){
+    # save empty csv
+    dat <- as.data.frame(result$dechallengeRechallenge)
+    colnames(dat) <- SqlRender::camelCaseToSnakeCase(
+      string = colnames(dat)
+    )
+
+    readr::write_csv(
+      x = dat,
+      file = file.path(saveDirectory,"dechallenge_rechallenge.csv")
+      )
+  } else{
+  # export in batches
   Andromeda::batchApply(
     tbl = result$dechallengeRechallenge,
     fun = function(x) {
@@ -174,6 +211,7 @@ exportDechallengeRechallengeToCsv <- function(
       )
     }
   )
+  }
 
   invisible(
     file.path(
@@ -200,6 +238,18 @@ exportRechallengeFailCaseSeriesToCsv <- function(
 
   message("Writing ", countN, " rows to csv")
 
+  if(countN == 0){
+    # save empty csv
+    dat <- as.data.frame(result$rechallengeFailCaseSeries)
+    colnames(dat) <- SqlRender::camelCaseToSnakeCase(
+      string = colnames(dat)
+    )
+    readr::write_csv(
+      x = dat,
+      file = file.path(saveDirectory,"rechallenge_fail_case_series.csv")
+    )
+  } else{
+    # save in batches
   Andromeda::batchApply(
     tbl = result$rechallengeFailCaseSeries,
     fun = function(x) {
@@ -229,6 +279,7 @@ exportRechallengeFailCaseSeriesToCsv <- function(
       )
     }
   )
+  }
 
   invisible(
     file.path(

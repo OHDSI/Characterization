@@ -75,6 +75,8 @@ duringData <- getDbDuringCovariateData(
   cohortTable = 'cohort'
 )
 
+DatabaseConnector::disconnect(connection)
+
 }
 \seealso{
 Other CovariateSetting: 

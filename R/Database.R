@@ -70,6 +70,7 @@ createSqliteDatabase <- function(
 #' @param resultsFolder        The folder containing the csv results
 #' @param tablePrefix          A prefix to append to the result tables for the characterization results
 #' @param csvTablePrefix      The prefix added to the csv results - default is 'c_'
+#' @param includedFiles      Specify the csv files to upload or NULL to upload all in directory
 #' @family Database
 #' @return
 #' Returns the connection to the sqlite database
@@ -79,13 +80,13 @@ createSqliteDatabase <- function(
 #' # generate results into resultsFolder
 #' conDet <- exampleOmopConnectionDetails()
 #'
-#' drSet <- createDechallengeRechallengeSettings(
-#'   targetIds = c(1,2),
+#' tteSet <- createTimeToEventSettings(
+#' targetIds = c(1,2),
 #'   outcomeIds = 3
-#' )
+#'   )
 #'
 #' cSet <- createCharacterizationSettings(
-#'   dechallengeRechallengeSettings = drSet
+#'   timeToEventSettings = tteSet
 #' )
 #'
 #' runCharacterizationAnalyses(
@@ -96,7 +97,7 @@ createSqliteDatabase <- function(
 #'   outcomeTable = 'cohort',
 #'   cdmDatabaseSchema = 'main',
 #'   characterizationSettings = cSet,
-#'   outputDirectory = tempdir()
+#'   outputDirectory = file.path(tempdir(),'database')
 #' )
 #'
 #' # create sqlite database
@@ -112,7 +113,8 @@ createSqliteDatabase <- function(
 #' insertResultsToDatabase(
 #'  connectionDetails = charResultDbCD,
 #'  schema = 'main',
-#'  resultsFolder = tempdir()
+#'  resultsFolder = file.path(tempdir(),'database'),
+#'  includedFiles = c('time_to_event')
 #' )
 #'
 #'
@@ -122,11 +124,16 @@ insertResultsToDatabase <- function(
     schema,
     resultsFolder,
     tablePrefix = "",
-    csvTablePrefix = "c_") {
+    csvTablePrefix = "c_",
+    includedFiles = NULL
+    ) {
   specLoc <- system.file("settings", "resultsDataModelSpecification.csv",
     package = "Characterization"
   )
   specs <- utils::read.csv(specLoc)
+  if(!is.null(includedFiles)){
+    specs <- specs[specs$table_name %in% includedFiles,]
+  }
   colnames(specs) <- SqlRender::snakeCaseToCamelCase(colnames(specs))
   specs$tableName <- paste0(csvTablePrefix, specs$tableName)
   ResultModelManager::uploadResults(
@@ -253,7 +260,8 @@ createCharacterizationTables <- function(
         )
         DatabaseConnector::executeSql(
           connection = conn,
-          sql = sql
+          sql = sql,
+          progressBar = FALSE
         )
 
         sql <- "DROP TABLE @my_schema.@table"
@@ -269,7 +277,8 @@ createCharacterizationTables <- function(
         )
         DatabaseConnector::executeSql(
           connection = conn,
-          sql = sql
+          sql = sql,
+          progressBar = FALSE
         )
       }
     }
@@ -288,10 +297,11 @@ createCharacterizationTables <- function(
 
     DatabaseConnector::executeSql(
       connection = conn,
-      sql = renderedSql
+      sql = renderedSql,
+      progressBar = FALSE
     )
 
-    # add database migration here in the future
+    ## add database migration here in the future
     migrateDataModel(
       connectionDetails = connectionDetails,
       connection = conn,
@@ -329,7 +339,11 @@ migrateDataModel <- function(
     connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
     on.exit(DatabaseConnector::disconnect(connection))
   }
-  DatabaseConnector::executeSql(connection, updateVersionSql)
+  DatabaseConnector::executeSql(
+    connection = connection,
+    sql = updateVersionSql,
+    progressBar = FALSE
+    )
 }
 
 

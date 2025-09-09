@@ -187,13 +187,13 @@ loadCharacterizationSettings <- function(
 #'
 #' conDet <- exampleOmopConnectionDetails()
 #'
-#' drSet <- createDechallengeRechallengeSettings(
+#' tteSet <- createTimeToEventSettings(
 #'   targetIds = c(1,2),
 #'   outcomeIds = 3
 #' )
 #'
 #' cSet <- createCharacterizationSettings(
-#'   dechallengeRechallengeSettings = drSet
+#'   timeToEventSettings = tteSet
 #' )
 #'
 #' runCharacterizationAnalyses(
@@ -204,7 +204,7 @@ loadCharacterizationSettings <- function(
 #'   outcomeTable = 'cohort',
 #'   cdmDatabaseSchema = 'main',
 #'   characterizationSettings = cSet,
-#'   outputDirectory = tempdir()
+#'   outputDirectory = file.path(tempdir(),'runChar')
 #' )
 #'
 #' @export
@@ -361,7 +361,7 @@ runCharacterizationAnalyses <- function(
   )
 
   # code to export all csvs into one file
-  aggregateCsvs(
+  aggregateCsvsBatch(
     outputFolder = outputDirectory,
     executionPath = executionPath,
     executionFolders = jobs$executionFolder,
@@ -421,7 +421,7 @@ runCharacterizationsInParallel <- function(x) {
       )
     },
     error = function(e) {
-      print(e)
+      rlang::inform(e$message)
       return(FALSE)
     }
   )
@@ -458,13 +458,6 @@ createJobs <- function(
       threads
     )
   )
-
-  # data.frame(
-  #  functionName,
-  #  settings # json,
-  #  executionFolder,
-  #  jobId
-  # )
 
   return(jobDf)
 }
@@ -558,6 +551,130 @@ aggregateCsvs <- function(
           file = savePath, quote = "all",
           append = append & !firstTracker$first[firstTracker$table == csvType]
         )
+        firstTracker$first[firstTracker$table == csvType] <- FALSE
+      }
+    }
+  }
+}
+
+
+aggregateCsvsBatch <- function(
+    executionPath,
+    outputFolder,
+    executionFolders, # needed?
+    csvFilePrefix,
+    batchSize = 100000
+    ) {
+  tables <- c(
+    "cohort_details.csv", "settings.csv", "covariates.csv",
+    "covariates_continuous.csv", "covariate_ref.csv",
+    "analysis_ref.csv", "cohort_counts.csv",
+    "time_to_event.csv",
+    "rechallenge_fail_case_series.csv", "dechallenge_rechallenge.csv"
+  )
+
+  colTypes <- c(
+    'ciicc','ciiiicciiccc', 'didciiccd',
+    'didddddddddciicc', 'dciicicc',
+    'icciicccc', 'iiciicciicddddd',
+    '????????',
+    '?????????????????', '????????????????????'
+  )
+
+  # this makes sure results are recreated
+  firstTracker <- data.frame(
+    table = tables,
+    first = rep(TRUE, length(tables))
+  )
+
+  csvTrackerFile <- file.path(outputFolder,'tracker.rds')
+  tracker <- list(
+    analysisRefTracker = c(),
+    covariateRefTracker = c(),
+    settingsTracker = c()
+  )
+  saveRDS(tracker, csvTrackerFile)
+
+  # create outputFolder
+
+  folderNames <- dir(executionPath)
+
+  # for each folder load covariates, covariates_continuous,
+  # covariate_ref and analysis_ref
+  for (folderName in folderNames) {
+    for (csvType in tables) {
+      loadPath <- file.path(executionPath, folderName, csvType)
+      savePath <- file.path(outputFolder, paste0(csvFilePrefix, csvType))
+      if (file.exists(loadPath)) {
+
+        firstTrackerCurrent <- firstTracker$first[firstTracker$table == csvType]
+        append <- file.exists(savePath)
+
+        # code to save results in batches
+        processCsv <- function(x, pos){
+
+          tracker <- readRDS(csvTrackerFile)
+
+          if (csvType == "analysis_ref.csv") {
+            x <- x %>%
+              dplyr::mutate(
+                unique_id = paste0(.data$setting_id, "-", .data$analysis_id)
+              ) %>%
+              dplyr::filter( # need to filter analysis_id and setting_id
+                !.data$unique_id %in% tracker$analysisRefTracker
+              ) %>%
+              dplyr::select(-"unique_id")
+
+            tracker$analysisRefTracker <- unique(c(tracker$analysisRefTracker, paste0(x$setting_id, "-", x$analysis_id)))
+          }
+          if (csvType == "covariate_ref.csv") { # this could be problematic as may have differnet covariate_ids
+            x <- x %>%
+              dplyr::mutate(
+                unique_id = paste0(.data$setting_id, "-", .data$covariate_id)
+              ) %>%
+              dplyr::filter( # need to filter covariate_id and setting_id
+                !.data$unique_id %in% tracker$covariateRefTracker
+              ) %>%
+              dplyr::select(-"unique_id")
+
+            tracker$covariateRefTracker <- unique(c(tracker$covariateRefTracker, paste0(x$setting_id, "-", x$covariate_id)))
+          }
+          if (csvType == "settings.csv") {
+            x <- x %>%
+              dplyr::filter(
+                !.data$setting_id %in% tracker$settingsTracker
+              )
+            tracker$settingsTracker <- c(tracker$settingsTracker, unique(x$setting_id))
+          }
+
+          # this does not work if the csv is empty - only
+          # works if the csv has rows.
+          readr::write_csv(
+            x = x,
+            file = savePath, quote = "all",
+            append = !firstTrackerCurrent | pos != 1
+            #append = append | pos != 1
+          )
+
+          saveRDS(tracker,csvTrackerFile)
+
+        }
+
+        readr::read_csv_chunked(
+          file = loadPath,
+          callback = readr::SideEffectChunkCallback$new(processCsv),
+          chunk_size = batchSize,
+          col_types = colTypes[csvType == tables],
+          show_col_types = FALSE
+        )
+
+        # readr::read_csv_chunked only works if the csv
+        # has 1 row or more.  This code will copy the
+        # csv with no rows to we always get a complete set of csv files
+        if(!file.exists(savePath) & file.exists(loadPath)){
+          file.copy(from = loadPath, to = savePath)
+        }
+
         firstTracker$first[firstTracker$table == csvType] <- FALSE
       }
     }

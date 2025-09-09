@@ -1,0 +1,4 @@
+covariate_id,covariate_name,analysis_id,concept_id,value_as_concept_id,collisions,setting_id,database_id
+8507001,gender = MALE,1,8507,NA,NA,20250626154217500852269034,1
+8532001,gender = FEMALE,1,8532,NA,NA,20250626154217500852269034,1
+   1002,age in years,2,   0,NA,NA,20250626154217500852269034,1

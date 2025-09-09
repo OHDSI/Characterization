@@ -95,7 +95,7 @@ test_that("prepareCharacterizationShiny works", {
     minCharacterizationMean = 0.01
   )
 
-  settings <- Characterization:::prepareCharacterizationShiny(
+  settings <- prepareCharacterizationShiny(
     resultFolder = file.path(resultLocation, "result"),
     cohortDefinitionSet = NULL,
     sqliteLocation = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
@@ -114,6 +114,7 @@ test_that("prepareCharacterizationShiny works", {
     )
   )
   conTest <- DatabaseConnector::connect(connectionDetailsTest)
+  on.exit(DatabaseConnector::disconnect(conTest))
   tables <- tolower(
     DatabaseConnector::getTableNames(
       connection = conTest,

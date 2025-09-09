@@ -14,15 +14,15 @@ rechallenge_fail_case_series,target_cohort_definition_id,bigint,Yes,Yes,No,No,Th
 rechallenge_fail_case_series,outcome_cohort_definition_id,bigint,Yes,Yes,No,No,The cohort definition id for the outcome cohort
 rechallenge_fail_case_series,person_key,int,Yes,Yes,No,No,The dense rank for the patient (an identifier that is not the same as the database)
 rechallenge_fail_case_series,subject_id,bigint,No,No,No,No,The person identifier for the failed case series (optional)
-rechallenge_fail_case_series,dechallenge_exposure_number,int,Yes,No,No,No,The number of times a dechallenge has occurred
+rechallenge_fail_case_series,dechallenge_exposure_number,int,Yes,Yes,No,No,The number of times a dechallenge has occurred
 rechallenge_fail_case_series,dechallenge_exposure_start_date_offset,int,Yes,No,No,No,The offset for the dechallenge start (number of days after index)
 rechallenge_fail_case_series,dechallenge_exposure_end_date_offset,int,Yes,No,No,No,The offset for the dechallenge end (number of days after index)
-rechallenge_fail_case_series,dechallenge_outcome_number,int,Yes,No,No,No,The number of times an outcome has occurred during the dechallenge
+rechallenge_fail_case_series,dechallenge_outcome_number,int,Yes,Yes,No,No,The number of times an outcome has occurred during the dechallenge
 rechallenge_fail_case_series,dechallenge_outcome_start_date_offset,int,Yes,No,No,No,The offset for the outcome start (number of days after index)
-rechallenge_fail_case_series,rechallenge_exposure_number,int,Yes,No,No,No,The number of times a rechallenge exposure has occurred
+rechallenge_fail_case_series,rechallenge_exposure_number,int,Yes,Yes,No,No,The number of times a rechallenge exposure has occurred
 rechallenge_fail_case_series,rechallenge_exposure_start_date_offset,int,Yes,No,No,No,The offset for the rechallenge start (number of days after index)
 rechallenge_fail_case_series,rechallenge_exposure_end_date_offset,int,Yes,No,No,No,The offset for the rechallenge end (number of days after index)
-rechallenge_fail_case_series,rechallenge_outcome_number,int,Yes,No,No,No,The number of times the outcome has occurred during the rechallenge
+rechallenge_fail_case_series,rechallenge_outcome_number,int,Yes,Yes,No,No,The number of times the outcome has occurred during the rechallenge
 rechallenge_fail_case_series,rechallenge_outcome_start_date_offset,int,Yes,No,No,No,The offset for the outcome start (number of days after index)
 dechallenge_rechallenge,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 dechallenge_rechallenge,dechallenge_stop_interval,int,Yes,Yes,No,No,The dechallenge stop interval
@@ -66,7 +66,7 @@ covariates,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
 covariates,cohort_type,varchar(12),Yes,Yes,No,No,The cohort type
 covariates,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
 covariates,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
-covariates,min_characterization_mean,float,No,Yes,No,No,Minimum fraction for feature extraction
+covariates,min_characterization_mean,float,Yes,Yes,No,No,Minimum fraction for feature extraction
 covariates,covariate_id,bigint,Yes,Yes,No,No,The covaraite id
 covariates,sum_value,int,Yes,No,No,No,The sum value
 covariates,average_value,float,No,No,No,No,The average value
@@ -113,8 +113,8 @@ cohort_counts,start_anchor,varchar(15),No,No,No,No,The start anchor
 cohort_counts,end_anchor,varchar(15),No,No,No,No,The end anchor
 cohort_counts,min_prior_observation,int,No,No,No,No,Minimum time observed before index
 cohort_counts,outcome_washout_days,int,No,No,No,No,Patients with outcome during washout are excluded
-cohort_counts,row_count,int,Yes,No,No,No,The number of rows in each cohort
-cohort_counts,person_count,int,Yes,No,No,No,The number of distinct people in each cohort
-cohort_counts,min_exposure_time,bigint,No,No,No,No,Minimum exposure time across cohort
-cohort_counts,mean_exposure_time,bigint,No,No,No,No,Mean exposure time across cohort
-cohort_counts,max_exposure_time,bigint,No,No,No,No,Max exposure time across cohort
+cohort_counts,row_count,bigint,Yes,No,No,No,The number of rows in each cohort
+cohort_counts,person_count,bigint,Yes,No,No,No,The number of distinct people in each cohort
+cohort_counts,min_exposure_time,bigint,No,No,No,No,Minimum exposure time across cohort in days
+cohort_counts,mean_exposure_time,float,No,No,No,No,Mean exposure time across cohort in days
+cohort_counts,max_exposure_time,bigint,No,No,No,No,Max exposure time across cohort in days
