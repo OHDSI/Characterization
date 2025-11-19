@@ -382,7 +382,8 @@ getDbDuringCovariateData <- function(
     sql <- paste0(paste0("select * from #cov_", continuousInd), collapse = " union ")
     sql <- SqlRender::translate(
       sql = sql,
-      targetDialect = DatabaseConnector::dbms(connection)
+      targetDialect = DatabaseConnector::dbms(connection),
+      tempEmulationSchema = tempEmulationSchema
     )
     DatabaseConnector::querySqlToAndromeda(
       connection = connection,
@@ -398,7 +399,8 @@ getDbDuringCovariateData <- function(
     connection = connection,
     sql = SqlRender::translate(
       sql = "select * from #cov_ref;",
-      targetDialect = DatabaseConnector::dbms(connection)
+      targetDialect = DatabaseConnector::dbms(connection),
+      tempEmulationSchema = tempEmulationSchema
     ),
     andromeda = result,
     andromedaTableName = "covariateRef",
@@ -411,7 +413,8 @@ getDbDuringCovariateData <- function(
     connection = connection,
     sql = SqlRender::translate(
       sql = "select * from #analysis_ref;",
-      targetDialect = DatabaseConnector::dbms(connection)
+      targetDialect = DatabaseConnector::dbms(connection),
+      tempEmulationSchema = tempEmulationSchema
     ),
     andromeda = result,
     andromedaTableName = "analysisRef",
