@@ -34,7 +34,9 @@ createAggregateCovariateSettings(
     TRUE, useVisitConceptCountDuring = TRUE),
   casePreTargetDuration = 365,
   casePostOutcomeDuration = 365,
-  extractNonCaseCovariates = TRUE
+  extractNonCaseCovariates = TRUE,
+  minTargetSize = 0,
+  minTwithOSize = 0
 )
 }
 \arguments{
@@ -65,6 +67,10 @@ or `"cohort end"`.}
 \item{casePostOutcomeDuration}{The number of days prior to case index we use for FeatureExtraction}
 
 \item{extractNonCaseCovariates}{Whether to extract aggregate covariates and counts for patients in the targets and outcomes in addition to the cases}
+
+\item{minTargetSize}{The minimum size of the target cohorts for them to have aggregate covariates calculated}
+
+\item{minTwithOSize}{The minimum size of the cohorts corresponding to patients in the target with the outcome during time-at-risk for them to have aggregate covariates calculated}
 }
 \value{
 A list with the settings

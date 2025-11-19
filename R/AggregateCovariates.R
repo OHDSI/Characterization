@@ -26,6 +26,8 @@
 #' @param casePreTargetDuration    The number of days prior to case index we use for FeatureExtraction
 #' @param casePostOutcomeDuration    The number of days prior to case index we use for FeatureExtraction
 #' @param extractNonCaseCovariates Whether to extract aggregate covariates and counts for patients in the targets and outcomes in addition to the cases
+#' @param minTargetSize The minimum size of the target cohorts for them to have aggregate covariates calculated
+#' @param minTwithOSize The minimum size of the cohorts corresponding to patients in the target with the outcome during time-at-risk for them to have aggregate covariates calculated
 #' @family Aggregate
 #' @return
 #' A list with the settings
@@ -96,7 +98,10 @@ createAggregateCovariateSettings <- function(
     ),
     casePreTargetDuration = 365,
     casePostOutcomeDuration = 365,
-    extractNonCaseCovariates = TRUE) {
+    extractNonCaseCovariates = TRUE,
+    minTargetSize = 0,
+    minTwithOSize = 0
+    ) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
   .checkCohortIds(
@@ -175,7 +180,9 @@ createAggregateCovariateSettings <- function(
     casePreTargetDuration = casePreTargetDuration, # case series
     casePostOutcomeDuration = casePostOutcomeDuration, # case series,
 
-    extractNonCaseCovariates = extractNonCaseCovariates
+    extractNonCaseCovariates = extractNonCaseCovariates,
+    minTargetSize = minTargetSize,
+    minTwithOSize = minTwithOSize
   )
 
   class(result) <- "aggregateCovariateSettings"
@@ -305,12 +312,23 @@ computeTargetAggregateCovariateAnalyses <- function(
 
   message("Target Aggregate: Computing aggregate target covariate results")
 
+  cohortsOfInt <- -1
+  if(settings$minTargetSize > 0){
+    if(sum(counts$personCount > settings$minTargetSize)){
+      message(paste0("Restricting to target cohorts with > ", settings$minTargetSize, ' patients'))
+      cohortsOfInt <- counts$cohortDefinitionId[counts$personCount > settings$minTargetSize]
+    } else{
+      message(paste0("No target cohorts with > ", settings$minTargetSize, ' patients'))
+      cohortsOfInt <- 0
+    }
+  }
+
   result <- FeatureExtraction::getDbCovariateData(
     connection = connection,
     cdmDatabaseSchema = cdmDatabaseSchema,
     cohortTable = "#agg_cohorts_before",
     cohortTableIsTemp = TRUE,
-    cohortIds = -1,
+    cohortIds = cohortsOfInt,
     covariateSettings = ParallelLogger::convertJsonToSettings(covariateSettings),
     cdmVersion = cdmVersion,
     aggregated = TRUE,
@@ -530,12 +548,24 @@ computeCaseAggregateCovariateAnalyses <- function(
 
   message("Case Aggregates: Computing aggregate before case covariate results")
 
+  cohortsOfInt <- -1
+  excludeIds <- cohortDetails$cohortDefinitionId[cohortDetails$cohortType == 'Exclude']
+  excludeIds <- counts$cohortDefinitionId[counts$cohortDefinitionId %in% excludeIds & counts$personCount >= minCellCount]
+  if(settings$minTwithOSize > 0){
+    if(sum(counts$personCount > settings$minTwithOSize | counts$cohortDefinitionId %in% excludeIds )){
+      message(paste0("Restricting to case cohorts with > ", settings$minTwithOSize, ' patients'))
+      cohortsOfInt <- counts$cohortDefinitionId[counts$personCount > settings$minTwithOSize | counts$cohortDefinitionId %in% excludeIds]
+    } else{
+      cohortsOfInt <- 0
+    }
+  }
+
   result <- FeatureExtraction::getDbCovariateData(
     connection = connection,
     cdmDatabaseSchema = cdmDatabaseSchema,
     cohortTable = "#cases",
     cohortTableIsTemp = TRUE,
-    cohortIds = -1,
+    cohortIds = cohortsOfInt,
     covariateSettings = ParallelLogger::convertJsonToSettings(covariateSettings),
     cdmVersion = cdmVersion,
     aggregated = TRUE,
@@ -547,12 +577,22 @@ computeCaseAggregateCovariateAnalyses <- function(
 
   result2 <- tryCatch(
     {
+      cohortsOfInt <- -1
+      if(settings$minTwithOSize > 0){
+        if(sum(counts$personCount > settings$minTwithOSize )){
+          message(paste0("Restricting to case cohorts with > ", settings$minTwithOSize, ' patients'))
+          cohortsOfInt <- counts$cohortDefinitionId[counts$personCount > settings$minTwithOSize]
+        } else{
+          cohortsOfInt <- 0
+        }
+      }
+
       FeatureExtraction::getDbCovariateData(
         connection = connection,
         cdmDatabaseSchema = cdmDatabaseSchema,
         cohortTable = "#case_series",
         cohortTableIsTemp = TRUE,
-        cohortIds = -1,
+        cohortIds = cohortsOfInt,
         covariateSettings = ParallelLogger::convertJsonToSettings(caseCovariateSettings),
         cdmVersion = cdmVersion,
         aggregated = TRUE,
