@@ -969,7 +969,6 @@ getAggregateCovariatesJobs <- function(
   }
   ind <- 1:length(characterizationSettings)
 
-
   # target combinations
   targetCombinations <- do.call(
     what = "rbind",
@@ -1034,7 +1033,8 @@ getAggregateCovariatesJobs <- function(
                 targetIds = unique(restrictedData$targetId[ind]),
                 minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
                 covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind])),
-                settingId = settingId
+                settingId = settingId,
+                minTargetSize = characterizationSettings$minTargetSize
               )
             )),
             executionFolder = paste("tac", i, paste(settingVal, collapse = "_"), sep = "_"),
@@ -1144,7 +1144,8 @@ getAggregateCovariatesJobs <- function(
               casePostOutcomeDuration = unique(restrictedData$casePostOutcomeDuration[ind]),
               covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind])),
               caseCovariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$caseCovariateSettingsJson[ind])),
-              settingIds = unique(restrictedData$settingId[ind])
+              settingIds = unique(restrictedData$settingId[ind]),
+              minTwithOSize = characterizationSettings$minTwithOSize
             )
           )),
           executionFolder = paste("cac", i, paste0(settingVal, collapse = "_"), sep = "_"),
