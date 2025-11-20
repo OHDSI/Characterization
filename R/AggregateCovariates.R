@@ -546,6 +546,24 @@ computeCaseAggregateCovariateAnalyses <- function(
     snakeCaseToCamelCase = TRUE
   )
 
+  sql <- "select
+  cohort_definition_id,
+  count(*) row_count,
+  count(distinct subject_id) person_count
+  from #case_series
+  group by cohort_definition_id;"
+  sql <- SqlRender::translate(
+    sql = sql,
+    targetDialect = connectionDetails$dbms,
+    tempEmulationSchema = tempEmulationSchema
+  )
+  # Have this in tryCatch?
+  casecounts <- DatabaseConnector::querySql(
+    connection = connection,
+    sql = sql,
+    snakeCaseToCamelCase = TRUE
+  )
+
   message("Case Aggregates: Computing aggregate before case covariate results")
 
   cohortsOfInt <- -1
@@ -579,9 +597,9 @@ computeCaseAggregateCovariateAnalyses <- function(
     {
       cohortsOfInt <- -1
       if(settings$minTwithOSize > 0){
-        if(sum(counts$personCount > settings$minTwithOSize )){
+        if(sum(casecounts$personCount > settings$minTwithOSize )){
           message(paste0("Restricting to case cohorts with > ", settings$minTwithOSize, ' patients'))
-          cohortsOfInt <- counts$cohortDefinitionId[counts$personCount > settings$minTwithOSize]
+          cohortsOfInt <- casecounts$cohortDefinitionId[casecounts$personCount > settings$minTwithOSize]
         } else{
           cohortsOfInt <- 0
         }

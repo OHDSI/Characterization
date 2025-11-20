@@ -161,7 +161,8 @@ prepareCharacterizationShiny <- function(
       tableName = "cg_COHORT_DEFINITION",
       data = data.frame(
         cohortDefinitionId = cohortIds,
-        cohortName = getCohortNames(cohortIds, cohortDefinitionSet)
+        cohortName = getCohortNames(cohortIds, cohortDefinitionSet),
+        subsetParents = cohortIds
       ),
       camelCaseToSnakeCase = TRUE
     )
