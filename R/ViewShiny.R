@@ -112,6 +112,39 @@ prepareCharacterizationShiny <- function(
 
   tables <- tolower(DatabaseConnector::getTableNames(con, "main"))
 
+  if (!"database_meta_data" %in% tables) {
+    dbIds <- unique(
+      c(
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "analysis_ref;"),
+          snakeCaseToCamelCase = TRUE
+        )$databaseId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "dechallenge_rechallenge;"),
+          snakeCaseToCamelCase = TRUE
+        )$databaseId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
+          snakeCaseToCamelCase = TRUE
+        )$databaseId
+      )
+    )
+
+    DatabaseConnector::insertTable(
+      connection = con,
+      databaseSchema = "main",
+      tableName = "DATABASE_META_DATA",
+      data = data.frame(
+        databaseId = dbIds,
+        cdmSourceAbbreviation = paste0("database ", dbIds)
+      ),
+      camelCaseToSnakeCase = TRUE
+    )
+  }
+
   # this now works for different prefixes
   if (!"cg_cohort_definition" %in% tables) {
     cohortIds <- unique(
@@ -123,7 +156,7 @@ prepareCharacterizationShiny <- function(
           )$targetCohortId,
         DatabaseConnector::querySql(
           connection = con,
-          sql = paste0("select distinct OUTCOME_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'TnO';"),
+          sql = paste0("select distinct OUTCOME_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'Cases';"),
           snakeCaseToCamelCase = TRUE
           )$outcomeCohortId,
         DatabaseConnector::querySql(
@@ -163,44 +196,33 @@ prepareCharacterizationShiny <- function(
         cohortDefinitionId = cohortIds,
         cohortName = getCohortNames(cohortIds, cohortDefinitionSet),
         subsetParent = cohortIds,
-        subsetDefinitionId = 0
+        subsetDefinitionId = NA,
+        subsetDefinitionJson = NA
       ),
       camelCaseToSnakeCase = TRUE
     )
-  }
 
-  if (!"database_meta_data" %in% tables) {
-    dbIds <- unique(
-      c(
-        DatabaseConnector::querySql(
-          connection = con,
-          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "analysis_ref;"),
-          snakeCaseToCamelCase = TRUE
-          )$databaseId,
-        DatabaseConnector::querySql(
-          connection = con,
-          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "dechallenge_rechallenge;"),
-          snakeCaseToCamelCase = TRUE
-          )$databaseId,
-        DatabaseConnector::querySql(
-          connection = con,
-          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
-          snakeCaseToCamelCase = TRUE
-          )$databaseId
-      )
-    )
+    databaseIds <- DatabaseConnector::querySql(
+      connection = con,
+      sql = paste0("select distinct DATABASE_ID from main.DATABASE_META_DATA;"),
+      snakeCaseToCamelCase = TRUE
+    )$databaseId
 
     DatabaseConnector::insertTable(
       connection = con,
       databaseSchema = "main",
-      tableName = "DATABASE_META_DATA",
+      tableName = "cg_COHORT_COUNT",
       data = data.frame(
-        databaseId = dbIds,
-        cdmSourceAbbreviation = paste0("database ", dbIds)
+        cohortId = cohortIds,
+        databaseId = databaseIds,
+        cohortSubjects = 0,
+        cohortEntries = 0
       ),
       camelCaseToSnakeCase = TRUE
     )
   }
+
+
 
   # create the settings for the database
   databaseSettings <- list(
