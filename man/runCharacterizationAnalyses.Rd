@@ -10,6 +10,8 @@ runCharacterizationAnalyses(
   targetTable,
   outcomeDatabaseSchema,
   outcomeTable,
+  outputDatabaseSchema = NULL,
+  outputTable = "#characterization_cohort",
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   cdmDatabaseSchema,
   characterizationSettings,
@@ -21,7 +23,9 @@ runCharacterizationAnalyses(
   minCellCount = 0,
   incremental = TRUE,
   threads = 1,
-  minCharacterizationMean = 0.01
+  minCharacterizationMean = 0.01,
+  minCharacterizationCount = 0,
+  mode = "CohortIncidence"
 )
 }
 \arguments{
@@ -64,6 +68,10 @@ can be created}
 \item{threads}{The number of threads to use when running aggregate covariates}
 
 \item{minCharacterizationMean}{The minimum mean threshold to extract when running aggregate covariates}
+
+\item{minCharacterizationCount}{The minimum count to extract when running aggregate covariates}
+
+\item{mode}{Select from Efficient (no exclusions to target based on washout)/CohortIncidence (excludes targets with outcome in washout if they have no time at risk)/PatientLevelPrediction (excludes targets with outcome during washout prior to index)}
 }
 \value{
 Multiple csv files in the outputDirectory.

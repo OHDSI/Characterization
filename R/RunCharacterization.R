@@ -7,7 +7,9 @@
 #'
 #' @param timeToEventSettings    A list of timeToEvent settings
 #' @param dechallengeRechallengeSettings A list of dechallengeRechallenge settings
-#' @param aggregateCovariateSettings A list of aggregateCovariate settings
+#' @param targetBaselineSettings A list of targetBaselineSettings settings
+#' @param riskFactorSettings A list of riskFactorSettings settings
+#' @param caseSeriesSettings A list of caseSeriesSettings settings
 #' @family LargeScale
 #'
 #' @return
@@ -29,16 +31,19 @@
 createCharacterizationSettings <- function(
     timeToEventSettings = NULL,
     dechallengeRechallengeSettings = NULL,
-    aggregateCovariateSettings = NULL) {
+    targetBaselineSettings = NULL,
+    riskFactorSettings = NULL,
+    caseSeriesSettings = NULL
+    ) {
   errorMessages <- checkmate::makeAssertCollection()
   .checkTimeToEventSettingsList(
     settings = timeToEventSettings,
     errorMessages =  errorMessages
   )
-  .checkAggregateCovariateSettingsList(
-    settings = aggregateCovariateSettings,
-    errorMessages = errorMessages
-  )
+  #.checkAggregateCovariateSettingsList(
+  #  settings = aggregateCovariateSettings,
+  #  errorMessages = errorMessages
+  #)
   .checkDechallengeRechallengeSettingsList(
     settings = dechallengeRechallengeSettings,
     errorMessages = errorMessages
@@ -50,8 +55,14 @@ createCharacterizationSettings <- function(
   if (inherits(dechallengeRechallengeSettings, "dechallengeRechallengeSettings")) {
     dechallengeRechallengeSettings <- list(dechallengeRechallengeSettings)
   }
-  if (inherits(aggregateCovariateSettings, "aggregateCovariateSettings")) {
-    aggregateCovariateSettings <- list(aggregateCovariateSettings)
+  if (inherits(targetBaselineSettings, "targetBaselineSettings")) {
+    targetBaselineSettings <- list(targetBaselineSettings)
+  }
+  if (inherits(riskFactorSettings, "riskFactorSettings")) {
+    riskFactorSettings <- list(riskFactorSettings)
+  }
+  if (inherits(caseSeriesSettings, "caseSeriesSettings")) {
+    caseSeriesSettings <- list(caseSeriesSettings)
   }
 
   valid <- checkmate::reportAssertions(errorMessages)
@@ -59,7 +70,9 @@ createCharacterizationSettings <- function(
   settings <- list(
     timeToEventSettings = timeToEventSettings,
     dechallengeRechallengeSettings = dechallengeRechallengeSettings,
-    aggregateCovariateSettings = aggregateCovariateSettings
+    targetBaselineSettings = targetBaselineSettings,
+    riskFactorSettings = riskFactorSettings,
+    caseSeriesSettings = caseSeriesSettings
   )
 
   class(settings) <- "characterizationSettings"
@@ -178,6 +191,8 @@ loadCharacterizationSettings <- function(
 #' @param incremental If TRUE then skip previously executed analyses that completed
 #' @param threads    The number of threads to use when running aggregate covariates
 #' @param minCharacterizationMean The minimum mean threshold to extract when running aggregate covariates
+#' @param minCharacterizationCount The minimum count to extract when running aggregate covariates
+#' @param mode Select from Efficient (no exclusions to target based on washout)/CohortIncidence (excludes targets with outcome in washout if they have no time at risk)/PatientLevelPrediction (excludes targets with outcome during washout prior to index)
 #' @family LargeScale
 #'
 #' @return
@@ -214,6 +229,8 @@ runCharacterizationAnalyses <- function(
     targetTable,
     outcomeDatabaseSchema,
     outcomeTable,
+    outputDatabaseSchema = NULL,
+    outputTable = '#characterization_cohort',
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     cdmDatabaseSchema,
     characterizationSettings,
@@ -225,7 +242,10 @@ runCharacterizationAnalyses <- function(
     minCellCount = 0,
     incremental = TRUE,
     threads = 1,
-    minCharacterizationMean = 0.01) {
+    minCharacterizationMean = 0.01, # is this global or within cov set?
+    minCharacterizationCount = 0, # is this global or within cov set?
+    mode = 'CohortIncidence'
+    ) {
   # inputs checks
   errorMessages <- checkmate::makeAssertCollection()
   .checkCharacterizationSettings(
@@ -239,6 +259,10 @@ runCharacterizationAnalyses <- function(
   checkmate::reportAssertions(
     errorMessages
   )
+  # check model in c('Efficient', 'CohortIncidence', 'PatientLevelPrediction')
+  if(!mode %in% c('Efficient', 'CohortIncidence', 'PatientLevelPrediction')){
+    stop("Invalid mode.  Please select one of: 'Efficient', 'CohortIncidence', 'PatientLevelPrediction'")
+  }
 
   runDateTime <- Sys.time()
 
@@ -262,12 +286,14 @@ runCharacterizationAnalyses <- function(
     saveRDS(
       object = list(
         characterizationSettings = characterizationSettings,
-        threads = threads
+        threads = threads,
+        mode = mode
       ),
       file = file.path(executionPath, "settings.rds")
     )
   }
 
+  # check settings are the same if running icremental
   if (incremental) {
     # check for any issues with current incremental
     oldSettings <- readRDS(
@@ -279,6 +305,10 @@ runCharacterizationAnalyses <- function(
     if (!identical(threads, oldSettings$threads)) {
       stop("Cannot change number of threads in incremental model")
     }
+    if (!identical(mode, oldSettings$mode)) {
+      stop(paste0("Cannot change mode in incremental model, please use ", oldSettings$mode, " mode."))
+    }
+
 
     # create logs if not exists
     createIncrementalLog(
@@ -315,6 +345,24 @@ runCharacterizationAnalyses <- function(
   }
 
 
+  # FIRST GENERATE ALL THE REQUIRED COHORTS - EXTRACT COHORT JOBS AND GENERATE
+  tableNames <- generateCohorts(
+    characterizationSettings = characterizationSettings,
+    threads = threads,
+    #numberOfJobs = njobs,
+    incremental = incremental,
+    executionPath = executionPath,
+
+    connectionDetails = connectionDetails,
+    targetDatabaseSchema = targetDatabaseSchema,
+    targetTable = targetTable,
+    outcomeDatabaseSchema = outcomeDatabaseSchema,
+    outcomeTable = outcomeTable,
+    outputDatabaseSchema = outputDatabaseSchema,
+    outputTable = outputTable,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    tempEmulationSchema = tempEmulationSchema
+  )
 
   # Now loop over the jobs
   inputSettings <- list(
@@ -329,11 +377,19 @@ runCharacterizationAnalyses <- function(
     showSubjectId = showSubjectId,
     minCellCount = minCellCount,
     minCharacterizationMean = minCharacterizationMean,
+    minCharacterizationCount = minCharacterizationCount,
     executionPath = executionPath,
-    incremental = incremental
+    incremental = incremental,
+
+    # new inputs
+    characterizationTable = tableNames$characterizationTable,
+    targetSettingsTable = tableNames$targetSettingsTable,
+    caseSettingsTable = tableNames$caseSettingsTable
   )
 
-  # convert jobList to list with extra inputs
+
+
+  # 2) convert jobList to list with extra inputs
   jobList <- lapply(
     X = 1:nrow(jobs),
     FUN = function(ind) {
@@ -361,12 +417,12 @@ runCharacterizationAnalyses <- function(
   )
 
   # code to export all csvs into one file
-  aggregateCsvsBatch(
-    outputFolder = outputDirectory,
-    executionPath = executionPath,
-    executionFolders = jobs$executionFolder,
-    csvFilePrefix = csvFilePrefix
-  )
+  #aggregateCsvsBatch(
+  #  outputFolder = outputDirectory,
+  #  executionPath = executionPath,
+  #  executionFolders = jobs$executionFolder,
+  #  csvFilePrefix = csvFilePrefix
+  #)
 
   invisible(outputDirectory)
 }
@@ -445,6 +501,7 @@ createJobs <- function(
     characterizationSettings,
     threads) {
   jobDf <- rbind(
+
     getTimeToEventJobs(
       characterizationSettings,
       threads
@@ -453,7 +510,15 @@ createJobs <- function(
       characterizationSettings,
       threads
     ),
-    getAggregateCovariatesJobs(
+    getTargetBaselineJobs(
+      characterizationSettings,
+      threads
+    ),
+    getRiskFactorJobs(
+      characterizationSettings,
+      threads
+    ),
+    getCaseSeriesJobs(
       characterizationSettings,
       threads
     )
