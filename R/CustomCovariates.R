@@ -121,8 +121,31 @@ createDuringCovariateSettings <- function(
 #' @param aggregated  whether the covariate should be aggregated
 #' @param cohortIds  cohort id for the target cohort
 #' @param covariateSettings  settings for the covariate cohorts and time periods
-#' @param minCharacterizationMean the minimum value for a covariate to be extracted
+#'
 #' @template tempEmulationSchema
+#'
+#' @param targetCovariateTable  (Optional) The name of the table where the resulting binary covariates will
+#'                               be stored. If not provided, results will be fetched to R. The table can be
+#'                               a permanent table in the \code{targetDatabaseSchema} or a temp table. If
+#'                               it is a temp table, do not specify \code{targetDatabaseSchema}.
+#' @param targetCovariateContinuousTable  (Optional) The name of the table where the resulting continuous covariates will
+#'                               be stored. If not provided, results will be fetched to R. The table can be
+#'                               a permanent table in the \code{targetDatabaseSchema} or a temp table. If
+#'                               it is a temp table, do not specify \code{targetDatabaseSchema}.
+#'
+#' @param targetCovariateRefTable (Optional) The name of the table where the covariate reference will be stored.
+#'
+#' @param targetAnalysisRefTable (Optional) The name of the table where the analysis reference will be stored.
+#' @param targetTimeRefTable     (Optional) The name of the table for the time reference
+#' @param minCharacterizationMean The minimum mean value for binary characterization output. Values below this will be cut off from output. This
+#'                                will help reduce the file size of the characterization output, but will remove information
+#'                                on covariates that have very low values. The default is 0.
+#'
+#'
+#' @param dropTableIfExists      If targetDatabaseSchema, drop any existing tables. Otherwise, results are merged
+#'                               into existing table data. Overides createTable.
+#' @param createTable            Run sql to create table? Code does not check if table exists.
+#'
 #' @param ...  additional arguments from FeatureExtraction
 #'
 #' @family CovariateSetting
@@ -165,11 +188,33 @@ getDbDuringCovariateData <- function(
     covariateSettings,
     minCharacterizationMean = 0,
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+
+    targetDatabaseSchema = NULL,
+    targetCovariateTable = NULL,
+    targetCovariateContinuousTable = NULL,
+    targetCovariateRefTable = NULL,
+    targetAnalysisRefTable = NULL,
+    targetTimeRefTable = NULL,
+    dropTableIfExists = FALSE,
+    createTable = TRUE,
+
     ...) {
   writeLines("Constructing during cohort covariates")
   if (!aggregated) {
     stop("Only aggregation supported")
   }
+
+  targetTables <- list(
+    covariates = targetCovariateTable,
+    covariatesContinuous = targetCovariateContinuousTable,
+    covariateRef = targetCovariateRefTable,
+    analysisRef = targetAnalysisRefTable,
+    timeRef = targetTimeRefTable
+  )
+
+  # if targetCovariateTable is NULL then extract to Andromeda
+  allTempTables <- all(substr(targetTables,1,1) == "#")
+  extractToAndromeda <- is.null(targetCovariateTable)
 
   getDomainSettings <- utils::read.csv(system.file("csv/PrespecAnalyses.csv", package = "Characterization"))
 
@@ -345,18 +390,41 @@ getDbDuringCovariateData <- function(
   # Retrieve the covariate:
   if (useBinary) {
     sql <- paste0(
+      "{@extract_to_table}?{
+
+      {@temp_tables}?{
+      SELECT * INTO @target_covariate_table
+      FROM (
+      }:{
+
+      INSERT INTO @target_covariate_table(
+      cohort_definition_id,
+      covariate_id,
+      sum_value,
+      average_value
+      )
+      }
+      }", # ADDED NEW
       "select temp.*, CAST(temp.sum_value / (1.0 * total.total_count) AS FLOAT) AS average_value from (",
       paste0(paste0("select cohort_definition_id, covariate_id, sum_value from #cov_", binaryInd), collapse = " union "),
       ") temp inner join
       (SELECT cohort_definition_id, COUNT(*) AS total_count
       FROM @cohort_table {@cohort_definition_id != -1} ? {\nWHERE cohort_definition_id IN (@cohort_definition_id)}
       GROUP BY cohort_definition_id ) total
-       on temp.cohort_definition_id = total.cohort_definition_id;"
+       on temp.cohort_definition_id = total.cohort_definition_id",
+      "
+      {@temp_tables}?{
+      ) main_table
+      }
+      ;"
     )
     sql <- SqlRender::render(
       sql = sql,
       cohort_table = cohortTable,
-      cohort_definition_id = paste0(c(-1), collapse = ",")
+      cohort_definition_id = paste0(c(-1), collapse = ","),
+      temp_tables = allTempTables,
+      target_covariate_table = targetTables$covariates,
+      extract_to_table = !extractToAndromeda
     )
     sql <- SqlRender::translate(
       sql = sql,
@@ -364,37 +432,104 @@ getDbDuringCovariateData <- function(
       tempEmulationSchema = tempEmulationSchema
     )
 
-    DatabaseConnector::querySqlToAndromeda(
-      connection = connection,
-      sql = sql,
-      andromeda = result,
-      andromedaTableName = "covariates",
-      appendToTable = FALSE,
-      snakeCaseToCamelCase = TRUE
-    )
-    if (minCharacterizationMean != 0 && "averageValue" %in% colnames(result$covariates)) {
-      result$covariates <- result$covariates %>%
-        dplyr::filter(.data$averageValue >= minCharacterizationMean)
+    if(extractToAndromeda){
+      message('Downloading covariates')
+      DatabaseConnector::querySqlToAndromeda(
+        connection = connection,
+        sql = sql,
+        andromeda = result,
+        andromedaTableName = "covariates",
+        appendToTable = FALSE,
+        snakeCaseToCamelCase = TRUE
+      )
+      if (minCharacterizationMean != 0 && "averageValue" %in% colnames(result$covariates)) {
+        result$covariates <- result$covariates %>%
+          dplyr::filter(.data$averageValue >= minCharacterizationMean)
+      }
+    } else{
+      # insert into the table
+      message('Inserting covariates into table')
+      DatabaseConnector::executeSql(
+        connection = connection,
+        sql = sql
+      )
     }
   }
 
   if (useContinuous) {
-    sql <- paste0(paste0("select * from #cov_", continuousInd), collapse = " union ")
+    sql <- paste0(
+      "{@extract_to_table}?{
+
+      {@temp_tables}?{
+      SELECT * INTO @target_covariate_continuous_table
+      FROM (
+      }:{
+      INSERT INTO @target_covariate_continuous_table(
+      cohort_definition_id,
+      covariate_id,
+      count_value,
+	    min_value,
+	    max_value,
+	    average_value,
+	    standard_deviation,
+	    median_value,
+	    p10_value,
+	    p25_value,
+	    p75_value,
+	    p90_value
+      )
+      }
+      }",
+      paste0(paste0("select
+                    cohort_definition_id,
+      covariate_id,
+      count_value,
+	    min_value,
+	    max_value,
+	    average_value,
+	    standard_deviation,
+	    median_value,
+	    p10_value,
+	    p25_value,
+	    p75_value,
+	    p90_value
+                    from #cov_", continuousInd), collapse = " union "),
+
+      "{@temp_tables}?{
+      ) main_table
+      }
+      ;"
+    )
+    sql <- SqlRender::render(
+      sql = sql,
+      temp_tables = allTempTables,
+      target_covariate_continuous_table = targetTables$covariatesContinuous,
+      extract_to_table = !extractToAndromeda
+    )
     sql <- SqlRender::translate(
       sql = sql,
       targetDialect = DatabaseConnector::dbms(connection),
       tempEmulationSchema = tempEmulationSchema
     )
-    DatabaseConnector::querySqlToAndromeda(
-      connection = connection,
-      sql = sql,
-      andromeda = result,
-      andromedaTableName = "covariatesContinuous",
-      appendToTable = FALSE,
-      snakeCaseToCamelCase = TRUE
-    )
+    if(extractToAndromeda){
+      message('Downloading continuous covariates')
+      DatabaseConnector::querySqlToAndromeda(
+        connection = connection,
+        sql = sql,
+        andromeda = result,
+        andromedaTableName = "covariatesContinuous",
+        appendToTable = FALSE,
+        snakeCaseToCamelCase = TRUE
+      )} else{
+        message('Inserting covariates into table')
+        DatabaseConnector::executeSql(
+          connection = connection,
+          sql = sql
+        )
+      }
   }
   # Retrieve the covariate ref:
+  if(extractToAndromeda){
   DatabaseConnector::querySqlToAndromeda(
     connection = connection,
     sql = SqlRender::translate(
@@ -406,9 +541,46 @@ getDbDuringCovariateData <- function(
     andromedaTableName = "covariateRef",
     appendToTable = FALSE,
     snakeCaseToCamelCase = TRUE
-  )
+  )}else{
+
+    sql <- SqlRender::render(
+      sql = "
+      {@temp_tables}?{
+      SELECT * INTO @target_covariate_ref
+      FROM #cov_ref;
+      }:{
+      INSERT INTO @target_covariate_ref(
+      covariate_id,
+	    covariate_name,
+	    analysis_id,
+	    concept_id
+      )
+
+      SELECT
+      covariate_id,
+	    covariate_name,
+	    analysis_id,
+	    concept_id
+      FROM #cov_ref;
+      }",
+      temp_tables = allTempTables,
+      target_covariate_ref = targetTables$covariateRef
+    )
+
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = DatabaseConnector::dbms(connection),
+      tempEmulationSchema = tempEmulationSchema
+    )
+
+    DatabaseConnector::executeSql(
+      connection = connection,
+      sql = sql
+    )
+  }
 
   # Retrieve the analysis ref:
+  if(extractToAndromeda){
   DatabaseConnector::querySqlToAndromeda(
     connection = connection,
     sql = SqlRender::translate(
@@ -420,7 +592,43 @@ getDbDuringCovariateData <- function(
     andromedaTableName = "analysisRef",
     appendToTable = FALSE,
     snakeCaseToCamelCase = TRUE
-  )
+  )} else{
+
+    sql <- SqlRender::render(
+      sql = "
+      {@temp_tables}?{
+      SELECT * INTO @target_analysis_ref
+      FROM #analysis_ref;
+      }:{
+      INSERT INTO @target_analysis_ref(
+      analysis_id,
+	    analysis_name,
+	    domain_id,
+	    is_binary,
+	    missing_means_zero
+      )
+      SELECT
+      analysis_id,
+	    analysis_name,
+	    domain_id,
+	    is_binary,
+	    missing_means_zero
+      FROM #analysis_ref;
+      }",
+      temp_tables = allTempTables,
+      target_analysis_ref = targetTables$analysisRef
+    )
+
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = DatabaseConnector::dbms(connection),
+      tempEmulationSchema = tempEmulationSchema
+    )
+    DatabaseConnector::executeSql(
+      connection = connection,
+      sql = sql
+    )
+  }
   time <- Sys.time() - start
   message(paste0("Extracting covariates took ", round(time, digits = 2), " ", units(time)))
 

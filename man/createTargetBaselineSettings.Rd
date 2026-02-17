@@ -51,7 +51,7 @@ aggregateSetting <- createTargetBaselineSettings(
 }
 \seealso{
 Other Aggregate: 
-\code{\link{createAggregateCovariateSettings}()},
+\code{\link{createCaseSeriesSettings}()},
 \code{\link{createRiskFactorSettings}()}
 }
 \concept{Aggregate}

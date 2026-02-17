@@ -17,12 +17,12 @@ lookupTargets <- function(
    min_prior_observation
 
    FROM @lookup_schema.@lookup_table lt
-   {@fetch_char_id}?{
+   {@use_char_id}?{
+    WHERE lt.characterization_target_id in (@char_ids);
+   }:{
    WHERE lt.target_id in (@target_ids)
    AND lt.limit_to_first_in_n_days = @limit_to_first_in_n_days
    AND lt.min_prior_observation = @min_prior_observation;
-  }:{
-    WHERE lt.characterization_target_id in (@char_ids);
   }
    "
 
@@ -30,11 +30,11 @@ lookupTargets <- function(
     sql = sql,
     lookup_schema = lookupDatabaseSchema,
     lookup_table = lookupTableName,
-    target_ids = paste0(targetIds, sep = ','),
+    target_ids = paste0(targetIds, collapse  = ','),
     limit_to_first_in_n_days = limitToFirstInNDays,
     min_prior_observation = minPriorObservation,
-    fetch_char_id = !is.null(characterizationTargetId),
-    char_ids = paste0(characterizationTargetId, sep = ',')
+    use_char_id = !is.null(characterizationTargetId),
+    char_ids = paste0(characterizationTargetId, collapse  = ',')
     )
 
   sql <- SqlRender::translate(
@@ -79,12 +79,12 @@ lookupCases <- function(
    risk_window_end
 
    FROM @lookup_schema.@lookup_table lt
-   WHERE characterization_target_id in (@char_ids),
-   AND outcome_id in (@outcome_ids),
-   AND outcome_washout_days = @outcome_washout_days,
-   AND start_anchor = @start_anchor,
-   AND risk_window_start = @risk_window_start,
-   AND end_anchor = @end_anchor,
+   WHERE characterization_target_id in (@char_ids)
+   AND outcome_id in (@outcome_ids)
+   AND outcome_washout_days = @outcome_washout_days
+   AND start_anchor = '@start_anchor'
+   AND risk_window_start = @risk_window_start
+   AND end_anchor = '@end_anchor'
    AND risk_window_end = @risk_window_end;
    "
 
@@ -92,8 +92,8 @@ lookupCases <- function(
     sql = sql,
     lookup_schema = lookupDatabaseSchema,
     lookup_table = lookupTableName,
-    char_ids = paste0(characterizationTargetIds, sep = ','),
-    outcome_ids = paste0(outcomeIds, sep = ','),
+    char_ids = paste0(characterizationTargetIds, collapse  = ','),
+    outcome_ids = paste0(outcomeIds, collapse  = ','),
     outcome_washout_days = outcomeWashoutDays,
     start_anchor = startAnchor,
     risk_window_start = riskWindowStart,

@@ -1,10 +1,34 @@
 -- drop temp table at end
 --IF OBJECT_ID('tempdb..#char_counts', 'U') IS NOT NULL DROP TABLE #char_counts;
 
-WITH char_counts AS (
+WITH
+
+cohort_of_int AS (
+
+SELECT
+characterization_case_id,
+
+{@efficient_mode}?{
+characterization_target_id as non_case_id,
+}:{
+characterization_case_id*10+2 as non_case_id,
+}
+
+characterization_case_id*10+1 as case_id
+FROM @characterization_schema.@case_settings_table
+WHERE characterization_case_id in (@characterization_case_ids)
+),
+
+char_counts AS (
 SELECT cohort_definition_id, count(*) as n
 FROM @characterization_schema.@characterization_table
-WHERE cohort_definition_id in (@cohort_definition_ids)
+WHERE cohort_definition_id in (
+
+SELECT non_case_id FROM cohort_of_int
+UNION
+SELECT case_id FROM cohort_of_int
+
+)
 GROUP BY cohort_definition_id
 )
 
@@ -24,14 +48,14 @@ IFNULL(non_case_average_value, 0) as non_case_average_value,
 IFNULL(case_average_value, 0) as case_average_value,
 IFNULL(non_case_median_value, 0) as non_case_median_value,
 IFNULL(case_median_value, 0) as case_median_value,
-IFNULL(non_case_p_10_value, 0) as non_case_p_10_value,
-IFNULL(case_p_10_value, 0) as case_p_10_value,
-IFNULL(non_case_p_25_value, 0) as non_case_p_25_value,
-IFNULL(case_p_25_value, 0) as case_p_25_value,
-IFNULL(non_case_p_75_value, 0) as non_case_p_75_value,
-IFNULL(case_p_75_value, 0) as case_p_75_value,
-IFNULL(non_case_p_90_value, 0) as non_case_p_90_value,
-IFNULL(case_p_90_value, 0) as case_p_90_value,
+IFNULL(non_case_p10_value, 0) as non_case_p10_value,
+IFNULL(case_p10_value, 0) as case_p10_value,
+IFNULL(non_case_p25_value, 0) as non_case_p25_value,
+IFNULL(case_p25_value, 0) as case_p25_value,
+IFNULL(non_case_p75_value, 0) as non_case_p75_value,
+IFNULL(case_p75_value, 0) as case_p75_value,
+IFNULL(non_case_p90_value, 0) as non_case_p90_value,
+IFNULL(case_p90_value, 0) as case_p90_value,
 IFNULL(non_case_standard_deviation, 0) as non_case_standard_deviation,
 IFNULL(case_standard_deviation, 0) as case_standard_deviation,
 (IFNULL(case_average_value, 0.0) - IFNULL(non_case_average_value, 0.0))/
@@ -44,48 +68,56 @@ FROM
 
 (SELECT
 counts.n as non_case_n,
-FLOOR(counts.cohort_definition_id/10) as characterization_case_id,
+coi.characterization_case_id,
 covariate_id,
 count_value as non_case_count_value,
 min_value as non_case_min_value,
 max_value as non_case_max_value,
 standard_deviation as non_case_standard_deviation,
 median_value as non_case_median_value,
-p_10_value as non_case_p_10_value,
-p_25_value as non_case_p_25_value,
-p_75_value as non_case_p_75_value,
-p_90_value as non_case_p_90_value,
+p10_value as non_case_p10_value,
+p25_value as non_case_p25_value,
+p75_value as non_case_p75_value,
+p90_value as non_case_p90_value,
 average_value as non_case_average_value
 FROM @characterization_fe_table INNER JOIN char_counts counts
 ON @characterization_fe_table.cohort_definition_id = counts.cohort_definition_id
-where (counts.cohort_definition_id - FLOOR(counts.cohort_definition_id/10)*10) = {@efficient_mode}?{0}:{2}) non_cases
+INNER JOIN cohort_of_int coi
+ON coi.non_case_id = counts.cohort_definition_id
+
+) non_cases
 
 FULL JOIN
 
 (SELECT
 counts.n as case_n,
-FLOOR(counts.cohort_definition_id/10) as characterization_case_id,
+coi.characterization_case_id,
 covariate_id,
 count_value as case_count_value,
 min_value as case_min_value,
 max_value as case_max_value,
 standard_deviation as case_standard_deviation,
 median_value as case_median_value,
-p_10_value as case_p_10_value,
-p_25_value as case_p_25_value,
-p_75_value as case_p_75_value,
-p_90_value as case_p_90_value,
+p10_value as case_p10_value,
+p25_value as case_p25_value,
+p75_value as case_p75_value,
+p90_value as case_p90_value,
 average_value as case_average_value
 FROM @characterization_fe_table INNER JOIN char_counts counts
 ON @characterization_fe_table.cohort_definition_id = counts.cohort_definition_id
-where (counts.cohort_definition_id - FLOOR(counts.cohort_definition_id/10)*10) = 1) cases
+INNER JOIN cohort_of_int coi
+ON coi.case_id = counts.cohort_definition_id
+) cases
 
 ON non_cases.characterization_case_id = cases.characterization_case_id
 AND non_cases.covariate_id = cases.covariate_id
 
 ) temp
 
-WHERE  abs(temp.standardized_mean_difference) >= @smd_min;
+WHERE  abs(temp.standardized_mean_difference) >= @smd_min
+AND (IFNULL(non_case_count_value, 0) + IFNULL(case_count_value, 0) ) >= @min_count
+;
+
 
 --IF OBJECT_ID('tempdb..#char_counts', 'U') IS NOT NULL DROP TABLE #char_counts;
 

@@ -105,6 +105,7 @@ computeTargetBaselineAnalyses <- function(
     targetTable,
     characterizationDatabaseSchema,
     characterizationTable, # contains char cohorts
+    #attritionTable,
     targetSettingsTable, # contains map between settings and char cohort id
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
@@ -112,6 +113,9 @@ computeTargetBaselineAnalyses <- function(
     outputFolder,
     minCellCount = 0,
     progressBar = interactive(),
+    minCharacterizationMean = 0.01,
+    minCovariateCount = 0,
+    executionId,
     ...) {
 
   if(missing(outputFolder)){
@@ -128,7 +132,7 @@ computeTargetBaselineAnalyses <- function(
   )
 
   # first look up the cohort ids for the settings
-  cohorts <- lookupCohorts(
+  cohorts <- lookupTargets(
     connection = connection,
     lookupDatabaseSchema = characterizationDatabaseSchema,
     lookupTableName = targetSettingsTable,
@@ -137,8 +141,6 @@ computeTargetBaselineAnalyses <- function(
     limitToFirstInNDays = settings$limitToFirstInNDays,
     minPriorObservation = settings$minPriorObservation
   )
-
-  cohorts$characterizationTargetId <- cohorts$characterizationTargetId*10
 
   # next run FE on cohortIds
   result <- FeatureExtraction::getDbCovariateData(
@@ -150,10 +152,32 @@ computeTargetBaselineAnalyses <- function(
     covariateSettings = ParallelLogger::convertJsonToSettings(settings$covariateSettings),
     cdmVersion = cdmVersion,
     aggregated = TRUE,
-    minCharacterizationMean = settings$minCharacterizationMean,
-    #minCharacterizationCount = settings$minCharacterizationCount,
+    minCharacterizationMean = minCharacterizationMean,
     tempEmulationSchema = tempEmulationSchema
   )
+
+  # filter minCovariateCount
+  if(minCovariateCount != 0){
+
+    if(!is.null(result$covariates)){
+      n <- result$covariates  %>% dplyr::count() %>% dplyr::pull()
+      if(n > 0){
+        result$covariates <- result$covariates %>% dplyr::filter(
+          .data$sumValue >= !!minCovariateCount
+        )
+      }
+    }
+
+    if(!is.null(result$covariatesContinuous)){
+      n <- result$covariatesContinuous  %>% dplyr::count() %>% dplyr::pull()
+      if(n > 0){
+        result$covariatesContinuous <- result$covariatesContinuous %>% dplyr::filter(
+          .data$countValue >= !!minCovariateCount
+        )
+      }
+    }
+
+  }
 
   result$targetSettings <- cohorts
 
@@ -161,9 +185,23 @@ computeTargetBaselineAnalyses <- function(
   message("Target Baseline: Exporting to csv")
   exportTargetAndromedaToCsv(
     andromeda = result,
+    tablesToExport = c('covariates', 'covariatesContinuous'),
+    tableNamePrefix = 'target_',
     outputFolder = outputFolder,
     databaseId = databaseId,
-    minCellCount = minCellCount
+    settingId = executionId,
+    minCellCount = minCellCount,
+    batchSize = 100000
+  )
+  exportTargetAndromedaToCsv(
+    andromeda = result,
+    tablesToExport = c('targetSettings', 'covariateRef', 'analysisRef'),
+    tableNamePrefix = '',
+    outputFolder = outputFolder,
+    databaseId = databaseId,
+    settingId = executionId,
+    minCellCount = minCellCount,
+    batchSize = 100000
   )
 
   message("Target Baseline:  ending")
@@ -174,7 +212,7 @@ computeTargetBaselineAnalyses <- function(
 
 getTargetBaselineJobs <- function(
     characterizationSettings,
-    threads
+    nTargetJobs
     ) {
 
   characterizationSettings <- characterizationSettings$targetBaselineSettings
@@ -201,26 +239,28 @@ getTargetBaselineJobs <- function(
       )
   )
 
+  settings <- c()
   if (nrow(targetCombinations) > 0) {
-    threadCols <- c("targetIds")
+    jobCols <- c("targetIds")
     settingCols <- c("minPriorObservation", "limitToFirstInNDays")
 
     # thread split - assign each target a treat
-    threadSettings <- targetCombinations %>%
-      dplyr::select(dplyr::all_of(threadCols)) %>%
+    jobSettings <- targetCombinations %>%
+      dplyr::select(dplyr::all_of(jobCols)) %>%
       dplyr::distinct()
-    threadSettings$thread <- rep(1:threads, ceiling(nrow(threadSettings) / threads))[1:nrow(threadSettings)]
-    targetCombinations <- merge(targetCombinations, threadSettings, by = threadCols)
+    jobSettings$nTargetJobs <- rep(1:nTargetJobs, ceiling(nrow(jobSettings) / nTargetJobs))[1:nrow(jobSettings)]
+    targetCombinations <- merge(targetCombinations, jobSettings, by = jobCols)
 
     executionSettings <- targetCombinations %>%
       dplyr::select(dplyr::all_of(settingCols)) %>%
-      dplyr::distinct()
+      dplyr::distinct() %>%
+      dplyr::mutate(
+        settingId = dplyr::row_number()
+      )
 
-    executionSettings$settingId <- createExecutionIds(nrow(executionSettings))
     targetCombinations <- merge(targetCombinations, executionSettings, by = settingCols)
 
     # recreate settings
-    settings <- c()
     for (settingId in unique(executionSettings$settingId)) {
       settingVal <- executionSettings %>%
         dplyr::filter(.data$settingId == !!settingId) %>%
@@ -229,8 +269,8 @@ getTargetBaselineJobs <- function(
       restrictedData <- targetCombinations %>%
         dplyr::inner_join(settingVal, by = settingCols)
 
-      for (i in unique(restrictedData$thread)) {
-        ind <- restrictedData$thread == i
+      for (i in unique(restrictedData$nTargetJobs)) {
+        ind <- restrictedData$nTargetJobs== i
         settings <- rbind(
           settings,
           data.frame(
@@ -238,10 +278,10 @@ getTargetBaselineJobs <- function(
             settings = as.character(ParallelLogger::convertSettingsToJson(
               list(
                 targetIds = unique(restrictedData$targetId[ind]),
+                limitToFirstInNDays = unique(restrictedData$limitToFirstInNDays[ind]),
                 minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
-                covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind])),
-                settingId = settingId,
-                limitToFirstInNDays = unique(restrictedData$limitToFirstInNDays[ind])
+                covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind]))
+                #settingId = settingId,
               )
             )),
             executionFolder = paste("t", i, paste(settingVal, collapse = "_"), sep = "_"),
@@ -250,21 +290,21 @@ getTargetBaselineJobs <- function(
         )
       }
     }
-  } else {
-    settings <- c()
   }
 
   return(settings)
 }
 
 
-
-
 exportTargetAndromedaToCsv <- function(
-  andromeda,
-  outputFolder,
-  databaseId,
-  minCellCount
+    andromeda,
+    tablesToExport = c('covariates','covariateContinuous', 'covariateRef', 'analysisRef'),
+    outputFolder,
+    databaseId,
+    settingId,
+    minCellCount,
+    batchSize = 100000,
+    tableNamePrefix = 'target_'
 ){
 
   saveLocation <- outputFolder
@@ -272,130 +312,66 @@ exportTargetAndromedaToCsv <- function(
     dir.create(saveLocation, recursive = T)
   }
 
-  # analysis_ref and covariate_ref
-  # add database_id and setting_id
-  if (!is.null(andromeda$analysisRef)) {
+for(tableToExport in tablesToExport){
+
+  tableName <- SqlRender::camelCaseToSnakeCase(tableToExport)
+
+  if (!is.null(andromeda[[tableToExport]])) {
     Andromeda::batchApply(
-      tbl = andromeda$analysisRef,
+      tbl = andromeda[[tableToExport]],
       fun = function(x) {
         data <- x #merge(x, ids)
         colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
+        data$database_id <- databaseId
+        data$setting_id <- settingId
 
-        if (file.exists(file.path(saveLocation, "analysis_ref.csv"))) {
-          append <- TRUE
-        } else {
-          append <- FALSE
-        }
-        readr::write_csv(
-          x = formatDouble(data),
-          file = file.path(saveLocation, "analysis_ref.csv"),
-          append = append
-        )
-      },
-      batchSize = batchSize
-    )
-  }
-
-  if (!is.null(andromeda$covariateRef)) {
-    Andromeda::batchApply(
-      tbl = andromeda$covariateRef,
-      fun = function(x) {
-        data <- x #merge(x, ids)
-        colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-
-        if (file.exists(file.path(saveLocation, "covariate_ref.csv"))) {
-          append <- TRUE
-        } else {
-          append <- FALSE
-        }
-        readr::write_csv(
-          x = formatDouble(data),
-          file = file.path(saveLocation, "covariate_ref.csv"),
-          append = append
-        )
-      },
-      batchSize = batchSize
-    )
-  }
-
-
-  if (!is.null(andromeda$covariates)) {
-    Andromeda::batchApply(
-      tbl = andromeda$covariates,
-      fun = function(x) {
-        data <- x #merge(x, extras, by = "cohortDefinitionId")
-        #data <- data %>% dplyr::select(-"cohortDefinitionId")
-        colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-
-        # censor minCellCount columns sum_value
-        removeInd <- data$sum_value < minCellCount
-        if (sum(removeInd) > 0) {
-          ParallelLogger::logInfo(paste0("Removing sum_value counts less than ", minCellCount))
+        if(tableToExport == 'covariates'){
+          # censor minCellCount columns sum_value
+          removeInd <- data$sum_value < minCellCount
           if (sum(removeInd) > 0) {
-            data$sum_value[removeInd] <- -1 * minCellCount
-            # adding other calculated columns
-            data$average_value[removeInd] <- NA
+            ParallelLogger::logInfo(paste0("Removing sum_value counts less than ", minCellCount))
+            if (sum(removeInd) > 0) {
+              data$sum_value[removeInd] <- -1 * minCellCount
+              # adding other calculated columns
+              data$average_value[removeInd] <- NA
+            }
+          }
+        } else if(tableToExport == 'covariatesContinuous'){
+          removeInd <- data$count_value < minCellCount
+          if (sum(removeInd) > 0) {
+            ParallelLogger::logInfo(paste0("Removing count_value counts less than ", minCellCount))
+            if (sum(removeInd) > 0) {
+              data$count_value[removeInd] <- -1 * minCellCount
+              # adding columns calculated from count
+              data$min_value[removeInd] <- NA
+              data$max_value[removeInd] <- NA
+              data$average_value[removeInd] <- NA
+              data$standard_deviation[removeInd] <- NA
+              data$median_value[removeInd] <- NA
+              data$p10_value[removeInd] <- NA
+              data$p25_value[removeInd] <- NA
+              data$p75_value[removeInd] <- NA
+              data$p90_value[removeInd] <- NA
+            }
           }
         }
 
-        if (file.exists(file.path(saveLocation, "covariates.csv"))) {
+        if (file.exists(file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv") ))) {
           append <- TRUE
         } else {
           append <- FALSE
         }
         readr::write_csv(
           x = formatDouble(data),
-          file = file.path(saveLocation, "covariates.csv"),
+          file = file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv")),
           append = append
         )
       },
       batchSize = batchSize
     )
   }
-
-  if (!is.null(andromeda$covariatesContinuous)) {
-    Andromeda::batchApply(
-      tbl = andromeda$covariatesContinuous,
-      fun = function(x) {
-        data <- x#merge(x, extras %>% dplyr::select(-"minCharacterizationMean"), by = "cohortDefinitionId")
-        #data <- data %>% dplyr::select(-"cohortDefinitionId")
-        colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-
-        # count_value
-        removeInd <- data$count_value < minCellCount
-        if (sum(removeInd) > 0) {
-          ParallelLogger::logInfo(paste0("Removing count_value counts less than ", minCellCount))
-          if (sum(removeInd) > 0) {
-            data$count_value[removeInd] <- -1 * minCellCount
-            # adding columns calculated from count
-            data$min_value[removeInd] <- NA
-            data$max_value[removeInd] <- NA
-            data$average_value[removeInd] <- NA
-            data$standard_deviation[removeInd] <- NA
-            data$median_value[removeInd] <- NA
-            data$p_10_value[removeInd] <- NA
-            data$p_25_value[removeInd] <- NA
-            data$p_75_value[removeInd] <- NA
-            data$p_90_value[removeInd] <- NA
-          }
-        }
-
-        if (file.exists(file.path(saveLocation, "covariates_continuous.csv"))) {
-          append <- TRUE
-        } else {
-          append <- FALSE
-        }
-        readr::write_csv(
-          x = formatDouble(data),
-          file = file.path(saveLocation, "covariates_continuous.csv"),
-          append = append
-        )
-      },
-      batchSize = batchSize
-    )
-  }
-
-  # add targetSettings extraction
+}
 
 }
+
 

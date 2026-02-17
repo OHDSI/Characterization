@@ -1,6 +1,7 @@
 generateCohorts <- function(
     characterizationSettings,
     threads = 1,
+    nTargetJobs = 1,
     mode,
     incremental,
     executionPath = executionPath,
@@ -13,34 +14,26 @@ generateCohorts <- function(
     outputTable = 'characterization_cohort',
     cdmDatabaseSchema,
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-    progressBar = interactive()
+    progressBar = interactive(),
+    settingHash,
+    databaseId,
+    dbHash
 ){
 
   # connection
   connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
   on.exit(DatabaseConnector::disconnect(connection))
 
-  settingHash <-  digest::digest(
-    object = as.character(characterizationSettings),
-    algo = "md5",
-    serialize = FALSE
-    )
-
-  dbHash <-  digest::digest(
-    object = as.character(cdmDatabaseSchema),
-    algo = "md5",
-    serialize = FALSE
-  )
-
   # tables names
   characterizationTableWithHash <- paste0(outputTable, '_',settingHash, '_', dbHash)
   targetSettingsTableWithHash <- paste0('target_settings', '_',settingHash, '_', dbHash)
   caseSettingsTableWithHash <- paste0('case_settings', '_',settingHash, '_', dbHash)
-  attributeTableWithHash <- paste0('attributes', '_',settingHash, '_', dbHash)
+  attritionTableWithHash <- paste0('attrition', '_',settingHash, '_', dbHash)
 
   cohortJobs <- getCohortJobs(
     characterizationSettings,
-    mode = mode
+    mode = mode,
+    nTargetJobs = nTargetJobs
   )
 
   # getting global case series values
@@ -96,7 +89,7 @@ generateCohorts <- function(
         tempEmulationSchema = tempEmulationSchema,
         characterization_schema = outputDatabaseSchema,
         characterization_table = characterizationTableWithHash,
-        attrition_table = attributeTableWithHash
+        attrition_table = attritionTableWithHash
       )
 
       DatabaseConnector::executeSql(connection, sql)
@@ -135,7 +128,7 @@ generateCohorts <- function(
       tempEmulationSchema = tempEmulationSchema,
       characterization_schema = outputDatabaseSchema,
       characterization_table = characterizationTableWithHash,
-      attrition_table = attributeTableWithHash
+      attrition_table = attritionTableWithHash
       )
 
     DatabaseConnector::executeSql(connection, sql)
@@ -151,7 +144,7 @@ generateCohorts <- function(
           connection = connection,
           cdmDatabaseSchema = cdmDatabaseSchema,
           characterizationTable = characterizationTableWithHash,
-          attritionTable = attributeTableWithHash,
+          attritionTable = attritionTableWithHash,
           targetSettingsTable = targetSettingsTableWithHash,
           caseSettingsTable = caseSettingsTableWithHash,
           characterizationDatabaseSchema = outputDatabaseSchema,
@@ -174,11 +167,45 @@ generateCohorts <- function(
       )
   }
 
+  # export attrition table
+  sql <- SqlRender::render(
+    sql = "SELECT * FROM @attrition_table",
+    attrition_table = paste0(outputDatabaseSchema, '.' ,attritionTableWithHash)
+    )
+  sql <- SqlRender::translate(
+    sql = sql,
+    targetDialect = attributes(connection)$dbms,
+    tempEmulationSchema = tempEmulationSchema
+      )
+  attrition <- DatabaseConnector::querySql(
+    connection = connection,
+    sql = sql,
+    snakeCaseToCamelCase = FALSE
+    )
+  attrition$databaseId <- databaseId
+  attrition$settingId <- settingHash
+  write.csv(
+    x = attrition,
+    file = file.path(executionPath, 'attrition.csv')
+      )
+
+  # export case series settings
+  write.csv(
+    x = data.frame(
+      settingId = settingHash,
+      casePreTargetDuration = casePreTargetDuration,
+      casePostOutcomeDuration = casePostOutcomeDuration
+    ),
+    file = file.path(executionPath, 'case_series_settings.csv')
+  )
+
+
+
 return(list(
   characterizationTable = characterizationTableWithHash,
   targetSettingsTable = targetSettingsTableWithHash,
   caseSettingsTable = caseSettingsTableWithHash,
-  attritionTable = attributeTableWithHash
+  attritionTable = attritionTableWithHash
 )
 )
 }
@@ -191,7 +218,7 @@ return(list(
 getCohortJobs <- function(
     characterizationSettings,
     mode,
-    threads # not currently used
+    nTargetJobs # not currently used
 ){
 
   targets <- c()
@@ -286,7 +313,7 @@ getCohortJobs <- function(
     tempTargets <- do.call(
       what = 'rbind',
       args = lapply(
-        X = characterizationSettings$targetBaselineSettings,
+        X = characterizationSettings$caseSeriesSettings,
         FUN = function(x){
           data.frame(
             targetId = x$targetIds,
@@ -305,7 +332,7 @@ getCohortJobs <- function(
     tempCases <- do.call(
       what = 'rbind',
       args = lapply(
-        X = characterizationSettings$riskFactorSettings,
+        X = characterizationSettings$caseSeriesSettings,
         FUN = function(x){
           do.call(
             what = 'rbind',
@@ -357,7 +384,7 @@ getCohortJobs <- function(
       )
 
 
-    message(paste0('Adding ', length(unique(targets$settingId)) ,' Target Baseline Jobs'))
+    message(paste0('Adding ', length(unique(targets$settingId)) ,' Target Cohort Jobs'))
 
     for(setId in unique(targets$settingId)){
       toi <- targets %>%
@@ -381,6 +408,16 @@ getCohortJobs <- function(
 
   if(!is.null(nrow(cases))){
     cases <- unique(cases) %>%
+      dplyr::group_by(
+        .data$targetId,.data$limitToFirstInNDays, .data$minPriorObservation,
+        .data$outcomeWashoutDays, .data$outcomeId,
+        .data$riskWindowStart,.data$startAnchor,
+        .data$riskWindowEnd, .data$endAnchor
+      ) %>%
+      dplyr::summarize(
+        type = paste(.data$type, collapse = ',')
+      ) %>%
+      dplyr::ungroup() %>%
       dplyr::inner_join(
         y = cases %>%
           dplyr::distinct(.data$outcomeWashoutDays, .data$outcomeId,
@@ -406,8 +443,9 @@ getCohortJobs <- function(
         characterizationCaseId = dplyr::row_number()
       )
 
-    message(paste0('Adding ', length(unique(cases$settingId)) ,' Case Jobs'))
+    message(paste0('Adding ', length(unique(cases$settingId)) ,' Case Cohort Jobs'))
 
+    nNonCase <- 0
     for(setId in unique(cases$settingId)){
       coi <- cases %>%
         dplyr::filter(.data$settingId == !!setId)
@@ -424,16 +462,16 @@ getCohortJobs <- function(
           startAnchor = unique(coi$startAnchor),
           riskWindowEnd = unique(coi$riskWindowEnd),
           endAnchor = unique(coi$endAnchor),
-          generateRiskFactors = 'risk-factor' %in% unique(coi$type),
-          generateCaseSeries = 'case-series' %in% unique(coi$type)
+          generateRiskFactors = length(grep('risk-factor', unique(coi$type))) > 0 ,
+          generateCaseSeries = length(grep('case-series', unique(coi$type))) > 0
         )
       )),
       jobId = paste("cases_", setId, sep = "_")
       ))
 
       if(mode != 'Efficient'){
-      if('risk-factor' %in% unique(coi$type)){
-        message(paste0('Adding ', length(unique(cases$settingId)) ,' Non Case Jobs'))
+      if(length(grep('risk-factor', unique(coi$type))) > 0){
+        nNonCase <- nNonCase + 1
         jobs <- rbind(jobs, data.frame(
           functionName = 'generateNonCases',
           settings = as.character(ParallelLogger::convertSettingsToJson(list(
@@ -453,6 +491,7 @@ getCohortJobs <- function(
 
     } # not efficient
     }
+    message(paste0('Adding ',nNonCase,' Non-Case Cohort Jobs'))
   }
 
   return(

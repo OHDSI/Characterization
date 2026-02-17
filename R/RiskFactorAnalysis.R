@@ -199,16 +199,18 @@ computeRiskFactorAnalyses <- function(
     outputFolder,
     minCharacterizationMean = 0,
     minSMD = 0.1,
+    minCovariateCount = 0,
     minCellCount = 0,
     progressBar = interactive(),
     mode,
+    executionId,
     ...) {
 
   if(missing(outputFolder)){
     stop('Please enter a output path value for outputFolder')
   }
 
-  message("Target Aggregate:  starting")
+  message("Risk factor analysis: connecting to database")
 
   connection <- DatabaseConnector::connect(
     connectionDetails = connectionDetails
@@ -222,13 +224,23 @@ computeRiskFactorAnalyses <- function(
   start <- Sys.time()
   message("Risk factor analysis: Finding temp Ids")
 
+  targetIds <- lookupTargets(
+    connection = connection,
+    lookupDatabaseSchema = characterizationDatabaseSchema,
+    lookupTableName = targetSettingsTable,
+    tempEmulationSchema = tempEmulationSchema,
+    targetIds = paste0(unique(settings$targetIds), collapse = ','),
+    limitToFirstInNDays = settings$limitToFirstInNDays,
+    minPriorObservation = settings$minPriorObservation
+  )
+
   caseIds <- lookupCases(
     connection = connection,
     lookupDatabaseSchema = characterizationDatabaseSchema,
     lookupTableName = caseSettingsTable,
     tempEmulationSchema = tempEmulationSchema,
-    characterizationTargetIds = settings$characterizationTargetIds,
-    outcomeIds = settings$outcomeIds,
+    characterizationTargetIds = paste0(unique(targetIds$characterizationTargetId), collapse = ','),
+    outcomeIds = paste0(unique(settings$outcomeIds), collapse = ','),
     outcomeWashoutDays = settings$outcomeWashoutDays,
     startAnchor = settings$startAnchor,
     riskWindowStart = settings$riskWindowStart,
@@ -236,17 +248,15 @@ computeRiskFactorAnalyses <- function(
     riskWindowEnd = settings$riskWindowEnd
   )
 
-  targetIds <- lookupTargets(
-    connection = connection,
-    lookupDatabaseSchema = characterizationDatabaseSchema,
-    lookupTableName = caseSettingsTable,
-    tempEmulationSchema = tempEmulationSchema,
-    characterizationTargetIds = settings$characterizationTargetIds
-  )
-
   # generate the targets, cases and non-cases ids
   # what about target only in efficient mode caseIds$characterizationTargetId*10
-  cohortIds <- c(settings$characterizationTargetIds*10, (caseIds$characterizationCaseId*10+1), (caseIds$characterizationCaseId*10+2))
+  if(mode == 'Efficient'){
+    message('Efficient mode so will not generate features on non-cases')
+    cohortIds <- c(caseIds$characterizationCaseId*10+1,caseIds$characterizationTargetId)
+  } else{
+    message(paste0(mode,' mode so will generate features on non-cases'))
+    cohortIds <- c(caseIds$characterizationCaseId*10+1,caseIds$characterizationCaseId*10+2)
+  }
 
   completionTime <- Sys.time() - start
   message(paste0("Risk factor analysis: Finding temp Ids took ", round(completionTime, digits = 1), " ", units(completionTime)))
@@ -262,15 +272,7 @@ computeRiskFactorAnalyses <- function(
   #message(paste0("Risk factor analysis: Extracting cohort attritions took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
 
-  ## 3) remove small cohorts using attrition
-  #start <- Sys.time()
-  #message("Risk factor analysis: Discovering small cohorts to ignore")
-
-  #completionTime <- Sys.time() - start
-  #message(paste0("Risk factor analysis: Discovering small cohorts to ignore ", round(completionTime, digits = 1), " ", units(completionTime)))
-
-
-  ## 4) run FE with all the cohorts of interest - ideally inserting the aggregate features into a new table
+  ## 3) run FE with all the cohorts of interest - ideally inserting the aggregate features into a new table
   start <- Sys.time()
   message("Risk factor analysis: Running FeatureExtraction")
   FeatureExtraction::getDbCovariateData(
@@ -284,12 +286,15 @@ computeRiskFactorAnalyses <- function(
     aggregated = TRUE,
     minCharacterizationMean = minCharacterizationMean,
 
-    targetDatabaseSchema = NULL,#characterizationDatabaseSchema,
-    targetCovariateTable = '#fe_covariate',
-    targetCovariateRefTable = '#fe_covariate_ref',
-    targetAnalysisRefTable = '#fe_analysis_ref',
+    exportToTable = TRUE,
+    targetDatabaseSchema = NULL,
+    targetCovariateTable = '#fe_covariate_rf',
+    targetCovariateContinuousTable = '#fe_covariate_continuous_rf',
+    targetCovariateRefTable = '#fe_covariate_ref_rf',
+    targetAnalysisRefTable = '#fe_analysis_ref_rf',
+    targetTimeRefTable = '#fe_time_ref_rf',
     dropTableIfExists = TRUE,
-    createTable = TRUE
+    createTable = FALSE
   )
 
   completionTime <- Sys.time() - start
@@ -297,7 +302,7 @@ computeRiskFactorAnalyses <- function(
 
 
 
-  ## 5) for each target,exclude,cases join the tables and calculate the SMD
+  ## 4) for each target,exclude,cases join the tables and calculate the SMD
   start <- Sys.time()
   message("Risk factor analysis: Calculating SMD for binary")
 
@@ -305,14 +310,16 @@ computeRiskFactorAnalyses <- function(
     sqlFilename = 'RiskFactorBinaryExtraction.sql',
     packageName = 'Characterization',
     dbms = attributes(connection)$dbms,
-    tempEmulationSchema = Sys.getenv("DATABRICKS_SCRATCH_SCHEMA"),
+    tempEmulationSchema = tempEmulationSchema,
     characterization_schema = characterizationDatabaseSchema,
     characterization_table = characterizationTable,
 
-    cohort_definition_ids = cohortIds,
-    characterization_fe_table = '#fe_covariate',
+    case_settings_table = caseSettingsTable,
+    characterization_case_ids = paste0(caseIds$characterizationCaseId, collapse = ','),
+    characterization_fe_table = '#fe_covariate_rf',
     efficient_mode =  mode == 'Efficient',
-    smd_min = minSMD
+    smd_min = minSMD,
+    min_count = minCovariateCount
   )
 
   result <- Andromeda::andromeda()
@@ -321,9 +328,8 @@ computeRiskFactorAnalyses <- function(
     connection = connection,
     sql = sql,
     andromeda = result,
-    andromedaTableName = 'risk_factor_binary',
-    snakeCaseToCamelCase = TRUE,
-    appendToTable = TRUE
+    andromedaTableName = 'covariates',
+    snakeCaseToCamelCase = TRUE
     )
 
   message("Risk factor analysis: Calculating SMD for continuous")
@@ -335,20 +341,23 @@ computeRiskFactorAnalyses <- function(
     characterization_schema = characterizationDatabaseSchema,
     characterization_table = characterizationTable,
 
-    cohort_definition_ids = cohortIds,
-    characterization_fe_table = '#fe_covariate_continuous',
+    case_settings_table = caseSettingsTable,
+    characterization_case_ids = paste0(caseIds$characterizationCaseId, collapse = ','),
+    characterization_fe_table = '#fe_covariate_continuous_rf',
     efficient_mode = mode == 'Efficient',
-    smd_min = minSMD
+    smd_min = minSMD,
+    min_count = minCovariateCount
   )
 
-  DatabaseConnector::querySqlToAndromeda(
+  tryCatch({DatabaseConnector::querySqlToAndromeda(
     connection = connection,
     sql = sql,
     andromeda = result,
-    andromedaTableName = 'risk_factor_continuous',
-    snakeCaseToCamelCase = TRUE,
-    appendToTable = TRUE
-  )
+    andromedaTableName = 'covariatesContinuous',
+    snakeCaseToCamelCase = TRUE
+  )}, error = function(e){
+    message(e);
+  })
 
   # cohort_id, cohort_setting_id (hash), outcome_id, outcome_setting_id, covariate_id, non_case_count, non_case_mean, case_count, case_mean, smd
 
@@ -358,36 +367,59 @@ computeRiskFactorAnalyses <- function(
   DatabaseConnector::querySqlToAndromeda(
     connection = connection,
     sql = SqlRender::translate(
-      sql = "SELECT * from #fe_covariate_ref;",
+      sql = paste0("SELECT * from #fe_covariate_ref_rf;"),
       targetDialect = attributes(connection)$dbms,
       tempEmulationSchema = tempEmulationSchema
       ),
     andromeda = result,
-    andromedaTableName = 'covariate_ref',
-    snakeCaseToCamelCase = TRUE,
-    appendToTable = TRUE
+    andromedaTableName = 'covariateRef',
+    snakeCaseToCamelCase = TRUE
   )
 
   DatabaseConnector::querySqlToAndromeda(
     connection = connection,
     sql = SqlRender::translate(
-      sql = "SELECT * from #fe_analysis_ref;",
+      sql = paste0("SELECT * from #fe_analysis_ref_rf;"),
       targetDialect = attributes(connection)$dbms,
       tempEmulationSchema = tempEmulationSchema
     ),
     andromeda = result,
-    andromedaTableName = 'analysis_ref',
-    snakeCaseToCamelCase = TRUE,
-    appendToTable = TRUE
+    andromedaTableName = 'analysisRef',
+    snakeCaseToCamelCase = TRUE
   )
 
-  result$target_setting <- targetIds
-  result$case_setting <- caseIds
+  # TODO drop FE tables
+
+  result$targetSettings <- targetIds
+  result$caseSettings <- caseIds
 
   completionTime <- Sys.time() - start
   message(paste0("Risk factor analysis: Calculating SMD and downloading took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
-  return(invisible(result))
+  # export to csv?
+  exportTargetAndromedaToCsv(
+    andromeda = result,
+    tablesToExport = c('covariates', 'covariatesContinuous'),
+    tableNamePrefix = 'risk_factor_',
+    outputFolder = outputFolder,
+    databaseId = databaseId,
+    settingId = executionId,#settings$settingId,
+    minCellCount = minCellCount,
+    batchSize = 100000
+  )
+  exportTargetAndromedaToCsv(
+    andromeda = result,
+    tablesToExport = c('targetSettings', 'caseSettings', 'covariateRef', 'analysisRef'),
+    tableNamePrefix = '',
+    outputFolder = outputFolder,
+    databaseId = databaseId,
+    settingId = executionId,#settings$settingId,
+    minCellCount = minCellCount,
+    batchSize = 100000
+  )
+
+
+  return(invisible(TRUE))
 }
 
 
@@ -395,83 +427,116 @@ computeRiskFactorAnalyses <- function(
 # function to partition jobs
 getRiskFactorJobs <- function(
     characterizationSettings,
-    threads) {
+    nTargetJobs # currently not used
+    ) {
 
   characterizationSettings <- characterizationSettings$riskFactorSettings
   if (length(characterizationSettings) == 0) {
     return(NULL)
   }
-  ind <- 1:length(characterizationSettings)
 
   # get all the settings
   # targetId, minPriorObservation, outcomeId, outcomeWashoutDays, tar, covariateSettings
 
-  riskFactorCombinations <- ''
+  riskFactorCombinations <- do.call(
+    what = "rbind",
+    args =
+      lapply(
+        X = 1:length(characterizationSettings),
+        FUN = function(i) {
+          do.call(
+            what = "rbind",
+            args = lapply(
+              X = unique(characterizationSettings[[i]]$outcomeIds),
+              FUN = function(outcomeId){
 
-  # create executionIds
-  settingCols <- c(
-    "minPriorObservation", "outcomeWashoutDays",
-    "riskWindowStart", "startAnchor",
-    "riskWindowEnd", "endAnchor"
-  )
-  executionSettings <- unique(riskFactorCombinations[, settingCols])
-  executionSettings$settingId <- createExecutionIds(nrow(executionSettings))
-  riskFactorCombinations <- merge(riskFactorCombinations, executionSettings, by = settingCols)
+                data.frame(
+                  targetId = unique(characterizationSettings[[i]]$targetIds),
+                  limitToFirstInNDays = characterizationSettings[[i]]$limitToFirstInNDays,
+                  minPriorObservation = characterizationSettings[[i]]$minPriorObservation,
 
-  # create thread split
-  threadCombinations <- riskFactorCombinations %>%
-    dplyr::select(
-      "targetId",
-      "minPriorObservation",
-      "outcomeWashoutDays"
-    ) %>%
-    dplyr::distinct()
-  threadCombinations$thread <- rep(1:threads, ceiling(nrow(threadCombinations) / threads))[1:nrow(threadCombinations)]
-  riskFactorCombinations <- merge(riskFactorCombinations, threadCombinations, by = c(
-    "targetId",
-    "minPriorObservation",
-    "outcomeWashoutDays"
-  ))
+                  outcomeId = outcomeId,
+                  outcomeWashoutDays = unique(characterizationSettings[[i]]$outcomeWashoutDays),
+                  riskWindowStart = unique(characterizationSettings[[i]]$riskWindowStart),
+                  startAnchor = unique(characterizationSettings[[i]]$startAnchor),
+                  riskWindowEnd = unique(characterizationSettings[[i]]$riskWindowEnd),
+                  endAnchor = unique(characterizationSettings[[i]]$endAnchor),
 
-  executionCols <- c(
-    "minPriorObservation", "outcomeWashoutDays"
-  )
-  executions <- unique(riskFactorCombinations[, executionCols])
-
-  # now create the settings
-  for (j in 1:nrow(executions)) {
-    settingVal <- executions[j, ]
-
-    restrictedData <- riskFactorCombinations %>%
-      dplyr::inner_join(settingVal, by = executionCols)
-
-    for (i in unique(restrictedData$thread)) {
-      ind <- restrictedData$thread == i
-      settings <- rbind(
-        settings,
-        data.frame(
-          functionName = "computeRiskFactorAnalyses",
-          settings = as.character(ParallelLogger::convertSettingsToJson(
-            list(
-              targetIds = unique(restrictedData$targetId[ind]),
-              outcomeIds = unique(restrictedData$outcomeId[ind]),
-              minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
-              outcomeWashoutDays = unique(restrictedData$outcomeWashoutDays[ind]),
-              tar = unique(data.frame(
-                riskWindowStart = restrictedData$riskWindowStart[ind],
-                startAnchor = restrictedData$startAnchor[ind],
-                riskWindowEnd = restrictedData$riskWindowEnd[ind],
-                endAnchor = restrictedData$endAnchor[ind]
-              )),
-              covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind])),
-              settingIds = unique(restrictedData$settingId[ind]),
-              minTwithOSize = minTwithOSize
+                  covariateSettingsJson = as.character(ParallelLogger::convertSettingsToJson(characterizationSettings[[i]]$covariateSettings))
+                )
+              }
             )
-          )),
-          executionFolder = paste("rf", i, paste0(settingVal, collapse = "_"), sep = "_"),
-          jobId = paste("rf", i, paste0(settingVal, collapse = "_"), sep = "_")
-        )
+          )
+        }
       )
+  )
+
+  settings <- c()
+  if(nrow(riskFactorCombinations) > 0 ){
+    jobCols <- c("targetId")
+    settingCols <- c(
+      "limitToFirstInNDays", "minPriorObservation",
+      "outcomeWashoutDays",
+      "riskWindowStart", "startAnchor",
+      "riskWindowEnd", "endAnchor"
+    )
+
+    jobSettings <- riskFactorCombinations %>%
+      dplyr::select(dplyr::all_of(jobCols)) %>%
+      dplyr::distinct()
+    jobSettings$nTargetJobs <- rep(1:nTargetJobs, ceiling(nrow(jobSettings) / nTargetJobs))[1:nrow(jobSettings)]
+    riskFactorCombinations <- merge(riskFactorCombinations, jobSettings, by = jobCols)
+
+
+    executionSettings <- riskFactorCombinations %>%
+      dplyr::select(dplyr::all_of(settingCols)) %>%
+      dplyr::distinct() %>%
+      dplyr::mutate(
+        settingId = dplyr::row_number()
+      )
+
+    riskFactorCombinations <- merge(riskFactorCombinations, executionSettings, by = settingCols)
+
+
+    # split by settingId (in future add split by target as well?)
+
+    # now create the settings
+    for (settingId in unique(riskFactorCombinations$settingId)) {
+
+      restrictedData <- riskFactorCombinations %>%
+        dplyr::filter(.data$settingId == !!settingId)
+
+      settingVal <- restrictedData[1,settingCols]
+
+      for (i in unique(restrictedData$nTargetJobs)) {
+        ind <- restrictedData$nTargetJobs== i
+
+        settings <- rbind(
+          settings,
+          data.frame(
+            functionName = "computeRiskFactorAnalyses",
+            settings = as.character(ParallelLogger::convertSettingsToJson(
+              list(
+                targetIds = unique(restrictedData$targetId[ind]),
+                outcomeIds = unique(restrictedData$outcomeId[ind]),
+                minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
+                limitToFirstInNDays = unique(restrictedData$limitToFirstInNDays[ind]),
+
+                outcomeWashoutDays = unique(restrictedData$outcomeWashoutDays[ind]),
+                riskWindowStart = unique(restrictedData$riskWindowStart[ind]),
+                startAnchor = unique(restrictedData$startAnchor[ind]),
+                riskWindowEnd = unique(restrictedData$riskWindowEnd[ind]),
+                endAnchor = unique(restrictedData$endAnchor[ind]),
+
+                covariateSettingsJson = combineCovariateSettingsJsons(as.list(unique(restrictedData$covariateSettingsJson[ind])))
+                #settingIds = unique(restrictedData$settingId[ind])
+              )
+            )),
+            executionFolder = paste("rf",i, paste0(settingVal, collapse = "_"), sep = "_"),
+            jobId = paste("rf",i, paste0(settingVal, collapse = "_"), sep = "_")
+          )
+        )
+      }
     }
   }
 

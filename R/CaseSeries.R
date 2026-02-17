@@ -18,16 +18,13 @@
 #'
 #' @param targetIds   A list of cohortIds for the target cohorts
 #' @param outcomeIds  A list of cohortIds for the outcome cohorts
+#' @param limitToFirstInNDays whether to limit each target cohort to the first entry into the cohort per N days per subject
 #' @param minPriorObservation The minimum time (in days) in the database a patient in the target cohorts must be observed prior to index
 #' @param outcomeWashoutDays Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
 #' @template timeAtRisk
-#' @param covariateSettings   An object created using \code{FeatureExtraction::createCovariateSettings}
 #' @param caseCovariateSettings An object created using \code{createDuringCovariateSettings}
 #' @param casePreTargetDuration    The number of days prior to case index we use for FeatureExtraction
 #' @param casePostOutcomeDuration    The number of days prior to case index we use for FeatureExtraction
-#' @param extractNonCaseCovariates Whether to extract aggregate covariates and counts for patients in the targets and outcomes in addition to the cases
-#' @param minTargetSize The minimum size of the target cohorts for them to have aggregate covariates calculated
-#' @param minTwithOSize The minimum size of the cohorts corresponding to patients in the target with the outcome during time-at-risk for them to have aggregate covariates calculated
 #' @family Aggregate
 #' @return
 #' A list with the settings
@@ -37,6 +34,7 @@
 #' aggregateSetting <- createAggregateCovariateSettings(
 #'   targetIds = c(1,2),
 #'   outcomeIds = c(3),
+#'   limitToFirstInNDays = 365,
 #'   minPriorObservation = 365,
 #'   outcomeWashoutDays = 90,
 #'   riskWindowStart = 1,
@@ -48,9 +46,10 @@
 #' )
 #'
 #' @export
-createAggregateCovariateSettings <- function(
+createCaseSeriesSettings <- function(
     targetIds,
     outcomeIds,
+    limitToFirstInNDays = 0,
     minPriorObservation = 0,
     outcomeWashoutDays = 0,
     riskWindowStart = 1,
@@ -67,9 +66,7 @@ createAggregateCovariateSettings <- function(
       useVisitConceptCountDuring = TRUE
     ),
     casePreTargetDuration = 365,
-    casePostOutcomeDuration = 365,
-    minTargetSize = 0,
-    minTwithOSize = 0
+    casePostOutcomeDuration = 365
     ) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
@@ -103,7 +100,9 @@ createAggregateCovariateSettings <- function(
     errorMessages = errorMessages
   )
 
-  # add check for outcomeWashoutDays
+  # add check for outcomeWashoutDays and nlimitToFirstInNDays
+
+  # check caseCovariateSettings as only works for During covaraiates
 
   checkmate::reportAssertions(errorMessages)
 
@@ -121,28 +120,23 @@ createAggregateCovariateSettings <- function(
   # create list
   result <- list(
     targetIds = targetIds,
+    limitToFirstInNDays = limitToFirstInNDays,
     minPriorObservation = minPriorObservation,
     outcomeIds = outcomeIds,
     outcomeWashoutDays = outcomeWashoutDays,
     riskWindowStart = riskWindowStart,
-    startAnchor = startAnchor,
+    startAnchor = gsub(' ', '_',startAnchor),
     riskWindowEnd = riskWindowEnd,
-    endAnchor = endAnchor,
-    caseCovariateSettings = caseCovariateSettings, # case series
-    casePreTargetDuration = casePreTargetDuration, # case series
-    casePostOutcomeDuration = casePostOutcomeDuration, # case series,
-    minTargetSize = minTargetSize,
-    minTwithOSize = minTwithOSize
+    endAnchor = gsub(' ', '_',endAnchor),
+    caseCovariateSettings = caseCovariateSettings,
+    casePreTargetDuration = casePreTargetDuration,
+    casePostOutcomeDuration = casePostOutcomeDuration
   )
 
   class(result) <- "caseSeriesSettings"
   return(result)
 }
 
-createExecutionIds <- function(size) {
-  executionIds <- gsub(" ", "", gsub("[[:punct:]]", "", paste(Sys.time(), sample(1000000, size), sep = "")))
-  return(executionIds)
-}
 
 # TODO cdmVersion should be in runChar
 computeCaseSeriesAnalyses <- function(
@@ -153,41 +147,339 @@ computeCaseSeriesAnalyses <- function(
     targetTable,
     outcomeDatabaseSchema = targetDatabaseSchema, # remove
     outcomeTable = targetTable, # remove
+
+    characterizationDatabaseSchema,
+    characterizationTable, # contains char cohorts
+    targetSettingsTable, # contains map between settings and char cohort id
+    caseSettingsTable, # contains map between settings and case id
+
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
     databaseId = "database 1",
     outputFolder,
     minCharacterizationMean = 0,
+    minCovariateCount = 0,
     minCellCount = 0,
     progressBar = interactive(),
+    executionId,
     ...) {
 
   if(missing(outputFolder)){
     stop('Please enter a output path value for outputFolder')
   }
 
-  # add code to get characterizationCaseId
+  message("Case series analysis: connecting to database")
 
-  # run FE for the characterizationCaseId*10 + 3/4/5
+  connection <- DatabaseConnector::connect(
+    connectionDetails = connectionDetails
+  )
+  on.exit(
+    DatabaseConnector::disconnect(connection)
+  )
+
+  # 1) create all the t, e and o cohorts using the defined inclusion criteria
+  start <- Sys.time()
+  message("Case series analysis: Finding temp Ids")
+
+  targetIds <- lookupTargets(
+    connection = connection,
+    lookupDatabaseSchema = characterizationDatabaseSchema,
+    lookupTableName = targetSettingsTable,
+    tempEmulationSchema = tempEmulationSchema,
+    targetIds = paste0(unique(settings$targetIds), collapse = ','),
+    limitToFirstInNDays = settings$limitToFirstInNDays,
+    minPriorObservation = settings$minPriorObservation
+  )
+
+  caseIds <- lookupCases(
+    connection = connection,
+    lookupDatabaseSchema = characterizationDatabaseSchema,
+    lookupTableName = caseSettingsTable,
+    tempEmulationSchema = tempEmulationSchema,
+    characterizationTargetIds = paste0(unique(targetIds$characterizationTargetId), collapse = ','),
+    outcomeIds = paste0(unique(settings$outcomeIds), collapse = ','),
+    outcomeWashoutDays = settings$outcomeWashoutDays,
+    startAnchor = settings$startAnchor,
+    riskWindowStart = settings$riskWindowStart,
+    endAnchor = settings$endAnchor,
+    riskWindowEnd = settings$riskWindowEnd
+  )
+
+  completionTime <- Sys.time() - start
+  message(paste0("Case series analysis: Finding temp Ids took ", round(completionTime, digits = 1), " ", units(completionTime)))
+
+
+  ## 4) run FE with all the cohorts of interest - ideally inserting the aggregate features into a new table
+  start <- Sys.time()
+  message("Case series analysis: Running FeatureExtraction")
+
+  FeatureExtraction::getDbCovariateData(
+    connection = connection,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    cohortTable = characterizationTable,
+    cohortDatabaseSchema = characterizationDatabaseSchema,
+    cohortIds = c(caseIds$characterizationCaseId*10+3,
+                  caseIds$characterizationCaseId*10+4,
+                  caseIds$characterizationCaseId*10+5),
+    rowIdField = 'row_number',
+    covariateSettings = ParallelLogger::convertJsonToSettings(settings$covariateSettings),
+    aggregated = TRUE,
+    minCharacterizationMean = minCharacterizationMean,
+
+    exportToTable = TRUE,
+    targetDatabaseSchema = NULL,
+    targetCovariateTable = '#fe_covariate_case',
+    targetCovariateContinuousTable = '#fe_covariate_continuous_case',
+    targetCovariateRefTable = '#fe_covariate_ref_case',
+    targetAnalysisRefTable = '#fe_analysis_ref_case',
+    targetTimeRefTable = '#fe_time_ref_case',
+    dropTableIfExists = TRUE,
+    createTable = FALSE
+  )
+
+  completionTime <- Sys.time() - start
+  message(paste0("Case series analysis: Running FeatureExtraction took ", round(completionTime, digits = 1), " ", units(completionTime)))
+
 
   # run the case series extraction for binary
+  start <- Sys.time()
+  message("Case series analysis: Extracting case series covariates")
 
-  # run the case series extraction for continuous
+  result <- Andromeda::andromeda()
+
+  sql <- SqlRender::loadRenderTranslateSql(
+    sqlFilename = 'CaseSeriesBinaryExtraction.sql',
+    packageName = 'Characterization',
+    dbms = attributes(connection)$dbms,
+    tempEmulationSchema = tempEmulationSchema,
+    characterization_fe_table = '#fe_covariate_case',
+    cohort_definition_ids = paste0(c(caseIds$characterizationCaseId*10+3,
+                                     caseIds$characterizationCaseId*10+4,
+                                     caseIds$characterizationCaseId*10+5),
+                                   collapse = ','),
+    min_count = minCovariateCount
+  )
+
+  tryCatch(
+    {DatabaseConnector::querySqlToAndromeda(
+      connection = connection,
+      sql = sql,
+      andromeda = result,
+      andromedaTableName = 'covariates',
+      snakeCaseToCamelCase = TRUE
+    )},
+    error = function(e){message(e)}
+  )
+
+  # continuous code here
+  sql <- SqlRender::loadRenderTranslateSql(
+    sqlFilename = 'CaseSeriesContinuousExtraction.sql',
+    packageName = 'Characterization',
+    dbms = attributes(connection)$dbms,
+    tempEmulationSchema = tempEmulationSchema,
+    characterization_fe_table = '#fe_covariate_continuous_case',
+    cohort_definition_ids = paste0(c(caseIds$characterizationCaseId*10+3,
+                                     caseIds$characterizationCaseId*10+4,
+                                     caseIds$characterizationCaseId*10+5),
+                                   collapse = ','),
+    min_count = minCovariateCount
+  )
+
+  tryCatch(
+    {DatabaseConnector::querySqlToAndromeda(
+      connection = connection,
+      sql = sql,
+      andromeda = result,
+      andromedaTableName = 'covariatesContinuous',
+      snakeCaseToCamelCase = TRUE
+    )},
+    error = function(e){message(e)}
+  )
 
   # extract the covariate_ref and analysis_ref
+  message("Case series analysis: Downloading ref tables")
+
+  # extract the covariate ref and analysis_ref tables as well
+  DatabaseConnector::querySqlToAndromeda(
+    connection = connection,
+    sql = SqlRender::translate(
+      sql = paste0("SELECT * from #fe_covariate_ref_case;"),
+      targetDialect = attributes(connection)$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    ),
+    andromeda = result,
+    andromedaTableName = 'covariateRef',
+    snakeCaseToCamelCase = TRUE
+  )
+
+  DatabaseConnector::querySqlToAndromeda(
+    connection = connection,
+    sql = SqlRender::translate(
+      sql = paste0("SELECT * from #fe_analysis_ref_case;"),
+      targetDialect = attributes(connection)$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    ),
+    andromeda = result,
+    andromedaTableName = 'analysisRef',
+    snakeCaseToCamelCase = TRUE
+  )
+
+  result$targetSettings <- targetIds
+  result$caseSettings <- caseIds
+
+  completionTime <- Sys.time() - start
+  message(paste0("Case series analysis: Downloading took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
   # export the andromeda to csv
+  exportTargetAndromedaToCsv(
+    andromeda = result,
+    tablesToExport = c('covariates', 'covariatesContinuous'),
+    tableNamePrefix = 'case_series_',
+    outputFolder = outputFolder,
+    databaseId = databaseId,
+    settingId = executionId,#settings$settingId,
+    minCellCount = minCellCount,
+    batchSize = 100000
+  )
+  exportTargetAndromedaToCsv(
+    andromeda = result,
+    tablesToExport = c('targetSettings', 'caseSettings', 'covariateRef', 'analysisRef'),
+    tableNamePrefix = '',
+    outputFolder = outputFolder,
+    databaseId = databaseId,
+    settingId = executionId,#settings$settingId,
+    minCellCount = minCellCount,
+    batchSize = 100000
+  )
 
   # clean up
+  # TODO drop FE tables
 
   return(invisible(TRUE))
 }
 
 getCaseSeriesJobs <- function(
     characterizationSettings,
-    threads) {
+    nTargetJobs
+    ) {
 
-  return(NULL)
+  characterizationSettings <- characterizationSettings$caseSeriesSettings
+  if (length(characterizationSettings) == 0) {
+    return(NULL)
+  }
+
+  # get all the settings
+  # targetId, minPriorObservation, outcomeId, outcomeWashoutDays, tar, covariateSettings
+
+  # split the targetIds per setting into nTargetJobs groups
+
+  caseSeriesCombinations <- do.call(
+    what = "rbind",
+    args =
+      lapply(
+        X = 1:length(characterizationSettings),
+        FUN = function(i) {
+          do.call(
+            what = "rbind",
+            args = lapply(
+              X = unique(characterizationSettings[[i]]$outcomeIds),
+              FUN = function(outcomeId){
+
+                data.frame(
+                  targetId = unique(characterizationSettings[[i]]$targetIds),
+                  limitToFirstInNDays = characterizationSettings[[i]]$limitToFirstInNDays,
+                  minPriorObservation = characterizationSettings[[i]]$minPriorObservation,
+
+                  outcomeId = outcomeId,
+                  outcomeWashoutDays = unique(characterizationSettings[[i]]$outcomeWashoutDays),
+                  riskWindowStart = unique(characterizationSettings[[i]]$riskWindowStart),
+                  startAnchor = unique(characterizationSettings[[i]]$startAnchor),
+                  riskWindowEnd = unique(characterizationSettings[[i]]$riskWindowEnd),
+                  endAnchor = unique(characterizationSettings[[i]]$endAnchor),
+
+                  casePreTargetDuration = unique(characterizationSettings[[i]]$casePreTargetDuration),
+                  casePostOutcomeDuration = unique(characterizationSettings[[i]]$casePostOutcomeDuration),
+
+                  covariateSettingsJson = as.character(ParallelLogger::convertSettingsToJson(characterizationSettings[[i]]$caseCovariateSettings))
+                )
+              }
+            )
+          )
+        }
+      )
+  )
+
+  settings <- c()
+  if(nrow(caseSeriesCombinations) > 0 ){
+    jobCols <- c("targetId")
+
+    settingCols <- c(
+      "limitToFirstInNDays", "minPriorObservation",
+      "outcomeWashoutDays",
+      "riskWindowStart", "startAnchor",
+      "riskWindowEnd", "endAnchor",
+      "casePreTargetDuration", "casePostOutcomeDuration"
+    )
+
+    jobSettings <- caseSeriesCombinations %>%
+      dplyr::select(dplyr::all_of(jobCols)) %>%
+      dplyr::distinct()
+    jobSettings$nTargetJobs <- rep(1:nTargetJobs, ceiling(nrow(jobSettings) / nTargetJobs))[1:nrow(jobSettings)]
+    caseSeriesCombinations <- merge(caseSeriesCombinations, jobSettings, by = jobCols)
+
+    executionSettings <- caseSeriesCombinations %>%
+      dplyr::select(dplyr::all_of(settingCols)) %>%
+      dplyr::distinct() %>%
+      dplyr::mutate(
+        settingId = dplyr::row_number()
+      )
+
+    caseSeriesCombinations <- merge(caseSeriesCombinations, executionSettings, by = settingCols)
+
+    for (settingId in unique(caseSeriesCombinations$settingId)) {
+
+      restrictedData <- caseSeriesCombinations %>%
+        dplyr::filter(.data$settingId == !!settingId)
+
+      settingVal <- restrictedData[1,settingCols]
+
+      for (i in unique(restrictedData$nTargetJobs)) {
+        ind <- restrictedData$nTargetJobs== i
+
+        settings <- rbind(
+          settings,
+          data.frame(
+            functionName = "computeCaseSeriesAnalyses",
+            settings = as.character(ParallelLogger::convertSettingsToJson(
+              list(
+                targetIds = unique(restrictedData$targetId[ind]),
+                outcomeIds = unique(restrictedData$outcomeId[ind]),
+                minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
+                limitToFirstInNDays = unique(restrictedData$limitToFirstInNDays[ind]),
+
+                outcomeWashoutDays = unique(restrictedData$outcomeWashoutDays[ind]),
+                riskWindowStart = unique(restrictedData$riskWindowStart[ind]),
+                startAnchor = unique(restrictedData$startAnchor[ind]),
+                riskWindowEnd = unique(restrictedData$riskWindowEnd[ind]),
+                endAnchor = unique(restrictedData$endAnchor[ind]),
+
+                casePreTargetDuration = unique(restrictedData$casePreTargetDuration[ind]),
+                casePostOutcomeDuration = unique(restrictedData$casePostOutcomeDuration[ind]),
+
+                covariateSettingsJson = combineCovariateSettingsJsons(as.list(unique(restrictedData$covariateSettingsJson[ind])))
+              )
+            )),
+            executionFolder = paste("cs",i, paste0(settingVal, collapse = "_"), sep = "_"),
+            jobId = paste("cs",i, paste0(settingVal, collapse = "_"), sep = "_")
+          )
+        )
+      }
+    }
+  }
+
+  # takes all the settings and break them down into
+  # a list of lists with the function to execute and inputs
+  return(settings)
 }
 
 

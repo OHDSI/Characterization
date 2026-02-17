@@ -82,7 +82,7 @@ riskFactorSetting <- createRiskFactorSettings(
 }
 \seealso{
 Other Aggregate: 
-\code{\link{createAggregateCovariateSettings}()},
+\code{\link{createCaseSeriesSettings}()},
 \code{\link{createTargetBaselineSettings}()}
 }
 \concept{Aggregate}

@@ -1,10 +1,33 @@
 -- drop temp table at end
 --IF OBJECT_ID('tempdb..#char_counts', 'U') IS NOT NULL DROP TABLE #char_counts;
 
-WITH char_counts AS (
+
+WITH
+
+cohort_of_int AS (
+
+SELECT
+characterization_case_id,
+
+{@efficient_mode}?{
+characterization_target_id as non_case_id,
+}:{
+characterization_case_id*10+2 as non_case_id,
+}
+
+characterization_case_id*10+1 as case_id
+FROM @characterization_schema.@case_settings_table
+WHERE characterization_case_id in (@characterization_case_ids)
+),
+
+char_counts AS (
 SELECT cohort_definition_id, count(*) as n
 FROM @characterization_schema.@characterization_table
-WHERE cohort_definition_id in (@cohort_definition_ids)
+WHERE cohort_definition_id in (
+SELECT non_case_id FROM cohort_of_int
+UNION
+SELECT case_id FROM cohort_of_int
+)
 GROUP BY cohort_definition_id
 )
 
@@ -40,40 +63,39 @@ FROM
 
 (SELECT
 counts.n as non_case_n,
-cs.characterization_case_id,
+coi.characterization_case_id,
 covariate_id,
 sum_value as non_case_sum_value,
 average_value as non_case_average_value
 FROM @characterization_fe_table INNER JOIN char_counts counts
 ON @characterization_fe_table.cohort_definition_id = counts.cohort_definition_id
-INNER JOIN @case_settings_table cs
-{@efficient_mode}?{
-ON cs.characterization_target_id = counts.cohort_definition_id
-}:{
-ON cs.characterization_case_id = FLOOR(counts.cohort_definition_id/10)
-}
-WHERE (counts.cohort_definition_id - FLOOR(counts.cohort_definition_id/10)*10) = {@efficient_mode}?{0}:{2}
-
+INNER JOIN cohort_of_int coi
+ON coi.non_case_id = counts.cohort_definition_id
 ) non_cases
 
 FULL JOIN
 
 (SELECT
 counts.n as case_n,
-FLOOR(counts.cohort_definition_id/10) as characterization_case_id,
+coi.characterization_case_id,
 covariate_id,
 sum_value as case_sum_value,
 average_value as case_average_value
 FROM @characterization_fe_table INNER JOIN char_counts counts
 ON @characterization_fe_table.cohort_definition_id = counts.cohort_definition_id
-where (counts.cohort_definition_id - FLOOR(counts.cohort_definition_id/10)*10) = 1) cases
+INNER JOIN cohort_of_int coi
+ON coi.case_id = counts.cohort_definition_id
+
+) cases
 
 ON non_cases.characterization_case_id = cases.characterization_case_id
 AND non_cases.covariate_id = cases.covariate_id
 
-) temp
+) smd_table
 
-WHERE  abs(temp.standardized_mean_difference) >= @smd_min;
+WHERE  abs(smd_table.standardized_mean_difference) >= @smd_min
+AND (IFNULL(non_case_sum_value, 0) + IFNULL(case_sum_value, 0) ) >= @min_count
+;
 
 --IF OBJECT_ID('tempdb..#char_counts', 'U') IS NOT NULL DROP TABLE #char_counts;
 

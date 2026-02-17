@@ -1,3 +1,6 @@
+SELECT * FROM
+
+(
 SELECT
 FLOOR(cohort_definition_id/10) as characterization_case_id,
 covariate_id,
@@ -39,9 +42,15 @@ END
 ) AS after_average_value
 
 FROM @characterization_fe_table
-where (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) in (3,4,5)
+where cohort_definition_id in (@cohort_definition_ids)
 
 GROUP BY
 FLOOR(cohort_definition_id/10),
-covariate_id;
+covariate_id
+
+
+) main_table
+
+WHERE (before_sum_value + during_sum_value + after_sum_value) >= @min_count
+;
 

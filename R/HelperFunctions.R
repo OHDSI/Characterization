@@ -15,6 +15,11 @@
 # limitations under the License.
 
 
+createExecutionIds <- function(size) {
+  executionIds <- gsub(" ", "", gsub("[[:punct:]]", "", paste(Sys.time(), sample(1000000, size), sep = "")))
+  return(executionIds)
+}
+
 #' create a connection detail for an example GI Bleed dataset from Eunomia
 #'
 #' @description
