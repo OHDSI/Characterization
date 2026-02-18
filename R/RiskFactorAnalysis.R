@@ -388,8 +388,6 @@ computeRiskFactorAnalyses <- function(
     snakeCaseToCamelCase = TRUE
   )
 
-  # TODO drop FE tables
-
   result$targetSettings <- targetIds
   result$caseSettings <- caseIds
 
@@ -416,6 +414,19 @@ computeRiskFactorAnalyses <- function(
     settingId = executionId,#settings$settingId,
     minCellCount = minCellCount,
     batchSize = 100000
+  )
+
+  # clean up temp tables (as some dbms do not have temp tables and it can get messy)
+  sql <- SqlRender::loadRenderTranslateSql(
+    sqlFilename = 'DropRiskFactorTempTables.sql',
+    packageName = 'Characterization',
+    dbms = attributes(connection)$dbms,
+    tempEmulationSchema = tempEmulationSchema
+  )
+
+  DatabaseConnector::executeSql(
+    connection = connection,
+    sql = sql
   )
 
 

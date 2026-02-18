@@ -352,8 +352,18 @@ computeCaseSeriesAnalyses <- function(
     batchSize = 100000
   )
 
-  # clean up
-  # TODO drop FE tables
+  # clean up temp tables (as some dbms do not have temp tables and it can get messy)
+  sql <- SqlRender::loadRenderTranslateSql(
+    sqlFilename = 'DropCaseSeriesTempTables.sql',
+    packageName = 'Characterization',
+    dbms = attributes(connection)$dbms,
+    tempEmulationSchema = tempEmulationSchema
+  )
+
+  DatabaseConnector::executeSql(
+    connection = connection,
+    sql = sql
+    )
 
   return(invisible(TRUE))
 }

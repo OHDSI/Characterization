@@ -40,10 +40,7 @@ createCharacterizationSettings <- function(
     settings = timeToEventSettings,
     errorMessages =  errorMessages
   )
-  #.checkAggregateCovariateSettingsList(
-  #  settings = aggregateCovariateSettings,
-  #  errorMessages = errorMessages
-  #)
+
   .checkDechallengeRechallengeSettingsList(
     settings = dechallengeRechallengeSettings,
     errorMessages = errorMessages
@@ -383,8 +380,27 @@ runCharacterizationAnalyses <- function(
     mode = mode,
 
     settingHash = settingHash,
+    dbHash = dbHash
+  )
+
+  # extract attrition, case_settings, target_settings, execution_settings, case_series_settings
+  exportSharedObjects(
+    saveLocation = outputDirectory,
+    tablePrefix = csvFilePrefix,
+    executionId = settingHash,
+    databaseId = databaseId,
+    characterizationSettings = characterizationSettings,
+    connectionDetails = connectionDetails,
+    tempEmulationSchema = tempEmulationSchema,
+    outputDatabaseSchema = outputDatabaseSchema,
+    attritionTable = tableNames$attritionTable,
+    targetSettingsTable = tableNames$targetSettingsTable,
+    caseSettingsTable = tableNames$caseSettingsTable,
     dbHash = dbHash,
-    databaseId = databaseId
+    mode = mode,
+    minCharacterizationMean = minCharacterizationMean,
+    minCovariateCount = minCovariateCount,
+    minSMD = minSMD
   )
 
   # Now loop over the jobs
@@ -450,21 +466,6 @@ runCharacterizationAnalyses <- function(
     executionFolders = jobs$executionFolder,
     csvFilePrefix = csvFilePrefix
   )
-
-  write.csv(
-    x = data.frame(
-      setting_id = executionId,
-      database_id = databaseId,
-      database_hash = dbHash,
-      mode = mode,
-      min_characterization_mean = minCharacterizationMean,
-      min_covariate_count = minCovariateCount,
-      min_smd = minSMD
-    ),
-    file = file.path(outputDirectory, 'execution_settings.csv')
-  )
-
-  # copy attrition.csv and case_series_settings.csv
 
   invisible(outputDirectory)
 }
@@ -580,7 +581,7 @@ aggregateCsvsBatch <- function(
     batchSize = 100000
     ) {
   tables <- c(
-    "case_settings.csv", "target_settings.csv",
+    #"case_settings.csv", "target_settings.csv",
 
     "analysis_ref.csv", "covariate_ref.csv",
 
@@ -596,7 +597,7 @@ aggregateCsvsBatch <- function(
   )
 
   colTypes <- c(
-    '??????????', '??????',
+    #'??????????', '??????',
 
     '?????????', '????????',
 
@@ -703,3 +704,161 @@ aggregateCsvsBatch <- function(
     }
   }
 }
+
+
+exportSharedObjects <- function(
+    saveLocation,
+    tablePrefix = '',
+    executionId,
+    databaseId,
+    characterizationSettings,
+    connectionDetails,
+    outputDatabaseSchema,
+    tempEmulationSchema,
+    attritionTable,
+    targetSettingsTable,
+    caseSettingsTable,
+
+    dbHash,
+    mode,
+    minCharacterizationMean,
+    minCovariateCount,
+    minSMD
+){
+
+  # add code here to save execution_settings,
+  #      attrition, target_settings, case_settings and case_series_settings
+
+  # connection
+  connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection))
+
+
+  if(!dir.exists(saveLocation)){
+    dir.create(saveLocation, recursive = TRUE)
+  }
+
+  # extract case series settings
+ # getting global case series values
+    if(is.null(characterizationSettings$caseSeriesSettings)){
+      casePreTargetDuration = 0
+      casePostOutcomeDuration = 0
+    } else{
+      casePreTargetDuration = max(unlist(lapply(
+        X = characterizationSettings$caseSeriesSettings,
+        FUN = function(x){
+          x$casePreTargetDuration
+        })))
+      casePostOutcomeDuration = max(unlist(lapply(
+        X = characterizationSettings$caseSeriesSettings,
+        FUN = function(x){
+          x$casePostOutcomeDuration
+        })))
+    }
+
+  write.csv(
+    x = data.frame(
+      settingId = executionId,
+      casePreTargetDuration = casePreTargetDuration,
+      casePostOutcomeDuration = casePostOutcomeDuration
+    ),
+    file = file.path(saveLocation, paste0(tablePrefix,'case_series_settings.csv'))
+  )
+
+  # extract attrition, target_settings
+  if(!is.null(characterizationSettings$caseSeriesSettings) |
+     !is.null(characterizationSettings$riskFactorSettings) |
+     !is.null(characterizationSettings$targetBaselineSettings)){
+
+    # export attrition table
+    sql <- SqlRender::render(
+      sql = "SELECT * FROM @attrition_table",
+      attrition_table = paste0(outputDatabaseSchema, '.' ,attritionTable)
+    )
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = attributes(connection)$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    )
+    attrition <- DatabaseConnector::querySql(
+      connection = connection,
+      sql = sql,
+      snakeCaseToCamelCase = FALSE
+    )
+    attrition$databaseId <- databaseId
+    attrition$settingId <- executionId
+    write.csv(
+      x = attrition,
+      file = file.path(saveLocation, paste0(tablePrefix,'attrition.csv'))
+    )
+
+    # export target settings table
+    sql <- SqlRender::render(
+      sql = "SELECT * FROM @target_settings_table",
+      target_settings_table = paste0(outputDatabaseSchema, '.' ,targetSettingsTable)
+    )
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = attributes(connection)$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    )
+    data <- DatabaseConnector::querySql(
+      connection = connection,
+      sql = sql,
+      snakeCaseToCamelCase = FALSE
+    )
+    data$databaseId <- databaseId
+    data$settingId <- executionId
+    write.csv(
+      x = data,
+      file = file.path(saveLocation, paste0(tablePrefix,'target_settings.csv'))
+    )
+
+  }
+
+  # extract case_settings
+  if(!is.null(characterizationSettings$caseSeriesSettings) |
+     !is.null(characterizationSettings$riskFactorSettings) ){
+
+    # export target settings table
+    sql <- SqlRender::render(
+      sql = "SELECT * FROM @case_settings_table",
+      case_settings_table = paste0(outputDatabaseSchema, '.' ,caseSettingsTable)
+    )
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = attributes(connection)$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    )
+    data <- DatabaseConnector::querySql(
+      connection = connection,
+      sql = sql,
+      snakeCaseToCamelCase = FALSE
+    )
+    data$databaseId <- databaseId
+    data$settingId <- executionId
+    write.csv(
+      x = data,
+      file = file.path(saveLocation, paste0(tablePrefix,'case_settings.csv'))
+    )
+
+  }
+
+  # saving execution settings
+  write.csv(
+    x = data.frame(
+      setting_id = executionId,
+      database_id = databaseId,
+      database_hash = dbHash,
+      mode = mode,
+      min_characterization_mean = minCharacterizationMean,
+      min_covariate_count = minCovariateCount,
+      min_smd = minSMD
+    ),
+    file = file.path(saveLocation, paste0(tablePrefix,'execution_settings.csv'))
+  )
+
+  return(invisible(TRUE))
+}
+
+

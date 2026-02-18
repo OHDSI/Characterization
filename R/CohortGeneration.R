@@ -16,7 +16,6 @@ generateCohorts <- function(
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     progressBar = interactive(),
     settingHash,
-    databaseId,
     dbHash
 ){
 
@@ -166,39 +165,6 @@ generateCohorts <- function(
         )
       )
   }
-
-  # export attrition table
-  sql <- SqlRender::render(
-    sql = "SELECT * FROM @attrition_table",
-    attrition_table = paste0(outputDatabaseSchema, '.' ,attritionTableWithHash)
-    )
-  sql <- SqlRender::translate(
-    sql = sql,
-    targetDialect = attributes(connection)$dbms,
-    tempEmulationSchema = tempEmulationSchema
-      )
-  attrition <- DatabaseConnector::querySql(
-    connection = connection,
-    sql = sql,
-    snakeCaseToCamelCase = FALSE
-    )
-  attrition$databaseId <- databaseId
-  attrition$settingId <- settingHash
-  write.csv(
-    x = attrition,
-    file = file.path(executionPath, 'attrition.csv')
-      )
-
-  # export case series settings
-  write.csv(
-    x = data.frame(
-      settingId = settingHash,
-      casePreTargetDuration = casePreTargetDuration,
-      casePostOutcomeDuration = casePostOutcomeDuration
-    ),
-    file = file.path(executionPath, 'case_series_settings.csv')
-  )
-
 
 
 return(list(
