@@ -88,6 +88,7 @@ generateCohorts <- function(
       sql <- SqlRender::loadRenderTranslateSql(
         sqlFilename = 'CreateTargetCohortTable.sql',
         packageName = 'Characterization',
+        dbms = attributes(connection)$dbms,
         tempEmulationSchema = tempEmulationSchema,
         characterization_schema = outputDatabaseSchema,
         characterization_table = characterizationTableWithHash,
@@ -127,6 +128,7 @@ generateCohorts <- function(
     sql <- SqlRender::loadRenderTranslateSql(
       sqlFilename = 'CreateTargetCohortTable.sql',
       packageName = 'Characterization',
+      dbms = attributes(connection)$dbms,
       tempEmulationSchema = tempEmulationSchema,
       characterization_schema = outputDatabaseSchema,
       characterization_table = characterizationTableWithHash,
