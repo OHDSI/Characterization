@@ -4,7 +4,7 @@ IF OBJECT_ID('tempdb..#temp_target', 'U') IS NOT NULL DROP TABLE #temp_target;
 
 SELECT
 target_settings.characterization_target_id AS cohort_definition_id,
-row_number() over(partition BY target_settings.characterization_target_id ORDER BY temp_cohort.subject_id, temp_cohort.cohort_start_date ASC) AS row_number,
+row_number() over(PARTITION BY CAST(target_settings.characterization_target_id AS BIGINT) ORDER BY temp_cohort.subject_id, temp_cohort.cohort_start_date ASC) AS row_number,
 temp_cohort.subject_id,
 temp_cohort.cohort_start_date,
 temp_cohort.cohort_end_date,

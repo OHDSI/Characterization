@@ -263,7 +263,7 @@ getCohortJobs <- function(
                   startAnchor = x$startAnchor,
                   riskWindowEnd = x$riskWindowEnd,
                   endAnchor = x$endAnchor,
-                  type = 'risk-factor'
+                  runtype = 'risk-factor'
                 )
               }
             )
@@ -321,7 +321,7 @@ getCohortJobs <- function(
                   startAnchor = x$startAnchor,
                   riskWindowEnd = x$riskWindowEnd,
                   endAnchor = x$endAnchor,
-                  type = 'case-series'
+                  runtype = 'case-series'
                 )
               }
             )
@@ -387,7 +387,7 @@ getCohortJobs <- function(
         .data$riskWindowEnd, .data$endAnchor
       ) %>%
       dplyr::summarize(
-        type = paste(.data$type, collapse = ',')
+        runtype = paste(.data$runtype, collapse = ',')
       ) %>%
       dplyr::ungroup() %>%
       dplyr::inner_join(
@@ -434,15 +434,15 @@ getCohortJobs <- function(
           startAnchor = unique(coi$startAnchor),
           riskWindowEnd = unique(coi$riskWindowEnd),
           endAnchor = unique(coi$endAnchor),
-          generateRiskFactors = length(grep('risk-factor', unique(coi$type))) > 0 ,
-          generateCaseSeries = length(grep('case-series', unique(coi$type))) > 0
+          generateRiskFactors = length(grep('risk-factor', unique(coi$runtype))) > 0 ,
+          generateCaseSeries = length(grep('case-series', unique(coi$runtype))) > 0
         )
       )),
       jobId = paste("cases_", setId, sep = "_")
       ))
 
       if(mode != 'Efficient'){
-      if(length(grep('risk-factor', unique(coi$type))) > 0){
+      if(length(grep('risk-factor', unique(coi$runtype))) > 0){
         nNonCase <- nNonCase + 1
         jobs <- rbind(jobs, data.frame(
           functionName = 'generateNonCases',

@@ -104,7 +104,7 @@ case_settings,start_anchor,varchar(15),Yes,No,No,No,The start anchor
 case_settings,end_anchor,varchar(15),Yes,No,No,No,The end anchor
 case_settings,risk_window_start,int,Yes,No,No,No,The risk window start
 case_settings,risk_window_end,int,Yes,No,No,No,The risk window end
-case_settings,type,varchar(50),Yes,No,No,No,Whether this case was used in risk-factor and/or case-series 
+case_settings,runtype,varchar(50),Yes,No,No,No,Whether this case was used in risk-factor and/or case-series 
 case_series_settings,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
 case_series_settings,case_pre_target_duration,int,Yes,No,No,No,The number of days before target index to create the before target period in case series
 case_series_settings,case_post_outcome_duration,int,Yes,No,No,No,The number of days after first outcome after target to create the after outcome period in case series

@@ -237,6 +237,7 @@ CREATE TABLE @my_schema.@table_prefixcase_settings (
     end_anchor VARCHAR(15),
     risk_window_start INT,
     risk_window_end INT,
+    runtype VARCHAR(50),
     PRIMARY KEY (setting_id, database_id,characterization_case_id)
 );
 
