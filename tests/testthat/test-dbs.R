@@ -172,7 +172,7 @@ for (dbmsPlatform in dbmsPlatforms) {
         tableName = dbmsDetails$cohortTable,
         data = data.frame(
           subject_id = 1:10,
-          cohort_definition_id = sample(4, 10, replace = T),
+          cohort_definition_id = sample(4, 10, replace = TRUE),
           cohort_start_date = rep(as.Date("2010-01-01"), 10),
           cohort_end_date = rep(as.Date("2010-01-01"), 10)
         )

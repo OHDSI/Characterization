@@ -65,7 +65,8 @@ generateCohorts <- function(
       dropTableIfExists = TRUE,
       createTable = TRUE,
       data = cohortJobs$targets,
-      camelCaseToSnakeCase = TRUE
+      camelCaseToSnakeCase = TRUE,
+      progressBar = progressBar
     )
   }
 
@@ -78,7 +79,8 @@ generateCohorts <- function(
       dropTableIfExists = TRUE,
       createTable = TRUE,
       data = cohortJobs$cases,
-      camelCaseToSnakeCase = TRUE
+      camelCaseToSnakeCase = TRUE,
+      progressBar = progressBar
     )
   }
 
@@ -95,7 +97,7 @@ generateCohorts <- function(
         attrition_table = attritionTableWithHash
       )
 
-      DatabaseConnector::executeSql(connection, sql)
+      DatabaseConnector::executeSql(connection, sql, progressBar = progressBar)
 
       tracker <- data.frame(
         jobId = 'targetTableCreate',
@@ -135,7 +137,7 @@ generateCohorts <- function(
       attrition_table = attritionTableWithHash
       )
 
-    DatabaseConnector::executeSql(connection, sql)
+    DatabaseConnector::executeSql(connection, sql, progressBar = progressBar)
 
   }
 

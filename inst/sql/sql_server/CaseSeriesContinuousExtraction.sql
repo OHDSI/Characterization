@@ -49,6 +49,18 @@ END
 ) AS before_p10_value,
 MAX(
 CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 3 THEN p25_value
+  ELSE 0
+END
+) AS before_p25_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 3 THEN p75_value
+  ELSE 0
+END
+) AS before_p75_value,
+MAX(
+CASE
   WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 3 THEN p90_value
   ELSE 0
 END
@@ -99,6 +111,18 @@ END
 ) AS during_p10_value,
 MAX(
 CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 4 THEN p25_value
+  ELSE 0
+END
+) AS during_p25_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 4 THEN p75_value
+  ELSE 0
+END
+) AS during_p75_value,
+MAX(
+CASE
   WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 4 THEN p90_value
   ELSE 0
 END
@@ -147,6 +171,18 @@ CASE
   ELSE 0
 END
 ) AS after_p10_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 5 THEN p25_value
+  ELSE 0
+END
+) AS after_p25_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 5 THEN p75_value
+  ELSE 0
+END
+) AS after_p75_value,
 MAX(
 CASE
   WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 5 THEN p90_value
