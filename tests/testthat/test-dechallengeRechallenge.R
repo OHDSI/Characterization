@@ -295,7 +295,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
     characterizationSettings = createCharacterizationSettings(
       dechallengeRechallengeSettings = res
     ),
-    threads = 1
+    nTargetJobs = 1
   )
 
   # as 1 thread should be 2 rows for two analyses
@@ -327,7 +327,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
     characterizationSettings = createCharacterizationSettings(
       dechallengeRechallengeSettings = res
     ),
-    threads = 3
+    nTargetJobs = 3
   )
 
   # as 3 thread should be 2*3 rows for two analyses
@@ -360,7 +360,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
     characterizationSettings = createCharacterizationSettings(
       dechallengeRechallengeSettings = res
     ),
-    threads = 20
+    nTargetJobs = 20
   )
 
   # as 3 thread should be 2*5 rows for two analyses

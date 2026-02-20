@@ -32,7 +32,7 @@ test_that("createIncrementalLog", {
     logname = "execution.csv"
   )
   testthat::expect_true("execution.csv" %in% dir(logFolder))
-  executionLog <- read.csv(file.path(logFolder, "execution.csv"))
+  executionLog <- utils::read.csv(file.path(logFolder, "execution.csv"))
   testthat::expect_true(nrow(executionLog) == 1)
   testthat::expect_true(executionLog$job_id == 0)
 
@@ -277,7 +277,7 @@ test_that("recordIncremental ", {
     executionFolder = logFolder6,
     logname = "execution.csv"
   )
-  execution <- read.csv(
+  execution <- utils::read.csv(
     file = file.path(logFolder6, "execution.csv")
   )
   testthat::expect_true(!"example100" %in% execution$job_id)
@@ -290,7 +290,7 @@ test_that("recordIncremental ", {
     endTime = Sys.time(),
     logname = "execution.csv"
   )
-  executionJobs <- read.csv(
+  executionJobs <- utils::read.csv(
     file = file.path(logFolder6, "execution.csv")
   )
   testthat::expect_true("example100" %in% executionJobs$job_id)

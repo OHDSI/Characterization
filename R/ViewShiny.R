@@ -151,12 +151,12 @@ prepareCharacterizationShiny <- function(
       c(
         DatabaseConnector::querySql(
           connection = con,
-          sql = paste0("select distinct TARGET_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'Target';"),
+          sql = paste0("select distinct TARGET_ID from ", tablePrefix, csvTablePrefix, "target_settings;"),
           snakeCaseToCamelCase = TRUE
           )$targetCohortId,
         DatabaseConnector::querySql(
           connection = con,
-          sql = paste0("select distinct OUTCOME_COHORT_ID from ", tablePrefix, csvTablePrefix, "cohort_details where COHORT_TYPE = 'Cases';"),
+          sql = paste0("select distinct OUTCOME_ID from ", tablePrefix, csvTablePrefix, "case_settings;"),
           snakeCaseToCamelCase = TRUE
           )$outcomeCohortId,
         DatabaseConnector::querySql(
@@ -208,18 +208,6 @@ prepareCharacterizationShiny <- function(
       snakeCaseToCamelCase = TRUE
     )$databaseId
 
-    DatabaseConnector::insertTable(
-      connection = con,
-      databaseSchema = "main",
-      tableName = "cg_COHORT_COUNT",
-      data = data.frame(
-        cohortId = cohortIds,
-        databaseId = databaseIds,
-        cohortSubjects = 0,
-        cohortEntries = 0
-      ),
-      camelCaseToSnakeCase = TRUE
-    )
   }
 
 

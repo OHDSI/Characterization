@@ -57,7 +57,7 @@ Create aggregate covariate study settings
 }
 \examples{
 
-aggregateSetting <- createAggregateCovariateSettings(
+caseSeriesSetting <- createCaseSeriesSettings(
   targetIds = c(1,2),
   outcomeIds = c(3),
   limitToFirstInNDays = 365,

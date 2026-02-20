@@ -294,7 +294,7 @@ computeRiskFactorAnalyses <- function(
     targetAnalysisRefTable = '#fe_analysis_ref_rf',
     targetTimeRefTable = '#fe_time_ref_rf',
     dropTableIfExists = TRUE,
-    createTable = FALSE
+    createTable = TRUE
   )
 
   completionTime <- Sys.time() - start

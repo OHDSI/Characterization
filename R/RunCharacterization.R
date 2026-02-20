@@ -177,6 +177,8 @@ loadCharacterizationSettings <- function(
 #' @param connectionDetails  The connection details to the database containing the OMOP CDM data
 #' @template TargetOutcomeTables
 #' @template TempEmulationSchema
+#' @param outputDatabaseSchema The schema where the characterization cohort table will be saved into
+#' @param outputTable The table name where the characterization cohort table will be saved into
 #' @param cdmDatabaseSchema The schema with the OMOP CDM data
 #' @param characterizationSettings The study settings created using \code{createCharacterizationSettings}
 #' @param outputDirectory The location to save the final csv files to
@@ -228,8 +230,8 @@ runCharacterizationAnalyses <- function(
     targetTable,
     outcomeDatabaseSchema,
     outcomeTable,
-    outputDatabaseSchema = NULL,
-    outputTable = '#characterization_cohort',
+    outputDatabaseSchema = targetDatabaseSchema,
+    outputTable = 'characterization_cohort',
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     cdmDatabaseSchema,
     characterizationSettings,
@@ -339,6 +341,9 @@ runCharacterizationAnalyses <- function(
       executionFolder = executionPath
     )
 
+    # get all job paths (needed for export even if no jobs left)
+    jobsExecutionFolder <- jobs$executionFolder
+
     # remove any previously completed jobs
     completedJobIds <- findCompletedJobs(executionFolder = executionPath)
 
@@ -350,6 +355,12 @@ runCharacterizationAnalyses <- function(
 
     if (nrow(jobs) == 0) {
       message("No jobs left")
+      aggregateCsvsBatch(
+        outputFolder = outputDirectory,
+        executionPath = executionPath,
+        executionFolders = jobsExecutionFolder,
+        csvFilePrefix = csvFilePrefix
+      )
       return(invisible(TRUE))
     }
   } else {
@@ -581,7 +592,6 @@ aggregateCsvsBatch <- function(
     batchSize = 100000
     ) {
   tables <- c(
-    #"case_settings.csv", "target_settings.csv",
 
     "analysis_ref.csv", "covariate_ref.csv",
 
@@ -597,11 +607,10 @@ aggregateCsvsBatch <- function(
   )
 
   colTypes <- c(
-    #'??????????', '??????',
 
-    '?????????', '????????',
+    'iccddcccc', '????????',
 
-    'didddddddddciicc', '??????',
+    '??????????????', '??????',
 
     '?????????????????????????', '?????????',
 
@@ -676,7 +685,9 @@ aggregateCsvsBatch <- function(
           readr::write_csv(
             x = x,
             file = savePath, quote = "all",
-            append = !firstTrackerCurrent | pos != 1
+            append = !firstTrackerCurrent | pos != 1,
+            num_threads = 1,
+            progress = FALSE,
             #append = append | pos != 1
           )
 
@@ -689,7 +700,8 @@ aggregateCsvsBatch <- function(
           callback = readr::SideEffectChunkCallback$new(processCsv),
           chunk_size = batchSize,
           col_types = colTypes[csvType == tables],
-          show_col_types = FALSE
+          show_col_types = FALSE,
+          progress = FALSE
         )
 
         # readr::read_csv_chunked only works if the csv
@@ -756,13 +768,14 @@ exportSharedObjects <- function(
         })))
     }
 
-  write.csv(
+  utils::write.csv(
     x = data.frame(
-      settingId = executionId,
-      casePreTargetDuration = casePreTargetDuration,
-      casePostOutcomeDuration = casePostOutcomeDuration
+      setting_id = executionId,
+      case_pre_target_duration = casePreTargetDuration,
+      case_post_outcome_duration = casePostOutcomeDuration
     ),
-    file = file.path(saveLocation, paste0(tablePrefix,'case_series_settings.csv'))
+    file = file.path(saveLocation, paste0(tablePrefix,'case_series_settings.csv')),
+    row.names = FALSE
   )
 
   # extract attrition, target_settings
@@ -785,11 +798,12 @@ exportSharedObjects <- function(
       sql = sql,
       snakeCaseToCamelCase = FALSE
     )
-    attrition$databaseId <- databaseId
-    attrition$settingId <- executionId
-    write.csv(
+    attrition$database_id <- databaseId
+    attrition$setting_id <- executionId
+    utils::write.csv(
       x = attrition,
-      file = file.path(saveLocation, paste0(tablePrefix,'attrition.csv'))
+      file = file.path(saveLocation, paste0(tablePrefix,'attrition.csv')),
+      row.names = FALSE
     )
 
     # export target settings table
@@ -807,11 +821,12 @@ exportSharedObjects <- function(
       sql = sql,
       snakeCaseToCamelCase = FALSE
     )
-    data$databaseId <- databaseId
-    data$settingId <- executionId
-    write.csv(
+    data$database_id <- databaseId
+    data$setting_id <- executionId
+    utils::write.csv(
       x = data,
-      file = file.path(saveLocation, paste0(tablePrefix,'target_settings.csv'))
+      file = file.path(saveLocation, paste0(tablePrefix,'target_settings.csv')),
+      row.names = FALSE
     )
 
   }
@@ -835,17 +850,18 @@ exportSharedObjects <- function(
       sql = sql,
       snakeCaseToCamelCase = FALSE
     )
-    data$databaseId <- databaseId
-    data$settingId <- executionId
-    write.csv(
+    data$database_id <- databaseId
+    data$setting_id <- executionId
+    utils::write.csv(
       x = data,
-      file = file.path(saveLocation, paste0(tablePrefix,'case_settings.csv'))
+      file = file.path(saveLocation, paste0(tablePrefix,'case_settings.csv')),
+      row.names = FALSE
     )
 
   }
 
   # saving execution settings
-  write.csv(
+  utils::write.csv(
     x = data.frame(
       setting_id = executionId,
       database_id = databaseId,
@@ -855,7 +871,8 @@ exportSharedObjects <- function(
       min_covariate_count = minCovariateCount,
       min_smd = minSMD
     ),
-    file = file.path(saveLocation, paste0(tablePrefix,'execution_settings.csv'))
+    file = file.path(saveLocation, paste0(tablePrefix,'execution_settings.csv')),
+    row.names = FALSE
   )
 
   return(invisible(TRUE))

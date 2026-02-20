@@ -268,6 +268,7 @@ computeDechallengeRechallengeAnalyses <- function(
 #' @param outputFolder A directory to save the results as csv files
 #' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
 #' @param progressBar Whether to display a progress bar while the analysis is running
+#' @param executionId a unique id for the run
 #' @param ... extra inputs
 #' @family DechallengeRechallenge
 #'

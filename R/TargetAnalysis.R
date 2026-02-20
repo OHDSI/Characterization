@@ -179,6 +179,17 @@ computeTargetBaselineAnalyses <- function(
 
   }
 
+  # rename the cohortDefinitionId column in covariates and covariatesContinuous
+  if(!is.null(result$covariates)){
+    result$covariates <- result$covariates %>%
+      dplyr::rename("characterizationTargetId" = "cohortDefinitionId")
+  }
+
+  if(!is.null(result$covariatesContinuous)){
+    result$covariatesContinuous <- result$covariatesContinuous %>%
+      dplyr::rename("characterizationTargetId" = "cohortDefinitionId")
+  }
+
   result$targetSettings <- cohorts
 
   # export all results to csv files
@@ -281,7 +292,6 @@ getTargetBaselineJobs <- function(
                 limitToFirstInNDays = unique(restrictedData$limitToFirstInNDays[ind]),
                 minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
                 covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind]))
-                #settingId = settingId,
               )
             )),
             executionFolder = paste("t", i, paste(settingVal, collapse = "_"), sep = "_"),
@@ -317,58 +327,77 @@ for(tableToExport in tablesToExport){
   tableName <- SqlRender::camelCaseToSnakeCase(tableToExport)
 
   if (!is.null(andromeda[[tableToExport]])) {
-    Andromeda::batchApply(
-      tbl = andromeda[[tableToExport]],
-      fun = function(x) {
-        data <- x #merge(x, ids)
-        colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-        data$database_id <- databaseId
-        data$setting_id <- settingId
 
-        if(tableToExport == 'covariates'){
-          # censor minCellCount columns sum_value
-          removeInd <- data$sum_value < minCellCount
-          if (sum(removeInd) > 0) {
-            ParallelLogger::logInfo(paste0("Removing sum_value counts less than ", minCellCount))
+    # get row count
+    rowCount <- andromeda[[tableToExport]] %>% dplyr::count() %>% dplyr::pull()
+
+    if(rowCount > 0){
+      Andromeda::batchApply(
+        tbl = andromeda[[tableToExport]],
+        fun = function(x) {
+          data <- x #merge(x, ids)
+          colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
+          data$database_id <- databaseId
+          data$setting_id <- settingId
+
+          if(tableToExport == 'covariates'){
+            # censor minCellCount columns sum_value
+            removeInd <- data$sum_value < minCellCount
             if (sum(removeInd) > 0) {
-              data$sum_value[removeInd] <- -1 * minCellCount
-              # adding other calculated columns
-              data$average_value[removeInd] <- NA
+              ParallelLogger::logInfo(paste0("Removing sum_value counts less than ", minCellCount))
+              if (sum(removeInd) > 0) {
+                data$sum_value[removeInd] <- -1 * minCellCount
+                # adding other calculated columns
+                data$average_value[removeInd] <- NA
+              }
+            }
+          } else if(tableToExport == 'covariatesContinuous'){
+            removeInd <- data$count_value < minCellCount
+            if (sum(removeInd) > 0) {
+              ParallelLogger::logInfo(paste0("Removing count_value counts less than ", minCellCount))
+              if (sum(removeInd) > 0) {
+                data$count_value[removeInd] <- -1 * minCellCount
+                # adding columns calculated from count
+                data$min_value[removeInd] <- NA
+                data$max_value[removeInd] <- NA
+                data$average_value[removeInd] <- NA
+                data$standard_deviation[removeInd] <- NA
+                data$median_value[removeInd] <- NA
+                data$p_10_value[removeInd] <- NA
+                data$p_25_value[removeInd] <- NA
+                data$p_75_value[removeInd] <- NA
+                data$p_90_value[removeInd] <- NA
+              }
             }
           }
-        } else if(tableToExport == 'covariatesContinuous'){
-          removeInd <- data$count_value < minCellCount
-          if (sum(removeInd) > 0) {
-            ParallelLogger::logInfo(paste0("Removing count_value counts less than ", minCellCount))
-            if (sum(removeInd) > 0) {
-              data$count_value[removeInd] <- -1 * minCellCount
-              # adding columns calculated from count
-              data$min_value[removeInd] <- NA
-              data$max_value[removeInd] <- NA
-              data$average_value[removeInd] <- NA
-              data$standard_deviation[removeInd] <- NA
-              data$median_value[removeInd] <- NA
-              data$p10_value[removeInd] <- NA
-              data$p25_value[removeInd] <- NA
-              data$p75_value[removeInd] <- NA
-              data$p90_value[removeInd] <- NA
-            }
-          }
-        }
 
-        if (file.exists(file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv") ))) {
-          append <- TRUE
-        } else {
-          append <- FALSE
-        }
-        readr::write_csv(
-          x = formatDouble(data),
-          file = file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv")),
-          append = append
+          if (file.exists(file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv") ))) {
+            append <- TRUE
+          } else {
+            append <- FALSE
+          }
+          readr::write_csv(
+            x = formatDouble(data),
+            file = file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv")),
+            append = append
+          )
+        },
+        batchSize = batchSize
+      )
+    } else{
+      data <- as.data.frame(andromeda[[tableToExport]])
+      colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
+      data <- data %>% dplyr::mutate(
+        database_id = NA,
+        setting_id = NA
+      )
+
+      readr::write_csv(
+        x = data,
+        file = file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv")),
+        append = file.exists(file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv")))
         )
-      },
-      batchSize = batchSize
-    )
+    }
   }
 }
 

@@ -31,7 +31,7 @@
 #'
 #' @examples
 #'
-#' aggregateSetting <- createAggregateCovariateSettings(
+#' caseSeriesSetting <- createCaseSeriesSettings(
 #'   targetIds = c(1,2),
 #'   outcomeIds = c(3),
 #'   limitToFirstInNDays = 365,
@@ -103,6 +103,24 @@ createCaseSeriesSettings <- function(
   # add check for outcomeWashoutDays and nlimitToFirstInNDays
 
   # check caseCovariateSettings as only works for During covaraiates
+  # check temporal is false
+  if (inherits(caseCovariateSettings, "covariateSettings")) {
+    caseCovariateSettings <- list(caseCovariateSettings)
+  }
+  if (sum(unlist(lapply(caseCovariateSettings, function(x) {
+    x$temporal
+  }))) > 0) {
+    stop("Temporal covariateSettings not supported by createCaseSeriesSettings()")
+  }
+
+  # check correct caseCovariateSettings
+  if(sum(unlist(lapply(
+    X = caseCovariateSettings,
+    FUN = function(x){
+      attr(x,"fun") == "Characterization::getDbDuringCovariateData"
+    })), na.rm = TRUE) != length(caseCovariateSettings)){
+    stop('caseCoveriateSettings must be Characterization::getDbDuringCovariateData')
+  }
 
   checkmate::reportAssertions(errorMessages)
 
@@ -234,12 +252,11 @@ computeCaseSeriesAnalyses <- function(
     targetAnalysisRefTable = '#fe_analysis_ref_case',
     targetTimeRefTable = '#fe_time_ref_case',
     dropTableIfExists = TRUE,
-    createTable = FALSE
+    createTable = TRUE
   )
 
   completionTime <- Sys.time() - start
   message(paste0("Case series analysis: Running FeatureExtraction took ", round(completionTime, digits = 1), " ", units(completionTime)))
-
 
   # run the case series extraction for binary
   start <- Sys.time()
@@ -268,7 +285,7 @@ computeCaseSeriesAnalyses <- function(
       andromedaTableName = 'covariates',
       snakeCaseToCamelCase = TRUE
     )},
-    error = function(e){message(e)}
+    error = function(e){message(e); return(NULL)}
   )
 
   # continuous code here
@@ -341,6 +358,7 @@ computeCaseSeriesAnalyses <- function(
     minCellCount = minCellCount,
     batchSize = 100000
   )
+
   exportTargetAndromedaToCsv(
     andromeda = result,
     tablesToExport = c('targetSettings', 'caseSettings', 'covariateRef', 'analysisRef'),

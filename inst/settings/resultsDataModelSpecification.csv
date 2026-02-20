@@ -61,60 +61,127 @@ covariate_ref,analysis_id,int,Yes,No,No,No,The analysis identifier
 covariate_ref,concept_id,bigint,Yes,No,No,No,The concept identifier
 covariate_ref,value_as_concept_id,int,N,N,N,N,The value as concept_id for features created from observation or measurement values
 covariate_ref,collisions,int,N,N,N,N,The number of collisions found for the covariate_id
-covariates,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-covariates,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
-covariates,cohort_type,varchar(12),Yes,Yes,No,No,The cohort type
-covariates,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
-covariates,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
-covariates,min_characterization_mean,float,Yes,Yes,No,No,Minimum fraction for feature extraction
-covariates,covariate_id,bigint,Yes,Yes,No,No,The covaraite id
-covariates,sum_value,int,Yes,No,No,No,The sum value
-covariates,average_value,float,No,No,No,No,The average value
-covariates_continuous,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-covariates_continuous,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
-covariates_continuous,cohort_type,varchar(12),Yes,Yes,No,No,The cohort type
-covariates_continuous,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
-covariates_continuous,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
-covariates_continuous,covariate_id,bigint,Yes,Yes,No,No,The covariate identifier
-covariates_continuous,count_value,int,Yes,No,No,No,The count value
-covariates_continuous,min_value,float,No,No,No,No,The min value
-covariates_continuous,max_value,float,No,No,No,No,The max value
-covariates_continuous,average_value,float,No,No,No,No,The average value
-covariates_continuous,standard_deviation,float,No,No,No,No,The standard devidation
-covariates_continuous,median_value,float,No,No,No,No,The median value
-covariates_continuous,p_10_value,float,No,No,No,No,The 10th percentile
-covariates_continuous,p_25_value,float,No,No,No,No,The 25th percentile
-covariates_continuous,p_75_value,float,No,No,No,No,The 75th percentile
-covariates_continuous,p_90_value,float,No,No,No,No,The 90th percentile
-settings,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
-settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-settings,covariate_setting_json,varchar,Yes,No,No,No,The covariate settings JSON
-settings,case_covariate_setting_json,varchar,Yes,No,No,No,The during covariate settings JSON
-settings,min_prior_observation,int,No,No,No,No,Minimum time observed before index
-settings,outcome_washout_days,int,No,No,No,No,Patients with outcome during washout are excluded
-settings,risk_window_start,int,No,No,No,No,The risk window start
-settings,risk_window_end,int,No,No,No,No,The risk window end
-settings,start_anchor,varchar(15),No,No,No,No,The start anchor
-settings,end_anchor,varchar(15),No,No,No,No,The end anchor
-settings,case_pre_target_duration,int,No,No,No,No,How far to look back before index for case features
-settings,case_post_outcome_duration,int,No,No,No,No,How far to look forward after outcome for case features
-cohort_details,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-cohort_details,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
-cohort_details,cohort_type,varchar(12),Yes,Yes,No,No,The cohort type
-cohort_details,target_cohort_id,int,Yes,Yes,No,No,The target cohort id
-cohort_details,outcome_cohort_id,int,Yes,Yes,No,No,The outcome cohort id
-cohort_counts,database_id,varchar(100),Yes,No,No,No,The database identifier
-cohort_counts,cohort_type,varchar(12),Yes,No,No,No,The cohort type
-cohort_counts,target_cohort_id,int,Yes,No,No,No,The target cohort id
-cohort_counts,outcome_cohort_id,int,Yes,No,No,No,The outcome cohort id
-cohort_counts,risk_window_start,int,No,No,No,No,The risk window start
-cohort_counts,risk_window_end,int,No,No,No,No,The risk window end
-cohort_counts,start_anchor,varchar(15),No,No,No,No,The start anchor
-cohort_counts,end_anchor,varchar(15),No,No,No,No,The end anchor
-cohort_counts,min_prior_observation,int,No,No,No,No,Minimum time observed before index
-cohort_counts,outcome_washout_days,int,No,No,No,No,Patients with outcome during washout are excluded
-cohort_counts,row_count,bigint,Yes,No,No,No,The number of rows in each cohort
-cohort_counts,person_count,bigint,Yes,No,No,No,The number of distinct people in each cohort
-cohort_counts,min_exposure_time,bigint,No,No,No,No,Minimum exposure time across cohort in days
-cohort_counts,mean_exposure_time,float,No,No,No,No,Mean exposure time across cohort in days
-cohort_counts,max_exposure_time,bigint,No,No,No,No,Max exposure time across cohort in days
+target_covariates,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+target_covariates,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
+target_covariates,characterization_target_id,int,Yes,Yes,No,No,The characteriation target id
+target_covariates,covariate_id,bigint,Yes,Yes,No,No,The covaraite id
+target_covariates,sum_value,int,Yes,No,No,No,The sum value
+target_covariates,average_value,float,No,No,No,No,The average value
+target_covariates_continuous,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+target_covariates_continuous,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
+target_covariates_continuous,characterization_target_id,int,Yes,Yes,No,No,The characteriation target id
+target_covariates_continuous,covariate_id,bigint,Yes,Yes,No,No,The covariate identifier
+target_covariates_continuous,count_value,int,Yes,No,No,No,The count value
+target_covariates_continuous,min_value,float,No,No,No,No,The min value
+target_covariates_continuous,max_value,float,No,No,No,No,The max value
+target_covariates_continuous,average_value,float,No,No,No,No,The average value
+target_covariates_continuous,standard_deviation,float,No,No,No,No,The standard devidation
+target_covariates_continuous,median_value,float,No,No,No,No,The median value
+target_covariates_continuous,p_10_value,float,No,No,No,No,The 10th percentile
+target_covariates_continuous,p_25_value,float,No,No,No,No,The 25th percentile
+target_covariates_continuous,p_75_value,float,No,No,No,No,The 75th percentile
+target_covariates_continuous,p_90_value,float,No,No,No,No,The 90th percentile
+execution_settings,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
+execution_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+execution_settings,database_hash,varchar(50),Yes,No,No,No,
+execution_settings,mode,varchar(25),Yes,No,No,No,Whether Efficient/CohortIncidence/PatientLevelPrediction mode was used for risk factor non-cases
+execution_settings,min_characterization_mean,float,Yes,No,No,No,The minimum fraction of patients who have a covariate for the covariate to be included in results
+execution_settings,min_covariate_count,int,Yes,No,No,No,The minimum number of patients who have a covariate for the covariate to be included in results (useful if cohorts are small)
+execution_settings,min_smd,float,Yes,No,No,No,The minimum standardized mean value a risk factor must have to be included in results
+target_settings,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
+target_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+target_settings,characterization_target_id,bigint,Yes,Yes,No,No,The target cohort id after inclusion criteria used internally by characterization
+target_settings,target_id,bigint,Yes,No,No,No,The target cohort id
+target_settings,limit_to_first_in_n_days,int,Yes,No,No,No,Target exposures are only included if they occur >= first_in_n_days days after the last exposure
+target_settings,min_prior_observation,int,Yes,No,No,No,Target exposures with < min_prior_obs days observation before exposure are excluded
+case_settings,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
+case_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+case_settings,characterization_case_id,bigint,Yes,Yes,No,No,"The case cohort id that is unique per characterization_target_id, outcome_id, outcome_washout_days and time-at-risk settings"
+case_settings,characterization_target_id,bigint,Yes,No,No,No,The target cohort id after inclusion criteria used internally by characterization
+case_settings,outcome_id,bigint,Yes,No,No,No,The outcome cohort id
+case_settings,outcome_washout_days,int,Yes,No,No,No,Outcome exposures with < outcome_washout_days days after the last outcome exposure are excluded
+case_settings,start_anchor,varchar(15),Yes,No,No,No,The start anchor
+case_settings,end_anchor,varchar(15),Yes,No,No,No,The end anchor
+case_settings,risk_window_start,int,Yes,No,No,No,The risk window start
+case_settings,risk_window_end,int,Yes,No,No,No,The risk window end
+case_settings,type,varchar(50),Yes,No,No,No,Whether this case was used in risk-factor and/or case-series 
+case_series_settings,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
+case_series_settings,case_pre_target_duration,int,Yes,No,No,No,The number of days before target index to create the before target period in case series
+case_series_settings,case_post_outcome_duration,int,Yes,No,No,No,The number of days after first outcome after target to create the after outcome period in case series
+attrition,cohort_definition_id,bigint,Yes,Yes,No,No,The characterization cohort id
+attrition,attr_reason,varchar(100),Yes,Yes,No,No,Description of cohort or removal
+attrition,n,bigint,Yes,No,No,No,The number of people remaining or removed
+attrition,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+attrition,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
+risk_factor_covariates,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+risk_factor_covariates,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
+risk_factor_covariates,characterization_case_id,bigint,Yes,Yes,No,No,"The case cohort id that is unique per characterization_target_id, outcome_id, outcome_washout_days and time-at-risk settings"
+risk_factor_covariates,covariate_id,bigint,Yes,Yes,No,No,The covaraite id
+risk_factor_covariates,non_case_sum_value,int,Yes,No,No,No,The sum value for the non-cases
+risk_factor_covariates,non_case_average_value,float,Yes,No,No,No,The average value for the non-cases
+risk_factor_covariates,case_sum_value,int,Yes,No,No,No,The sum value of the cases
+risk_factor_covariates,case_average_value,float,Yes,No,No,No,The average value of the cases
+risk_factor_covariates,standardized_mean_difference,float,Yes,No,No,No,The standardized mean difference for the covariate
+risk_factor_covariates_continuous,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+risk_factor_covariates_continuous,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
+risk_factor_covariates_continuous,characterization_case_id,bigint,Yes,Yes,No,No,"The case cohort id that is unique per characterization_target_id, outcome_id, outcome_washout_days and time-at-risk settings"
+risk_factor_covariates_continuous,covariate_id,bigint,Yes,Yes,No,No,The covariate identifier
+risk_factor_covariates_continuous,case_count_value,int,Yes,No,No,No,The count value
+risk_factor_covariates_continuous,case_min_value,float,No,No,No,No,The min value
+risk_factor_covariates_continuous,case_max_value,float,No,No,No,No,The max value
+risk_factor_covariates_continuous,case_average_value,float,No,No,No,No,The average value
+risk_factor_covariates_continuous,case_standard_deviation,float,No,No,No,No,The standard devidation
+risk_factor_covariates_continuous,case_median_value,float,No,No,No,No,The median value
+risk_factor_covariates_continuous,case_p_10_value,float,No,No,No,No,The 10th percentile
+risk_factor_covariates_continuous,case_p_25_value,float,No,No,No,No,The 25th percentile
+risk_factor_covariates_continuous,case_p_75_value,float,No,No,No,No,The 75th percentile
+risk_factor_covariates_continuous,case_p_90_value,float,No,No,No,No,The 90th percentile
+risk_factor_covariates_continuous,non_case_count_value,int,Yes,No,No,No,The count value
+risk_factor_covariates_continuous,non_case_min_value,float,No,No,No,No,The min value
+risk_factor_covariates_continuous,non_case_max_value,float,No,No,No,No,The max value
+risk_factor_covariates_continuous,non_case_average_value,float,No,No,No,No,The average value
+risk_factor_covariates_continuous,non_case_standard_deviation,float,No,No,No,No,The standard devidation
+risk_factor_covariates_continuous,non_case_median_value,float,No,No,No,No,The median value
+risk_factor_covariates_continuous,non_case_p_10_value,float,No,No,No,No,The 10th percentile
+risk_factor_covariates_continuous,non_case_p_25_value,float,No,No,No,No,The 25th percentile
+risk_factor_covariates_continuous,non_case_p_75_value,float,No,No,No,No,The 75th percentile
+risk_factor_covariates_continuous,non_case_p_90_value,float,No,No,No,No,The 90th percentile
+risk_factor_covariates_continuous,standardized_mean_difference,float,Yes,No,No,No,The standardized mean difference for the covariate
+case_series_covariates,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+case_series_covariates,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
+case_series_covariates,characterization_case_id,bigint,Yes,Yes,No,No,"The case cohort id that is unique per characterization_target_id, outcome_id, outcome_washout_days and time-at-risk settings"
+case_series_covariates,covariate_id,bigint,Yes,Yes,No,No,The covaraite id
+case_series_covariates,before_sum_value,int,Yes,No,No,No,The sum value for the non-cases
+case_series_covariates,before_average_value,float,Yes,No,No,No,The average value for the non-cases
+case_series_covariates,during_sum_value,int,Yes,No,No,No,The sum value of the cases
+case_series_covariates,during_average_value,float,Yes,No,No,No,The average value of the cases
+case_series_covariates,after_sum_value,int,Yes,No,No,No,The sum value of the cases
+case_series_covariates,after_average_value,float,Yes,No,No,No,The average value of the cases
+case_series_covariates_continuous,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+case_series_covariates_continuous,setting_id,varchar(30),Yes,Yes,No,No,The run identifier
+case_series_covariates_continuous,characterization_case_id,bigint,Yes,Yes,No,No,"The case cohort id that is unique per characterization_target_id, outcome_id, outcome_washout_days and time-at-risk settings"
+case_series_covariates_continuous,covariate_id,bigint,Yes,Yes,No,No,The covariate identifier
+case_series_covariates_continuous,before_count_value,int,Yes,No,No,No,The count value
+case_series_covariates_continuous,before_min_value,float,No,No,No,No,The min value
+case_series_covariates_continuous,before_max_value,float,No,No,No,No,The max value
+case_series_covariates_continuous,before_average_value,float,No,No,No,No,The average value
+case_series_covariates_continuous,before_standard_deviation,float,No,No,No,No,The standard devidation
+case_series_covariates_continuous,before_median_value,float,No,No,No,No,The median value
+case_series_covariates_continuous,before_p_10_value,float,No,No,No,No,The 10th percentile
+case_series_covariates_continuous,before_p_90_value,float,No,No,No,No,The 90th percentile
+case_series_covariates_continuous,during_count_value,int,Yes,No,No,No,The count value
+case_series_covariates_continuous,during_min_value,float,No,No,No,No,The min value
+case_series_covariates_continuous,during_max_value,float,No,No,No,No,The max value
+case_series_covariates_continuous,during_average_value,float,No,No,No,No,The average value
+case_series_covariates_continuous,during_standard_deviation,float,No,No,No,No,The standard devidation
+case_series_covariates_continuous,during_median_value,float,No,No,No,No,The median value
+case_series_covariates_continuous,during_p_10_value,float,No,No,No,No,The 10th percentile
+case_series_covariates_continuous,during_p_90_value,float,No,No,No,No,The 90th percentile
+case_series_covariates_continuous,after_count_value,int,Yes,No,No,No,The count value
+case_series_covariates_continuous,after_min_value,float,No,No,No,No,The min value
+case_series_covariates_continuous,after_max_value,float,No,No,No,No,The max value
+case_series_covariates_continuous,after_average_value,float,No,No,No,No,The average value
+case_series_covariates_continuous,after_standard_deviation,float,No,No,No,No,The standard devidation
+case_series_covariates_continuous,after_median_value,float,No,No,No,No,The median value
+case_series_covariates_continuous,after_p_10_value,float,No,No,No,No,The 10th percentile
+case_series_covariates_continuous,after_p_90_value,float,No,No,No,No,The 90th percentile

@@ -123,7 +123,8 @@ createDuringCovariateSettings <- function(
 #' @param covariateSettings  settings for the covariate cohorts and time periods
 #'
 #' @template tempEmulationSchema
-#'
+#' @param targetDatabaseSchema (Optional) The schema to save the tables targetCovariateTable/targetCovariateContinuousTable/targetCovariateRefTable/targetCovariateRefTable/targetAnalysisRefTable
+#'                              when they are not temp tables and the output is being exported to database tables.
 #' @param targetCovariateTable  (Optional) The name of the table where the resulting binary covariates will
 #'                               be stored. If not provided, results will be fetched to R. The table can be
 #'                               a permanent table in the \code{targetDatabaseSchema} or a temp table. If
@@ -392,18 +393,12 @@ getDbDuringCovariateData <- function(
     sql <- paste0(
       "{@extract_to_table}?{
 
-      {@temp_tables}?{
-      SELECT * INTO @target_covariate_table
-      FROM (
-      }:{
-
       INSERT INTO @target_covariate_table(
       cohort_definition_id,
       covariate_id,
       sum_value,
       average_value
       )
-      }
       }", # ADDED NEW
       "select temp.*, CAST(temp.sum_value / (1.0 * total.total_count) AS FLOAT) AS average_value from (",
       paste0(paste0("select cohort_definition_id, covariate_id, sum_value from #cov_", binaryInd), collapse = " union "),
@@ -412,17 +407,12 @@ getDbDuringCovariateData <- function(
       FROM @cohort_table {@cohort_definition_id != -1} ? {\nWHERE cohort_definition_id IN (@cohort_definition_id)}
       GROUP BY cohort_definition_id ) total
        on temp.cohort_definition_id = total.cohort_definition_id",
-      "
-      {@temp_tables}?{
-      ) main_table
-      }
-      ;"
+      ";"
     )
     sql <- SqlRender::render(
       sql = sql,
       cohort_table = cohortTable,
       cohort_definition_id = paste0(c(-1), collapse = ","),
-      temp_tables = allTempTables,
       target_covariate_table = targetTables$covariates,
       extract_to_table = !extractToAndromeda
     )
@@ -460,10 +450,6 @@ getDbDuringCovariateData <- function(
     sql <- paste0(
       "{@extract_to_table}?{
 
-      {@temp_tables}?{
-      SELECT * INTO @target_covariate_continuous_table
-      FROM (
-      }:{
       INSERT INTO @target_covariate_continuous_table(
       cohort_definition_id,
       covariate_id,
@@ -478,7 +464,6 @@ getDbDuringCovariateData <- function(
 	    p75_value,
 	    p90_value
       )
-      }
       }",
       paste0(paste0("select
                     cohort_definition_id,
@@ -495,14 +480,10 @@ getDbDuringCovariateData <- function(
 	    p90_value
                     from #cov_", continuousInd), collapse = " union "),
 
-      "{@temp_tables}?{
-      ) main_table
-      }
-      ;"
+      ";"
     )
     sql <- SqlRender::render(
       sql = sql,
-      temp_tables = allTempTables,
       target_covariate_continuous_table = targetTables$covariatesContinuous,
       extract_to_table = !extractToAndromeda
     )
@@ -545,10 +526,6 @@ getDbDuringCovariateData <- function(
 
     sql <- SqlRender::render(
       sql = "
-      {@temp_tables}?{
-      SELECT * INTO @target_covariate_ref
-      FROM #cov_ref;
-      }:{
       INSERT INTO @target_covariate_ref(
       covariate_id,
 	    covariate_name,
@@ -561,9 +538,7 @@ getDbDuringCovariateData <- function(
 	    covariate_name,
 	    analysis_id,
 	    concept_id
-      FROM #cov_ref;
-      }",
-      temp_tables = allTempTables,
+      FROM #cov_ref;",
       target_covariate_ref = targetTables$covariateRef
     )
 
@@ -596,10 +571,6 @@ getDbDuringCovariateData <- function(
 
     sql <- SqlRender::render(
       sql = "
-      {@temp_tables}?{
-      SELECT * INTO @target_analysis_ref
-      FROM #analysis_ref;
-      }:{
       INSERT INTO @target_analysis_ref(
       analysis_id,
 	    analysis_name,
@@ -613,9 +584,7 @@ getDbDuringCovariateData <- function(
 	    domain_id,
 	    is_binary,
 	    missing_means_zero
-      FROM #analysis_ref;
-      }",
-      temp_tables = allTempTables,
+      FROM #analysis_ref;",
       target_analysis_ref = targetTables$analysisRef
     )
 

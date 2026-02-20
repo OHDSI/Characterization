@@ -17,6 +17,7 @@ computeRechallengeFailCaseSeriesAnalyses(
   outputFolder,
   minCellCount = 0,
   progressBar = interactive(),
+  executionId,
   ...
 )
 }
@@ -51,6 +52,8 @@ can be created}
 \item{minCellCount}{The minimum cell value to display, values less than this will be replaced by -1}
 
 \item{progressBar}{Whether to display a progress bar while the analysis is running}
+
+\item{executionId}{a unique id for the run}
 
 \item{...}{extra inputs}
 }

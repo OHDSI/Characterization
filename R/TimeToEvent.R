@@ -74,6 +74,7 @@ createTimeToEventSettings <- function(
 #' @param outputFolder A directory to save the results as csv files
 #' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
 #' @param progressBar Whether to display a progress bar while the analysis is running
+#' @param executionId a unique id for the run
 #' @param ... extra inputs
 #' @family TimeToEvent
 #'
@@ -288,7 +289,7 @@ getTimeToEventJobs <- function(
   tcount <- length(unique(tnos$targetId))
   ocount <- length(unique(tnos$outcomeId))
 
-  if (threads > max(tcount, ocount)) {
+  if (nTargetJobs > max(tcount, ocount)) {
     message("Input parameter nTargetJobs greater than number of targets and outcomes")
     message(paste0("Only using ", max(tcount, ocount), " nTargetJobs for TimeToEvent"))
   }

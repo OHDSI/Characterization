@@ -61,7 +61,7 @@ CREATE TABLE @my_schema.@table_prefixdechallenge_rechallenge (
 
 CREATE TABLE @my_schema.@table_prefixanalysis_ref (
     database_id varchar(100) NOT NULL,
-    setting_id varchar(30) NOT NULL,
+    setting_id varchar(50) NOT NULL,
     analysis_id int NOT NULL,
     analysis_name varchar(max) NOT NULL,
     domain_id varchar(30),
@@ -74,7 +74,7 @@ CREATE TABLE @my_schema.@table_prefixanalysis_ref (
 
 CREATE TABLE @my_schema.@table_prefixcovariate_ref (
     database_id varchar(100) NOT NULL,
-    setting_id varchar(30) NOT NULL,
+    setting_id varchar(50) NOT NULL,
     covariate_id bigint NOT NULL,
     covariate_name varchar(max) NOT NULL,
     analysis_id int NOT NULL,
@@ -84,27 +84,23 @@ CREATE TABLE @my_schema.@table_prefixcovariate_ref (
     PRIMARY KEY (database_id, setting_id, covariate_id)
 );
 
-CREATE TABLE @my_schema.@table_prefixcovariates (
+-- TARGETS
+CREATE TABLE @my_schema.@table_prefixtarget_covariates (
     database_id varchar(100) NOT NULL,
-    setting_id varchar(30) NOT NULL,
-    cohort_type varchar(12),
-    target_cohort_id int,
-    outcome_cohort_id int,
-    min_characterization_mean float,
+    setting_id varchar(50) NOT NULL,
+    characterization_target_id bigint,
     covariate_id bigint NOT NULL,
-    sum_value int NOT NULL,
+    sum_value bigint NOT NULL,
     average_value float,
-    PRIMARY KEY (database_id, setting_id, target_cohort_id, outcome_cohort_id, cohort_type , covariate_id, min_characterization_mean)
+    PRIMARY KEY (database_id, setting_id, characterization_target_id, covariate_id)
 );
 
-CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
+CREATE TABLE @my_schema.@table_prefixtarget_covariates_continuous (
     database_id varchar(100) NOT NULL,
-    setting_id varchar(30) NOT NULL,
-    cohort_type varchar(12),
-    target_cohort_id int,
-    outcome_cohort_id int,
+    setting_id varchar(50) NOT NULL,
+    characterization_target_id bigint,
     covariate_id bigint NOT NULL,
-    count_value int NOT NULL,
+    count_value bigint NOT NULL,
     min_value float,
     max_value float,
     average_value float,
@@ -114,50 +110,149 @@ CREATE TABLE @my_schema.@table_prefixcovariates_continuous (
     p_25_value float,
     p_75_value float,
     p_90_value float,
-    PRIMARY KEY (database_id, setting_id, target_cohort_id, outcome_cohort_id, cohort_type , covariate_id)
+    PRIMARY KEY (database_id, setting_id, characterization_target_id, covariate_id)
 );
 
--- covariateSettings
-CREATE TABLE @my_schema.@table_prefixsettings (
-    setting_id varchar(30) NOT NULL,
+-- RISK FACTOR
+CREATE TABLE @my_schema.@table_prefixrisk_factor_covariates (
     database_id varchar(100) NOT NULL,
-    covariate_setting_json varchar(MAX),
-    case_covariate_setting_json varchar(MAX),
-    min_prior_observation int,
-    outcome_washout_days int,
-    risk_window_start int,
-    risk_window_end int,
-    start_anchor varchar(15),
-    end_anchor varchar(15),
-    case_pre_target_duration int,
-    case_post_outcome_duration int,
+    setting_id varchar(50) NOT NULL,
+    characterization_case_id bigint NOT NULL,
+    covariate_id bigint NOT NULL,
+    non_case_sum_value bigint NOT NULL,
+    non_case_average_value float NOT NULL,
+    case_sum_value bigint NOT NULL,
+    case_average_value float NOT NULL,
+    standardized_mean_difference float,
+    PRIMARY KEY (database_id, setting_id, characterization_case_id, covariate_id)
+);
+
+CREATE TABLE @my_schema.@table_prefixrisk_factor_covariates_continuous (
+    database_id varchar(100) NOT NULL,
+    setting_id varchar(50) NOT NULL,
+    characterization_case_id BIGINT NOT NULL,
+    covariate_id bigint NOT NULL,
+    case_count_value bigint NOT NULL,
+    case_min_value float NOT NULL,
+    case_max_value float NOT NULL,
+    case_average_value float NOT NULL,
+    case_standard_deviation float NOT NULL,
+    case_median_value float NOT NULL,
+    case_p_10_value float NOT NULL,
+    case_p_25_value float NOT NULL,
+    case_p_75_value float NOT NULL,
+    case_p_90_value float NOT NULL,
+    non_case_count_value bigint NOT NULL,
+    non_case_min_value float NOT NULL,
+    non_case_max_value float NOT NULL,
+    non_case_average_value bigint NOT NULL,
+    non_case_standard_deviation float NOT NULL,
+    non_case_median_value float NOT NULL,
+    non_case_p_10_value float NOT NULL,
+    non_case_p_25_value float NOT NULL,
+    non_case_p_75_value float NOT NULL,
+    non_case_p_90_value float NOT NULL,
+    standardized_mean_difference float,
+    PRIMARY KEY (database_id, setting_id, characterization_case_id, covariate_id)
+);
+
+
+-- CASE SERIES
+CREATE TABLE @my_schema.@table_prefixcase_series_covariates (
+    database_id varchar(100) NOT NULL,
+    setting_id varchar(50) NOT NULL,
+    characterization_case_id bigint NOT NULL,
+    covariate_id bigint NOT NULL,
+    before_sum_value bigint NOT NULL,
+    before_average_value float NOT NULL,
+    during_sum_value bigint NOT NULL,
+    during_average_value float NOT NULL,
+    after_sum_value bigint NOT NULL,
+    after_average_value float NOT NULL,
+    PRIMARY KEY (database_id, setting_id, characterization_case_id, covariate_id)
+);
+
+CREATE TABLE @my_schema.@table_prefixcase_series_covariates_continuous (
+    database_id varchar(100) NOT NULL,
+    setting_id varchar(50) NOT NULL,
+    characterization_case_id BIGINT NOT NULL,
+    covariate_id bigint NOT NULL,
+    before_count_value bigint NOT NULL,
+    before_min_value float NOT NULL,
+    before_max_value float NOT NULL,
+    before_average_value float NOT NULL,
+    before_standard_deviation float NOT NULL,
+    before_median_value float NOT NULL,
+    before_p_10_value float NOT NULL,
+    before_p_90_value float NOT NULL,
+    during_count_value bigint NOT NULL,
+    during_min_value float NOT NULL,
+    during_max_value float NOT NULL,
+    during_average_value bigint NOT NULL,
+    during_standard_deviation float NOT NULL,
+    during_median_value float NOT NULL,
+    during_p_10_value float NOT NULL,
+    during_p_90_value float NOT NULL,
+    after_count_value bigint NOT NULL,
+    after_min_value float NOT NULL,
+    after_max_value float NOT NULL,
+    after_average_value bigint NOT NULL,
+    after_standard_deviation float NOT NULL,
+    after_median_value float NOT NULL,
+    after_p_10_value float NOT NULL,
+    after_p_90_value float NOT NULL,
+    PRIMARY KEY (database_id, setting_id, characterization_case_id, covariate_id)
+);
+
+-- SETTINGS
+CREATE TABLE @my_schema.@table_prefixexecution_settings (
+    setting_id varchar(50) NOT NULL,
+    database_id varchar(100) NOT NULL,
+    database_hash varchar(50) NOT NULL,
+    mode varchar(15),
+    min_characterization_mean FLOAT,
+    min_covariate_count INT,
+    min_smd FLOAT,
     PRIMARY KEY (setting_id, database_id)
 );
 
--- added this table
-CREATE TABLE @my_schema.@table_prefixcohort_details (
+CREATE TABLE @my_schema.@table_prefixtarget_settings (
+    setting_id varchar(50) NOT NULL,
     database_id varchar(100) NOT NULL,
-    setting_id varchar(30) NOT NULL,
-    cohort_type varchar(12),
-    target_cohort_id int,
-    outcome_cohort_id int,
-    PRIMARY KEY (setting_id, database_id,target_cohort_id,outcome_cohort_id,cohort_type)
+    characterization_target_id BIGINT NOT NULL,
+    target_id BIGINT,
+    limit_to_first_in_n_days INT,
+    min_prior_observation INT,
+    PRIMARY KEY (setting_id, database_id,characterization_target_id)
 );
 
-CREATE TABLE @my_schema.@table_prefixcohort_counts(
+CREATE TABLE @my_schema.@table_prefixcase_settings (
+    setting_id varchar(50) NOT NULL,
     database_id varchar(100) NOT NULL,
-    cohort_type varchar(12),
-    target_cohort_id int,
-    outcome_cohort_id int,
-    risk_window_start int,
-    risk_window_end int,
-    start_anchor varchar(15),
-    end_anchor varchar(15),
-    min_prior_observation int,
-    outcome_washout_days int,
-    row_count int NOT NULL,
-    person_count int NOT NULL,
-    min_exposure_time int,
-    mean_exposure_time int,
-    max_exposure_time int
+    characterization_case_id BIGINT NOT NULL,
+    characterization_target_id BIGINT,
+    outcome_id BIGINT,
+    outcome_washout_days INT,
+    start_anchor VARCHAR(15),
+    end_anchor VARCHAR(15),
+    risk_window_start INT,
+    risk_window_end INT,
+    PRIMARY KEY (setting_id, database_id,characterization_case_id)
+);
+
+CREATE TABLE @my_schema.@table_prefixcase_series_settings (
+    setting_id varchar(50) NOT NULL,
+    case_pre_target_duration int,
+    case_post_outcome_duration int,
+    PRIMARY KEY (setting_id)
+);
+
+-- added this table
+CREATE TABLE @my_schema.@table_prefixattrition (
+    database_id varchar(100) NOT NULL,
+    setting_id varchar(30) NOT NULL,
+    cohort_definition_id BIGINT,
+    attr_reason VARCHAR(200),
+    n BIGINT,
+    PRIMARY KEY (setting_id, database_id, cohort_definition_id, attr_reason)
 );

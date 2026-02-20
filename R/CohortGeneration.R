@@ -35,6 +35,9 @@ generateCohorts <- function(
     nTargetJobs = nTargetJobs
   )
 
+  # only run the code below if there are cohorts to be generated
+  if(!is.null(cohortJobs$jobs)){
+
   # getting global case series values
   if(is.null(characterizationSettings$caseSeriesSettings)){
     casePreTargetDuration = 0
@@ -108,7 +111,7 @@ generateCohorts <- function(
       )
 
     } else{
-      tracker <- read.csv(file.path(executionPath,'cohort_job_tracker.csv'))
+      tracker <- utils::read.csv(file.path(executionPath,'cohort_job_tracker.csv'))
     }
 
     completedJobIndex <- cohortJobs$jobs$jobId %in% tracker$jobId
@@ -164,6 +167,7 @@ generateCohorts <- function(
           jobId = cohortJobs$jobs$jobId[i]
         )
       )
+  }
   }
 
 

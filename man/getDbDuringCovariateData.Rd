@@ -54,6 +54,9 @@ on covariates that have very low values. The default is 0.}
 To emulate temp tables, provide a schema with write privileges where temp tables
 can be created}
 
+\item{targetDatabaseSchema}{(Optional) The schema to save the tables targetCovariateTable/targetCovariateContinuousTable/targetCovariateRefTable/targetCovariateRefTable/targetAnalysisRefTable
+when they are not temp tables and the output is being exported to database tables.}
+
 \item{targetCovariateTable}{(Optional) The name of the table where the resulting binary covariates will
 be stored. If not provided, results will be fetched to R. The table can be
 a permanent table in the \code{targetDatabaseSchema} or a temp table. If

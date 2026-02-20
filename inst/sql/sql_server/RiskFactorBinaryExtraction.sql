@@ -1,7 +1,3 @@
--- drop temp table at end
---IF OBJECT_ID('tempdb..#char_counts', 'U') IS NOT NULL DROP TABLE #char_counts;
-
-
 WITH
 
 cohort_of_int AS (
@@ -96,7 +92,4 @@ AND non_cases.covariate_id = cases.covariate_id
 WHERE  abs(smd_table.standardized_mean_difference) >= @smd_min
 AND (IFNULL(non_case_sum_value, 0) + IFNULL(case_sum_value, 0) ) >= @min_count
 ;
-
---IF OBJECT_ID('tempdb..#char_counts', 'U') IS NOT NULL DROP TABLE #char_counts;
-
 

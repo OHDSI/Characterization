@@ -10,8 +10,8 @@ runCharacterizationAnalyses(
   targetTable,
   outcomeDatabaseSchema,
   outcomeTable,
-  outputDatabaseSchema = NULL,
-  outputTable = "#characterization_cohort",
+  outputDatabaseSchema = targetDatabaseSchema,
+  outputTable = "characterization_cohort",
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   cdmDatabaseSchema,
   characterizationSettings,
@@ -44,6 +44,10 @@ this should include both the database and schema name, for example
 'scratch.dbo'.}
 
 \item{outcomeTable}{Name of the outcome cohort table.}
+
+\item{outputDatabaseSchema}{The schema where the characterization cohort table will be saved into}
+
+\item{outputTable}{The table name where the characterization cohort table will be saved into}
 
 \item{tempEmulationSchema}{Some database platforms like Oracle and Impala do not truly support temp tables.
 To emulate temp tables, provide a schema with write privileges where temp tables
