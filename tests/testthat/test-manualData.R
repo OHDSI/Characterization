@@ -158,6 +158,7 @@ test_that("manual data runCharacterizationAnalyses", {
     ),
     targetBaselineSettings = Characterization::createTargetBaselineSettings(
       targetIds = 1,
+      limitToFirstInNDays = 99999,
       minPriorObservation = 365,
       covariateSettings = FeatureExtraction::createCovariateSettings(
         useDemographicsAge = TRUE,
@@ -169,6 +170,7 @@ test_that("manual data runCharacterizationAnalyses", {
     riskFactorSettings = Characterization::createRiskFactorSettings(
       targetIds = 1,
       outcomeIds = 2,
+      limitToFirstInNDays = 99999,
       minPriorObservation = 365,
       outcomeWashoutDays = 30,
       riskWindowStart = 1,
@@ -183,6 +185,7 @@ test_that("manual data runCharacterizationAnalyses", {
     caseSeriesSettings = createCaseSeriesSettings(
       targetIds = 1,
       outcomeIds = 2,
+      limitToFirstInNDays = 99999,
       minPriorObservation = 365,
       outcomeWashoutDays = 30,
       riskWindowStart = 1,
@@ -210,8 +213,8 @@ test_that("manual data runCharacterizationAnalyses", {
     threads = 1,
     nTargetJobs = 1,
     minCharacterizationMean = 0.0001,
-    minCellCount = NULL,
-    minSMD = 0.01,
+    minCellCount = 0,
+    minSMD = 0,
     minCovariateCount = 2,
     mode = 'PatientLevelPrediction',
     showSubjectId = TRUE
@@ -258,11 +261,90 @@ test_that("manual data runCharacterizationAnalyses", {
 
   # Target baseline covs
   # =======
+
+  eset <- utils::read.csv(file.path(tempdir(), "result", "c_execution_settings.csv"))
+  testthat::expect_true(nrow(eset) == 1)
+
+  # targetId = 1, limitToFirstInNDays = 99999,minPriorObservation = 365,
+  tset <- utils::read.csv(file.path(tempdir(), "result", "c_target_settings.csv"))
+  testthat::expect_true(tset$target_id == 1)
+  testthat::expect_true(tset$limit_to_first_in_n_days == 99999)
+  testthat::expect_true(tset$min_prior_observation == 365)
+  testthat::expect_true(tset$characterization_target_id == tset$target_id*10)
+
+  attrition <- utils::read.csv(file.path(tempdir(), "result", "c_attrition.csv"))
+  # there should be 9 people as the first subject has cohort date outside observation
+  testthat::expect_true(attrition$N[attrition$cohort_definition_id==10] == 9)
+
+  # useDemographicsAge = TRUE, useDemographicsGender = TRUE, useConditionEraAnyTimePrior = TRUE
   covs <- utils::read.csv(file.path(tempdir(), "result", "c_target_covariates.csv"))
+  # gender 8532001
+  testthat::expect_true(8532001 %in% covs$covariate_id)
 
+  maxCount <- length(unique(cohort$subject_id[cohort$cohort_definition_id == 1]))
+  testthat::expect_true(sum(covs$sum_value <= maxCount) == nrow(covs))
 
+  # data is all female so make sure female cov has average_value of 1
+  testthat::expect_true(covs$average_value[covs$covariate_id == 8532001] == 1)
+  testthat::expect_true(covs$sum_value[covs$covariate_id == 8532001] == attrition$N[attrition$cohort_definition_id==10])
 
   covs_cont <- utils::read.csv(file.path(tempdir(), "result", "c_target_covariates_continuous.csv"))
+  testthat::expect_true(1002 %in% covs_cont$covariate_id)
+  testthat::expect_true(covs_cont$count_value == 9)
+
+
+  # risk factor - check SMD
+  rf_covs <- utils::read.csv(file.path(tempdir(), "result", "c_risk_factor_covariates.csv"))
+  # 378253 - 7 : 2013-04-03, 9 : 2006-01-04/2014-08-02/2014-08-04
+  # 7 had outcome 5 days after index and ~5 months after index
+  # 9 does not have outcome
+
+  testthat::expect_true(rf_covs$non_case_sum_value[rf_covs$covariate_id == 378253201] == 1)
+  testthat::expect_true(rf_covs$case_sum_value[rf_covs$covariate_id == 378253201] == 1)
+  # 5 cases and 4 non-cases
+  testthat::expect_true(rf_covs$non_case_average_value[rf_covs$covariate_id == 378253201] == 1/4)
+  testthat::expect_true(rf_covs$case_average_value[rf_covs$covariate_id == 378253201] == 1/5)
+
+  # now make sure SMD is correct
+  # 4 non-cases and 1 has outcome, 5-cases and 1 has outcome
+  nonCases <- 4
+  nonCaseMean <- rf_covs$non_case_average_value[rf_covs$covariate_id == 378253201]
+  nonCaseOnes <- 1
+  nonCaseZeros <- 3
+  cases <- 5
+  caseMean <- rf_covs$case_average_value[rf_covs$covariate_id == 378253201]
+  caseOnes <- 1
+  caseZeros <- 4
+
+  meanDiff <- caseMean - nonCaseMean
+  nonCaseSD <- sqrt((nonCaseOnes*(1-nonCaseMean)^2 + nonCaseZeros*(0-nonCaseMean)^2)/nonCases)
+  caseSD <- sqrt((caseOnes*(1-caseMean)^2 + caseZeros*(0-caseMean)^2)/cases)
+  pooledSD <- sqrt((caseSD^2+nonCaseSD^2)/2)
+  manualSMD <- meanDiff/pooledSD
+
+  testthat::expect_equal(
+    rf_covs$standardized_mean_difference[rf_covs$covariate_id == 378253201],
+    manualSMD, tolerance = 0.01
+    )
+
+  rf_cont <- utils::read.csv(file.path(tempdir(), "result", "c_risk_factor_covariates_continuous.csv"))
+
+  nonCases <- 4
+  nonCaseMean <- rf_cont$non_case_average_value[rf_cont$covariate_id == 1002]
+  nonCaseSd <- rf_cont$non_case_standard_deviation[rf_cont$covariate_id == 1002]
+  cases <- 5
+  caseMean <- rf_cont$case_average_value[rf_cont$covariate_id == 1002]
+  caseSd <- rf_cont$case_standard_deviation[rf_cont$covariate_id == 1002]
+
+  meanDiff <- caseMean - nonCaseMean
+  pooledSD <- sqrt((caseSd^2+nonCaseSd^2)/2)
+  manualSMD <- meanDiff/pooledSD
+
+  testthat::expect_equal(
+    rf_cont$standardized_mean_difference[rf_covs$covariate_id == 1002],
+    manualSMD, tolerance = 0.01
+  )
+
 
 })
 

@@ -166,7 +166,7 @@ for (dbmsPlatform in dbmsPlatforms) {
     } else {
       # create a cohort table
       DatabaseConnector::insertTable(
-        bulkLoad = F,
+        bulkLoad = FALSE,
         connection = con,
         databaseSchema = dbmsDetails$cohortDatabaseSchema,
         tableName = dbmsDetails$cohortTable,
