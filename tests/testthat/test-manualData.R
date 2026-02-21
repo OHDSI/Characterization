@@ -22,7 +22,7 @@ test_that("manual data runCharacterizationAnalyses", {
   persons <- data.frame(
     person_id = 1:10,
     gender_concept_id = rep(8532, 10),
-    year_of_birth = rep(2000, 10),
+    year_of_birth = rep(1984, 10)+sample(10,10),
     race_concept_id = rep(1, 10),
     ethnicity_concept_id = rep(1, 10),
     location_id = rep(1, 10),
@@ -212,10 +212,10 @@ test_that("manual data runCharacterizationAnalyses", {
     incremental = TRUE,
     threads = 1,
     nTargetJobs = 1,
-    minCharacterizationMean = 0.0001,
+    minCharacterizationMean = 0,
     minCellCount = 0,
     minSMD = 0,
-    minCovariateCount = 2,
+    minCovariateCount = 0,
     mode = 'PatientLevelPrediction',
     showSubjectId = TRUE
   )
@@ -264,6 +264,7 @@ test_that("manual data runCharacterizationAnalyses", {
 
   eset <- utils::read.csv(file.path(tempdir(), "result", "c_execution_settings.csv"))
   testthat::expect_true(nrow(eset) == 1)
+
 
   # targetId = 1, limitToFirstInNDays = 99999,minPriorObservation = 365,
   tset <- utils::read.csv(file.path(tempdir(), "result", "c_target_settings.csv"))
@@ -317,8 +318,8 @@ test_that("manual data runCharacterizationAnalyses", {
   caseZeros <- 4
 
   meanDiff <- caseMean - nonCaseMean
-  nonCaseSD <- sqrt((nonCaseOnes*(1-nonCaseMean)^2 + nonCaseZeros*(0-nonCaseMean)^2)/nonCases)
-  caseSD <- sqrt((caseOnes*(1-caseMean)^2 + caseZeros*(0-caseMean)^2)/cases)
+  nonCaseSD <- sqrt((nonCaseOnes*(1-nonCaseMean)^2 + nonCaseZeros*(0-nonCaseMean)^2)/(nonCases-1))
+  caseSD <- sqrt((caseOnes*(1-caseMean)^2 + caseZeros*(0-caseMean)^2)/(cases-1))
   pooledSD <- sqrt((caseSD^2+nonCaseSD^2)/2)
   manualSMD <- meanDiff/pooledSD
 
@@ -326,6 +327,29 @@ test_that("manual data runCharacterizationAnalyses", {
     rf_covs$standardized_mean_difference[rf_covs$covariate_id == 378253201],
     manualSMD, tolerance = 0.01
     )
+
+  # test when a non-case or case is 0
+
+  nonCases <- 4
+  nonCaseMean <- rf_covs$non_case_average_value[rf_covs$covariate_id == 201820201]
+  nonCaseOnes <- 0
+  nonCaseZeros <- 4
+  cases <- 5
+  caseMean <- rf_covs$case_average_value[rf_covs$covariate_id == 201820201]
+  caseOnes <- 3
+  caseZeros <- 2
+
+  meanDiff <- caseMean - nonCaseMean
+  nonCaseSD <- sqrt((nonCaseOnes*(1-nonCaseMean)^2 + nonCaseZeros*(0-nonCaseMean)^2)/(nonCases-1))
+  caseSD <- sqrt((caseOnes*(1-caseMean)^2 + caseZeros*(0-caseMean)^2)/(cases-1))
+  pooledSD <- sqrt((caseSD^2+nonCaseSD^2)/2)
+  manualSMD <- meanDiff/pooledSD
+
+  testthat::expect_equal(
+    rf_covs$standardized_mean_difference[rf_covs$covariate_id == 201820201],
+    manualSMD, tolerance = 0.01
+  )
+
 
   rf_cont <- utils::read.csv(file.path(tempdir(), "result", "c_risk_factor_covariates_continuous.csv"))
 
@@ -341,7 +365,7 @@ test_that("manual data runCharacterizationAnalyses", {
   manualSMD <- meanDiff/pooledSD
 
   testthat::expect_equal(
-    rf_cont$standardized_mean_difference[rf_covs$covariate_id == 1002],
+    rf_cont$standardized_mean_difference[rf_cont$covariate_id == 1002],
     manualSMD, tolerance = 0.01
   )
 
