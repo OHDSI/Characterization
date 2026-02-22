@@ -252,7 +252,8 @@ computeCaseSeriesAnalyses <- function(
     targetAnalysisRefTable = '#fe_analysis_ref_case',
     targetTimeRefTable = '#fe_time_ref_case',
     dropTableIfExists = TRUE,
-    createTable = TRUE
+    createTable = TRUE,
+    tempEmulationSchema = tempEmulationSchema
   )
 
   completionTime <- Sys.time() - start

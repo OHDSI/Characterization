@@ -294,7 +294,8 @@ computeRiskFactorAnalyses <- function(
     targetAnalysisRefTable = '#fe_analysis_ref_rf',
     targetTimeRefTable = '#fe_time_ref_rf',
     dropTableIfExists = TRUE,
-    createTable = TRUE
+    createTable = TRUE,
+    tempEmulationSchema = tempEmulationSchema
   )
 
   completionTime <- Sys.time() - start
