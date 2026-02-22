@@ -668,16 +668,18 @@ aggregateCsvsBatch <- function(
             tracker$analysisRefTracker <- unique(c(tracker$analysisRefTracker, paste0(x$setting_id, "-", x$analysis_id)))
           }
           if (csvType == "covariate_ref.csv") { # this could be problematic as may have differnet covariate_ids
-            x <- x %>%
-              dplyr::mutate(
-                unique_id = paste0(.data$setting_id, "-", .data$covariate_id)
-              ) %>%
-              dplyr::filter( # need to filter covariate_id and setting_id
-                !.data$unique_id %in% tracker$covariateRefTracker
-              ) %>%
-              dplyr::select(-"unique_id")
+            if(nrow(x)>0){
+              x <- x %>%
+                dplyr::mutate(
+                  unique_id = paste0(.data$setting_id, "-", .data$covariate_id)
+                ) %>%
+                dplyr::filter( # need to filter covariate_id and setting_id
+                  !.data$unique_id %in% tracker$covariateRefTracker
+                ) %>%
+                dplyr::select(-"unique_id")
 
-            tracker$covariateRefTracker <- unique(c(tracker$covariateRefTracker, paste0(x$setting_id, "-", x$covariate_id)))
+              tracker$covariateRefTracker <- unique(c(tracker$covariateRefTracker, paste0(x$setting_id, "-", x$covariate_id)))
+            }
           }
 
           # this does not work if the csv is empty - only
@@ -687,7 +689,7 @@ aggregateCsvsBatch <- function(
             file = savePath, quote = "all",
             append = !firstTrackerCurrent | pos != 1,
             num_threads = 1,
-            progress = FALSE,
+            progress = FALSE
             #append = append | pos != 1
           )
 
@@ -701,7 +703,8 @@ aggregateCsvsBatch <- function(
           chunk_size = batchSize,
           col_types = colTypes[csvType == tables],
           show_col_types = FALSE,
-          progress = FALSE
+          progress = FALSE,
+          col_names = TRUE
         )
 
         # readr::read_csv_chunked only works if the csv
@@ -785,7 +788,7 @@ exportSharedObjects <- function(
 
     # export attrition table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @attrition_table",
+      sql = "SELECT * FROM @attrition_table;",
       attrition_table = paste0(outputDatabaseSchema, '.' ,attritionTable)
     )
     sql <- SqlRender::translate(
@@ -808,7 +811,7 @@ exportSharedObjects <- function(
 
     # export target settings table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @target_settings_table",
+      sql = "SELECT * FROM @target_settings_table;",
       target_settings_table = paste0(outputDatabaseSchema, '.' ,targetSettingsTable)
     )
     sql <- SqlRender::translate(
@@ -837,7 +840,7 @@ exportSharedObjects <- function(
 
     # export target settings table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @case_settings_table",
+      sql = "SELECT * FROM @case_settings_table;",
       case_settings_table = paste0(outputDatabaseSchema, '.' ,caseSettingsTable)
     )
     sql <- SqlRender::translate(
