@@ -433,8 +433,12 @@ getDbDuringCovariateData <- function(
         snakeCaseToCamelCase = TRUE
       )
       if (minCharacterizationMean != 0 && "averageValue" %in% colnames(result$covariates)) {
-        result$covariates <- result$covariates %>%
-          dplyr::filter(.data$averageValue >= minCharacterizationMean)
+
+        numRows <- result$covariates %>% dplyr::count() %>% dplyr::pull()
+        if(numRows > 0){
+          result$covariates <- result$covariates %>%
+            dplyr::filter(.data$averageValue >= minCharacterizationMean)
+        }
       }
     } else{
       # insert into the table

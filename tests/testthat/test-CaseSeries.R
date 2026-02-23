@@ -328,6 +328,22 @@ test_that("computeCaseSeriesAnalyses", {
     mode = 'PatientLevelPrediction'
   )
 
+  # cleanup
+  Characterization:::dropCohorts(
+    connectionDetails = connectionDetails,
+    targetDatabaseSchema = "main",
+    targetTable = "cohort",
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort",
+    outputDatabaseSchema = 'main',
+    outputTable = 'char_cohort',
+    cdmDatabaseSchema = "main",
+    tempEmulationSchema = "main",
+    progressBar = FALSE,
+    settingHash = 'set1',
+    dbHash = 'db1'
+  )
+
   # check incremental does not run
   testthat::expect_true(
     sum(c(
@@ -360,6 +376,140 @@ test_that("computeCaseSeriesAnalyses", {
       covs$database_id[1] == "madeup"
     )
   }
+})
+
+
+# testing case series include/exclude covs
+test_that("testing during covs", {
+targetIds <- c(1, 2, 4)
+outcomeIds <- c(3)
+
+res <- createCaseSeriesSettings(
+  targetIds = targetIds,
+  outcomeIds = outcomeIds,
+  limitToFirstInNDays = 365,
+  minPriorObservation = 30,
+  outcomeWashoutDays = 365,
+  riskWindowStart = 1,
+  startAnchor = 'cohort start',
+  riskWindowEnd = 365,
+  endAnchor = 'cohort start'
+)
+
+tables <- Characterization:::generateCohorts(
+  characterizationSettings = createCharacterizationSettings(
+    caseSeriesSettings = res
+  ),
+  mode = 'PatientLevelPrediction',
+  incremental = FALSE,
+  executionPath = tempFolder1, # used for incremental logging
+  connectionDetails = connectionDetails,
+
+  targetDatabaseSchema = "main",
+  targetTable = "cohort",
+  outcomeDatabaseSchema = "main",
+  outcomeTable = "cohort",
+  outputDatabaseSchema = 'main',
+  outputTable = 'char_cohort',
+  cdmDatabaseSchema = "main",
+  tempEmulationSchema = "main",
+  progressBar = FALSE,
+  settingHash = 'set1',
+  dbHash = 'db1'
+)
+
+# 2) check excluded
+# ======================
+covariateSettings1 <- Characterization::createDuringCovariateSettings(
+  useDrugEraDuring = TRUE,
+  useVisitCountDuring = TRUE,
+  excludedCovariateConceptIds = c(1124300,1118084)
+)
+
+data1 <- FeatureExtraction::getDbCovariateData(
+  connectionDetails = connectionDetails,
+  cdmDatabaseSchema = "main",
+  cohortTable = 'char_cohort_set1_db1',
+  cohortDatabaseSchema = "main",
+  cohortIds = c(10,20,40), # the targets
+  rowIdField = 'row_number',
+  exportToTable = FALSE,
+  aggregated = TRUE,
+  minCharacterizationMean = 0.01,
+  tempEmulationSchema = "main",
+  covariateSettings = covariateSettings1
+    )
+
+# add checks to make sure data exists
+testthat::expect_true(
+  nrow(as.data.frame(data1$covariates)) == 0
+)
+
+# 2) check included
+# ======================
+covariateSettings2 <- Characterization::createDuringCovariateSettings(
+  useDrugEraDuring = TRUE,
+  includedCovariateIds = c(1124300417)
+)
+
+data2 <- FeatureExtraction::getDbCovariateData(
+  connectionDetails = connectionDetails,
+  cdmDatabaseSchema = "main",
+  cohortTable = 'char_cohort_set1_db1',
+  cohortDatabaseSchema = "main",
+  cohortIds = c(10,20,40), # the targets
+  rowIdField = 'row_number',
+  exportToTable = FALSE,
+  aggregated = TRUE,
+  minCharacterizationMean = 0.01,
+  tempEmulationSchema = "main",
+  covariateSettings = covariateSettings2
+)
+
+# should only have covariateId 1124300417
+testthat::expect_true(
+  as.data.frame(data2$covariates)$covariateId == 1124300417
+)
+
+covariateSettings3 <- Characterization::createDuringCovariateSettings(
+  useDrugEraDuring = TRUE,
+  includedCovariateConceptIds = c(1118084)
+)
+data3 <- FeatureExtraction::getDbCovariateData(
+  connectionDetails = connectionDetails,
+  cdmDatabaseSchema = "main",
+  cohortTable = 'char_cohort_set1_db1',
+  cohortDatabaseSchema = "main",
+  cohortIds = c(10,20,40), # the targets
+  rowIdField = 'row_number',
+  exportToTable = FALSE,
+  aggregated = TRUE,
+  minCharacterizationMean = 0.01,
+  tempEmulationSchema = "main",
+  covariateSettings = covariateSettings3
+)
+# should only have covariateId 1118084417
+testthat::expect_true(
+  as.data.frame(data3$covariates)$covariateId == 1118084417
+)
+
+# cleanup
+Characterization:::dropCohorts(
+  connectionDetails = connectionDetails,
+  targetDatabaseSchema = "main",
+  targetTable = "cohort",
+  outcomeDatabaseSchema = "main",
+  outcomeTable = "cohort",
+  outputDatabaseSchema = 'main',
+  outputTable = 'char_cohort',
+  cdmDatabaseSchema = "main",
+  tempEmulationSchema = "main",
+  progressBar = FALSE,
+  settingHash = 'set1',
+  dbHash = 'db1'
+)
+
+
 })
 
 # TODO: add a test to make sure the SMD is correct? could create fake data in sqlite to run

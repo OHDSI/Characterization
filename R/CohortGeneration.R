@@ -706,3 +706,48 @@ generateNonCases <- function(
 
   return(invisible(TRUE))
 }
+
+
+
+dropCohorts <- function(
+  connectionDetails,
+  targetDatabaseSchema,
+  targetTable,
+  outcomeDatabaseSchema,
+  outcomeTable,
+  outputDatabaseSchema,
+  outputTable = 'characterization_cohort',
+  cdmDatabaseSchema,
+  tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+  progressBar = FALSE,
+  settingHash,
+  dbHash
+){
+  # remove the tables if they exist
+
+  # connection
+  connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection))
+
+  # tables names
+  characterizationTableWithHash <- paste0(outputTable, '_',settingHash, '_', dbHash)
+  targetSettingsTableWithHash <- paste0('target_settings', '_',settingHash, '_', dbHash)
+  caseSettingsTableWithHash <- paste0('case_settings', '_',settingHash, '_', dbHash)
+  attritionTableWithHash <- paste0('attrition', '_',settingHash, '_', dbHash)
+
+  sql <- SqlRender::loadRenderTranslateSql(
+    sqlFilename = 'DropTargetCohortTable.sql',
+    packageName = 'Characterization',
+    dbms = attributes(connection)$dbms,
+    tempEmulationSchema = tempEmulationSchema,
+    characterization_schema = outputDatabaseSchema,
+    characterization_table = characterizationTableWithHash,
+    attrition_table = attritionTableWithHash,
+    target_settings_table = targetSettingsTableWithHash,
+    case_settings_table = caseSettingsTableWithHash
+  )
+
+  DatabaseConnector::executeSql(connection, sql, progressBar = progressBar)
+
+  return(invisible(TRUE))
+}
