@@ -43,13 +43,13 @@ SQRT(
   (
     (POWER((1.0 - IFNULL(case_average_value, 0.0)),2) * IFNULL(case_sum_value*1.0, 0.0)) +
     (POWER((0.0 - IFNULL(case_average_value, 0.0)),2) * (IFNULL(case_n*1.0, 0.0) - IFNULL(case_sum_value*1.0, 0.0)))
-  )/CASE WHEN IFNULL(case_n*1.0-1.0, 1.0) is 0 THEN 1.0 ELSE IFNULL(case_n*1.0-1.0, 1.0) END
+  )/CASE WHEN IFNULL(case_n*1.0-1.0, 1.0) = 0 THEN 1.0 ELSE IFNULL(case_n*1.0-1.0, 1.0) END
 
 +
   (
     (POWER((1.0 - IFNULL(non_case_average_value, 0.0)),2) * IFNULL(non_case_sum_value*1.0, 0.0)) +
     (POWER((0.0 - IFNULL(non_case_average_value, 0.0)),2) * (IFNULL(non_case_n*1.0, 0.0) - IFNULL(non_case_sum_value*1.0, 0)))
-  )/CASE WHEN IFNULL(non_case_n*1.0-1.0, 1.0) is 0 THEN 1.0 ELSE IFNULL(non_case_n*1.0-1.0, 1.0) END
+  )/CASE WHEN IFNULL(non_case_n*1.0-1.0, 1.0) = 0 THEN 1.0 ELSE IFNULL(non_case_n*1.0-1.0, 1.0) END
 
   )/2.0
   ) as standardized_mean_difference
