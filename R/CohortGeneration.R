@@ -358,7 +358,7 @@ getCohortJobs <- function(
       )
 
 
-    message(paste0('Adding ', length(unique(targets$settingId)) ,' Target Cohort Jobs'))
+    message(paste0('Adding ', length(unique(targets$settingId)) ,' Target Cohort Jobs containing ', length(unique(targets$targetId)) ,' targets'))
 
     for(setId in unique(targets$settingId)){
       toi <- targets %>%
@@ -394,16 +394,16 @@ getCohortJobs <- function(
       dplyr::ungroup() %>%
       dplyr::inner_join(
         y = cases %>%
-          dplyr::distinct(.data$outcomeWashoutDays, .data$outcomeId,
+          dplyr::distinct(.data$outcomeWashoutDays, #.data$outcomeId,
                           .data$riskWindowStart,.data$startAnchor,
                           .data$riskWindowEnd, .data$endAnchor) %>%
-          dplyr::arrange(.data$outcomeWashoutDays, .data$outcomeId,
+          dplyr::arrange(.data$outcomeWashoutDays, #.data$outcomeId,
                          .data$riskWindowStart,.data$startAnchor,
                          .data$riskWindowEnd, .data$endAnchor) %>%
           dplyr::mutate(
             settingId = dplyr::row_number()
           ),
-        by = c("outcomeWashoutDays", "outcomeId",
+        by = c("outcomeWashoutDays", #"outcomeId",
                "riskWindowStart", "startAnchor",
                "riskWindowEnd", "endAnchor")
       ) %>%
@@ -417,7 +417,7 @@ getCohortJobs <- function(
         characterizationCaseId = dplyr::row_number()
       )
 
-    message(paste0('Adding ', length(unique(cases$settingId)) ,' Case Cohort Jobs'))
+    message(paste0('Adding ', length(unique(cases$settingId)) ,' Case Cohort Jobs containing ', nrow(cases), ' case cohorts'))
 
     nNonCase <- 0
     for(setId in unique(cases$settingId)){

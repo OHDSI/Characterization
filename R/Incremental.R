@@ -113,7 +113,8 @@ cleanIncremental <- function(
     fixedExecution <- executionFile[!executionFile$job_id %in% issues, ]
     utils::write.csv(
       x = fixedExecution,
-      file = file.path(executionFolder, "execution.csv")
+      file = file.path(executionFolder, "execution.csv"),
+      row.names = FALSE
     )
   }
 

@@ -178,7 +178,8 @@ test_that("cleanIncremental", {
   dir.create(file.path(logFolder2, "1"))
   write.csv(
     x = data.frame(a = 1),
-    file = file.path(logFolder2, "1", "madeup.csv")
+    file = file.path(logFolder2, "1", "madeup.csv"),
+    row.names = FALSE
   )
   testthat::expect_true(file.exists(file.path(logFolder2, "1", "madeup.csv")))
 
@@ -323,7 +324,8 @@ test_that("No Incremental works", {
 
   write.csv(
     x = data.frame(a = 1),
-    file = file.path(logFolder5, "job_1", "anyCsvFile.csv")
+    file = file.path(logFolder5, "job_1", "anyCsvFile.csv"),
+    row.names = FALSE
   )
 
   # now there is a csv file it should error
