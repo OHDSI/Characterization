@@ -141,38 +141,42 @@ generateCohorts <- function(
 
   }
 
-  # TODO: replace below with parallel jobs using threads
-  for(i in 1:nrow(cohortJobs$jobs)){
-    do.call(
-      what = cohortJobs$jobs$functionName[i],
-      args =
-        list(
-          connection = connection,
-          cdmDatabaseSchema = cdmDatabaseSchema,
-          characterizationTable = characterizationTableWithHash,
-          attritionTable = attritionTableWithHash,
-          targetSettingsTable = targetSettingsTableWithHash,
-          caseSettingsTable = caseSettingsTableWithHash,
-          characterizationDatabaseSchema = outputDatabaseSchema,
-          tempEmulationSchema = tempEmulationSchema,
-          targetDatabaseSchema = targetDatabaseSchema,
-          targetTable = targetTable,
-          outcomeDatabaseSchema = outcomeDatabaseSchema,
-          outcomeTable = outcomeTable,
-          incremental = incremental,
-          mode = mode,
+    if(nrow(cohortJobs$jobs) > 0){
+      # TODO: replace below with parallel jobs using threads
+      for(i in 1:nrow(cohortJobs$jobs)){
+        do.call(
+          what = cohortJobs$jobs$functionName[i],
+          args =
+            list(
+              connection = connection,
+              cdmDatabaseSchema = cdmDatabaseSchema,
+              characterizationTable = characterizationTableWithHash,
+              attritionTable = attritionTableWithHash,
+              targetSettingsTable = targetSettingsTableWithHash,
+              caseSettingsTable = caseSettingsTableWithHash,
+              characterizationDatabaseSchema = outputDatabaseSchema,
+              tempEmulationSchema = tempEmulationSchema,
+              targetDatabaseSchema = targetDatabaseSchema,
+              targetTable = targetTable,
+              outcomeDatabaseSchema = outcomeDatabaseSchema,
+              outcomeTable = outcomeTable,
+              incremental = incremental,
+              mode = mode,
 
-          casePreTargetDuration = casePreTargetDuration,
-          casePostOutcomeDuration = casePostOutcomeDuration,
+              casePreTargetDuration = casePreTargetDuration,
+              casePostOutcomeDuration = casePostOutcomeDuration,
 
-          progressBar = progressBar,
-          executionPath = executionPath,
-          settings = ParallelLogger::convertJsonToSettings(cohortJobs$jobs$settings[i]),
-          jobId = cohortJobs$jobs$jobId[i]
+              progressBar = progressBar,
+              executionPath = executionPath,
+              settings = ParallelLogger::convertJsonToSettings(cohortJobs$jobs$settings[i]),
+              jobId = cohortJobs$jobs$jobId[i]
+            )
         )
-      )
-  }
-  }
+      }
+    } else{ # end if no jobs left
+      message('No cohort jobs left to run')
+    }
+  } # end not null joblist
 
 
 return(list(
