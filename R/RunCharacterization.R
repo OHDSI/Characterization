@@ -267,6 +267,10 @@ runCharacterizationAnalyses <- function(
     stop("Invalid mode.  Please select one of: 'Efficient', 'CohortIncidence', 'PatientLevelPrediction'")
   }
 
+  if(threads > 4){
+    warning('Andromeda uses up to 20% memory per thread so using more than 4 threads may lead to memory errors.')
+  }
+
   runDateTime <- Sys.time()
 
   createDirectory(outputDirectory)
