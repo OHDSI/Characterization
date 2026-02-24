@@ -3,9 +3,6 @@
 
 context("RiskFactor")
 
-# ADDED TEMP testing this to see whether it is getting changed before this
-connectionDetails <- Characterization::exampleOmopConnectionDetails()
-
 tempFolder1 <- tempfile("runRf1")
 on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
 tempFolder2 <- tempfile("runRf2")

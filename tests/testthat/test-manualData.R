@@ -10,11 +10,11 @@ test_that("manual data runCharacterizationAnalyses", {
   # this test creates made-up OMOP CDM data
   # and runs runCharacterizationAnalyses on the data
   # to check whether the results are as expected
-  connectionDetails <- DatabaseConnector::createConnectionDetails(
+  connectionDetailsManual <- DatabaseConnector::createConnectionDetails(
     dbms = "sqlite",
     server = manualData
   )
-  con <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  con <- DatabaseConnector::connect(connectionDetails = connectionDetailsManual)
   on.exit(DatabaseConnector::disconnect(con))
   schema <- "main"
 
@@ -195,8 +195,8 @@ test_that("manual data runCharacterizationAnalyses", {
       )
     )
   )
-  Characterization::runCharacterizationAnalyses(
-    connectionDetails = connectionDetails,
+  runCharacterizationAnalyses(
+    connectionDetails = connectionDetailsManual,
     targetDatabaseSchema = schema,
     targetTable = "cohort",
     outcomeDatabaseSchema = schema,
@@ -378,11 +378,11 @@ test_that("manual data checking ... works", {
   # this test creates made-up OMOP CDM data
   # and runs runCharacterizationAnalyses on the data
   # to check whether the results are as expected
-  connectionDetails <- DatabaseConnector::createConnectionDetails(
+  connectionDetailsManual <- DatabaseConnector::createConnectionDetails(
     dbms = "sqlite",
     server = manualData2
   )
-  con <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  con <- DatabaseConnector::connect(connectionDetails = connectionDetailsManual)
   on.exit(DatabaseConnector::disconnect(con))
   schema <- "main"
 

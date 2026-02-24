@@ -1,10 +1,10 @@
 context("ExportingCsvFiles")
 library(dplyr)
 
-tempFolder <- tempdir("exporting")
+tempFolder <- file.path(tempdir(),"exporting")
 on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
 
-tempFolder2 <- tempdir("results")
+tempFolder2 <- file.path(tempdir(),"results")
 on.exit(unlink(tempFolder2, recursive = TRUE), add = TRUE)
 
 test_that("addDbAndSettings works for single table", {
@@ -110,7 +110,9 @@ test_that("exportAndromedaSubfilesToCsv", {
   # inside tempFolder create folders with Andromeda result file
 
   dir.create(file.path(tempFolder, 'test_1'))
+  on.exit(unlink(file.path(tempFolder, 'test_1'), recursive = TRUE), add = TRUE)
   dir.create(file.path(tempFolder, 'test_2'))
+  on.exit(unlink(file.path(tempFolder, 'test_1'), recursive = TRUE), add = TRUE)
 
   andromeda1 <- Andromeda::andromeda()
   andromeda1$analysisRef <- data.frame(
@@ -245,6 +247,7 @@ test_that("exportAndromedaSubfilesToCsv", {
 
 test_that("removeRedundant", {
   dir.create(file.path(tempFolder, 'test_3'))
+  on.exit(unlink(file.path(tempFolder, 'test_3'), recursive = TRUE), add = TRUE)
 
   andromeda1 <- Andromeda::andromeda()
   andromeda1$analysisRef <- data.frame(

@@ -711,10 +711,6 @@ generateNonCases <- function(
 
 dropCohorts <- function(
   connectionDetails,
-  targetDatabaseSchema,
-  targetTable,
-  outcomeDatabaseSchema,
-  outcomeTable,
   outputDatabaseSchema,
   outputTable = 'characterization_cohort',
   cdmDatabaseSchema,

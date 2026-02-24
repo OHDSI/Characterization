@@ -27,7 +27,7 @@ for (folder in c(
 }
 
 test_that("createIncrementalLog", {
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder,
     logname = "execution.csv"
   )
@@ -36,7 +36,7 @@ test_that("createIncrementalLog", {
   testthat::expect_true(nrow(executionLog) == 1)
   testthat::expect_true(executionLog$job_id == 0)
 
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder,
     logname = "madeup.csv"
   )
@@ -55,11 +55,11 @@ test_that("checkIncrementalFilesExist", {
   testthat::expect_true(is.null(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = TRUE)))
 
   # now add the csvs and check should be true
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder7,
     logname = "execution.csv"
   )
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder7,
     logname = "completed.csv"
   )
@@ -76,18 +76,18 @@ test_that("checkIncrementalFilesExist", {
 test_that("loadIncrementalFiles", {
   # should error as not completed.csv
   testthat::expect_error(
-    Characterization:::loadIncrementalFiles(
+    loadIncrementalFiles(
       executionFolder = logFolder
     )
   )
 
   # now create the completed.csv
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder,
     logname = "completed.csv"
   )
 
-  result <- Characterization:::loadIncrementalFiles(
+  result <- loadIncrementalFiles(
     executionFolder = logFolder
   )
   testthat::expect_true(sum(c("executed", "completed") %in% names(result)) == 2)
@@ -96,18 +96,18 @@ test_that("loadIncrementalFiles", {
 })
 
 test_that("getExecutionJobIssues", {
-  result <- Characterization:::loadIncrementalFiles(
+  result <- loadIncrementalFiles(
     executionFolder = logFolder
   )
   # should error as not completed.csv
-  issues <- Characterization:::getExecutionJobIssues(
+  issues <- getExecutionJobIssues(
     executed = result$executed,
     completed = result$completed
   )
   testthat::expect_true(length(issues) == 0)
 
   # now add some executed but not completed results
-  issues <- Characterization:::getExecutionJobIssues(
+  issues <- getExecutionJobIssues(
     executed = data.frame(
       run_date_time = c(1, 1),
       job_id = c(1, 2),
@@ -123,7 +123,7 @@ test_that("getExecutionJobIssues", {
   )
   testthat::expect_true(issues == 2)
 
-  issues <- Characterization:::getExecutionJobIssues(
+  issues <- getExecutionJobIssues(
     executed = data.frame(
       run_date_time = c(1, 1),
       job_id = c(1, 20),
@@ -142,11 +142,11 @@ test_that("getExecutionJobIssues", {
 
 test_that("cleanIncremental", {
   # create folder with issues
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder2,
     logname = "execution.csv"
   )
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder2,
     logname = "completed.csv"
   )
@@ -163,10 +163,10 @@ test_that("cleanIncremental", {
     append = TRUE
   )
 
-  incrementalFiles <- Characterization:::loadIncrementalFiles(
+  incrementalFiles <- loadIncrementalFiles(
     executionFolder = logFolder2
   )
-  issues <- Characterization:::getExecutionJobIssues(
+  issues <- getExecutionJobIssues(
     executed = incrementalFiles$executed,
     completed = incrementalFiles$completed
   )
@@ -186,16 +186,16 @@ test_that("cleanIncremental", {
   testthat::expect_true(file.exists(file.path(logFolder2, "1", "result")))
 
   # run clean to fix issues
-  Characterization:::cleanIncremental(
+  cleanIncremental(
     executionFolder = logFolder2
   )
 
   # check issues are fixed
   testthat::expect_true(!file.exists(file.path(logFolder2, "1", "result")))
-  incrementalFiles <- Characterization:::loadIncrementalFiles(
+  incrementalFiles <- loadIncrementalFiles(
     executionFolder = logFolder2
   )
-  issues <- Characterization:::getExecutionJobIssues(
+  issues <- getExecutionJobIssues(
     executed = incrementalFiles$executed,
     completed = incrementalFiles$completed
   )
@@ -207,16 +207,16 @@ test_that("cleanIncremental", {
 
 test_that("checkResultFilesIncremental ", {
   # create folder with issues
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder3,
     logname = "execution.csv"
   )
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder3,
     logname = "completed.csv"
   )
 
-  result <- Characterization:::checkResultFilesIncremental(
+  result <- checkResultFilesIncremental(
     executionFolder = logFolder3
   )
   testthat::expect_true(is.null(result))
@@ -240,11 +240,11 @@ test_that("checkResultFilesIncremental ", {
 
 test_that("checkResultFilesIncremental ", {
   # create folder with issues
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder4,
     logname = "execution.csv"
   )
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder4,
     logname = "completed.csv"
   )
@@ -271,12 +271,12 @@ test_that("checkResultFilesIncremental ", {
     append = TRUE
   )
 
-  jobs <- Characterization:::findCompletedJobs(logFolder4)
+  jobs <- findCompletedJobs(logFolder4)
   testthat::expect_true(1 %in% jobs)
 })
 
 test_that("recordIncremental ", {
-  Characterization:::createIncrementalLog(
+  createIncrementalLog(
     executionFolder = logFolder6,
     logname = "execution.csv"
   )
@@ -285,7 +285,7 @@ test_that("recordIncremental ", {
   )
   testthat::expect_true(!"example100" %in% execution$job_id)
 
-  Characterization:::recordIncremental(
+  recordIncremental(
     executionFolder = logFolder6,
     runDateTime = Sys.time(),
     jobId = "example100",
@@ -300,7 +300,7 @@ test_that("recordIncremental ", {
 
   # test warning if no file
   testthat::expect_warning(
-    Characterization:::recordIncremental(
+    recordIncremental(
       executionFolder = logFolder6,
       runDateTime = 1,
       jobId = "example100",
@@ -313,7 +313,7 @@ test_that("recordIncremental ", {
 
 
 test_that("No Incremental works", {
-  result <- Characterization:::checkResultFilesNonIncremental(
+  result <- checkResultFilesNonIncremental(
     executionFolder = logFolder5
   )
   testthat::expect_true(is.null(result))
@@ -332,13 +332,13 @@ test_that("No Incremental works", {
 
   # now there is a csv file it should error
   testthat::expect_error(
-    Characterization:::checkResultFilesNonIncremental(
+    checkResultFilesNonIncremental(
       executionFolder = logFolder5
     )
   )
 
   # this should clean the folder of any csv files
-  Characterization:::cleanNonIncremental(
+  cleanNonIncremental(
     executionFolder = logFolder5
   )
   # previously created result should have been deleted

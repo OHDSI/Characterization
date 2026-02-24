@@ -330,10 +330,6 @@ test_that("computeCaseSeriesAnalyses", {
   # cleanup
   dropCohorts(
     connectionDetails = connectionDetails,
-    targetDatabaseSchema = "main",
-    targetTable = "cohort",
-    outcomeDatabaseSchema = "main",
-    outcomeTable = "cohort",
     outputDatabaseSchema = 'main',
     outputTable = 'char_cohort',
     cdmDatabaseSchema = "main",
@@ -498,10 +494,6 @@ testthat::expect_true(
 # cleanup
 dropCohorts(
   connectionDetails = connectionDetails,
-  targetDatabaseSchema = "main",
-  targetTable = "cohort",
-  outcomeDatabaseSchema = "main",
-  outcomeTable = "cohort",
   outputDatabaseSchema = 'main',
   outputTable = 'char_cohort',
   cdmDatabaseSchema = "main",

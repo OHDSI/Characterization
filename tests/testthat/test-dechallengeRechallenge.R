@@ -117,9 +117,9 @@ test_that("computeDechallengeRechallengeAnalyses", {
     connection = con,
     databaseSchema = "main",
     tableName = "cohort_dechal",
-    createTable = T,
-    dropTableIfExists = T,
-    camelCaseToSnakeCase = F
+    createTable = TRUE,
+    dropTableIfExists = TRUE,
+    camelCaseToSnakeCase = FALSE
   )
 
   DatabaseConnector::disconnect(con)
@@ -148,6 +148,9 @@ test_that("computeDechallengeRechallengeAnalyses", {
   testthat::expect_true(nrow(dc) == 1)
   testthat::expect_true(dc$numPersonsExposed == 4)
   testthat::expect_true(dc$numExposureEras == 10)
+
+  # clean up
+  file.remove(file.path(dcLoc,"result"))
 })
 
 test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
@@ -252,6 +255,9 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
   testthat::expect_equal(nrow(dc), 1)
   testthat::expect_equal(dc$subjectId, 2)
 
+  # clean up
+  file.remove(file.path(dcLoc, "result"))
+
 })
 
 
@@ -266,7 +272,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 30
   )
-  jobs <- Characterization:::getDechallengeRechallengeJobs(
+  jobs <- getDechallengeRechallengeJobs(
     characterizationSettings = createCharacterizationSettings(
       dechallengeRechallengeSettings = res
     ),
@@ -298,7 +304,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
 
 
   # checking more threads 3
-  jobs <- Characterization:::getDechallengeRechallengeJobs(
+  jobs <- getDechallengeRechallengeJobs(
     characterizationSettings = createCharacterizationSettings(
       dechallengeRechallengeSettings = res
     ),
@@ -331,7 +337,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
 
 
   # checking more threads than needed 20
-  jobs <- Characterization:::getDechallengeRechallengeJobs(
+  jobs <- getDechallengeRechallengeJobs(
     characterizationSettings = createCharacterizationSettings(
       dechallengeRechallengeSettings = res
     ),
