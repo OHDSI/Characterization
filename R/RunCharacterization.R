@@ -35,7 +35,9 @@ createCharacterizationSettings <- function(
     riskFactorSettings = NULL,
     caseSeriesSettings = NULL
     ) {
+
   errorMessages <- checkmate::makeAssertCollection()
+
   .checkTimeToEventSettingsList(
     settings = timeToEventSettings,
     errorMessages =  errorMessages
@@ -43,6 +45,21 @@ createCharacterizationSettings <- function(
 
   .checkDechallengeRechallengeSettingsList(
     settings = dechallengeRechallengeSettings,
+    errorMessages = errorMessages
+  )
+
+  .checkTargetBaselineSettingsList(
+    settings = targetBaselineSettings,
+    errorMessages = errorMessages
+  )
+
+  .checkRiskFactorSettingsList(
+    settings = riskFactorSettings,
+    errorMessages = errorMessages
+  )
+
+  .checkCaseSeriesSettingsList(
+    settings = caseSeriesSettings,
     errorMessages = errorMessages
   )
 
@@ -259,6 +276,12 @@ runCharacterizationAnalyses <- function(
     tablePrefix = csvFilePrefix,
     errorMessages = errorMessages
   )
+
+  .checkConnectionDetails(
+    connectionDetails = connectionDetails,
+    errorMessages = errorMessages
+  )
+
   checkmate::reportAssertions(
     errorMessages
   )
@@ -398,6 +421,7 @@ runCharacterizationAnalyses <- function(
   # extract attrition, case_settings, target_settings, execution_settings, case_series_settings
   exportSharedObjects(
     saveLocation = outputDirectory,
+    executionPath = executionPath,
     tablePrefix = csvFilePrefix,
     executionId = settingHash,
     databaseId = databaseId,
@@ -477,6 +501,12 @@ runCharacterizationAnalyses <- function(
     outputFolder = outputDirectory,
     csvFilePrefix = csvFilePrefix,
     batchSize = 100000,
+    minCellCount = minCellCount
+  )
+  exportAttrition(
+    executionPath = executionPath,
+    outputFolder = outputDirectory,
+    csvFilePrefix = csvFilePrefix,
     minCellCount = minCellCount
   )
 
@@ -591,6 +621,7 @@ createJobs <- function(
 
 exportSharedObjects <- function(
     saveLocation,
+    executionPath,
     tablePrefix = '',
     executionId,
     databaseId,
@@ -656,7 +687,7 @@ exportSharedObjects <- function(
 
     # export attrition table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @attrition_table",
+      sql = "SELECT * FROM @attrition_table;",
       attrition_table = paste0(outputDatabaseSchema, '.' ,attritionTable)
     )
     sql <- SqlRender::translate(
@@ -664,22 +695,31 @@ exportSharedObjects <- function(
       targetDialect = attributes(connection)$dbms,
       tempEmulationSchema = tempEmulationSchema
     )
-    attrition <- DatabaseConnector::querySql(
+
+    andromeda <- Andromeda::andromeda()
+
+    DatabaseConnector::querySqlToAndromeda(
       connection = connection,
       sql = sql,
-      snakeCaseToCamelCase = FALSE
+      andromeda = andromeda,
+      andromedaTableName = 'attrition',
+      snakeCaseToCamelCase = TRUE
     )
-    attrition$database_id <- databaseId
-    attrition$setting_id <- executionId
-    utils::write.csv(
-      x = attrition,
-      file = file.path(saveLocation, paste0(tablePrefix,'attrition.csv')),
-      row.names = FALSE
+
+    addDbAndSettings(
+      andromeda = andromeda,
+      databaseId = databaseId,
+      settingId = executionId
+    )
+
+    saveCharacterizationAndromeda(
+      andromeda = andromeda,
+      outputFolder = file.path(executionPath, 'attrition')
     )
 
     # export target settings table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @target_settings_table",
+      sql = "SELECT * FROM @target_settings_table;",
       target_settings_table = paste0(outputDatabaseSchema, '.' ,targetSettingsTable)
     )
     sql <- SqlRender::translate(
@@ -708,7 +748,7 @@ exportSharedObjects <- function(
 
     # export target settings table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @case_settings_table",
+      sql = "SELECT * FROM @case_settings_table;",
       case_settings_table = paste0(outputDatabaseSchema, '.' ,caseSettingsTable)
     )
     sql <- SqlRender::translate(

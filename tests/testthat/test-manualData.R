@@ -275,7 +275,7 @@ test_that("manual data runCharacterizationAnalyses", {
 
   attrition <- utils::read.csv(file.path(tempdir(), "result", "c_attrition.csv"))
   # there should be 9 people as the first subject has cohort date outside observation
-  testthat::expect_true(attrition$N[attrition$cohort_definition_id==10] == 9)
+  testthat::expect_true(attrition$n[attrition$cohort_definition_id==10] == 9)
 
   # useDemographicsAge = TRUE, useDemographicsGender = TRUE, useConditionEraAnyTimePrior = TRUE
   covs <- utils::read.csv(file.path(tempdir(), "result", "c_target_covariates.csv"))
@@ -287,7 +287,7 @@ test_that("manual data runCharacterizationAnalyses", {
 
   # data is all female so make sure female cov has average_value of 1
   testthat::expect_true(covs$average_value[covs$covariate_id == 8532001] == 1)
-  testthat::expect_true(covs$sum_value[covs$covariate_id == 8532001] == attrition$N[attrition$cohort_definition_id==10])
+  testthat::expect_true(covs$sum_value[covs$covariate_id == 8532001] == attrition$n[attrition$cohort_definition_id==10])
 
   covs_cont <- utils::read.csv(file.path(tempdir(), "result", "c_target_covariates_continuous.csv"))
   testthat::expect_true(1002 %in% covs_cont$covariate_id)

@@ -186,7 +186,7 @@ addMissingCsvs <- function(
 
   if(sum(!requiredTables %in% presentTables) > 0){
     missingTables <- requiredTables[!requiredTables %in% presentTables]
-    tableDetails <- read.csv(system.file('settings/resultsDataModelSpecification.csv',package = 'Characterization'))
+    tableDetails <- utils::read.csv(system.file('settings/resultsDataModelSpecification.csv',package = 'Characterization'))
 
     for(missingTable in missingTables){
       columnNames <- tableDetails$column_name[tableDetails$table_name == missingTable]
@@ -194,7 +194,7 @@ addMissingCsvs <- function(
       df <- t(data.frame(rep(1, length(columnNames))))
       colnames(df) <- columnNames
 
-      write.csv(
+      utils::write.csv(
         x = df[-1,],
         file = file.path(outputFolder, paste0(csvFilePrefix,missingTable , '.csv')),
         row.names = FALSE
@@ -482,3 +482,221 @@ censorResults <- function(
 
   return(newData)
 }
+
+
+exportAttrition <- function(
+    executionPath,
+    outputFolder,
+    csvFilePrefix = 'c_',
+    minCellCount = 0
+){
+
+  # load attrition
+  if(file.exists(file.path(executionPath, 'attrition', 'result'))){
+    andromeda <- Andromeda::loadAndromeda(file.path(executionPath, 'attrition', 'result'))
+
+    # load case series
+    if(file.exists(file.path(outputFolder, paste0(csvFilePrefix, 'case_settings', '.csv')))){
+      andromeda$caseSettings <- utils::read.csv(file.path(outputFolder, paste0(csvFilePrefix, 'case_settings', '.csv')))
+    }
+
+    # load targets
+    if(file.exists(file.path(outputFolder, paste0(csvFilePrefix, 'target_settings', '.csv')))){
+      andromeda$targetSettings <- utils::read.csv(file.path(outputFolder, paste0(csvFilePrefix, 'target_settings', '.csv')))
+    }
+
+    # if no case or target settings then return
+    if(is.null(andromeda$caseSettings) & is.null(andromeda$targetSettings)){
+      message('No target and/or case setting found but these are required to process attrition')
+      return(invisible(FALSE))
+    }
+
+    # process the attrition into useful numbers with minCellCount
+
+    if(is.null(andromeda$caseSettings) & !is.null(andromeda$targetSettings)){
+      message('Found targets only to do attrition for...')
+
+      targets <- andromeda$attrition %>%
+        dplyr::inner_join(
+        y = andromeda$targetSettings %>%
+          dplyr::mutate(
+            cohortDefinitionId = .data$characterization_target_id,
+            databaseId = .data$database_id,
+            settingId = .data$setting_id
+          ),
+        by = c("cohortDefinitionId", "databaseId", "settingId")
+        )
+
+      # apply censoring
+      targets <- targets %>%
+        dplyr::mutate(
+          n = ifelse(.data$n < !!minCellCount, -1*minCellCount, .data$n)
+        ) %>%
+        dplyr::select("cohortDefinitionId", "attrReason", "n", "databaseId", "settingId")
+
+      andromeda$attritionProcessed <- targets
+
+    }
+
+    if(!is.null(andromeda$caseSettings) & !is.null(andromeda$targetSettings)){
+      message('Found cases and targets to do attrition for...')
+
+      targets <- andromeda$attrition %>%
+        dplyr::inner_join(
+          y = andromeda$targetSettings %>%
+            dplyr::mutate(
+              cohortDefinitionId = .data$characterization_target_id,
+              databaseId = .data$database_id,
+              settingId = .data$setting_id
+            ),
+          by = c("cohortDefinitionId", "databaseId", "settingId")
+        )
+
+      cases <- andromeda$attrition %>%
+        dplyr::inner_join(
+          andromeda$caseSettings %>%
+            dplyr::mutate(
+              cohortDefinitionId = .data$characterization_case_id*10+1,
+              databaseId = .data$database_id,
+              settingId = .data$setting_id
+            ),
+          by = c("cohortDefinitionId", "databaseId", "settingId")
+          )
+
+      nonCases <- cases %>%
+        dplyr::mutate(
+          n_cases = .data$n,
+          targetDefinitionId = .data$characterization_target_id
+          ) %>%
+        dplyr::select("cohortDefinitionId","targetDefinitionId", "databaseId", "settingId", "n_cases") %>%
+        dplyr::inner_join(
+          targets %>%
+            dplyr::mutate(
+              n_targets = .data$n,
+              targetDefinitionId = .data$cohortDefinitionId
+            ) %>%
+            dplyr::select("targetDefinitionId","databaseId", "settingId", "n_targets"),
+          by = c("targetDefinitionId", "databaseId", "settingId")
+          )%>%
+        dplyr::left_join(
+          andromeda$attrition %>%
+            dplyr::mutate(
+              cohortDefinitionId = .data$cohortDefinitionId-1,
+              n_excludes = .data$n
+            ) %>%
+            dplyr::select(
+              "cohortDefinitionId","databaseId", "settingId", "n_excludes"
+            ),
+          by = c("cohortDefinitionId","databaseId","settingId")
+        ) %>%
+        dplyr::select(-"targetDefinitionId") %>%
+        dplyr::group_by(
+          .data$cohortDefinitionId,.data$databaseId, .data$settingId
+        ) %>%
+        dplyr::summarise(
+          n_cases = max(.data$n_cases, na.rm = TRUE),
+          n_non_cases = max(.data$n_targets, na.rm = TRUE) - sum(.data$n_excludes, na.rm = TRUE),
+          n_excluded = sum(.data$n_excludes, na.rm = TRUE)
+        )
+
+
+      # apply censoring
+      targets <- targets %>%
+        dplyr::mutate(
+          n = ifelse(.data$n < !!minCellCount, -1*minCellCount, .data$n)
+        ) %>%
+        dplyr::select("cohortDefinitionId", "attrReason", "n", "databaseId", "settingId")
+
+      andromeda$attritionProcessed <- targets
+
+
+      cases <- cases %>%
+        dplyr::mutate(
+          n = ifelse(.data$n < !!minCellCount, -1*minCellCount, .data$n)
+        ) %>%
+        dplyr::select("cohortDefinitionId", "attrReason", "n", "databaseId", "settingId")
+      Andromeda::appendToTable(
+        tbl = andromeda$attritionProcessed,
+        data = cases
+      )
+
+      nonCasesTemp <- nonCases %>%
+        dplyr::mutate(
+          cohortDefinitionId = .data$cohortDefinitionId+1,
+          attrReason = 'Non-cases',
+          n = ifelse(.data$n_non_cases < !!minCellCount, -1*minCellCount, .data$n_non_cases)
+        ) %>%
+        dplyr::select("cohortDefinitionId", "attrReason", "n", "databaseId", "settingId")
+
+      Andromeda::appendToTable(
+        tbl = andromeda$attritionProcessed,
+        data = nonCasesTemp
+      )
+
+      excluded <- nonCases %>%
+        dplyr::mutate(
+          cohortDefinitionId = .data$cohortDefinitionId+1,
+          attrReason = 'Total excluded',
+          n = ifelse(.data$n_excluded < !!minCellCount, -1*minCellCount, .data$n_excluded)
+        ) %>%
+        dplyr::select("cohortDefinitionId", "attrReason", "n", "databaseId", "settingId")
+
+      Andromeda::appendToTable(
+        tbl = andromeda$attritionProcessed,
+        data = excluded
+      )
+
+      # individual exlcusions that all above minCellCount
+
+      exclusionIds <- excluded %>%
+        dplyr::select("cohortDefinitionId") %>%
+        dplyr::pull()
+
+      excludedIndividual <- as.data.frame(andromeda$attrition %>%
+        dplyr::filter(.data$cohortDefinitionId %in% !!exclusionIds))
+
+      if(nrow(excludedIndividual) > 0 ){
+
+        cohortDefinitionIdsToUncensor <- excludedIndividual %>%
+          dplyr::group_by(
+            .data$cohortDefinitionId, .data$databaseId, .data$settingId
+          ) %>%
+          dplyr::summarise(
+            uncensor = sum(.data$n > !!minCellCount, na.rm = TRUE) == dplyr::n()
+          ) %>%
+          dplyr::filter(.data$uncensor) %>%
+          dplyr::select("cohortDefinitionId") %>%
+          dplyr::pull()
+
+        if(length(cohortDefinitionIdsToUncensor) > 0){
+          extras <- andromeda$attrition %>%
+            dplyr::filter(.data$cohortDefinitionId %in% !!cohortDefinitionIdsToUncensor) %>%
+            dplyr::select("cohortDefinitionId", "attrReason", "n", "databaseId", "settingId")
+
+          Andromeda::appendToTable(
+            tbl = andromeda$attritionProcessed,
+            data = extras
+          )
+        }
+
+      }
+
+    }
+
+    # change the column format
+    data <- as.data.frame(andromeda$attritionProcessed)
+    colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
+
+    # save the attrition
+    utils::write.csv(
+      x = data,
+      file = file.path(outputFolder, paste0(csvFilePrefix, 'attrition', '.csv')),
+      row.names = FALSE
+        )
+  }
+
+  return(invisible(TRUE))
+}
+
+
+

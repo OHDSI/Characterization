@@ -7,6 +7,9 @@ on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
 tempFolder2 <- file.path(tempdir(),"results")
 on.exit(unlink(tempFolder2, recursive = TRUE), add = TRUE)
 
+tempFolder3 <- file.path(tempdir(),"attrition")
+on.exit(unlink(tempFolder3, recursive = TRUE), add = TRUE)
+
 test_that("addDbAndSettings works for single table", {
 
   andromeda <- Andromeda::andromeda()
@@ -534,5 +537,331 @@ test_that("censorResults", {
 
   # CONTINUOUS COVS
   #caseSeriesCovariatesContinuous
+  data <- data.frame(
+    covariateId = 1:5,
+    databaseId = '1',
+    settingId = 'madeup',
+    beforeCountValue = c(4,1,11,14,150),
+    beforeAverageValue = c(4,1,11,14,150)/200,
+    beforeMinValue = rep(1,5),
+    beforeMaxValue = rep(1,5),
+    beforeStandardDeviation = rep(1,5),
+    beforeMedianValue = rep(1,5),
+    beforeP10Value = rep(1,5),
+    beforeP25Value = rep(1,5),
+    beforeP75Value = rep(1,5),
+    beforeP90Value =rep(1,5),
+
+    duringCountValue = c(1,0,100,90,50),
+    duringAverageValue = c(1,0,100,90,50)/200,
+    duringMinValue = rep(1,5),
+    duringMaxValue = rep(1,5),
+    duringStandardDeviation = rep(1,5),
+    duringMedianValue = rep(1,5),
+    duringP10Value = rep(1,5),
+    duringP25Value = rep(1,5),
+    duringP75Value = rep(1,5),
+    duringP90Value =rep(1,5),
+
+    afterCountValue = c(1,0,200,9,50),
+    afterAverageValue = c(1,0,200,9,50)/200,
+    afterMinValue = rep(1,5),
+    afterMaxValue = rep(1,5),
+    afterStandardDeviation = rep(1,5),
+    afterMedianValue = rep(1,5),
+    afterP10Value = rep(1,5),
+    afterP25Value = rep(1,5),
+    afterP75Value = rep(1,5),
+    afterP90Value =rep(1,5)
+  )
+
+  newdata <- censorResults(
+    data = data,
+    tableName = 'caseSeriesCovariatesContinuous',
+    minCellCount = 10
+  )
+
+  censored <- data$beforeCountValue < 10 & data$beforeCountValue !=0
+  testthat::expect_true(unique(newdata$beforeCountValue[censored]) == -10)
+  testthat::expect_true(is.na(unique(newdata$beforeAverageValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$beforeMinValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$beforeMaxValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$beforeMedianValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$beforeP10Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$beforeP25Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$beforeP75Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$beforeP90Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$beforeStandardDeviation[censored])))
+  notcensored <- data$beforeCountValue >= 10 | data$beforeCountValue == 0
+  testthat::expect_identical(newdata$beforeCountValue[notcensored], data$beforeCountValue[notcensored])
+
+  censored <- data$duringCountValue < 10 & data$duringCountValue !=0
+  testthat::expect_true(unique(newdata$duringCountValue[censored]) == -10)
+  testthat::expect_true(is.na(unique(newdata$duringAverageValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$duringMinValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$duringMaxValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$duringMedianValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$duringP10Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$duringP25Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$duringP75Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$duringP90Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$duringStandardDeviation[censored])))
+  notcensored <- data$duringCountValue >= 10 | data$duringCountValue == 0
+  testthat::expect_identical(newdata$duringCountValue[notcensored], data$duringCountValue[notcensored])
+
+  censored <- data$afterCountValue < 10 & data$afterCountValue !=0
+  testthat::expect_true(unique(newdata$afterCountValue[censored]) == -10)
+  testthat::expect_true(is.na(unique(newdata$afterAverageValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$afterMinValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$afterMaxValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$afterMedianValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$afterP10Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$afterP25Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$afterP75Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$afterP90Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$afterStandardDeviation[censored])))
+  notcensored <- data$afterCountValue >= 10 | data$afterCountValue == 0
+  testthat::expect_identical(newdata$afterCountValue[notcensored], data$afterCountValue[notcensored])
+
+
+  # Risk Factor continuous
+  data <- data.frame(
+    covariateId = 1:5,
+    databaseId = '1',
+    settingId = 'madeup',
+
+    caseCountValue = c(4,1,11,14,150),
+    caseAverageValue = c(4,1,11,14,150)/200,
+    caseMinValue = rep(1,5),
+    caseMaxValue = rep(1,5),
+    caseStandardDeviation = rep(1,5),
+    caseMedianValue = rep(1,5),
+    caseP10Value = rep(1,5),
+    caseP25Value = rep(1,5),
+    caseP75Value = rep(1,5),
+    caseP90Value =rep(1,5),
+
+    nonCaseCountValue = c(1,0,100,90,50),
+    nonCaseAverageValue = c(1,0,100,90,50)/200,
+    nonCaseMinValue = rep(1,5),
+    nonCaseMaxValue = rep(1,5),
+    nonCaseStandardDeviation = rep(1,5),
+    nonCaseMedianValue = rep(1,5),
+    nonCaseP10Value = rep(1,5),
+    nonCaseP25Value = rep(1,5),
+    nonCaseP75Value = rep(1,5),
+    nonCaseP90Value =rep(1,5)
+  )
+
+  newdata <- censorResults(
+    data = data,
+    tableName = 'riskFactorCovariatesContinuous',
+    minCellCount = 10
+  )
+
+  censored <- data$caseCountValue < 10 & data$caseCountValue !=0
+  testthat::expect_true(unique(newdata$caseCountValue[censored]) == -10)
+  testthat::expect_true(is.na(unique(newdata$caseAverageValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$caseMinValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$caseMaxValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$caseMedianValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$caseP10Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$caseP25Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$caseP75Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$caseP90Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$caseStandardDeviation[censored])))
+  notcensored <- data$caseCountValue >= 10 | data$caseCountValue == 0
+  testthat::expect_identical(newdata$caseCountValue[notcensored], data$caseCountValue[notcensored])
+
+  censored <- data$nonCaseCountValue < 10 & data$nonCaseCountValue !=0
+  testthat::expect_true(unique(newdata$nonCaseCountValue[censored]) == -10)
+  testthat::expect_true(is.na(unique(newdata$nonCaseAverageValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$nonCaseMinValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$nonCaseMaxValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$nonCaseMedianValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$nonCaseP10Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$nonCaseP25Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$nonCaseP75Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$nonCaseP90Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$nonCaseStandardDeviation[censored])))
+  notcensored <- data$nonCaseCountValue >= 10 | data$nonCaseCountValue == 0
+  testthat::expect_identical(newdata$nonCaseCountValue[notcensored], data$nonCaseCountValue[notcensored])
+
+
+  # target continuous
+  data <- data.frame(
+    covariateId = 1:5,
+    databaseId = '1',
+    settingId = 'madeup',
+    countValue = c(4,1,11,14,150),
+    averageValue = c(4,1,11,14,150)/200,
+    minValue = rep(1,5),
+    maxValue = rep(1,5),
+    standardDeviation = rep(1,5),
+    medianValue = rep(1,5),
+    p10Value = rep(1,5),
+    p25Value = rep(1,5),
+    p75Value = rep(1,5),
+    p90Value =rep(1,5)
+  )
+
+  newdata <- censorResults(
+    data = data,
+    tableName = 'targetCovariatesContinuous',
+    minCellCount = 10
+  )
+
+  censored <- data$countValue < 10 & data$countValue !=0
+  testthat::expect_true(unique(newdata$countValue[censored]) == -10)
+  testthat::expect_true(is.na(unique(newdata$averageValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$minValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$maxValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$medianValue[censored])))
+  testthat::expect_true(is.na(unique(newdata$p10Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$p25Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$p75Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$p90Value[censored])))
+  testthat::expect_true(is.na(unique(newdata$standardDeviation[censored])))
+  notcensored <- data$countValue >= 10 | data$countValue == 0
+  testthat::expect_identical(newdata$countValue[notcensored], data$countValue[notcensored])
+
+})
+
+
+test_that("exportAttrition", {
+
+  # create example attrition
+  andromeda <- Andromeda::andromeda()
+  andromeda$attrition <- data.frame(
+    cohortDefinitionId = c(10,20,30,40, 11,21,31,12,22,32),
+    attrReason = c('Target first in 365 - 365 prior obs',
+                   'Target first in 365 - 365 prior obs',
+                   'Target first in 365 - 365 prior obs',
+                   'Target first in 365 - 365 prior obs',
+                   'Cases','Cases','Cases',
+                   '3. Has outcome during TAR',
+                   '3. Has outcome during TAR',
+                   '3. Has outcome during TAR'
+                   ),
+    n = c(1000,50,400,350,
+          50,10,60,
+          50,10,60
+          ),
+    databaseId = 'db',
+    settingId = 'set1'
+  )
+
+  # save to temp folder
+  Characterization:::saveCharacterizationAndromeda(
+    andromeda = andromeda,
+    outputFolder = file.path(tempFolder3,'attrition')
+      )
+
+  # now create target and case settings
+  target_settings <- data.frame(
+    target_id	= c(1,2,3,4),
+    limit_to_first_in_n_days	= rep(365, 4),
+    min_prior_observation	= rep(365, 4),
+    setting_id	= 'set1',
+    characterization_target_id	= c(10,20,30,40),
+    database_id = 'db'
+  )
+
+  case_settings <- data.frame(
+    outcome_id	= rep(3,3),
+    outcome_washout_days	= rep(90,3),
+    risk_window_start	= rep(1,3),
+    start_anchor = rep('cohort_start',3),
+    risk_window_end	= rep(365,3),
+    end_anchor = rep('cohort_start',3),
+    runtype = rep('PLP',3),
+    characterization_case_id	= c(1,2,3),
+    setting_id	= 'set1',
+    characterization_target_id	= c(10,20,40),
+    database_id = 'db'
+  )
+
+  utils::write.csv(
+    x = target_settings,
+    file = file.path(tempFolder3, 'c_target_settings.csv')
+      )
+
+  utils::write.csv(
+    x = case_settings,
+    file = file.path(tempFolder3, 'c_case_settings.csv')
+  )
+
+exportAttrition(
+    executionPath = tempFolder3,
+    outputFolder = tempFolder3,
+    csvFilePrefix = 'c_',
+    minCellCount = 0
+)
+
+# load attrition
+testthat::expect_true(file.exists(file.path(tempFolder3, 'c_attrition.csv')))
+
+attrition <- utils::read.csv(file.path(tempFolder3, 'c_attrition.csv'))
+testthat::expect_true(nrow(attrition) == 16)
+testthat::expect_true(sum(colnames(attrition) %in% c('cohort_definition_id', 'attr_reason', 'n', 'database_id', 'setting_id')) == 5)
+
+
+# now test the minCellCount
+exportAttrition(
+  executionPath = tempFolder3,
+  outputFolder = tempFolder3,
+  csvFilePrefix = 'c_',
+  minCellCount = 50
+)
+attrition <- utils::read.csv(file.path(tempFolder3, 'c_attrition.csv'))
+testthat::expect_true(sum(attrition$n < 50 & attrition$n != -50) == 0)
+testthat::expect_true(sum(colnames(attrition) %in% c('cohort_definition_id', 'attr_reason', 'n', 'database_id', 'setting_id')) == 5)
+
+# now test csvFilePrefix
+utils::write.csv(
+  x = target_settings,
+  file = file.path(tempFolder3, 'cccd_target_settings.csv')
+)
+
+utils::write.csv(
+  x = case_settings,
+  file = file.path(tempFolder3, 'cccd_case_settings.csv')
+)
+exportAttrition(
+  executionPath = tempFolder3,
+  outputFolder = tempFolder3,
+  csvFilePrefix = 'cccd_',
+  minCellCount = 12
+)
+attrition <- utils::read.csv(file.path(tempFolder3, 'cccd_attrition.csv'))
+testthat::expect_true(sum(attrition$n < 12 & attrition$n != -12) == 0)
+testthat::expect_true(sum(colnames(attrition) %in% c('cohort_definition_id', 'attr_reason', 'n', 'database_id', 'setting_id')) == 5)
+
+
+# test when no case_settings
+utils::write.csv(
+  x = target_settings,
+  file = file.path(tempFolder3, 'c2_target_settings.csv')
+)
+return <- exportAttrition(
+  executionPath = tempFolder3,
+  outputFolder = tempFolder3,
+  csvFilePrefix = 'c2_',
+  minCellCount = 12
+)
+attrition <- utils::read.csv(file.path(tempFolder3, 'c2_attrition.csv'))
+testthat::expect_true(sum(attrition$n < 12 & attrition$n != -12) == 0)
+testthat::expect_true(sum(colnames(attrition) %in% c('cohort_definition_id', 'attr_reason', 'n', 'database_id', 'setting_id')) == 5)
+testthat::expect_true(nrow(attrition) == 4)
+
+# test no target or case settings
+return <- exportAttrition(
+  executionPath = tempFolder3,
+  outputFolder = tempFolder3,
+  csvFilePrefix = 'c3_',
+  minCellCount = 12
+)
+testthat::expect_false(return)
+testthat::expect_true(!file.exists(file.path(tempFolder3, 'c3_attrition.csv')))
 
 })
