@@ -355,11 +355,12 @@ runCharacterizationAnalyses <- function(
 
     if (nrow(jobs) == 0) {
       message("No jobs left")
-      aggregateCsvsBatch(
+      exportAndromedaSubfilesToCsv(
         outputFolder = outputDirectory,
         executionPath = executionPath,
-        executionFolders = jobsExecutionFolder,
-        csvFilePrefix = csvFilePrefix
+        csvFilePrefix = csvFilePrefix,
+        minCellCount = minCellCount,
+        batchSize = 100000
       )
       return(invisible(TRUE))
     }
