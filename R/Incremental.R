@@ -190,7 +190,7 @@ cleanNonIncremental <- function(
     path = executionFolder,
     recursive = TRUE,
     full.names = TRUE,
-    pattern = ".csv"
+    pattern = "result"
   )
   if (length(files) > 0) {
     for (file in files) {
@@ -206,7 +206,7 @@ checkResultFilesNonIncremental <- function(
     path = executionFolder,
     recursive = TRUE,
     full.names = TRUE,
-    pattern = ".csv"
+    pattern = "result"
   )
   if (length(files) > 0) {
     errorMessage <- paste0(

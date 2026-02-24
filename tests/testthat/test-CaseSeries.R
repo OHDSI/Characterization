@@ -12,7 +12,7 @@ on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
 test_that("createCaseSeriesSettings", {
   targetIds <- sample(x = 100, size = sample(10, 1))
   outcomeIds <- sample(x = 100, size = sample(10, 1))
-  covariateSettings <- Characterization::createDuringCovariateSettings(
+  covariateSettings <- createDuringCovariateSettings(
     useDrugEraDuring = TRUE,
     useVisitCountDuring = TRUE
     )
@@ -131,10 +131,10 @@ test_that("error when using temporal features - risk factors", {
 test_that("createCaseSeriesSettings covariateList", {
   targetIds <- sample(x = 100, size = sample(10, 1))
   outcomeIds <- sample(x = 100, size = sample(10, 1))
-  covariateSettings1 <- Characterization::createDuringCovariateSettings(
+  covariateSettings1 <- createDuringCovariateSettings(
     useVisitCountDuring = T
   )
-  covariateSettings2 <- Characterization::createDuringCovariateSettings(
+  covariateSettings2 <- createDuringCovariateSettings(
     useConditionOccurrenceDuring = TRUE
   )
   covariateSettings <- list(covariateSettings1, covariateSettings2)
@@ -166,7 +166,7 @@ test_that("createCaseSeriesSettings covariateList", {
 test_that("getCaseSeriesJobs", {
   targetIds <- c(1, 2, 4)
   outcomeIds <- c(3)
-  covariateSettings <- Characterization::createDuringCovariateSettings(
+  covariateSettings <- createDuringCovariateSettings(
     useDrugEraDuring = TRUE,
     useVisitCountDuring = TRUE
   )
@@ -188,7 +188,7 @@ test_that("getCaseSeriesJobs", {
   )
 
   jobDf <-  getCaseSeriesJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       caseSeriesSettings = res
     ),
     nTargetJobs = 1
@@ -211,7 +211,7 @@ test_that("getCaseSeriesJobs", {
 
   # now check nTargetJobs = 2
   jobDf <-  getCaseSeriesJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       caseSeriesSettings = res
     ),
     nTargetJobs = 2
@@ -220,7 +220,7 @@ test_that("getCaseSeriesJobs", {
 
   # now check nTargetJobs = 3
   jobDf <-  getCaseSeriesJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       caseSeriesSettings = res
     ),
     nTargetJobs = 3
@@ -234,7 +234,7 @@ test_that("getCaseSeriesJobs", {
 
   # now check nTargetJobs = 4
   jobDf <-  getCaseSeriesJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       caseSeriesSettings = res
     ),
     nTargetJobs = 4
@@ -243,7 +243,7 @@ test_that("getCaseSeriesJobs", {
 
   # now check threads = 50
   jobDf <-  getCaseSeriesJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       caseSeriesSettings = res
     ),
     nTargetJobs = 50
@@ -255,7 +255,7 @@ test_that("getCaseSeriesJobs", {
 test_that("computeCaseSeriesAnalyses", {
   targetIds <- c(1, 2, 4)
   outcomeIds <- c(3)
-  covariateSettings <- Characterization::createDuringCovariateSettings(
+  covariateSettings <- createDuringCovariateSettings(
     useDrugEraDuring = TRUE,
     useVisitCountDuring = TRUE
   )
@@ -280,7 +280,7 @@ test_that("computeCaseSeriesAnalyses", {
     nTargetJobs = 1
   )
 
-  tables <- Characterization:::generateCohorts(
+  tables <- generateCohorts(
     characterizationSettings = createCharacterizationSettings(
       caseSeriesSettings = res
     ),
@@ -302,7 +302,7 @@ test_that("computeCaseSeriesAnalyses", {
     dbHash = 'db1'
     )
 
-  Characterization:::computeCaseSeriesAnalyses(
+  computeCaseSeriesAnalyses(
     connectionDetails = connectionDetails,
     cdmDatabaseSchema = "main",
     cdmVersion = 5,
@@ -319,7 +319,6 @@ test_that("computeCaseSeriesAnalyses", {
     settings = ParallelLogger::convertJsonToSettings(jobDf$settings[1]),
     databaseId = "madeup",
     outputFolder = tempFolder1,
-    minCellCount = 0,
     progressBar = FALSE,
     minCharacterizationMean = 0,
     minCovariateCount = 0,
@@ -329,7 +328,7 @@ test_that("computeCaseSeriesAnalyses", {
   )
 
   # cleanup
-  Characterization:::dropCohorts(
+  dropCohorts(
     connectionDetails = connectionDetails,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
@@ -346,34 +345,37 @@ test_that("computeCaseSeriesAnalyses", {
 
   # check incremental does not run
   testthat::expect_true(
+    'result' %in% dir(tempFolder1)
+  )
+
+  res <- Andromeda::loadAndromeda(file.path(tempFolder1, 'result'))
+
+  testthat::expect_true(
     sum(c(
-      "case_series_covariates.csv",
-      "case_series_covariates_continuous.csv",
-      "covariate_ref.csv",
-      "analysis_ref.csv"
-    ) %in% dir(tempFolder1)) == 4
+      "caseSeriesCovariates",
+      "caseSeriesCovariatesContinuous",
+      "covariateRef",
+      "analysisRef"
+    ) %in% names(res)) == 4
   )
 
 
-  covs <- readr::read_csv(
-    file = file.path(tempFolder1, "case_series_covariates.csv"),
-    show_col_types = FALSE
-  )
+  covs <- as.data.frame(res$caseSeriesCovariates)
   # check covariates is unique
   testthat::expect_true(
     nrow(covs) == nrow(unique(covs))
   )
 
   # check key columns are there
-  testthat::expect_true('database_id' %in% colnames(covs))
-  testthat::expect_true('setting_id' %in% colnames(covs))
-  testthat::expect_true('characterization_case_id' %in% colnames(covs))
-  testthat::expect_true('covariate_id' %in% colnames(covs))
+  testthat::expect_true('databaseId' %in% colnames(covs))
+  testthat::expect_true('settingId' %in% colnames(covs))
+  testthat::expect_true('characterizationCaseId' %in% colnames(covs))
+  testthat::expect_true('covariateId' %in% colnames(covs))
 
   # check databaseId is added
   if(nrow(covs) > 0){
     testthat::expect_true(
-      covs$database_id[1] == "madeup"
+      covs$databaseId[1] == "madeup"
     )
   }
 })
@@ -396,7 +398,7 @@ res <- createCaseSeriesSettings(
   endAnchor = 'cohort start'
 )
 
-tables <- Characterization:::generateCohorts(
+tables <- generateCohorts(
   characterizationSettings = createCharacterizationSettings(
     caseSeriesSettings = res
   ),
@@ -420,7 +422,7 @@ tables <- Characterization:::generateCohorts(
 
 # 2) check excluded
 # ======================
-covariateSettings1 <- Characterization::createDuringCovariateSettings(
+covariateSettings1 <- createDuringCovariateSettings(
   useDrugEraDuring = TRUE,
   useVisitCountDuring = TRUE,
   excludedCovariateConceptIds = c(1124300,1118084)
@@ -447,7 +449,7 @@ testthat::expect_true(
 
 # 2) check included
 # ======================
-covariateSettings2 <- Characterization::createDuringCovariateSettings(
+covariateSettings2 <- createDuringCovariateSettings(
   useDrugEraDuring = TRUE,
   includedCovariateIds = c(1124300417)
 )
@@ -471,7 +473,7 @@ testthat::expect_true(
   as.data.frame(data2$covariates)$covariateId == 1124300417
 )
 
-covariateSettings3 <- Characterization::createDuringCovariateSettings(
+covariateSettings3 <- createDuringCovariateSettings(
   useDrugEraDuring = TRUE,
   includedCovariateConceptIds = c(1118084)
 )
@@ -494,7 +496,7 @@ testthat::expect_true(
 )
 
 # cleanup
-Characterization:::dropCohorts(
+dropCohorts(
   connectionDetails = connectionDetails,
   targetDatabaseSchema = "main",
   targetTable = "cohort",
@@ -511,7 +513,4 @@ Characterization:::dropCohorts(
 
 
 })
-
-# TODO: add a test to make sure the SMD is correct? could create fake data in sqlite to run
-# risk factor extraction sql
 

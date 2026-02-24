@@ -329,7 +329,7 @@ computeRiskFactorAnalyses <- function(
     connection = connection,
     sql = sql,
     andromeda = result,
-    andromedaTableName = 'covariates',
+    andromedaTableName = 'riskFactorCovariates',
     snakeCaseToCamelCase = TRUE
     )
 
@@ -354,7 +354,7 @@ computeRiskFactorAnalyses <- function(
     connection = connection,
     sql = sql,
     andromeda = result,
-    andromedaTableName = 'covariatesContinuous',
+    andromedaTableName = 'riskFactorCovariatesContinuous',
     snakeCaseToCamelCase = TRUE
   )}, error = function(e){
     message(e);
@@ -395,26 +395,15 @@ computeRiskFactorAnalyses <- function(
   completionTime <- Sys.time() - start
   message(paste0("Risk factor analysis: Calculating SMD and downloading took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
-  # export to csv?
-  exportTargetAndromedaToCsv(
+  # export to andromeda
+  result <- addDbAndSettings(
     andromeda = result,
-    tablesToExport = c('covariates', 'covariatesContinuous'),
-    tableNamePrefix = 'risk_factor_',
-    outputFolder = outputFolder,
     databaseId = databaseId,
-    settingId = executionId,#settings$settingId,
-    minCellCount = minCellCount,
-    batchSize = 100000
+    settingId = executionId
   )
-  exportTargetAndromedaToCsv(
+  saveCharacterizationAndromeda(
     andromeda = result,
-    tablesToExport = c('targetSettings', 'caseSettings', 'covariateRef', 'analysisRef'),
-    tableNamePrefix = '',
-    outputFolder = outputFolder,
-    databaseId = databaseId,
-    settingId = executionId,#settings$settingId,
-    minCellCount = minCellCount,
-    batchSize = 100000
+    outputFolder = outputFolder
   )
 
   # clean up temp tables (as some dbms do not have temp tables and it can get messy)
@@ -429,7 +418,6 @@ computeRiskFactorAnalyses <- function(
     connection = connection,
     sql = sql
   )
-
 
   return(invisible(TRUE))
 }

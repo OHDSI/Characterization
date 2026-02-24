@@ -267,10 +267,6 @@ runCharacterizationAnalyses <- function(
     stop("Invalid mode.  Please select one of: 'Efficient', 'CohortIncidence', 'PatientLevelPrediction'")
   }
 
-  if(threads > 4){
-    warning('Andromeda uses up to 20% memory per thread so using more than 4 threads may lead to memory errors.')
-  }
-
   runDateTime <- Sys.time()
 
   createDirectory(outputDirectory)
@@ -475,11 +471,12 @@ runCharacterizationAnalyses <- function(
   )
 
   # code to export all csvs into one file
-  aggregateCsvsBatch(
-    outputFolder = outputDirectory,
+  exportAndromedaSubfilesToCsv(
     executionPath = executionPath,
-    executionFolders = jobs$executionFolder,
-    csvFilePrefix = csvFilePrefix
+    outputFolder = outputDirectory,
+    csvFilePrefix = csvFilePrefix,
+    batchSize = 100000,
+    minCellCount = minCellCount
   )
 
   invisible(outputDirectory)
@@ -588,141 +585,7 @@ createJobs <- function(
 
 
 
-aggregateCsvsBatch <- function(
-    executionPath,
-    outputFolder,
-    executionFolders, # needed?
-    csvFilePrefix,
-    batchSize = 100000
-    ) {
-  tables <- c(
 
-    "analysis_ref.csv", "covariate_ref.csv",
-
-    "target_covariates_continuous.csv", "target_covariates.csv",
-
-    "risk_factor_covariates_continuous.csv", "risk_factor_covariates.csv",
-
-    "case_series_covariates_continuous.csv", "case_series_covariates.csv",
-
-    "time_to_event.csv",
-
-    "rechallenge_fail_case_series.csv", "dechallenge_rechallenge.csv"
-  )
-
-  colTypes <- c(
-
-    'iccddcccc', 'iciicccc', # correct
-
-    'iiiiidddddddcc', 'iiidcc',  # correct
-
-    'iiiidddddddddddddddddddcc', 'iiiidddcc', # correct
-
-    'iiidddddddddidddddddddidddddddddcc', 'iiidididcc', # correct
-
-    'ciiccidc', # correct
-
-    'ciiiicddddddddddd', 'ciiiiddddddddddddddd' # correct
-  )
-
-  # this makes sure results are recreated
-  firstTracker <- data.frame(
-    table = tables,
-    first = rep(TRUE, length(tables))
-  )
-
-  csvTrackerFile <- file.path(outputFolder,'tracker.rds')
-  tracker <- list(
-    analysisRefTracker = c(),
-    covariateRefTracker = c(),
-    settingsTracker = c()
-  )
-  saveRDS(tracker, csvTrackerFile)
-
-  # create outputFolder
-
-  folderNames <- dir(executionPath)
-
-  # for each folder load covariates, covariates_continuous,
-  # covariate_ref and analysis_ref
-  for (folderName in folderNames) {
-    for (csvType in tables) {
-      loadPath <- file.path(executionPath, folderName, csvType)
-      savePath <- file.path(outputFolder, paste0(csvFilePrefix, csvType))
-      if (file.exists(loadPath)) {
-
-        firstTrackerCurrent <- firstTracker$first[firstTracker$table == csvType]
-        append <- file.exists(savePath)
-
-        # code to save results in batches
-        processCsv <- function(x, pos){
-
-          tracker <- readRDS(csvTrackerFile)
-
-          if (csvType == "analysis_ref.csv") {
-            x <- x %>%
-              dplyr::mutate(
-                unique_id = paste0(.data$setting_id, "-", .data$analysis_id)
-              ) %>%
-              dplyr::filter( # need to filter analysis_id and setting_id
-                !.data$unique_id %in% tracker$analysisRefTracker
-              ) %>%
-              dplyr::select(-"unique_id")
-
-            tracker$analysisRefTracker <- unique(c(tracker$analysisRefTracker, paste0(x$setting_id, "-", x$analysis_id)))
-          }
-          if (csvType == "covariate_ref.csv") { # this could be problematic as may have differnet covariate_ids
-            if(nrow(x)>0){
-              x <- x %>%
-                dplyr::mutate(
-                  unique_id = paste0(.data$setting_id, "-", .data$covariate_id)
-                ) %>%
-                dplyr::filter( # need to filter covariate_id and setting_id
-                  !.data$unique_id %in% tracker$covariateRefTracker
-                ) %>%
-                dplyr::select(-"unique_id")
-
-              tracker$covariateRefTracker <- unique(c(tracker$covariateRefTracker, paste0(x$setting_id, "-", x$covariate_id)))
-            }
-          }
-
-          # this does not work if the csv is empty - only
-          # works if the csv has rows.
-          readr::write_csv(
-            x = x,
-            file = savePath, quote = "all",
-            append = !firstTrackerCurrent | pos != 1,
-            num_threads = 1,
-            progress = FALSE
-            #append = append | pos != 1
-          )
-
-          saveRDS(tracker,csvTrackerFile)
-
-        }
-
-        readr::read_csv_chunked(
-          file = loadPath,
-          callback = readr::SideEffectChunkCallback$new(processCsv),
-          chunk_size = batchSize,
-          col_types = colTypes[csvType == tables],
-          show_col_types = FALSE,
-          progress = FALSE,
-          col_names = TRUE
-        )
-
-        # readr::read_csv_chunked only works if the csv
-        # has 1 row or more.  This code will copy the
-        # csv with no rows so we always get a complete set of csv files
-        if(!file.exists(savePath) & file.exists(loadPath)){
-          file.copy(from = loadPath, to = savePath)
-        }
-
-        firstTracker$first[firstTracker$table == csvType] <- FALSE
-      }
-    }
-  }
-}
 
 
 exportSharedObjects <- function(
@@ -792,7 +655,7 @@ exportSharedObjects <- function(
 
     # export attrition table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @attrition_table;",
+      sql = "SELECT * FROM @attrition_table",
       attrition_table = paste0(outputDatabaseSchema, '.' ,attritionTable)
     )
     sql <- SqlRender::translate(
@@ -815,7 +678,7 @@ exportSharedObjects <- function(
 
     # export target settings table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @target_settings_table;",
+      sql = "SELECT * FROM @target_settings_table",
       target_settings_table = paste0(outputDatabaseSchema, '.' ,targetSettingsTable)
     )
     sql <- SqlRender::translate(
@@ -844,7 +707,7 @@ exportSharedObjects <- function(
 
     # export target settings table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @case_settings_table;",
+      sql = "SELECT * FROM @case_settings_table",
       case_settings_table = paste0(outputDatabaseSchema, '.' ,caseSettingsTable)
     )
     sql <- SqlRender::translate(

@@ -404,7 +404,6 @@ test_that("min cell count works", {
     nTargetJobs = 1,
     mode = 'Efficient',
     minCellCount = 1000000
-
   )
 
   testthat::expect_true(
@@ -460,66 +459,5 @@ test_that("min cell count works", {
   testthat::expect_true(sum(is.na(res$max_value)) == length(res$max_value))
 
   # TODO add checks for RF and CS results
-
-})
-
-
-
-test_that("checking the batch csv aggregation", {
-
-  tempFolder <- tempfile("Characterization")
-  on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
-
-  executionPath <- testthat::test_path("testdata", "execution")
-
-  if(!dir.exists(file.path(tempFolder,'aggCvs'))){
-    dir.create(file.path(tempFolder,'aggCvs'), recursive = TRUE)
-  }
-  if(!dir.exists(file.path(tempFolder,'aggCvs_batch1'))){
-    dir.create(file.path(tempFolder,'aggCvs_batch1'), recursive = TRUE)
-  }
-
-
-# checking the batch csv aggregation
-
-Characterization:::aggregateCsvsBatch(
-  executionPath = executionPath,
-  outputFolder = file.path(tempFolder,'aggCvs'),
-  csvFilePrefix = ''
-)
-
-Characterization:::aggregateCsvsBatch(
-  executionPath = executionPath,
-  outputFolder = file.path(tempFolder,'aggCvs_batch1'),
-  csvFilePrefix = '',
-  batchSize = 1
-)
-
-#check files are the same using default batch
-files <- dir(file.path(tempFolder,'aggCvs'), pattern = 'csv')
-for(i in 1:length(files)){
-  d1 <- readr::read_csv(file.path(tempFolder,'aggCvs', files[i]),
-                        show_col_types = FALSE)
-  d2 <- readr::read_csv(file.path(tempFolder,'aggCvs_batch1', files[i]),
-                        show_col_types = FALSE)
-  testthat::expect_true(all.equal(d1,d2))
-}
-
-
-# make sure it still works if re-executed (no left over files)
-Characterization:::aggregateCsvsBatch(
-  executionPath = executionPath,
-  outputFolder = file.path(tempFolder,'aggCvs_batch1'),
-  csvFilePrefix = '',
-  batchSize = 1
-)
-files <- dir(file.path(tempFolder,'aggCvs'), pattern = 'csv')
-for(i in 1:length(files)){
-  d1 <- readr::read_csv(file.path(tempFolder,'aggCvs', files[i]),
-                        show_col_types = FALSE)
-  d2 <- readr::read_csv(file.path(tempFolder,'aggCvs_batch1', files[i]),
-                        show_col_types = FALSE)
-  testthat::expect_true(all.equal(d1,d2))
-}
 
 })

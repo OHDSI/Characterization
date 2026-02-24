@@ -258,28 +258,27 @@ test_that("computeTargetBaselineAnalyses", {
     settings = ParallelLogger::convertJsonToSettings(jobDf$settings[1]),
     databaseId = "madeup",
     outputFolder = tempFolder1,
-    minCellCount = 0,
     progressBar = FALSE,
     minCharacterizationMean = 0,
     minCovariateCount = 0,
     executionId = 'execution123'
   )
 
+  result <- Andromeda::loadAndromeda(file.path(tempFolder1, "result"))
+
   # check incremental does not run
   testthat::expect_true(
     sum(c(
-      "target_covariates.csv",
-      "target_covariates_continuous.csv",
-      "covariate_ref.csv",
-      "analysis_ref.csv"
-    ) %in% dir(tempFolder1)) == 4
+      "targetCovariates",
+      "targetCovariatesContinuous",
+      "covariateRef",
+      "analysisRef"
+    ) %in% names(result)) == 4
   )
 
 
-  covs <- readr::read_csv(
-    file = file.path(tempFolder1, "target_covariates.csv"),
-    show_col_types = FALSE
-  )
+  covs <- as.data.frame(result$targetCovariates)
+
   # check covariates is unique
   testthat::expect_true(
     nrow(covs) == nrow(unique(covs))
@@ -287,6 +286,6 @@ test_that("computeTargetBaselineAnalyses", {
 
   # check databaseId is added
   testthat::expect_true(
-    covs$database_id[1] == "madeup"
+    covs$databaseId[1] == "madeup"
   )
 })

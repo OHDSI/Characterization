@@ -22,7 +22,7 @@ for (folder in c(
   logFolder7
 )) {
   if (!dir.exists(folder)) {
-    dir.create(folder)
+    dir.create(folder, recursive = TRUE)
   }
 }
 
@@ -52,7 +52,7 @@ test_that("checkIncrementalFilesExist", {
 
   # cleanIncremental should fail unless ignoreWhenEmpty is TRUE
   testthat::expect_error(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = FALSE))
-  testthat::expect_true(is.null(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = T)))
+  testthat::expect_true(is.null(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = TRUE)))
 
   # now add the csvs and check should be true
   Characterization:::createIncrementalLog(
@@ -68,8 +68,8 @@ test_that("checkIncrementalFilesExist", {
     executionFolder = logFolder7
   ))
   # make sure it runs now there are results
-  testthat::expect_true(is.null(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = F)))
-  testthat::expect_true(is.null(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = T)))
+  testthat::expect_true(is.null(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = FALSE)))
+  testthat::expect_true(is.null(cleanIncremental(executionFolder = logFolder7, ignoreWhenEmpty = TRUE)))
 
 })
 
@@ -160,7 +160,7 @@ test_that("cleanIncremental", {
       end_time = c(1)
     ),
     file = file.path(logFolder2, "execution.csv"),
-    append = T
+    append = TRUE
   )
 
   incrementalFiles <- Characterization:::loadIncrementalFiles(
@@ -176,12 +176,14 @@ test_that("cleanIncremental", {
   testthat::expect_true(length(issues) == 1)
 
   dir.create(file.path(logFolder2, "1"))
-  write.csv(
-    x = data.frame(a = 1),
-    file = file.path(logFolder2, "1", "madeup.csv"),
-    row.names = FALSE
+  andromeda <- Andromeda::andromeda()
+  Andromeda::saveAndromeda(
+    andromeda = andromeda,
+    fileName = file.path(logFolder2, "1", "result")
+
   )
-  testthat::expect_true(file.exists(file.path(logFolder2, "1", "madeup.csv")))
+
+  testthat::expect_true(file.exists(file.path(logFolder2, "1", "result")))
 
   # run clean to fix issues
   Characterization:::cleanIncremental(
@@ -189,7 +191,7 @@ test_that("cleanIncremental", {
   )
 
   # check issues are fixed
-  testthat::expect_true(!file.exists(file.path(logFolder2, "1", "madeup.csv")))
+  testthat::expect_true(!file.exists(file.path(logFolder2, "1", "result")))
   incrementalFiles <- Characterization:::loadIncrementalFiles(
     executionFolder = logFolder2
   )
@@ -228,7 +230,7 @@ test_that("checkResultFilesIncremental ", {
       end_time = c(1)
     ),
     file = file.path(logFolder3, "execution.csv"),
-    append = T
+    append = TRUE
   )
 
   testthat::expect_error(Characterization:::checkResultFilesIncremental(
@@ -256,7 +258,7 @@ test_that("checkResultFilesIncremental ", {
       end_time = c(1)
     ),
     file = file.path(logFolder4, "execution.csv"),
-    append = T
+    append = TRUE
   )
   readr::write_csv(
     x = data.frame(
@@ -266,7 +268,7 @@ test_that("checkResultFilesIncremental ", {
       end_time = c(1)
     ),
     file = file.path(logFolder4, "completed.csv"),
-    append = T
+    append = TRUE
   )
 
   jobs <- Characterization:::findCompletedJobs(logFolder4)
@@ -318,15 +320,15 @@ test_that("No Incremental works", {
 
   dir.create(
     path = file.path(logFolder5, "job_1"),
-    recursive = T
+    recursive = TRUE
   )
   on.exit(unlink(file.path(logFolder5, "job_1")))
 
-  write.csv(
-    x = data.frame(a = 1),
-    file = file.path(logFolder5, "job_1", "anyCsvFile.csv"),
-    row.names = FALSE
-  )
+  andromeda <- Andromeda::andromeda()
+  Andromeda::saveAndromeda(
+    andromeda = andromeda,
+    fileName = file.path(logFolder5, "job_1", 'result')
+      )
 
   # now there is a csv file it should error
   testthat::expect_error(
@@ -339,6 +341,6 @@ test_that("No Incremental works", {
   Characterization:::cleanNonIncremental(
     executionFolder = logFolder5
   )
-  # previously created csv should have been deleted
+  # previously created result should have been deleted
   testthat::expect_true(length(dir(file.path(logFolder5, "job_1"))) == 0)
 })

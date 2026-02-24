@@ -190,29 +190,23 @@ computeTargetBaselineAnalyses <- function(
       dplyr::rename("characterizationTargetId" = "cohortDefinitionId")
   }
 
+  # rename
+  result$targetCovariates <- result$covariates
+  result$covariates <- NULL
+  result$targetCovariatesContinuous <- result$covariatesContinuous
+  result$covariatesContinuous <- NULL
+
   result$targetSettings <- cohorts
 
-  # export all results to csv files
-  message("Target Baseline: Exporting to csv")
-  exportTargetAndromedaToCsv(
+  # export to andromeda
+  result <- addDbAndSettings(
     andromeda = result,
-    tablesToExport = c('covariates', 'covariatesContinuous'),
-    tableNamePrefix = 'target_',
-    outputFolder = outputFolder,
     databaseId = databaseId,
-    settingId = executionId,
-    minCellCount = minCellCount,
-    batchSize = 100000
+    settingId = executionId
   )
-  exportTargetAndromedaToCsv(
+  saveCharacterizationAndromeda(
     andromeda = result,
-    tablesToExport = c('targetSettings', 'covariateRef', 'analysisRef'),
-    tableNamePrefix = '',
-    outputFolder = outputFolder,
-    databaseId = databaseId,
-    settingId = executionId,
-    minCellCount = minCellCount,
-    batchSize = 100000
+    outputFolder = outputFolder
   )
 
   message("Target Baseline:  ending")
@@ -306,101 +300,5 @@ getTargetBaselineJobs <- function(
 }
 
 
-exportTargetAndromedaToCsv <- function(
-    andromeda,
-    tablesToExport = c('covariates','covariateContinuous', 'covariateRef', 'analysisRef'),
-    outputFolder,
-    databaseId,
-    settingId,
-    minCellCount,
-    batchSize = 100000,
-    tableNamePrefix = 'target_'
-){
-
-  saveLocation <- outputFolder
-  if (!dir.exists(saveLocation)) {
-    dir.create(saveLocation, recursive = T)
-  }
-
-for(tableToExport in tablesToExport){
-
-  tableName <- SqlRender::camelCaseToSnakeCase(tableToExport)
-
-  if (!is.null(andromeda[[tableToExport]])) {
-
-    # get row count
-    rowCount <- andromeda[[tableToExport]] %>% dplyr::count() %>% dplyr::pull()
-
-    if(rowCount > 0){
-      Andromeda::batchApply(
-        tbl = andromeda[[tableToExport]],
-        fun = function(x) {
-          data <- x #merge(x, ids)
-          colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-          data$database_id <- databaseId
-          data$setting_id <- settingId
-
-          if(tableToExport == 'covariates'){
-            # censor minCellCount columns sum_value
-            removeInd <- data$sum_value < minCellCount
-            if (sum(removeInd) > 0) {
-              ParallelLogger::logInfo(paste0("Removing sum_value counts less than ", minCellCount))
-              if (sum(removeInd) > 0) {
-                data$sum_value[removeInd] <- -1 * minCellCount
-                # adding other calculated columns
-                data$average_value[removeInd] <- NA
-              }
-            }
-          } else if(tableToExport == 'covariatesContinuous'){
-            removeInd <- data$count_value < minCellCount
-            if (sum(removeInd) > 0) {
-              ParallelLogger::logInfo(paste0("Removing count_value counts less than ", minCellCount))
-              if (sum(removeInd) > 0) {
-                data$count_value[removeInd] <- -1 * minCellCount
-                # adding columns calculated from count
-                data$min_value[removeInd] <- NA
-                data$max_value[removeInd] <- NA
-                data$average_value[removeInd] <- NA
-                data$standard_deviation[removeInd] <- NA
-                data$median_value[removeInd] <- NA
-                data$p_10_value[removeInd] <- NA
-                data$p_25_value[removeInd] <- NA
-                data$p_75_value[removeInd] <- NA
-                data$p_90_value[removeInd] <- NA
-              }
-            }
-          }
-
-          if (file.exists(file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv") ))) {
-            append <- TRUE
-          } else {
-            append <- FALSE
-          }
-          readr::write_csv(
-            x = formatDouble(data),
-            file = file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv")),
-            append = append
-          )
-        },
-        batchSize = batchSize
-      )
-    } else{
-      data <- as.data.frame(andromeda[[tableToExport]])
-      colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
-      data <- data %>% dplyr::mutate(
-        database_id = NA,
-        setting_id = NA
-      )
-
-      readr::write_csv(
-        x = data,
-        file = file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv")),
-        append = file.exists(file.path(saveLocation, paste0(tableNamePrefix, tableName,".csv")))
-        )
-    }
-  }
-}
-
-}
 
 

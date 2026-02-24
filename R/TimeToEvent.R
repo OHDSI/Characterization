@@ -241,11 +241,11 @@ computeTimeToEventAnalyses <- function(
     )
 
     # add the csv export here
-    message("exporting to csv file")
-    exportTimeToEventToCsv(
-      result = result,
-      saveDirectory = outputFolder,
-      minCellCount = minCellCount
+    message("exporting to andromeda")
+    # export to andromeda
+    saveCharacterizationAndromeda(
+      andromeda = result,
+      outputFolder = outputFolder
     )
 
     return(invisible(TRUE))

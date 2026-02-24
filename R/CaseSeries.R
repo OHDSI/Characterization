@@ -283,7 +283,7 @@ computeCaseSeriesAnalyses <- function(
       connection = connection,
       sql = sql,
       andromeda = result,
-      andromedaTableName = 'covariates',
+      andromedaTableName = 'caseSeriesCovariates',
       snakeCaseToCamelCase = TRUE
     )},
     error = function(e){message(e); return(NULL)}
@@ -308,7 +308,7 @@ computeCaseSeriesAnalyses <- function(
       connection = connection,
       sql = sql,
       andromeda = result,
-      andromedaTableName = 'covariatesContinuous',
+      andromedaTableName = 'caseSeriesCovariatesContinuous',
       snakeCaseToCamelCase = TRUE
     )},
     error = function(e){message(e)}
@@ -348,27 +348,15 @@ computeCaseSeriesAnalyses <- function(
   completionTime <- Sys.time() - start
   message(paste0("Case series analysis: Downloading took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
-  # export the andromeda to csv
-  exportTargetAndromedaToCsv(
+  # export to andromeda
+  result <- addDbAndSettings(
     andromeda = result,
-    tablesToExport = c('covariates', 'covariatesContinuous'),
-    tableNamePrefix = 'case_series_',
-    outputFolder = outputFolder,
     databaseId = databaseId,
-    settingId = executionId,#settings$settingId,
-    minCellCount = minCellCount,
-    batchSize = 100000
+    settingId = executionId
   )
-
-  exportTargetAndromedaToCsv(
+  saveCharacterizationAndromeda(
     andromeda = result,
-    tablesToExport = c('targetSettings', 'caseSettings', 'covariateRef', 'analysisRef'),
-    tableNamePrefix = '',
-    outputFolder = outputFolder,
-    databaseId = databaseId,
-    settingId = executionId,#settings$settingId,
-    minCellCount = minCellCount,
-    batchSize = 100000
+    outputFolder = outputFolder
   )
 
   # clean up temp tables (as some dbms do not have temp tables and it can get messy)

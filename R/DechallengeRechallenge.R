@@ -245,11 +245,10 @@ computeDechallengeRechallengeAnalyses <- function(
     )
 
     # export results to csv
-    message("exporting to csv file")
-    exportDechallengeRechallengeToCsv(
-      result = result,
-      saveDirectory = outputFolder,
-      minCellCount = minCellCount
+    message("exporting to andomeda")
+    saveCharacterizationAndromeda(
+      andromeda = result,
+      outputFolder = outputFolder
     )
 
     return(invisible(TRUE))
@@ -415,10 +414,10 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     )
 
     # add the csv export here
-    message("exporting to csv file")
-    exportRechallengeFailCaseSeriesToCsv(
-      result = result,
-      saveDirectory = outputFolder
+    message("exporting to andromeda")
+    saveCharacterizationAndromeda(
+      andromeda = result,
+      outputFolder = outputFolder
     )
 
     return(invisible(TRUE))

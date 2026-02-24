@@ -3,6 +3,9 @@
 
 context("RiskFactor")
 
+# ADDED TEMP testing this to see whether it is getting changed before this
+connectionDetails <- Characterization::exampleOmopConnectionDetails()
+
 tempFolder1 <- tempfile("runRf1")
 on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
 tempFolder2 <- tempfile("runRf2")
@@ -316,7 +319,6 @@ test_that("computeRiskFactorAnalyses", {
     settings = ParallelLogger::convertJsonToSettings(jobDf$settings[1]),
     databaseId = "madeup",
     outputFolder = tempFolder1,
-    minCellCount = 0,
     progressBar = FALSE,
     minCharacterizationMean = 0,
     minCovariateCount = 0,
@@ -325,37 +327,37 @@ test_that("computeRiskFactorAnalyses", {
     mode = 'PatientLevelPrediction'
   )
 
+  result <- Andromeda::loadAndromeda(file.path(tempFolder1, "result"))
+
   # check incremental does not run
   testthat::expect_true(
     sum(c(
-      "risk_factor_covariates.csv",
-      "risk_factor_covariates_continuous.csv",
-      "covariate_ref.csv",
-      "analysis_ref.csv"
-    ) %in% dir(tempFolder1)) == 4
+      "riskFactorCovariates",
+      "riskFactorCovariatesContinuous",
+      "covariateRef",
+      "analysisRef"
+    ) %in% names(result)) == 4
   )
 
 
-  covs <- readr::read_csv(
-    file = file.path(tempFolder1, "risk_factor_covariates.csv"),
-    show_col_types = FALSE
-  )
+  covs <- as.data.frame(result$riskFactorCovariates)
+
   # check covariates is unique
   testthat::expect_true(
     nrow(covs) == nrow(unique(covs))
   )
 
   # check key columns are there
-  testthat::expect_true('database_id' %in% colnames(covs))
-  testthat::expect_true('setting_id' %in% colnames(covs))
-  testthat::expect_true('characterization_case_id' %in% colnames(covs))
-  testthat::expect_true('covariate_id' %in% colnames(covs))
-  testthat::expect_true('standardized_mean_difference' %in% colnames(covs))
+  testthat::expect_true('databaseId' %in% colnames(covs))
+  testthat::expect_true('settingId' %in% colnames(covs))
+  testthat::expect_true('characterizationCaseId' %in% colnames(covs))
+  testthat::expect_true('covariateId' %in% colnames(covs))
+  testthat::expect_true('standardizedMeanDifference' %in% colnames(covs))
 
   # check databaseId is added
   if(nrow(covs) > 0){
     testthat::expect_true(
-      covs$database_id[1] == "madeup"
+      covs$databaseId[1] == "madeup"
     )
   }
 })
