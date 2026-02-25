@@ -71,7 +71,7 @@ INSERT INTO @characterization_schema.@attrition_table
 SELECT
 cohort_definition_id,
 'Target first in @limit_to_first_in_n_days - @min_prior_observation prior obs' as attr_reason,
-count(*) as N
+count(*) as n
 
 FROM #temp_target
 

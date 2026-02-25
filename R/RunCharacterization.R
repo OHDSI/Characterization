@@ -687,7 +687,7 @@ exportSharedObjects <- function(
 
     # export attrition table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @attrition_table;",
+      sql = "SELECT cohort_definition_id,	attr_reason, n FROM @attrition_table;",
       attrition_table = paste0(outputDatabaseSchema, '.' ,attritionTable)
     )
     sql <- SqlRender::translate(
@@ -719,7 +719,7 @@ exportSharedObjects <- function(
 
     # export target settings table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @target_settings_table;",
+      sql = "SELECT target_id,	limit_to_first_in_n_days,	min_prior_observation, characterization_target_id FROM @target_settings_table;",
       target_settings_table = paste0(outputDatabaseSchema, '.' ,targetSettingsTable)
     )
     sql <- SqlRender::translate(
@@ -748,7 +748,7 @@ exportSharedObjects <- function(
 
     # export target settings table
     sql <- SqlRender::render(
-      sql = "SELECT * FROM @case_settings_table;",
+      sql = "SELECT characterization_case_id, characterization_target_id, outcome_id,	outcome_washout_days,	risk_window_start,	start_anchor,	risk_window_end,	end_anchor,	runtype	 FROM @case_settings_table;",
       case_settings_table = paste0(outputDatabaseSchema, '.' ,caseSettingsTable)
     )
     sql <- SqlRender::translate(

@@ -136,7 +136,7 @@ INSERT INTO @characterization_schema.@attrition_table
 SELECT
 cohort_definition_id*10+1,
 'Cases' as attr_reason,
-count(*) as N
+count(*) as n
 
 FROM #characterization_cases
 
