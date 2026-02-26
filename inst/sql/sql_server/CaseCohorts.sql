@@ -23,7 +23,7 @@ FROM @characterization_schema.@characterization_table t
 
 INNER JOIN
 ( SELECT *,
-  ISNULL(datediff(day, LAG(cohort_start_date) OVER(partition BY subject_id, cohort_definition_id ORDER BY cohort_start_date ASC), cohort_start_date ), (@outcome_washout+1)) outcome_washout_time
+  ISNULL(datediff(day, LAG(cohort_end_date) OVER(partition BY subject_id, cohort_definition_id ORDER BY cohort_start_date ASC), cohort_start_date ), (@outcome_washout+1)) outcome_washout_time
   FROM @cohort_schema.@cohort_table
   WHERE cohort_definition_id IN (@outcome_cohort_ids)
 ) o

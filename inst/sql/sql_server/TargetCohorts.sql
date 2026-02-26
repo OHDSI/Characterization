@@ -21,7 +21,7 @@ FROM (SELECT
       subject_id,
       cohort_start_date,
       cohort_end_date,
-      ISNULL(datediff(day, LAG(cohort_start_date) OVER(partition BY subject_id, cohort_definition_id ORDER BY cohort_start_date ASC), cohort_start_date ), -1) AS time_between
+      ISNULL(datediff(day, LAG(cohort_end_date) OVER(partition BY subject_id, cohort_definition_id ORDER BY cohort_start_date ASC), cohort_start_date ), -1) AS time_between
       FROM @cohort_schema.@cohort_table WHERE cohort_definition_id IN (@cohort_ids)
 ) temp_cohort
 
