@@ -85,6 +85,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get install -y libssh-dev
+          sudo R CMD javareconf
           Rscript -e 'install.packages("remotes")'
           while read -r cmd
           do
