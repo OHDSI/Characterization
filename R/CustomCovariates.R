@@ -143,10 +143,6 @@ createDuringCovariateSettings <- function(
 #'                                on covariates that have very low values. The default is 0.
 #'
 #'
-#' @param dropTableIfExists      If targetDatabaseSchema, drop any existing tables. Otherwise, results are merged
-#'                               into existing table data. Overides createTable.
-#' @param createTable            Run sql to create table? Code does not check if table exists.
-#'
 #' @param ...  additional arguments from FeatureExtraction
 #'
 #' @family CovariateSetting
@@ -196,8 +192,6 @@ getDbDuringCovariateData <- function(
     targetCovariateRefTable = NULL,
     targetAnalysisRefTable = NULL,
     targetTimeRefTable = NULL,
-    dropTableIfExists = FALSE,
-    createTable = TRUE,
 
     ...) {
   writeLines("Constructing during cohort covariates")

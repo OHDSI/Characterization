@@ -11,14 +11,14 @@ SELECT
     MAX(CASE WHEN dateadd(day, @risk_window_start, t.@start_anchor_date) > dateadd(day, @risk_window_end, t.@end_anchor_date) THEN 1 else 0 END) AS no_tar_ignoring_outcome_washout,
     MAX(CASE WHEN dateadd(day, @risk_window_start, t.@start_anchor_date) > t.observation_period_end_date THEN 1 else 0 END) AS no_tar_obs,
     -- has no tar due to outcome washout (CI excluded but in pe)
-    MAX(CASE WHEN DATEDIFF(day,dateadd(day,@outcome_washout, o.cohort_start_date) , dateadd(day, @risk_window_end, t.@end_anchor_date)) < 0 THEN 1 ELSE 0 END) AS no_tar_because_outcome_washout,
+    MAX(CASE WHEN DATEDIFF(day,dateadd(day,@outcome_washout, o.cohort_end_date) , dateadd(day, @risk_window_end, t.@end_anchor_date)) <= 0 THEN 1 ELSE 0 END) AS no_tar_because_outcome_washout,
     -- leaves database leading to no TAR
-    MAX(CASE WHEN DATEDIFF(day,dateadd(day,@outcome_washout, o.cohort_start_date) , t.observation_period_end_date) < 0 THEN 1 ELSE 0 END) AS no_tar_washout_and_obs,
-     -- has outcome in washout before tar start (used by plp to exclude)
+    MAX(CASE WHEN DATEDIFF(day,dateadd(day,@outcome_washout, o.cohort_end_date) , t.observation_period_end_date) <= 0 THEN 1 ELSE 0 END) AS no_tar_washout_and_obs,
+    -- outcome overlaps the washout before tar (used by plp to exclude)
     MAX(CASE
     WHEN o.cohort_start_date IS NOT NULL
     AND o.cohort_start_date < dateadd(day, @risk_window_start, t.@start_anchor_date)
-    AND o.cohort_start_date > dateadd(day, -@outcome_washout, dateadd(day, @risk_window_start, t.@start_anchor_date))
+    AND o.cohort_end_date > dateadd(day, -@outcome_washout, dateadd(day, @risk_window_start, t.@start_anchor_date))
     THEN 1 else 0 END) AS outcome_in_washout_before_tar,
 
     -- ADD has outcome in TAR (left join CASES on characterization_target_id, row_id and )
@@ -44,8 +44,8 @@ SELECT
     AND o.cohort_start_date <= t.observation_period_end_date
     -- outcome starts before TAR start
     AND o.cohort_start_date <= dateadd(day, @risk_window_start, t.@start_anchor_date)
-    -- outcome starts within washout prior before TAR start
-    AND o.cohort_start_date >= dateadd(day, -@outcome_washout, dateadd(day, @risk_window_start, t.@start_anchor_date))
+    -- outcome end after washout prior before TAR start
+    AND o.cohort_end_date >= dateadd(day, -@outcome_washout, dateadd(day, @risk_window_start, t.@start_anchor_date))
 
     -- use real table not temp case table?
     LEFT JOIN (SELECT * from @characterization_schema.@characterization_table
@@ -119,7 +119,7 @@ FROM
 
 {@use_plp}?{
 CASE
-WHEN temp.no_tar_ignoring_outcome_washout = 1 OR temp.no_tar_obs = 1 THEN '1. No TAR due to end > start or observation end'
+WHEN temp.no_tar_ignoring_outcome_washout = 1 OR temp.no_tar_obs = 1 THEN '1. No TAR due to TAR start > TAR end or observation end'
 WHEN temp.outcome_in_washout_before_tar = 1 THEN '2. Outcome occurs during washout'
 WHEN temp.outcome_during_tar = 1 THEN '3. Has outcome during TAR'
 END attr_reason
