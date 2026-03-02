@@ -277,7 +277,7 @@ test_that("computeRiskFactorAnalyses", {
     nTargetJobs = 1
   )
 
-  tables <- Characterization:::generateCohorts(
+  tables <- generateCohorts(
     characterizationSettings = createCharacterizationSettings(
       riskFactorSettings = res
     ),

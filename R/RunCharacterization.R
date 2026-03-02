@@ -205,7 +205,8 @@ loadCharacterizationSettings <- function(
 #' @param showSubjectId  Whether to include subjectId of failed rechallenge case series or hide
 #' @param minCellCount  The minimum count value that is calculated
 #' @param incremental If TRUE then skip previously executed analyses that completed
-#' @param threads    The number of threads to use when running in parallel
+#' @param threads    The number of threads to use when running analyses jobs in parallel
+#' @param cohortGenerationThreads (optional) The number of threads to use when generating the cohorts in parallel (Note: some database management systems do not allow insert parallelization)
 #' @param nTargetJobs Partition the targets into this number of groups (e.g., if there are 20 targets and njobs is 5 then there will be 4 targets per job and 5 jobs)
 #' @param minCharacterizationMean The minimum mean threshold to extract when running aggregate covariates
 #' @param minCovariateCount The minimum number of patients who must have the covariate when running aggregate covariates
@@ -260,6 +261,7 @@ runCharacterizationAnalyses <- function(
     minCellCount = 0,
     incremental = TRUE,
     threads = 1,
+    cohortGenerationThread = NULL,
     nTargetJobs = 1,
     minCharacterizationMean = 0.01, # is this global or within cov set?
     minCovariateCount = 0, # is this global or within cov set?
@@ -281,6 +283,15 @@ runCharacterizationAnalyses <- function(
     connectionDetails = connectionDetails,
     errorMessages = errorMessages
   )
+
+  if(is.null(cohortGenerationThread)){
+    cohortGenerationThread <- 1
+  } else{
+    .checkCohortGenerationThread(
+      cohortGenerationThread = cohortGenerationThread,
+      errorMessages = errorMessages
+    )
+  }
 
   checkmate::reportAssertions(
     errorMessages
@@ -398,7 +409,7 @@ runCharacterizationAnalyses <- function(
   # FIRST GENERATE ALL THE REQUIRED COHORTS - EXTRACT COHORT JOBS AND GENERATE
   tableNames <- generateCohorts(
     characterizationSettings = characterizationSettings,
-    threads = threads,
+    threads = cohortGenerationThread,
     nTargetJobs = nTargetJobs,
     incremental = incremental,
     executionPath = executionPath,
@@ -492,7 +503,8 @@ runCharacterizationAnalyses <- function(
   ParallelLogger::clusterApply(
     cluster = cluster,
     x = jobList,
-    fun = runCharacterizationsInParallel
+    fun = runCharacterizationsInParallel,
+    progressBar = interactive()
   )
 
   # code to export all csvs into one file

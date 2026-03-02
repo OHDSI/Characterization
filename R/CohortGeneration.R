@@ -143,12 +143,22 @@ generateCohorts <- function(
 
     if(nrow(cohortJobs$jobs) > 0){
       # TODO: replace below with parallel jobs using threads
-      for(i in 1:nrow(cohortJobs$jobs)){
-        do.call(
-          what = cohortJobs$jobs$functionName[i],
-          args =
+      message("Creating new cluster")
+      cohortcluster <- ParallelLogger::makeCluster(
+        numberOfThreads = threads,
+        singleThreadToMain = TRUE,
+        setAndromedaTempFolder = TRUE
+      )
+      on.exit(ParallelLogger::stopCluster(cluster = cohortcluster))
+
+      ParallelLogger::clusterApply(
+        cluster = cohortcluster,
+        x = lapply(
+          1:nrow(cohortJobs$jobs),
+          function(i){
             list(
-              connection = connection,
+              func = cohortJobs$jobs[i,"functionName"],
+              connectionDetails = connectionDetails,
               cdmDatabaseSchema = cdmDatabaseSchema,
               characterizationTable = characterizationTableWithHash,
               attritionTable = attritionTableWithHash,
@@ -166,13 +176,20 @@ generateCohorts <- function(
               casePreTargetDuration = casePreTargetDuration,
               casePostOutcomeDuration = casePostOutcomeDuration,
 
-              progressBar = progressBar,
+              progressBar = progressBar, # set to FALSE
               executionPath = executionPath,
-              settings = ParallelLogger::convertJsonToSettings(cohortJobs$jobs$settings[i]),
-              jobId = cohortJobs$jobs$jobId[i]
+
+              settings = ParallelLogger::convertJsonToSettings(cohortJobs$jobs[i,"settings"]),
+              jobId = cohortJobs$jobs[i, "jobId"]
             )
-        )
-      }
+
+          }
+        ),
+        fun = runCohortGenerationInParallel,
+        progressBar = progressBar,
+        stopOnError = TRUE # do not proceed unless all cohort jobs complete
+      )
+
     } else{ # end if no jobs left
       message('No cohort jobs left to run')
     }
@@ -190,6 +207,19 @@ return(list(
 
 
 
+runCohortGenerationInParallel <- function(x){
+
+  functionToCall <- paste0('Characterization:::', x$func, sep= '')
+  x$func <- NULL
+
+  do.call(
+    what = eval(parse(text = functionToCall)),
+    args = x
+  )
+}
+
+
+
 # make this return data.frame with columns functionName/settings/executionFolder/jobId
 # where settings into functionName is a json: as.character(ParallelLogger::convertSettingsToJson(list))
 # partitions by targetId (thread) and settings
@@ -199,6 +229,7 @@ getCohortJobs <- function(
     nTargetJobs # not currently used
 ){
 
+  message('Extracting cohort jobs')
   targets <- c()
   cases <- c()
 
@@ -347,6 +378,14 @@ getCohortJobs <- function(
 
   if(!is.null(nrow(targets))){
 
+    jobCols <- c("targetId")
+
+    jobSettings <- targets %>%
+      dplyr::select(dplyr::all_of(jobCols)) %>%
+      dplyr::distinct()
+    jobSettings$nTargetJobs <- rep(1:nTargetJobs, ceiling(nrow(jobSettings) / nTargetJobs))[1:nrow(jobSettings)]
+    targets <- merge(targets, jobSettings, by = jobCols)
+
     targets <- unique(targets) %>%
       dplyr::inner_join(
         y = targets %>%
@@ -362,29 +401,36 @@ getCohortJobs <- function(
       )
 
 
-    message(paste0('Adding ', length(unique(targets$settingId)) ,' Target Cohort Jobs containing ', length(unique(targets$targetId)) ,' targets'))
+    message(paste0('Adding ', length(unique(targets$settingId))*length(unique(targets$nTargetJobs)) ,' Target Cohort Jobs containing ', length(unique(targets$targetId)) ,' targets'))
 
     for(setId in unique(targets$settingId)){
       toi <- targets %>%
         dplyr::filter(.data$settingId == !!setId)
 
-      jobs <- rbind(jobs,data.frame(
-        functionName = 'generateTargets',
-        settings =  as.character(ParallelLogger::convertSettingsToJson(
-          list(
-            settingId = setId,
-            targetIds = unique(toi$targetId),
-            limitToFirstInNDays = unique(toi$limitToFirstInNDays),
-            minPriorObservation = unique(toi$minPriorObservation)
-          ))),
-      jobId = paste("targets_", setId, sep = "_")
-      ))
+      settingVal <- toi[1,c("limitToFirstInNDays", "minPriorObservation")]
+
+      for (i in unique(toi$nTargetJobs)) {
+        ind <- toi$nTargetJobs== i
+
+        jobs <- rbind(jobs,data.frame(
+          functionName = 'generateTargets',
+          settings =  as.character(ParallelLogger::convertSettingsToJson(
+            list(
+              settingId = setId,
+              targetIds = unique(toi$targetId[ind]),
+              limitToFirstInNDays = unique(toi$limitToFirstInNDays[ind]),
+              minPriorObservation = unique(toi$minPriorObservation[ind])
+            ))),
+          jobId = paste("targets",i, paste0(settingVal, collapse = "_"), sep = "_")
+        ))
+      }
 
     }
   }
 
 
   if(!is.null(nrow(cases))){
+
     cases <- unique(cases) %>%
       dplyr::group_by(
         .data$targetId,.data$limitToFirstInNDays, .data$minPriorObservation,
@@ -413,7 +459,7 @@ getCohortJobs <- function(
       ) %>%
       dplyr::inner_join(
         y = targets %>%
-          dplyr::select("characterizationTargetId", "targetId","limitToFirstInNDays", "minPriorObservation"),
+          dplyr::select("characterizationTargetId", "targetId","limitToFirstInNDays", "minPriorObservation", "nTargetJobs"),
         by = c("targetId","limitToFirstInNDays", "minPriorObservation")
       ) %>%
       dplyr::select(-"targetId",-"limitToFirstInNDays", -"minPriorObservation") %>%
@@ -421,55 +467,73 @@ getCohortJobs <- function(
         characterizationCaseId = dplyr::row_number()
       )
 
-    message(paste0('Adding ', length(unique(cases$settingId)) ,' Case Cohort Jobs containing ', nrow(cases), ' case cohorts'))
+    message(paste0('Adding ', length(unique(cases$settingId))*length(unique(cases$nTargetJobs)) ,' Case Cohort Jobs containing ', nrow(cases), ' case cohorts'))
 
     nNonCase <- 0
     for(setId in unique(cases$settingId)){
       coi <- cases %>%
         dplyr::filter(.data$settingId == !!setId)
 
-      jobs <- rbind(jobs, data.frame(
-        functionName = 'generateCases',
-        settings = as.character(ParallelLogger::convertSettingsToJson(list(
-          settingId = setId,
-          analysisId = 2,
-          characterizationTargetIds = unique(coi$characterizationTargetId),
-          outcomeIds = unique(coi$outcomeId),
-          outcomeWashoutDays = unique(coi$outcomeWashoutDays),
-          riskWindowStart = unique(coi$riskWindowStart),
-          startAnchor = unique(coi$startAnchor),
-          riskWindowEnd = unique(coi$riskWindowEnd),
-          endAnchor = unique(coi$endAnchor),
-          generateRiskFactors = length(grep('risk-factor', unique(coi$runtype))) > 0 ,
-          generateCaseSeries = length(grep('case-series', unique(coi$runtype))) > 0
-        )
-      )),
-      jobId = paste("cases_", setId, sep = "_")
-      ))
+      settingVal <- coi[1,c("outcomeWashoutDays", #"outcomeId",
+                            "riskWindowStart", "startAnchor",
+                            "riskWindowEnd", "endAnchor")]
 
-      if(mode != 'Efficient'){
-      if(length(grep('risk-factor', unique(coi$runtype))) > 0){
-        nNonCase <- nNonCase + 1
+      for (i in unique(coi$nTargetJobs)) {
+        ind <- coi$nTargetJobs== i
+
         jobs <- rbind(jobs, data.frame(
-          functionName = 'generateNonCases',
+          functionName = 'generateCases',
           settings = as.character(ParallelLogger::convertSettingsToJson(list(
             settingId = setId,
-            characterizationTargetIds = unique(coi$characterizationTargetId),
-            outcomeIds = unique(coi$outcomeId),
-            outcomeWashoutDays = unique(coi$outcomeWashoutDays),
-            riskWindowStart = unique(coi$riskWindowStart),
-            startAnchor = unique(coi$startAnchor),
-            riskWindowEnd = unique(coi$riskWindowEnd),
-            endAnchor = unique(coi$endAnchor)
+            analysisId = 2,
+            characterizationTargetIds = unique(coi$characterizationTargetId[ind]),
+            outcomeIds = unique(coi$outcomeId[ind]),
+            outcomeWashoutDays = unique(coi$outcomeWashoutDays[ind]),
+            riskWindowStart = unique(coi$riskWindowStart[ind]),
+            startAnchor = unique(coi$startAnchor[ind]),
+            riskWindowEnd = unique(coi$riskWindowEnd[ind]),
+            endAnchor = unique(coi$endAnchor[ind]),
+            generateRiskFactors = length(grep('risk-factor', unique(coi$runtype[ind]))) > 0 ,
+            generateCaseSeries = length(grep('case-series', unique(coi$runtype[ind]))) > 0
           )
           )),
-          jobId = paste("non_cases_", setId, sep = "_")
+          jobId = paste("cases",i, paste0(settingVal, collapse = "_"), sep = "_")
         ))
-      }
 
-    } # not efficient
+
+        if(mode != 'Efficient'){
+          if(length(grep('risk-factor', unique(coi$runtype[ind]))) > 0){
+            nNonCase <- nNonCase + 1
+            jobs <- rbind(jobs, data.frame(
+              functionName = 'generateNonCases',
+              settings = as.character(ParallelLogger::convertSettingsToJson(list(
+                settingId = setId,
+                characterizationTargetIds = unique(coi$characterizationTargetId[ind]),
+                outcomeIds = unique(coi$outcomeId[ind]),
+                outcomeWashoutDays = unique(coi$outcomeWashoutDays[ind]),
+                riskWindowStart = unique(coi$riskWindowStart[ind]),
+                startAnchor = unique(coi$startAnchor[ind]),
+                riskWindowEnd = unique(coi$riskWindowEnd[ind]),
+                endAnchor = unique(coi$endAnchor[ind])
+              )
+              )),
+              jobId = paste("non_cases",i, paste0(settingVal, collapse = "_"), sep = "_")
+            ))
+          }
+
+        } # not efficient
+      }
     }
     message(paste0('Adding ',nNonCase,' Non-Case Cohort Jobs'))
+
+  }
+
+  # removing nTargetJobs
+  if(!is.null(nrow(targets))){
+    targets <- targets %>% dplyr::select(-"nTargetJobs")
+  }
+  if(!is.null(nrow(cases))){
+    cases <- cases %>% dplyr::select(-"nTargetJobs")
   }
 
   return(
@@ -484,7 +548,7 @@ getCohortJobs <- function(
 
 
 generateTargets <- function(
-    connection,
+    connectionDetails,
     cdmDatabaseSchema,
     characterizationTable,
     attritionTable,
@@ -506,6 +570,9 @@ generateTargets <- function(
 
   message("Creating Target Cohorts")
   start <- Sys.time()
+
+  connection <- DatabaseConnector::connect(connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection))
 
   sql <- SqlRender::loadRenderTranslateSql(
     sqlFilename = 'TargetCohorts.sql',
@@ -554,7 +621,7 @@ generateTargets <- function(
 
 
 generateCases <- function(
-    connection,
+    connectionDetails,
     cdmDatabaseSchema,
     characterizationTable,
     attritionTable,
@@ -579,6 +646,9 @@ generateCases <- function(
 
   message("Creating Cases")
   start <- Sys.time()
+
+  connection <- DatabaseConnector::connect(connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection))
 
   sql <- SqlRender::loadRenderTranslateSql(
     sqlFilename = 'CaseCohorts.sql',
@@ -633,7 +703,7 @@ generateCases <- function(
 }
 
 generateNonCases <- function(
-    connection,
+    connectionDetails,
     cdmDatabaseSchema,
     characterizationTable,
     attritionTable,
@@ -656,6 +726,9 @@ generateNonCases <- function(
 
   message("Creating Non Cases")
   start <- Sys.time()
+
+  connection <- DatabaseConnector::connect(connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection))
 
   sql <- SqlRender::loadRenderTranslateSql(
     sqlFilename = 'NonCaseCohorts.sql',
