@@ -21,7 +21,7 @@ FROM (SELECT
       subject_id,
       cohort_start_date,
       cohort_end_date,
-      ISNULL(datediff(day, LAG(cohort_start_date) OVER(partition BY subject_id, cohort_definition_id ORDER BY cohort_start_date ASC), cohort_start_date ), -1) AS time_between
+      ISNULL(datediff(day, LAG(cohort_end_date) OVER(partition BY subject_id, cohort_definition_id ORDER BY cohort_start_date ASC), cohort_start_date ), -1) AS time_between
       FROM @cohort_schema.@cohort_table WHERE cohort_definition_id IN (@cohort_ids)
 ) temp_cohort
 
@@ -71,7 +71,7 @@ INSERT INTO @characterization_schema.@attrition_table
 SELECT
 cohort_definition_id,
 'Target first in @limit_to_first_in_n_days - @min_prior_observation prior obs' as attr_reason,
-count(*) as N
+count(*) as n
 
 FROM #temp_target
 

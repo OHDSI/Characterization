@@ -22,8 +22,6 @@ getDbDuringCovariateData(
   targetCovariateRefTable = NULL,
   targetAnalysisRefTable = NULL,
   targetTimeRefTable = NULL,
-  dropTableIfExists = FALSE,
-  createTable = TRUE,
   ...
 )
 }
@@ -72,11 +70,6 @@ it is a temp table, do not specify \code{targetDatabaseSchema}.}
 \item{targetAnalysisRefTable}{(Optional) The name of the table where the analysis reference will be stored.}
 
 \item{targetTimeRefTable}{(Optional) The name of the table for the time reference}
-
-\item{dropTableIfExists}{If targetDatabaseSchema, drop any existing tables. Otherwise, results are merged
-into existing table data. Overides createTable.}
-
-\item{createTable}{Run sql to create table? Code does not check if table exists.}
 
 \item{...}{additional arguments from FeatureExtraction}
 }

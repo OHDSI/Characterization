@@ -577,7 +577,7 @@ exportAttrition <- function(
             ) %>%
             dplyr::select("targetDefinitionId","databaseId", "settingId", "n_targets"),
           by = c("targetDefinitionId", "databaseId", "settingId")
-          )%>%
+          ) %>%
         dplyr::left_join(
           andromeda$attrition %>%
             dplyr::mutate(
