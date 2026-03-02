@@ -19,7 +19,7 @@
 #' @export
 createTargetBaselineSettings <- function(
     targetIds,
-    limitToFirstInNDays = 0,
+    limitToFirstInNDays = 99999,
     minPriorObservation = 0,
     covariateSettings = FeatureExtraction::createCovariateSettings(
       useDemographicsGender = TRUE,

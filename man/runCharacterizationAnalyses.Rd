@@ -23,7 +23,7 @@ runCharacterizationAnalyses(
   minCellCount = 0,
   incremental = TRUE,
   threads = 1,
-  cohortGenerationThread = NULL,
+  cohortGenerationThreads = NULL,
   nTargetJobs = 1,
   minCharacterizationMean = 0.01,
   minCovariateCount = 0,
@@ -74,6 +74,8 @@ can be created}
 
 \item{threads}{The number of threads to use when running analyses jobs in parallel}
 
+\item{cohortGenerationThreads}{(optional) The number of threads to use when generating the cohorts in parallel (Note: some database management systems do not allow insert parallelization)}
+
 \item{nTargetJobs}{Partition the targets into this number of groups (e.g., if there are 20 targets and njobs is 5 then there will be 4 targets per job and 5 jobs)}
 
 \item{minCharacterizationMean}{The minimum mean threshold to extract when running aggregate covariates}
@@ -83,8 +85,6 @@ can be created}
 \item{mode}{Select from Efficient (no exclusions to target based on washout)/CohortIncidence (excludes targets with outcome in washout if they have no time at risk)/PatientLevelPrediction (excludes targets with outcome during washout prior to index)}
 
 \item{minSMD}{The minimum standardized mean difference for the risk factor analysis}
-
-\item{cohortGenerationThreads}{(optional) The number of threads to use when generating the cohorts in parallel (Note: some database management systems do not allow insert parallelization)}
 }
 \value{
 Multiple csv files in the outputDirectory.

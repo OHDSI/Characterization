@@ -261,7 +261,7 @@ runCharacterizationAnalyses <- function(
     minCellCount = 0,
     incremental = TRUE,
     threads = 1,
-    cohortGenerationThread = NULL,
+    cohortGenerationThreads = NULL,
     nTargetJobs = 1,
     minCharacterizationMean = 0.01, # is this global or within cov set?
     minCovariateCount = 0, # is this global or within cov set?
@@ -284,11 +284,11 @@ runCharacterizationAnalyses <- function(
     errorMessages = errorMessages
   )
 
-  if(is.null(cohortGenerationThread)){
-    cohortGenerationThread <- 1
+  if(is.null(cohortGenerationThreads)){
+    cohortGenerationThreads <- 1
   } else{
     .checkCohortGenerationThread(
-      cohortGenerationThread = cohortGenerationThread,
+      cohortGenerationThreads = cohortGenerationThreads,
       errorMessages = errorMessages
     )
   }
@@ -389,13 +389,20 @@ runCharacterizationAnalyses <- function(
 
     if (nrow(jobs) == 0) {
       message("No jobs left")
-      exportAndromedaSubfilesToCsv(
-        outputFolder = outputDirectory,
-        executionPath = executionPath,
-        csvFilePrefix = csvFilePrefix,
-        minCellCount = minCellCount,
-        batchSize = 100000
-      )
+
+      exportCompleted <- checkExport(outputDirectory)
+
+      if(!exportCompleted){
+        exportAndromedaSubfilesToCsv(
+          outputFolder = outputDirectory,
+          executionPath = executionPath,
+          csvFilePrefix = csvFilePrefix,
+          minCellCount = minCellCount,
+          batchSize = 100000
+        )
+      } else{
+        message('Export previously completed')
+      }
       return(invisible(TRUE))
     }
   } else {
@@ -409,7 +416,7 @@ runCharacterizationAnalyses <- function(
   # FIRST GENERATE ALL THE REQUIRED COHORTS - EXTRACT COHORT JOBS AND GENERATE
   tableNames <- generateCohorts(
     characterizationSettings = characterizationSettings,
-    threads = cohortGenerationThread,
+    threads = cohortGenerationThreads,
     nTargetJobs = nTargetJobs,
     incremental = incremental,
     executionPath = executionPath,
@@ -506,6 +513,14 @@ runCharacterizationAnalyses <- function(
     fun = runCharacterizationsInParallel,
     progressBar = interactive()
   )
+
+  # check all the jobs ran
+  if(incremental){
+    # confirm all analyses were completed or error so user knows this
+    checkResultFilesIncremental(
+      executionFolder = executionPath
+    )
+  }
 
   # code to export all csvs into one file
   exportAndromedaSubfilesToCsv(

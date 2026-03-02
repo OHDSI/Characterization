@@ -7,7 +7,7 @@
 createRiskFactorSettings(
   targetIds,
   outcomeIds,
-  limitToFirstInNDays = 0,
+  limitToFirstInNDays = 99999,
   minPriorObservation = 0,
   outcomeWashoutDays = 0,
   riskWindowStart = 1,

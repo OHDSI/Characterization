@@ -316,12 +316,12 @@ exampleOmopConnectionDetails <- function(exdir = tempdir()) {
 
 
 .checkCohortGenerationThread <- function(
-    cohortGenerationThread,
+    cohortGenerationThreads,
     errorMessages) {
   checkmate::assertCount(
-    x = cohortGenerationThread,
+    x = cohortGenerationThreads,
     null.ok = FALSE,
-    .var.name = "cohortGenerationThread",
+    .var.name = "cohortGenerationThreads",
     add = errorMessages
   )
 }

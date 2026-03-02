@@ -49,6 +49,14 @@ saveCharacterizationAndromeda <- function(
 }
 
 
+checkExport <- function(outputDirectory){
+  return(file.exists(file.path(outputDirectory,'export-complete.txt')))
+}
+
+confirmExport <- function(outputDirectory){
+  write.table(x = '', file = file.path(outputDirectory,'export-complete.txt'))
+}
+
 # this function exports Andromeda tables to csv results
 exportAndromedaSubfilesToCsv <- function(
     executionPath,
@@ -170,6 +178,9 @@ exportAndromedaSubfilesToCsv <- function(
     tablesToExport = tablesToExport,
     csvFilePrefix = csvFilePrefix
     )
+
+  # adding txt file that confirms export completed
+  confirmExport(outputFolder)
 
 return(invisible(TRUE))
 }
