@@ -251,7 +251,7 @@ CREATE TABLE @my_schema.@table_prefixcase_series_settings (
 -- added this table
 CREATE TABLE @my_schema.@table_prefixattrition (
     database_id varchar(100) NOT NULL,
-    setting_id varchar(30) NOT NULL,
+    setting_id varchar(50) NOT NULL,
     cohort_definition_id BIGINT,
     attr_reason VARCHAR(200),
     n BIGINT,
