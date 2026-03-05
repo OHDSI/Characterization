@@ -168,14 +168,17 @@ case_series_covariates_continuous,before_average_value,float,No,No,No,No,The ave
 case_series_covariates_continuous,before_standard_deviation,float,No,No,No,No,The standard devidation
 case_series_covariates_continuous,before_median_value,float,No,No,No,No,The median value
 case_series_covariates_continuous,before_p_10_value,float,No,No,No,No,The 10th percentile
+case_series_covariates_continuous,before_p_25_value,float,No,No,No,No,The 25th percentile
+case_series_covariates_continuous,before_p_75_value,float,No,No,No,No,The 75th percentile
 case_series_covariates_continuous,before_p_90_value,float,No,No,No,No,The 90th percentile
-case_series_covariates_continuous,during_count_value,int,No,No,No,No,The count value
 case_series_covariates_continuous,during_min_value,float,No,No,No,No,The min value
 case_series_covariates_continuous,during_max_value,float,No,No,No,No,The max value
 case_series_covariates_continuous,during_average_value,float,No,No,No,No,The average value
 case_series_covariates_continuous,during_standard_deviation,float,No,No,No,No,The standard devidation
 case_series_covariates_continuous,during_median_value,float,No,No,No,No,The median value
 case_series_covariates_continuous,during_p_10_value,float,No,No,No,No,The 10th percentile
+case_series_covariates_continuous,during_p_25_value,float,No,No,No,No,The 25th percentile
+case_series_covariates_continuous,during_p_75_value,float,No,No,No,No,The 75th percentile
 case_series_covariates_continuous,during_p_90_value,float,No,No,No,No,The 90th percentile
 case_series_covariates_continuous,after_count_value,int,No,No,No,No,The count value
 case_series_covariates_continuous,after_min_value,float,No,No,No,No,The min value
@@ -184,4 +187,6 @@ case_series_covariates_continuous,after_average_value,float,No,No,No,No,The aver
 case_series_covariates_continuous,after_standard_deviation,float,No,No,No,No,The standard devidation
 case_series_covariates_continuous,after_median_value,float,No,No,No,No,The median value
 case_series_covariates_continuous,after_p_10_value,float,No,No,No,No,The 10th percentile
+case_series_covariates_continuous,after_p_25_value,float,No,No,No,No,The 25th percentile
+case_series_covariates_continuous,after_p_75_value,float,No,No,No,No,The 75th percentile
 case_series_covariates_continuous,after_p_90_value,float,No,No,No,No,The 90th percentile

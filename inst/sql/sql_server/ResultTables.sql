@@ -184,6 +184,8 @@ CREATE TABLE @my_schema.@table_prefixcase_series_covariates_continuous (
     before_standard_deviation float,
     before_median_value float,
     before_p_10_value float,
+    before_p_25_value float,
+    before_p_75_value float,
     before_p_90_value float,
     during_count_value bigint,
     during_min_value float,
@@ -192,6 +194,8 @@ CREATE TABLE @my_schema.@table_prefixcase_series_covariates_continuous (
     during_standard_deviation float,
     during_median_value float,
     during_p_10_value float,
+    during_p_25_value float,
+    during_p_75_value float,
     during_p_90_value float,
     after_count_value bigint,
     after_min_value float,
@@ -200,6 +204,8 @@ CREATE TABLE @my_schema.@table_prefixcase_series_covariates_continuous (
     after_standard_deviation float,
     after_median_value float,
     after_p_10_value float,
+    after_p_25_value float,
+    after_p_75_value float,
     after_p_90_value float,
     PRIMARY KEY (database_id, setting_id, characterization_case_id, covariate_id)
 );
