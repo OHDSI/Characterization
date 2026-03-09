@@ -1,3 +1,23 @@
+Characterization 3.0.0
+======================
+- Splitting the aggregateCovariates into: riskFactor, targetBaseline and caseSeries to make the inputs clearer.
+- Adding a new function for cohort generation for the riskFactor, targetBaseline and caseSeries settings to ensure 
+  cohort generation is efficient and remove redundancies.
+- Updating the results tables for the partitioning of aggregateCovariates into riskFactor, targetBaseline and caseSeries
+- riskFactor analysis now has three modes: efficient (target without case vs case), CohortIncidence (target without case who have some TAR vs case) and
+  PatientLevelPrediction (target without case and without people with outcome during washout period before TAR vs case).
+- riskFactor analysis calculates SMD during execution and min SMD values can be specified to reduce result size.  
+- User can specify the number of target jobs (how many groups of targetIds to partition the jobs into) and the number of threads (how many threads to run the jobs in parallel).
+- Intermediate results are stored as Andromeda files rather than csv files
+- minCellCount censoring is done when exporting the intermediate results so it can be changed after execution without rerunning whole analysis.
+- When running in incremental model results are checked to ensure all jobs executed successful before exporting to csv otherwise
+  an error is returned to show some jobs were incomplete.
+- riskFactor and caseSeries use the new FeatureExtarction option of exporting the features into a database table rather than downloading
+  this enables additional processing to be done efficiently in SQL instead of R.
+- The cohorts used by riskFactor, targetBaseline and caseSeries are saved into a user specified database and table 
+- The attritions for riskFactor, targetBaseline and caseSeries cohort creation are saved to enable users to see where patients were removed.
+
+
 Characterization 2.2.0
 ======================
 - fixed csv spec: made mean_exposure_time a float and specified that min_characterization_mean in covariate table must be non-null and is in the pk.

@@ -1,8 +1,8 @@
 Package: Characterization
 Type: Package
 Title: Implement Descriptive Studies Using the Common Data Model
-Version: 2.2.9999
-Date: 2026-2-20
+Version: 3.0.0
+Date: 2026-2-26
 Authors@R: c(
   person("Jenna", "Reps", , "jreps@its.jnj.com", role = c("aut", "cre")),
   person("Patrick", "Ryan", , "ryan@ohdsi.org", role = c("aut")),
@@ -19,7 +19,7 @@ Imports:
   Andromeda (>= 1.0.0),
   DatabaseConnector (>= 6.3.1),
   digest,
-  FeatureExtraction  (>= 3.10.0),
+  FeatureExtraction  (>= 3.13.0),
   SqlRender (>= 1.9.0),
   ParallelLogger (>= 3.0.0),
   ResultModelManager,
@@ -38,8 +38,6 @@ Suggests:
   OhdsiShinyAppBuilder,
   shiny,
   withr
-Remotes:
-    ohdsi/FeatureExtraction@database_covariate_storage_jenna
 NeedsCompilation: no
 RoxygenNote: 7.3.2
 Encoding: UTF-8

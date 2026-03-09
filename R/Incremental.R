@@ -210,7 +210,7 @@ checkResultFilesNonIncremental <- function(
   )
   if (length(files) > 0) {
     errorMessage <- paste0(
-      "Running in non-incremental but csv files exist in execution folder.",
+      "Running in non-incremental but result files exist in execution folder.",
       " please delete manually or using cleanNonIncremental()"
     )
     stop(errorMessage)
