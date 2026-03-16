@@ -153,6 +153,7 @@ exportAndromedaSubfilesToCsv <- function(
               batchSize = batchSize
             )
           } else{
+            data <- as.data.frame(andromeda[[table]])
             if(!is.null(colnames(data))){
               # convert the column names to snakecase
               colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
@@ -273,6 +274,11 @@ censorResults <- function(
 ){
 
   newData <- data
+
+  # return empty data.frame if it is empty
+  if(nrow(newData) == 0){
+    return(newData)
+  }
 
   if(tableName == 'targetCovariates'){
     # censor minCellCount columns sum_value
