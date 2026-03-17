@@ -102,7 +102,7 @@ cohort_definition_id*10+3,
 row_number,
 subject_id,
 DATEADD(day, -@case_series_before, cohort_start_date),
-DATEADD(day, -1, cohort_start_date),
+DATEADD(day, 0, cohort_start_date),
 'case-series'
 FROM #characterization_cases
 
@@ -113,8 +113,8 @@ SELECT
 cohort_definition_id*10+4,
 row_number,
 subject_id,
-DATEADD(day, 0, cohort_start_date),
-DATEADD(day, -1, outcome_start_date),
+DATEADD(day, 1, cohort_start_date),
+DATEADD(day, 0, outcome_start_date),
 'case-series'
 FROM #characterization_cases
 
@@ -124,7 +124,7 @@ SELECT
 cohort_definition_id*10+5,
 row_number,
 subject_id,
-DATEADD(day, 0, outcome_start_date),
+DATEADD(day, 1, outcome_start_date),
 DATEADD(day, @case_series_after, outcome_end_date),
 'case-series'
 FROM #characterization_cases;
