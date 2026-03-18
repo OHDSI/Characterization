@@ -11,7 +11,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/OHDSI/Characterization/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/OHDSI/Characterization/blob/v3.0.0/DESCRIPTION)
 
 Reps J, Ryan P, Knoll C (2026). *Characterization: Implement Descriptive
 Studies Using the Common Data Model*. R package version 3.0.0,
