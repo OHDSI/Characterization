@@ -189,20 +189,20 @@ runCharacterizationAnalyses(
   characterizationSettings = cSet,
   outputDirectory = file.path(tempdir(),'runChar')
 )
-#> Creating directory /tmp/RtmpdKM5Qo/runChar
-#> Creating directory /tmp/RtmpdKM5Qo/runChar/execution
+#> Creating directory /tmp/RtmpMjtmga/runChar
+#> Creating directory /tmp/RtmpMjtmga/runChar/execution
 #> Connecting using SQLite driver
 #> Extracting cohort jobs
 #> Connecting using SQLite driver
 #> Creating new cluster
 #> Connecting using SQLite driver
 #> Uploading #cohort_settings
-#> Inserting data took 0.00711 secs
+#> Inserting data took 0.00745 secs
 #> Computing time to event results
-#> Executing SQL took 0.0211 secs
-#> Computing time-to-event for 2 T-O pairs took 0.21 secs
+#> Executing SQL took 0.0217 secs
+#> Computing time-to-event for 2 T-O pairs took 0.215 secs
 #> exporting to andromeda
 #> Disconnected Andromeda. This data object can no longer be used
 #> Removing any existing results in outputFolder directory
-#> Loading andromeda result at /tmp/RtmpdKM5Qo/runChar/execution/tte_1
+#> Loading andromeda result at /tmp/RtmpMjtmga/runChar/execution/tte_1
 ```
