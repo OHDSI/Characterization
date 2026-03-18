@@ -7,7 +7,9 @@
 #'
 #' @param timeToEventSettings    A list of timeToEvent settings
 #' @param dechallengeRechallengeSettings A list of dechallengeRechallenge settings
-#' @param aggregateCovariateSettings A list of aggregateCovariate settings
+#' @param targetBaselineSettings A list of targetBaselineSettings settings
+#' @param riskFactorSettings A list of riskFactorSettings settings
+#' @param caseSeriesSettings A list of caseSeriesSettings settings
 #' @family LargeScale
 #'
 #' @return
@@ -29,18 +31,35 @@
 createCharacterizationSettings <- function(
     timeToEventSettings = NULL,
     dechallengeRechallengeSettings = NULL,
-    aggregateCovariateSettings = NULL) {
+    targetBaselineSettings = NULL,
+    riskFactorSettings = NULL,
+    caseSeriesSettings = NULL
+    ) {
+
   errorMessages <- checkmate::makeAssertCollection()
+
   .checkTimeToEventSettingsList(
     settings = timeToEventSettings,
     errorMessages =  errorMessages
   )
-  .checkAggregateCovariateSettingsList(
-    settings = aggregateCovariateSettings,
-    errorMessages = errorMessages
-  )
+
   .checkDechallengeRechallengeSettingsList(
     settings = dechallengeRechallengeSettings,
+    errorMessages = errorMessages
+  )
+
+  .checkTargetBaselineSettingsList(
+    settings = targetBaselineSettings,
+    errorMessages = errorMessages
+  )
+
+  .checkRiskFactorSettingsList(
+    settings = riskFactorSettings,
+    errorMessages = errorMessages
+  )
+
+  .checkCaseSeriesSettingsList(
+    settings = caseSeriesSettings,
     errorMessages = errorMessages
   )
 
@@ -50,8 +69,14 @@ createCharacterizationSettings <- function(
   if (inherits(dechallengeRechallengeSettings, "dechallengeRechallengeSettings")) {
     dechallengeRechallengeSettings <- list(dechallengeRechallengeSettings)
   }
-  if (inherits(aggregateCovariateSettings, "aggregateCovariateSettings")) {
-    aggregateCovariateSettings <- list(aggregateCovariateSettings)
+  if (inherits(targetBaselineSettings, "targetBaselineSettings")) {
+    targetBaselineSettings <- list(targetBaselineSettings)
+  }
+  if (inherits(riskFactorSettings, "riskFactorSettings")) {
+    riskFactorSettings <- list(riskFactorSettings)
+  }
+  if (inherits(caseSeriesSettings, "caseSeriesSettings")) {
+    caseSeriesSettings <- list(caseSeriesSettings)
   }
 
   valid <- checkmate::reportAssertions(errorMessages)
@@ -59,7 +84,9 @@ createCharacterizationSettings <- function(
   settings <- list(
     timeToEventSettings = timeToEventSettings,
     dechallengeRechallengeSettings = dechallengeRechallengeSettings,
-    aggregateCovariateSettings = aggregateCovariateSettings
+    targetBaselineSettings = targetBaselineSettings,
+    riskFactorSettings = riskFactorSettings,
+    caseSeriesSettings = caseSeriesSettings
   )
 
   class(settings) <- "characterizationSettings"
@@ -167,6 +194,8 @@ loadCharacterizationSettings <- function(
 #' @param connectionDetails  The connection details to the database containing the OMOP CDM data
 #' @template TargetOutcomeTables
 #' @template TempEmulationSchema
+#' @param outputDatabaseSchema The schema where the characterization cohort table will be saved into
+#' @param outputTable The table name where the characterization cohort table will be saved into
 #' @param cdmDatabaseSchema The schema with the OMOP CDM data
 #' @param characterizationSettings The study settings created using \code{createCharacterizationSettings}
 #' @param outputDirectory The location to save the final csv files to
@@ -176,8 +205,13 @@ loadCharacterizationSettings <- function(
 #' @param showSubjectId  Whether to include subjectId of failed rechallenge case series or hide
 #' @param minCellCount  The minimum count value that is calculated
 #' @param incremental If TRUE then skip previously executed analyses that completed
-#' @param threads    The number of threads to use when running aggregate covariates
+#' @param threads    The number of threads to use when running analyses jobs in parallel
+#' @param cohortGenerationThreads (optional) The number of threads to use when generating the cohorts in parallel (Note: some database management systems do not allow insert parallelization)
+#' @param nTargetJobs Partition the targets into this number of groups (e.g., if there are 20 targets and njobs is 5 then there will be 4 targets per job and 5 jobs)
 #' @param minCharacterizationMean The minimum mean threshold to extract when running aggregate covariates
+#' @param minCovariateCount The minimum number of patients who must have the covariate when running aggregate covariates
+#' @param mode Select from Efficient (no exclusions to target based on washout)/CohortIncidence (excludes targets with outcome in washout if they have no time at risk)/PatientLevelPrediction (excludes targets with outcome during washout prior to index)
+#' @param minSMD The minimum standardized mean difference for the risk factor analysis
 #' @family LargeScale
 #'
 #' @return
@@ -214,6 +248,8 @@ runCharacterizationAnalyses <- function(
     targetTable,
     outcomeDatabaseSchema,
     outcomeTable,
+    outputDatabaseSchema = targetDatabaseSchema,
+    outputTable = 'characterization_cohort',
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     cdmDatabaseSchema,
     characterizationSettings,
@@ -225,7 +261,13 @@ runCharacterizationAnalyses <- function(
     minCellCount = 0,
     incremental = TRUE,
     threads = 1,
-    minCharacterizationMean = 0.01) {
+    cohortGenerationThreads = NULL,
+    nTargetJobs = 1,
+    minCharacterizationMean = 0.01, # is this global or within cov set?
+    minCovariateCount = 0, # is this global or within cov set?
+    mode = 'CohortIncidence',
+    minSMD = 0
+    ) {
   # inputs checks
   errorMessages <- checkmate::makeAssertCollection()
   .checkCharacterizationSettings(
@@ -236,9 +278,28 @@ runCharacterizationAnalyses <- function(
     tablePrefix = csvFilePrefix,
     errorMessages = errorMessages
   )
+
+  .checkConnectionDetails(
+    connectionDetails = connectionDetails,
+    errorMessages = errorMessages
+  )
+
+  if(is.null(cohortGenerationThreads)){
+    cohortGenerationThreads <- 1
+  } else{
+    .checkCohortGenerationThread(
+      cohortGenerationThreads = cohortGenerationThreads,
+      errorMessages = errorMessages
+    )
+  }
+
   checkmate::reportAssertions(
     errorMessages
   )
+  # check model in c('Efficient', 'CohortIncidence', 'PatientLevelPrediction')
+  if(!mode %in% c('Efficient', 'CohortIncidence', 'PatientLevelPrediction')){
+    stop("Invalid mode.  Please select one of: 'Efficient', 'CohortIncidence', 'PatientLevelPrediction'")
+  }
 
   runDateTime <- Sys.time()
 
@@ -252,9 +313,23 @@ runCharacterizationAnalyses <- function(
   ParallelLogger::registerLogger(logger)
   on.exit(ParallelLogger::unregisterLogger(logger))
 
+  # get execution id
+  settingHash <-  digest::digest(
+    object = as.character(characterizationSettings),
+    algo = "md5",
+    serialize = FALSE
+  )
+  executionId <- settingHash # for now using hash of json settings
+
+  dbHash <-  digest::digest(
+    object = as.character(cdmDatabaseSchema),
+    algo = "md5",
+    serialize = FALSE
+  )
+
   jobs <- createJobs(
     characterizationSettings = characterizationSettings,
-    threads = threads
+    nTargetJobs = nTargetJobs
   )
 
   # save settings
@@ -262,12 +337,14 @@ runCharacterizationAnalyses <- function(
     saveRDS(
       object = list(
         characterizationSettings = characterizationSettings,
-        threads = threads
+        nTargetJobs = nTargetJobs,
+        mode = mode
       ),
       file = file.path(executionPath, "settings.rds")
     )
   }
 
+  # check settings are the same if running icremental
   if (incremental) {
     # check for any issues with current incremental
     oldSettings <- readRDS(
@@ -276,9 +353,13 @@ runCharacterizationAnalyses <- function(
     if (!identical(characterizationSettings, oldSettings$characterizationSettings)) {
       stop("Settings have changed - please turn off incremental")
     }
-    if (!identical(threads, oldSettings$threads)) {
-      stop("Cannot change number of threads in incremental model")
+    if (!identical(nTargetJobs, oldSettings$nTargetJobs)) {
+      stop("Cannot change nTargetJobs in incremental model")
     }
+    if (!identical(mode, oldSettings$mode)) {
+      stop(paste0("Cannot change mode in incremental model, please use ", oldSettings$mode, " mode."))
+    }
+
 
     # create logs if not exists
     createIncrementalLog(
@@ -294,6 +375,9 @@ runCharacterizationAnalyses <- function(
       executionFolder = executionPath
     )
 
+    # get all job paths (needed for export even if no jobs left)
+    jobsExecutionFolder <- jobs$executionFolder
+
     # remove any previously completed jobs
     completedJobIds <- findCompletedJobs(executionFolder = executionPath)
 
@@ -305,6 +389,20 @@ runCharacterizationAnalyses <- function(
 
     if (nrow(jobs) == 0) {
       message("No jobs left")
+
+      exportCompleted <- checkExport(outputDirectory)
+
+      if(!exportCompleted){
+        exportAndromedaSubfilesToCsv(
+          outputFolder = outputDirectory,
+          executionPath = executionPath,
+          csvFilePrefix = csvFilePrefix,
+          minCellCount = minCellCount,
+          batchSize = 100000
+        )
+      } else{
+        message('Export previously completed')
+      }
       return(invisible(TRUE))
     }
   } else {
@@ -315,6 +413,49 @@ runCharacterizationAnalyses <- function(
   }
 
 
+  # FIRST GENERATE ALL THE REQUIRED COHORTS - EXTRACT COHORT JOBS AND GENERATE
+  tableNames <- generateCohorts(
+    characterizationSettings = characterizationSettings,
+    threads = cohortGenerationThreads,
+    nTargetJobs = nTargetJobs,
+    incremental = incremental,
+    executionPath = executionPath,
+
+    connectionDetails = connectionDetails,
+    targetDatabaseSchema = targetDatabaseSchema,
+    targetTable = targetTable,
+    outcomeDatabaseSchema = outcomeDatabaseSchema,
+    outcomeTable = outcomeTable,
+    outputDatabaseSchema = outputDatabaseSchema,
+    outputTable = outputTable,
+    cdmDatabaseSchema = cdmDatabaseSchema,
+    tempEmulationSchema = tempEmulationSchema,
+    mode = mode,
+
+    settingHash = settingHash,
+    dbHash = dbHash
+  )
+
+  # extract attrition, case_settings, target_settings, execution_settings, case_series_settings
+  exportSharedObjects(
+    saveLocation = outputDirectory,
+    executionPath = executionPath,
+    tablePrefix = csvFilePrefix,
+    executionId = settingHash,
+    databaseId = databaseId,
+    characterizationSettings = characterizationSettings,
+    connectionDetails = connectionDetails,
+    tempEmulationSchema = tempEmulationSchema,
+    outputDatabaseSchema = outputDatabaseSchema,
+    attritionTable = tableNames$attritionTable,
+    targetSettingsTable = tableNames$targetSettingsTable,
+    caseSettingsTable = tableNames$caseSettingsTable,
+    dbHash = dbHash,
+    mode = mode,
+    minCharacterizationMean = minCharacterizationMean,
+    minCovariateCount = minCovariateCount,
+    minSMD = minSMD
+  )
 
   # Now loop over the jobs
   inputSettings <- list(
@@ -329,11 +470,23 @@ runCharacterizationAnalyses <- function(
     showSubjectId = showSubjectId,
     minCellCount = minCellCount,
     minCharacterizationMean = minCharacterizationMean,
+    minCovariateCount = minCovariateCount,
     executionPath = executionPath,
-    incremental = incremental
+    incremental = incremental,
+
+    # new inputs
+    characterizationDatabaseSchema = outputDatabaseSchema,
+    characterizationTable = tableNames$characterizationTable,
+    targetSettingsTable = tableNames$targetSettingsTable,
+    caseSettingsTable = tableNames$caseSettingsTable,
+    mode = mode,
+    minSMD = minSMD,
+    executionId = executionId
   )
 
-  # convert jobList to list with extra inputs
+
+
+  # 2) convert jobList to list with extra inputs
   jobList <- lapply(
     X = 1:nrow(jobs),
     FUN = function(ind) {
@@ -357,15 +510,31 @@ runCharacterizationAnalyses <- function(
   ParallelLogger::clusterApply(
     cluster = cluster,
     x = jobList,
-    fun = runCharacterizationsInParallel
+    fun = runCharacterizationsInParallel,
+    progressBar = interactive()
   )
 
+  # check all the jobs ran
+  if(incremental){
+    # confirm all analyses were completed or error so user knows this
+    checkResultFilesIncremental(
+      executionFolder = executionPath
+    )
+  }
+
   # code to export all csvs into one file
-  aggregateCsvsBatch(
-    outputFolder = outputDirectory,
+  exportAndromedaSubfilesToCsv(
     executionPath = executionPath,
-    executionFolders = jobs$executionFolder,
-    csvFilePrefix = csvFilePrefix
+    outputFolder = outputDirectory,
+    csvFilePrefix = csvFilePrefix,
+    batchSize = 100000,
+    minCellCount = minCellCount
+  )
+  exportAttrition(
+    executionPath = executionPath,
+    outputFolder = outputDirectory,
+    csvFilePrefix = csvFilePrefix,
+    minCellCount = minCellCount
   )
 
   invisible(outputDirectory)
@@ -443,19 +612,29 @@ runCharacterizationsInParallel <- function(x) {
 
 createJobs <- function(
     characterizationSettings,
-    threads) {
+    nTargetJobs
+    ) {
   jobDf <- rbind(
+
     getTimeToEventJobs(
       characterizationSettings,
-      threads
+      nTargetJobs
     ),
     getDechallengeRechallengeJobs(
       characterizationSettings,
-      threads
+      nTargetJobs
     ),
-    getAggregateCovariatesJobs(
+    getTargetBaselineJobs(
       characterizationSettings,
-      threads
+      nTargetJobs
+    ),
+    getRiskFactorJobs(
+      characterizationSettings,
+      nTargetJobs
+    ),
+    getCaseSeriesJobs(
+      characterizationSettings,
+      nTargetJobs
     )
   )
 
@@ -464,219 +643,177 @@ createJobs <- function(
 
 
 
-aggregateCsvs <- function(
+
+
+
+exportSharedObjects <- function(
+    saveLocation,
     executionPath,
-    outputFolder,
-    executionFolders, # needed?
-    csvFilePrefix) {
-  tables <- c(
-    "cohort_details.csv", "settings.csv", "covariates.csv",
-    "covariates_continuous.csv", "covariate_ref.csv",
-    "analysis_ref.csv", "cohort_counts.csv",
-    "time_to_event.csv",
-    "rechallenge_fail_case_series.csv", "dechallenge_rechallenge.csv"
-  )
+    tablePrefix = '',
+    executionId,
+    databaseId,
+    characterizationSettings,
+    connectionDetails,
+    outputDatabaseSchema,
+    tempEmulationSchema,
+    attritionTable,
+    targetSettingsTable,
+    caseSettingsTable,
 
-  colTypes <- c(
-    'ciicc','ciiiicciiccc', 'didciiccd',
-    'didddddddddciicc', 'dciicicc',
-    'icciicccc', 'iiciicciicddddd',
-    '????????',
-    '?????????????????', '????????????????????'
-  )
+    dbHash,
+    mode,
+    minCharacterizationMean,
+    minCovariateCount,
+    minSMD
+){
 
-  # this makes sure results are recreated
-  firstTracker <- data.frame(
-    table = tables,
-    first = rep(TRUE, length(tables))
-  )
+  # add code here to save execution_settings,
+  #      attrition, target_settings, case_settings and case_series_settings
 
-  analysisRefTracker <- c()
-  covariateRefTracker <- c()
-  settingsTracker <- c()
+  # connection
+  connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection))
 
-  # create outputFolder
 
-  folderNames <- dir(executionPath)
-
-  # for each folder load covariates, covariates_continuous,
-  # covariate_ref and analysis_ref
-  for (folderName in folderNames) {
-    for (csvType in tables) {
-      loadPath <- file.path(executionPath, folderName, csvType)
-      savePath <- file.path(outputFolder, paste0(csvFilePrefix, csvType))
-      if (file.exists(loadPath)) {
-        # TODO do this in batches
-        data <- readr::read_csv(
-          file = loadPath,
-          show_col_types = FALSE,
-          col_types = colTypes[csvType == tables]
-        )
-
-        if (csvType == "analysis_ref.csv") {
-          data <- data %>%
-            dplyr::mutate(
-              unique_id = paste0(.data$setting_id, "-", .data$analysis_id)
-            ) %>%
-            dplyr::filter( # need to filter analysis_id and setting_id
-              !.data$unique_id %in% analysisRefTracker
-            ) %>%
-            dplyr::select(-"unique_id")
-
-          analysisRefTracker <- unique(c(analysisRefTracker, paste0(data$setting_id, "-", data$analysis_id)))
-        }
-        if (csvType == "covariate_ref.csv") { # this could be problematic as may have differnet covariate_ids
-          data <- data %>%
-            dplyr::mutate(
-              unique_id = paste0(.data$setting_id, "-", .data$covariate_id)
-            ) %>%
-            dplyr::filter( # need to filter covariate_id and setting_id
-              !.data$unique_id %in% covariateRefTracker
-            ) %>%
-            dplyr::select(-"unique_id")
-
-          covariateRefTracker <- unique(c(covariateRefTracker, paste0(data$setting_id, "-", data$covariate_id)))
-        }
-        if (csvType == "settings.csv") {
-          data <- data %>%
-            dplyr::filter(
-              !.data$setting_id %in% settingsTracker
-            )
-          settingsTracker <- c(settingsTracker, unique(data$setting_id))
-        }
-
-        append <- file.exists(savePath)
-        readr::write_csv(
-          x = data,
-          file = savePath, quote = "all",
-          append = append & !firstTracker$first[firstTracker$table == csvType]
-        )
-        firstTracker$first[firstTracker$table == csvType] <- FALSE
-      }
-    }
+  if(!dir.exists(saveLocation)){
+    dir.create(saveLocation, recursive = TRUE)
   }
+
+  # extract case series settings
+ # getting global case series values
+    if(is.null(characterizationSettings$caseSeriesSettings)){
+      casePreTargetDuration = 0
+      casePostOutcomeDuration = 0
+    } else{
+      casePreTargetDuration = max(unlist(lapply(
+        X = characterizationSettings$caseSeriesSettings,
+        FUN = function(x){
+          x$casePreTargetDuration
+        })))
+      casePostOutcomeDuration = max(unlist(lapply(
+        X = characterizationSettings$caseSeriesSettings,
+        FUN = function(x){
+          x$casePostOutcomeDuration
+        })))
+    }
+
+  utils::write.csv(
+    x = data.frame(
+      setting_id = executionId,
+      case_pre_target_duration = casePreTargetDuration,
+      case_post_outcome_duration = casePostOutcomeDuration
+    ),
+    file = file.path(saveLocation, paste0(tablePrefix,'case_series_settings.csv')),
+    row.names = FALSE
+  )
+
+  # extract attrition, target_settings
+  if(!is.null(characterizationSettings$caseSeriesSettings) |
+     !is.null(characterizationSettings$riskFactorSettings) |
+     !is.null(characterizationSettings$targetBaselineSettings)){
+
+    # export attrition table
+    sql <- SqlRender::render(
+      sql = "SELECT cohort_definition_id,	attr_reason, n FROM @attrition_table;",
+      attrition_table = paste0(outputDatabaseSchema, '.' ,attritionTable)
+    )
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = attributes(connection)$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    )
+
+    andromeda <- Andromeda::andromeda()
+
+    DatabaseConnector::querySqlToAndromeda(
+      connection = connection,
+      sql = sql,
+      andromeda = andromeda,
+      andromedaTableName = 'attrition',
+      snakeCaseToCamelCase = TRUE
+    )
+
+    addDbAndSettings(
+      andromeda = andromeda,
+      databaseId = databaseId,
+      settingId = executionId
+    )
+
+    saveCharacterizationAndromeda(
+      andromeda = andromeda,
+      outputFolder = file.path(executionPath, 'attrition')
+    )
+
+    # export target settings table
+    sql <- SqlRender::render(
+      sql = "SELECT target_id,	limit_to_first_in_n_days,	min_prior_observation, characterization_target_id FROM @target_settings_table;",
+      target_settings_table = paste0(outputDatabaseSchema, '.' ,targetSettingsTable)
+    )
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = attributes(connection)$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    )
+    data <- DatabaseConnector::querySql(
+      connection = connection,
+      sql = sql,
+      snakeCaseToCamelCase = FALSE
+    )
+    data$database_id <- databaseId
+    data$setting_id <- executionId
+    utils::write.csv(
+      x = data,
+      file = file.path(saveLocation, paste0(tablePrefix,'target_settings.csv')),
+      row.names = FALSE
+    )
+
+  }
+
+  # extract case_settings
+  if(!is.null(characterizationSettings$caseSeriesSettings) |
+     !is.null(characterizationSettings$riskFactorSettings) ){
+
+    # export target settings table
+    sql <- SqlRender::render(
+      sql = "SELECT characterization_case_id, characterization_target_id, outcome_id,	outcome_washout_days,	risk_window_start,	start_anchor,	risk_window_end,	end_anchor,	runtype	 FROM @case_settings_table;",
+      case_settings_table = paste0(outputDatabaseSchema, '.' ,caseSettingsTable)
+    )
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = attributes(connection)$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    )
+    data <- DatabaseConnector::querySql(
+      connection = connection,
+      sql = sql,
+      snakeCaseToCamelCase = FALSE
+    )
+    data$database_id <- databaseId
+    data$setting_id <- executionId
+    utils::write.csv(
+      x = data,
+      file = file.path(saveLocation, paste0(tablePrefix,'case_settings.csv')),
+      row.names = FALSE
+    )
+
+  }
+
+  # saving execution settings
+  utils::write.csv(
+    x = data.frame(
+      setting_id = executionId,
+      database_id = databaseId,
+      database_hash = dbHash,
+      mode = mode,
+      min_characterization_mean = minCharacterizationMean,
+      min_covariate_count = minCovariateCount,
+      min_smd = minSMD
+    ),
+    file = file.path(saveLocation, paste0(tablePrefix,'execution_settings.csv')),
+    row.names = FALSE
+  )
+
+  return(invisible(TRUE))
 }
 
 
-aggregateCsvsBatch <- function(
-    executionPath,
-    outputFolder,
-    executionFolders, # needed?
-    csvFilePrefix,
-    batchSize = 100000
-    ) {
-  tables <- c(
-    "cohort_details.csv", "settings.csv", "covariates.csv",
-    "covariates_continuous.csv", "covariate_ref.csv",
-    "analysis_ref.csv", "cohort_counts.csv",
-    "time_to_event.csv",
-    "rechallenge_fail_case_series.csv", "dechallenge_rechallenge.csv"
-  )
-
-  colTypes <- c(
-    'ciicc','ciiiicciiccc', 'didciiccd',
-    'didddddddddciicc', 'dciicicc',
-    'icciicccc', 'iiciicciicddddd',
-    '????????',
-    '?????????????????', '????????????????????'
-  )
-
-  # this makes sure results are recreated
-  firstTracker <- data.frame(
-    table = tables,
-    first = rep(TRUE, length(tables))
-  )
-
-  csvTrackerFile <- file.path(outputFolder,'tracker.rds')
-  tracker <- list(
-    analysisRefTracker = c(),
-    covariateRefTracker = c(),
-    settingsTracker = c()
-  )
-  saveRDS(tracker, csvTrackerFile)
-
-  # create outputFolder
-
-  folderNames <- dir(executionPath)
-
-  # for each folder load covariates, covariates_continuous,
-  # covariate_ref and analysis_ref
-  for (folderName in folderNames) {
-    for (csvType in tables) {
-      loadPath <- file.path(executionPath, folderName, csvType)
-      savePath <- file.path(outputFolder, paste0(csvFilePrefix, csvType))
-      if (file.exists(loadPath)) {
-
-        firstTrackerCurrent <- firstTracker$first[firstTracker$table == csvType]
-        append <- file.exists(savePath)
-
-        # code to save results in batches
-        processCsv <- function(x, pos){
-
-          tracker <- readRDS(csvTrackerFile)
-
-          if (csvType == "analysis_ref.csv") {
-            x <- x %>%
-              dplyr::mutate(
-                unique_id = paste0(.data$setting_id, "-", .data$analysis_id)
-              ) %>%
-              dplyr::filter( # need to filter analysis_id and setting_id
-                !.data$unique_id %in% tracker$analysisRefTracker
-              ) %>%
-              dplyr::select(-"unique_id")
-
-            tracker$analysisRefTracker <- unique(c(tracker$analysisRefTracker, paste0(x$setting_id, "-", x$analysis_id)))
-          }
-          if (csvType == "covariate_ref.csv") { # this could be problematic as may have differnet covariate_ids
-            x <- x %>%
-              dplyr::mutate(
-                unique_id = paste0(.data$setting_id, "-", .data$covariate_id)
-              ) %>%
-              dplyr::filter( # need to filter covariate_id and setting_id
-                !.data$unique_id %in% tracker$covariateRefTracker
-              ) %>%
-              dplyr::select(-"unique_id")
-
-            tracker$covariateRefTracker <- unique(c(tracker$covariateRefTracker, paste0(x$setting_id, "-", x$covariate_id)))
-          }
-          if (csvType == "settings.csv") {
-            x <- x %>%
-              dplyr::filter(
-                !.data$setting_id %in% tracker$settingsTracker
-              )
-            tracker$settingsTracker <- c(tracker$settingsTracker, unique(x$setting_id))
-          }
-
-          # this does not work if the csv is empty - only
-          # works if the csv has rows.
-          readr::write_csv(
-            x = x,
-            file = savePath, quote = "all",
-            append = !firstTrackerCurrent | pos != 1
-            #append = append | pos != 1
-          )
-
-          saveRDS(tracker,csvTrackerFile)
-
-        }
-
-        readr::read_csv_chunked(
-          file = loadPath,
-          callback = readr::SideEffectChunkCallback$new(processCsv),
-          chunk_size = batchSize,
-          col_types = colTypes[csvType == tables],
-          show_col_types = FALSE
-        )
-
-        # readr::read_csv_chunked only works if the csv
-        # has 1 row or more.  This code will copy the
-        # csv with no rows to we always get a complete set of csv files
-        if(!file.exists(savePath) & file.exists(loadPath)){
-          file.copy(from = loadPath, to = savePath)
-        }
-
-        firstTracker$first[firstTracker$table == csvType] <- FALSE
-      }
-    }
-  }
-}

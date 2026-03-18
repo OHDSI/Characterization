@@ -166,13 +166,13 @@ for (dbmsPlatform in dbmsPlatforms) {
     } else {
       # create a cohort table
       DatabaseConnector::insertTable(
-        bulkLoad = F,
+        bulkLoad = FALSE,
         connection = con,
         databaseSchema = dbmsDetails$cohortDatabaseSchema,
         tableName = dbmsDetails$cohortTable,
         data = data.frame(
           subject_id = 1:10,
-          cohort_definition_id = sample(4, 10, replace = T),
+          cohort_definition_id = sample(4, 10, replace = TRUE),
           cohort_start_date = rep(as.Date("2010-01-01"), 10),
           cohort_end_date = rep(as.Date("2010-01-01"), 10)
         )
@@ -197,21 +197,21 @@ for (dbmsPlatform in dbmsPlatforms) {
         dechallengeEvaluationWindow = 31
       )
 
-      aggregateCovariateSettings1 <- createAggregateCovariateSettings(
+      targetBaselineSettings1 <- createTargetBaselineSettings(
         targetIds = targetIds,
-        outcomeIds = outcomeIds,
-        riskWindowStart = 1,
-        startAnchor = "cohort start",
-        riskWindowEnd = 365,
-        endAnchor = "cohort start",
         covariateSettings = FeatureExtraction::createCovariateSettings(
-          useDemographicsGender = T,
-          useDemographicsAge = T,
-          useDemographicsRace = T
+          useDemographicsGender = TRUE,
+          useDemographicsAge = TRUE
+        )
+      )
+      targetBaselineSettings2 <- createTargetBaselineSettings(
+        targetIds = targetIds,
+        covariateSettings = FeatureExtraction::createCovariateSettings(
+          useConditionOccurrenceLongTerm = TRUE
         )
       )
 
-      aggregateCovariateSettings2 <- createAggregateCovariateSettings(
+      riskFactorSettings <- createRiskFactorSettings(
         targetIds = targetIds,
         outcomeIds = outcomeIds,
         riskWindowStart = 1,
@@ -219,8 +219,20 @@ for (dbmsPlatform in dbmsPlatforms) {
         riskWindowEnd = 365,
         endAnchor = "cohort start",
         covariateSettings = FeatureExtraction::createCovariateSettings(
-          useConditionOccurrenceLongTerm = T
+          useConditionOccurrenceLongTerm = TRUE
         )
+      )
+
+      caseSeriesSettings <- createCaseSeriesSettings(
+        targetIds = targetIds,
+        outcomeIds = outcomeIds,
+        riskWindowStart = 1,
+        startAnchor = "cohort start",
+        riskWindowEnd = 365,
+        endAnchor = "cohort start",
+        caseCovariateSettings = Characterization::createDuringCovariateSettings(
+          useDrugEraDuring = TRUE
+          )
       )
 
       characterizationSettings <- createCharacterizationSettings(
@@ -231,10 +243,12 @@ for (dbmsPlatform in dbmsPlatforms) {
         dechallengeRechallengeSettings = list(
           dechallengeRechallengeSettings
         ),
-        aggregateCovariateSettings = list(
-          aggregateCovariateSettings1,
-          aggregateCovariateSettings2
-        )
+        targetBaselineSettings = list(
+          targetBaselineSettings1,
+          targetBaselineSettings2
+        ),
+        riskFactorSettings = riskFactorSettings,
+        caseSeriesSettings = caseSeriesSettings
       )
 
       runCharacterizationAnalyses(
@@ -246,28 +260,42 @@ for (dbmsPlatform in dbmsPlatforms) {
         outcomeTable = dbmsDetails$cohortTable,
         characterizationSettings = characterizationSettings,
         outputDirectory = file.path(tempFolder, "csv"),
+        outputDatabaseSchema = dbmsDetails$cohortDatabaseSchema,
+        outputTable = 'made_up_table',
         executionPath = file.path(tempFolder, "execution"),
         csvFilePrefix = "c_",
         threads = 1,
-        databaseId = dbmsDetails$connectionDetails$dbms
+        nTargetJobs = 1,
+        incremental = FALSE,
+        databaseId = dbmsDetails$connectionDetails$dbms,
+        minSMD = 0.1,
+        mode = 'CohortIncidence',
+        minCharacterizationMean = 0.01,
+        minCovariateCount = 2
       )
 
       testthat::expect_true(
         length(dir(file.path(tempFolder, "csv"))) > 0
       )
 
-      # check cohort details is saved
+      # check all settings are saved
       testthat::expect_true(
-        file.exists(file.path(tempFolder, "csv", "c_cohort_details.csv"))
+        file.exists(file.path(tempFolder, "csv", "c_case_settings.csv"))
       )
       testthat::expect_true(
-        file.exists(file.path(tempFolder, "csv", "c_settings.csv"))
+        file.exists(file.path(tempFolder, "csv", "c_target_settings.csv"))
       )
       testthat::expect_true(
         file.exists(file.path(tempFolder, "csv", "c_analysis_ref.csv"))
       )
       testthat::expect_true(
         file.exists(file.path(tempFolder, "csv", "c_covariate_ref.csv"))
+      )
+      testthat::expect_true(
+        file.exists(file.path(tempFolder, "csv", "c_execution_settings.csv"))
+      )
+      testthat::expect_true(
+        file.exists(file.path(tempFolder, "csv", "c_case_series_settings.csv"))
       )
     }
   })

@@ -50,7 +50,7 @@ targetIds <- c(1,2,4)
     dechallengeEvaluationWindow = 31
   )
 
-  aggregateCovariateSettings1 <- createAggregateCovariateSettings(
+  riskFactorSettings1 <- createRiskFactorSettings(
     targetIds = targetIds,
     outcomeIds = outcomeIds,
     riskWindowStart = 1,
@@ -64,7 +64,7 @@ targetIds <- c(1,2,4)
     )
   )
 
-  aggregateCovariateSettings2 <- createAggregateCovariateSettings(
+  riskFactorSettings2 <- createRiskFactorSettings(
     targetIds = targetIds,
     outcomeIds = outcomeIds,
     riskWindowStart = 1,
@@ -83,10 +83,10 @@ targetIds <- c(1,2,4)
       ),
     dechallengeRechallengeSettings = list(
       dechallengeRechallengeSettings
-    ),
-    aggregateCovariateSettings = list(
-      aggregateCovariateSettings1,
-      aggregateCovariateSettings2
+    ),  
+    riskFactorSettings =  list(
+      riskFactorSettings1,
+      riskFactorSettings2
       )
   )
   
@@ -97,11 +97,14 @@ runCharacterizationAnalyses(
   targetTable = 'cohort',
   outcomeDatabaseSchema = 'main',
   outcomeTable = 'cohort',
+  outputDatabaseSchema = 'main',
+  outputTable = 'char_cohort',
   characterizationSettings = characterizationSettings,   
   outputDirectory = file.path(tempdir(), 'example', 'results'),
   executionPath = file.path(tempdir(), 'example', 'execution'),
   csvFilePrefix = 'c_',
-  databaseId = 'Eunomia'
+  databaseId = 'Eunomia',
+  minSMD = 0.1
 )
 ```
 

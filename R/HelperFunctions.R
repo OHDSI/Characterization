@@ -15,6 +15,11 @@
 # limitations under the License.
 
 
+createExecutionIds <- function(size) {
+  executionIds <- gsub(" ", "", gsub("[[:punct:]]", "", paste(Sys.time(), sample(1000000, size), sep = "")))
+  return(executionIds)
+}
+
 #' create a connection detail for an example GI Bleed dataset from Eunomia
 #'
 #' @description
@@ -140,31 +145,62 @@ exampleOmopConnectionDetails <- function(exdir = tempdir()) {
   })
 }
 
-.checkAggregateCovariateSettings <- function(
-    settings,
-    errorMessages) {
-  checkmate::assertClass(
-    x = settings,
-    classes = "aggregateCovariateSettings",
-    add = errorMessages
-  )
-}
 
-.checkAggregateCovariateSettingsList <- function(
+.checkTargetBaselineSettingsList <- function(
     settings,
     errorMessages) {
   if (is.null(settings)) {
     return()
   }
 
-  if (inherits(settings, "aggregateCovariateSettings")) {
+  if (inherits(settings, "targetBaselineSettings")) {
     settings <- list(settings)
   }
 
   lapply(settings, function(x) {
     checkmate::assertClass(
       x = x,
-      classes = "aggregateCovariateSettings",
+      classes = "targetBaselineSettings",
+      add = errorMessages
+    )
+  })
+}
+
+.checkRiskFactorSettingsList <- function(
+    settings,
+    errorMessages) {
+  if (is.null(settings)) {
+    return()
+  }
+
+  if (inherits(settings, "riskFactorSettings")) {
+    settings <- list(settings)
+  }
+
+  lapply(settings, function(x) {
+    checkmate::assertClass(
+      x = x,
+      classes = "riskFactorSettings",
+      add = errorMessages
+    )
+  })
+}
+
+.checkCaseSeriesSettingsList <- function(
+    settings,
+    errorMessages) {
+  if (is.null(settings)) {
+    return()
+  }
+
+  if (inherits(settings, "caseSeriesSettings")) {
+    settings <- list(settings)
+  }
+
+  lapply(settings, function(x) {
+    checkmate::assertClass(
+      x = x,
+      classes = "caseSeriesSettings",
       add = errorMessages
     )
   })
@@ -279,23 +315,14 @@ exampleOmopConnectionDetails <- function(exdir = tempdir()) {
 }
 
 
-
-checkNoCsv <- function(
-    csvFiles,
-    errorMessage) {
-  csvExists <- sapply(csvFiles, function(x) {
-    file.exists(x)
-  })
-
-  if (sum(csvExists) > 0) {
-    stop(errorMessage)
-  }
-
-  return(invisible(TRUE))
+.checkCohortGenerationThread <- function(
+    cohortGenerationThreads,
+    errorMessages) {
+  checkmate::assertCount(
+    x = cohortGenerationThreads,
+    null.ok = FALSE,
+    .var.name = "cohortGenerationThreads",
+    add = errorMessages
+  )
 }
 
-cleanCsv <- function(
-    resultFolder,
-    fileName = "time_to_event.csv") {
-  file.remove(file.path(resultFolder, fileName))
-}

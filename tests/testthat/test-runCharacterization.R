@@ -23,21 +23,22 @@ test_that("runCharacterizationAnalyses", {
     dechallengeEvaluationWindow = 31
   )
 
-  aggregateCovariateSettings1 <- createAggregateCovariateSettings(
+  targetBaselineSettings1 <- createTargetBaselineSettings(
     targetIds = targetIds,
-    outcomeIds = outcomeIds,
-    riskWindowStart = 1,
-    startAnchor = "cohort start",
-    riskWindowEnd = 365,
-    endAnchor = "cohort start",
     covariateSettings = FeatureExtraction::createCovariateSettings(
-      useDemographicsGender = T,
-      useDemographicsAge = T,
-      useDemographicsRace = T
+      useDemographicsGender = TRUE
     )
   )
 
-  aggregateCovariateSettings2 <- createAggregateCovariateSettings(
+  targetBaselineSettings2 <- createTargetBaselineSettings(
+    targetIds = targetIds,
+    covariateSettings = FeatureExtraction::createCovariateSettings(
+      useDemographicsAge = TRUE,
+      useDemographicsRace = TRUE
+    )
+  )
+
+  riskFactorSettings <- createRiskFactorSettings(
     targetIds = targetIds,
     outcomeIds = outcomeIds,
     riskWindowStart = 1,
@@ -45,10 +46,23 @@ test_that("runCharacterizationAnalyses", {
     riskWindowEnd = 365,
     endAnchor = "cohort start",
     covariateSettings = FeatureExtraction::createCovariateSettings(
-      useDemographicsGender = T,
-      useDemographicsAge = T,
-      useDemographicsRace = T
+      useDemographicsGender = TRUE,
+      useDemographicsAge = TRUE,
+      useDemographicsRace = TRUE
     )
+  )
+
+  caseSeriesSettings <- createCaseSeriesSettings(
+    targetIds = targetIds,
+    outcomeIds = outcomeIds,
+    riskWindowStart = 1,
+    startAnchor = "cohort start",
+    riskWindowEnd = 365,
+    endAnchor = "cohort start",
+    caseCovariateSettings = Characterization::createDuringCovariateSettings(
+      useVisitCountDuring = TRUE,
+      useConditionOccurrenceDuring = TRUE
+      )
   )
 
   characterizationSettings <- createCharacterizationSettings(
@@ -59,10 +73,12 @@ test_that("runCharacterizationAnalyses", {
     dechallengeRechallengeSettings = list(
       dechallengeRechallengeSettings
     ),
-    aggregateCovariateSettings = list(
-      aggregateCovariateSettings1,
-      aggregateCovariateSettings2
-    )
+    targetBaselineSettings = list(
+      targetBaselineSettings1,
+      targetBaselineSettings2
+    ),
+    riskFactorSettings = list(riskFactorSettings),
+    caseSeriesSettings = list(caseSeriesSettings)
   )
 
   testthat::expect_true(
@@ -76,7 +92,13 @@ test_that("runCharacterizationAnalyses", {
     length(characterizationSettings$dechallengeRechallengeSettings) == 1
   )
   testthat::expect_true(
-    length(characterizationSettings$aggregateCovariateSettings) == 2
+    length(characterizationSettings$targetBaselineSettings) == 2
+  )
+  testthat::expect_true(
+    length(characterizationSettings$riskFactorSettings) == 1
+  )
+  testthat::expect_true(
+    length(characterizationSettings$caseSeriesSettings) == 1
   )
 
   tempFile <- tempfile(fileext = ".json")
@@ -111,6 +133,7 @@ test_that("runCharacterizationAnalyses", {
   tempFolder <- tempfile("Characterization")
   on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
 
+
   runCharacterizationAnalyses(
     connectionDetails = connectionDetails,
     cdmDatabaseSchema = "main",
@@ -119,13 +142,21 @@ test_that("runCharacterizationAnalyses", {
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     characterizationSettings = characterizationSettings,
+
+    outputDatabaseSchema = 'main',
+    outputTable = 'char_test_cohort',
+    tempEmulationSchema = 'main',
     outputDirectory = file.path(tempFolder, "result"),
     executionPath = file.path(tempFolder, "execution"),
     csvFilePrefix = "c_",
     databaseId = "1",
-    incremental = T,
+    incremental = TRUE,
+    minCovariateCount = 2,
+    minSMD = 0,
     minCharacterizationMean = 0.01,
-    threads = 1
+    threads = 1,
+    nTargetJobs = 1,
+    mode = 'Efficient'
   )
 
   testthat::expect_true(
@@ -139,10 +170,10 @@ test_that("runCharacterizationAnalyses", {
 
   # check cohort details is saved
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_cohort_details.csv"))
+    file.exists(file.path(tempFolder, "result", "c_case_settings.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_settings.csv"))
+    file.exists(file.path(tempFolder, "result", "c_target_settings.csv"))
   )
   testthat::expect_true(
     file.exists(file.path(tempFolder, "result", "c_analysis_ref.csv"))
@@ -151,10 +182,16 @@ test_that("runCharacterizationAnalyses", {
     file.exists(file.path(tempFolder, "result", "c_covariate_ref.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_covariates.csv"))
+    file.exists(file.path(tempFolder, "result", "c_target_covariates.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_covariates_continuous.csv"))
+    file.exists(file.path(tempFolder, "result", "c_risk_factor_covariates.csv"))
+  )
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "result", "c_case_series_covariates.csv"))
+  )
+  testthat::expect_true(
+    file.exists(file.path(tempFolder, "result", "c_target_covariates_continuous.csv"))
   )
 
   testthat::expect_true(
@@ -333,20 +370,14 @@ test_that("min cell count works", {
       targetIds = 1,
       outcomeIds = 2
     ),
-    aggregateCovariateSettings = Characterization::createAggregateCovariateSettings(
+    targetBaselineSettings = Characterization::createTargetBaselineSettings(
       targetIds = 1,
-      outcomeIds = 2,
       minPriorObservation = 365,
-      outcomeWashoutDays = 30,
-      riskWindowStart = 1,
-      riskWindowEnd = 90,
       covariateSettings = FeatureExtraction::createCovariateSettings(
-        useDemographicsAge = T,
-        useDemographicsGender = T,
-        useConditionEraAnyTimePrior = T
-      ),
-      caseCovariateSettings = Characterization::createDuringCovariateSettings(useConditionEraDuring = T),
-      casePreTargetDuration = 365 * 5
+        useDemographicsAge = TRUE,
+        useDemographicsGender = TRUE,
+        useConditionEraAnyTimePrior = TRUE
+      )
     )
   )
 
@@ -360,11 +391,18 @@ test_that("min cell count works", {
     characterizationSettings = characterizationSettings,
     outputDirectory = file.path(tempFolder, "result_mincell"),
     executionPath = file.path(tempFolder, "execution_mincell"),
+    outputDatabaseSchema = 'main',
+    outputTable = 'char_test_cohort2',
+    tempEmulationSchema = 'main',
     csvFilePrefix = "c_",
     databaseId = "1",
-    incremental = F,
-    minCharacterizationMean = 0.001,
+    incremental = TRUE,
+    minCovariateCount = 2,
+    minSMD = 0.1,
+    minCharacterizationMean = 0.01,
     threads = 1,
+    nTargetJobs = 1,
+    mode = 'Efficient',
     minCellCount = 1000000
   )
 
@@ -398,26 +436,19 @@ test_that("min cell count works", {
   testthat::expect_true(sum(is.na(res$pct_rechallenge_success)) == length(res$pct_rechallenge_success))
   testthat::expect_true(sum(is.na(res$pct_rechallenge_fail)) == length(res$pct_rechallenge_fail))
 
+  # add mincellcount filter for attrition
 
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result_mincell", "c_cohort_counts.csv"))
+    file.exists(file.path(tempFolder, "result_mincell", "c_target_covariates.csv"))
   )
-  res <- readr::read_csv(file.path(tempFolder, "result_mincell", "c_cohort_counts.csv"))
-  testthat::expect_true(sum(res$row_count == -1000000) == length(res$row_count))
-  testthat::expect_true(sum(res$person_count == -1000000) == length(res$person_count))
-
-
-  testthat::expect_true(
-    file.exists(file.path(tempFolder, "result_mincell", "c_covariates.csv"))
-  )
-  res <- readr::read_csv(file.path(tempFolder, "result_mincell", "c_covariates.csv"))
+  res <- readr::read_csv(file.path(tempFolder, "result_mincell", "c_target_covariates.csv"))
   testthat::expect_true(sum(res$sum_value == -1000000) == length(res$sum_value))
   testthat::expect_true(sum(is.na(res$average_value)) == length(res$average_value))
 
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result_mincell", "c_covariates_continuous.csv"))
+    file.exists(file.path(tempFolder, "result_mincell", "c_target_covariates_continuous.csv"))
   )
-  res <- readr::read_csv(file.path(tempFolder, "result_mincell", "c_covariates_continuous.csv"))
+  res <- readr::read_csv(file.path(tempFolder, "result_mincell", "c_target_covariates_continuous.csv"))
   testthat::expect_true(sum(res$count_value == -1000000) == length(res$count_value))
   testthat::expect_true(sum(is.na(res$average_value)) == length(res$average_value))
   testthat::expect_true(sum(is.na(res$p_10_value)) == length(res$p_10_value))
@@ -426,81 +457,7 @@ test_that("min cell count works", {
   testthat::expect_true(sum(is.na(res$p_75_value)) == length(res$p_75_value))
   testthat::expect_true(sum(is.na(res$min_value)) == length(res$min_value))
   testthat::expect_true(sum(is.na(res$max_value)) == length(res$max_value))
-})
 
-
-
-test_that("checking the batch csv aggregation", {
-
-  tempFolder <- tempfile("Characterization")
-  on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
-
-  executionPath <- testthat::test_path("testdata", "execution")
-
-  if(!dir.exists(file.path(tempFolder,'aggCvs'))){
-    dir.create(file.path(tempFolder,'aggCvs'), recursive = T)
-  }
-  if(!dir.exists(file.path(tempFolder,'aggCvs2'))){
-    dir.create(file.path(tempFolder,'aggCvs2'), recursive = T)
-  }
-  if(!dir.exists(file.path(tempFolder,'aggCvs3'))){
-    dir.create(file.path(tempFolder,'aggCvs3'), recursive = T)
-  }
-
-# checking the batch csv aggregation
-Characterization:::aggregateCsvs(
-  executionPath = executionPath,
-  outputFolder = file.path(tempFolder,'aggCvs'),
-  csvFilePrefix = ''
-)
-
-Characterization:::aggregateCsvsBatch(
-  executionPath = executionPath,
-  outputFolder = file.path(tempFolder,'aggCvs2'),
-  csvFilePrefix = ''
-)
-
-Characterization:::aggregateCsvsBatch(
-  executionPath = executionPath,
-  outputFolder = file.path(tempFolder,'aggCvs3'),
-  csvFilePrefix = '',
-  batchSize = 1
-)
-
-#check files are the same using default batch
-files <- dir(file.path(tempFolder,'aggCvs'), pattern = 'csv')
-for(i in 1:length(files)){
-  d1 <- readr::read_csv(file.path(tempFolder,'aggCvs', files[i]),
-                        show_col_types = F)
-  d2 <- readr::read_csv(file.path(tempFolder,'aggCvs2', files[i]),
-                        show_col_types = F)
-  testthat::expect_true(all.equal(d1,d2))
-}
-
-# when batchsize is 1
-files <- dir(file.path(tempFolder,'aggCvs'), pattern = 'csv')
-for(i in 1:length(files)){
-  d1 <- readr::read_csv(file.path(tempFolder,'aggCvs', files[i]),
-                        show_col_types = F)
-  d2 <- readr::read_csv(file.path(tempFolder,'aggCvs3', files[i]),
-                        show_col_types = F)
-  testthat::expect_true(all.equal(d1,d2))
-}
-
-# make sure it still works if re-executed (no left over files)
-Characterization:::aggregateCsvsBatch(
-  executionPath = executionPath,
-  outputFolder = file.path(tempFolder,'aggCvs3'),
-  csvFilePrefix = '',
-  batchSize = 1
-)
-files <- dir(file.path(tempFolder,'aggCvs'), pattern = 'csv')
-for(i in 1:length(files)){
-  d1 <- readr::read_csv(file.path(tempFolder,'aggCvs', files[i]),
-                        show_col_types = F)
-  d2 <- readr::read_csv(file.path(tempFolder,'aggCvs3', files[i]),
-                        show_col_types = F)
-  testthat::expect_true(all.equal(d1,d2))
-}
+  # TODO add checks for RF and CS results
 
 })

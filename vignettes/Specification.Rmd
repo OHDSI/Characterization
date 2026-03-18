@@ -332,19 +332,19 @@ knitr::kable(
 
 **Note:** The way an outcome and exposure phenotype are designed can make it impossible or unlikely to see a dechallenge fail. For example, if an outcome is designed with a 365 day washout window, then it means there cannot be another outcome occurring within 365 days of another outcome. As a dechallange failure is the outcome occurring within dechallenge evaluation window days after the exposure ends (and the exposure must end within stop interval days of the outcome to be a dechallenge), then using the defaults for these values means a dechallenge failure requires an outcome to be possible within 60 days of the dechallenge outcome, which is impossible with a 365 washout window.
 
-# Aggregate Covariates
+# Target Baseline Covariates
 
 ## Inputs
 
-A vector of targetIds plus the minimum prior observation required for the target cohorts and specifying which features to extract (covariateSettings).
+A vector of targetIds plus the minimum prior observation required for the target cohorts and minimum time before target exposures and specifying which features to extract (covariateSettings).
 
 ## Outputs
 
-For each target cohort restricted to only the patients with minimum prior observation at index and first occurrence the mean value for each feature of interest is extracted into a data.frame.
+For each target cohort restricted to only the patients with minimum prior observation at index and first occurrence in the specified number of days the mean value for each feature of interest is extracted into a data.frame.
 
 ## Worked Example
 
-The aggregate covariates calculates the mean value of a feature within a cohort of patients. In this analysis we restrict to first occurrence in the cohort with a minimum prior observation in days specified by the user (default 365 days). This restriction is implemented as otherwise a patient could contribute multiple times to the mean value and this makes interpretation difficult.
+The target baseline covariates calculates the mean value of a feature within a cohort of patients. In this analysis we restrict to first occurrence in the cohort with a minimum prior observation in days specified by the user (default 365 days). This restriction is implemented as otherwise a patient could contribute multiple times to the mean value and this makes interpretation difficult.
 
 ### Example Inputs
 
@@ -352,11 +352,20 @@ Here we consider the inputs are:
 
 ```{r}
 minPriorObservation <- 365
+limitToFirstInNDays <- 99999 # all time prior
 covariateSettings <- FeatureExtraction::createCovariateSettings(
   useDemographicsAge = T, 
   useDemographicsGender = T,
   useConditionOccurrenceAnyTimePrior = T, includedCovariateConceptIds = c(201820)
   )
+
+targetSettings <- Characterization::createTargetBaselineSettings(
+  targetIds = c(1,2), 
+  limitToFirstInNDays = limitToFirstInNDays, 
+  minPriorObservation = minPriorObservation, 
+  covariateSettings = covariateSettings
+    )
+
 ```
 
 ### Example Data
@@ -405,12 +414,12 @@ meanData <- data.frame(
 
 knitr::kable(
   x = meanData, 
-  caption = 'Example aggregate features for two example cohorts.'
+  caption = 'Example target baseline features for two example cohorts.'
     )
 
 ```
 
-The database and cohort comparison implements the aggregate covariate analysis for all target and outcome ids fed into characterization across all OMOP CDM databases available and then lets users compare the mean values of the features between databases for the same cohort or across different cohorts within the same database. The standardized mean different is calculated between two cohorts when possible, this is calculated per feature as: abs(mean value in cohort 1 - mean value in cohort 2)/((standard deviation of values in cohort 1 squared plus standard deviation of values in cohort 2 squared)/2).
+This analysis lets users compare the mean values of the features between databases for the same cohort or across different cohorts within the same database. The standardized mean different is calculated between two cohorts when possible, this is calculated per feature as: abs(mean value in cohort 1 - mean value in cohort 2)/((standard deviation of values in cohort 1 squared plus standard deviation of values in cohort 2 squared)/2).
 
 # Risk Factor Analysis
 
@@ -431,6 +440,7 @@ Lets consider an example with a time-at-risk of target cohort start + 1 to targe
 ```{r}
 targetId <- 1
 outcomeId <- 2
+limitToFirstInNDays <- 99999 # first ever
 minPriorObservation <- 365
 outcomeWashoutDays <- 365
 riskWindowStart <- 1
@@ -442,6 +452,20 @@ covariateSettings <- FeatureExtraction::createCovariateSettings(
   useDemographicsGender = T,
   useConditionOccurrenceAnyTimePrior = T, includedCovariateConceptIds = c(201820)
   )
+
+rfSettings <- Characterization::createRiskFactorSettings(
+  targetIds = targetId, 
+  outcomeIds = outcomeId, 
+  limitToFirstInNDays = limitToFirstInNDays, 
+  minPriorObservation = minPriorObservation, 
+  outcomeWashoutDays = outcomeWashoutDays, 
+  riskWindowStart = riskWindowStart, 
+  startAnchor = startAnchor, 
+  riskWindowEnd = riskWindowEnd, 
+  endAnchor = endAnchor, 
+  covariateSettings = covariateSettings
+  )
+
 ```
 
 ### Example Data
@@ -620,6 +644,7 @@ Here we consider the inputs are:
 ```{r}
 targetId <- 1
 outcomeId <- 2
+limitToFirstInNDays <- 99999 # first ever
 minPriorObservation <- 365
 outcomeWashoutDays <- 365
 preTargetIndexDays <- 365
@@ -628,9 +653,26 @@ riskWindowStart <- 1
 startAnchor <- 'cohort start'
 riskWindowEnd <- 180
 endAnchor <- 'cohort start'
-covariateSettings <- FeatureExtraction::createCovariateSettings(
-  useConditionOccurrenceAnyTimePrior = T, includedCovariateConceptIds = c(201820)
+caseCovariateSettings <- Characterization::createDuringCovariateSettings(
+  useConditionOccurrenceDuring =  TRUE,
+  includedCovariateConceptIds = c(201820)
   )
+
+caseSeriesSettings <- Characterization::createCaseSeriesSettings(
+  targetIds = targetId, 
+  outcomeIds = outcomeId, 
+  limitToFirstInNDays = limitToFirstInNDays, 
+  minPriorObservation = minPriorObservation, 
+  outcomeWashoutDays = outcomeWashoutDays, 
+  riskWindowStart = riskWindowStart, 
+  startAnchor = startAnchor, 
+  riskWindowEnd = riskWindowEnd, 
+  endAnchor = endAnchor, 
+  caseCovariateSettings = caseCovariateSettings, 
+  casePreTargetDuration = 365, 
+  casePostOutcomeDuration = 365
+  )
+
 ```
 
 ### Example Data

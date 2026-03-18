@@ -3,12 +3,12 @@ context("ViewShiny")
 # create a folder with results for the shiny app
 resultLocation <- file.path(tempdir(), paste0("d_", paste0(sample(100, 3), collapse = "_"), sep = ""), "shinyResults")
 if (!dir.exists(resultLocation)) {
-  dir.create(resultLocation, recursive = T)
+  dir.create(resultLocation, recursive = TRUE)
 }
 
 test_that("is_installed", {
-  testthat::expect_equal(is_installed("FeatureExtraction"), T)
-  testthat::expect_equal(is_installed("MadeUp4u834t3f"), F)
+  testthat::expect_equal(is_installed("FeatureExtraction"), TRUE)
+  testthat::expect_equal(is_installed("MadeUp4u834t3f"), FALSE)
 })
 
 test_that("ensure_installed", {
@@ -35,31 +35,18 @@ test_that("prepareCharacterizationShiny works", {
     dechallengeEvaluationWindow = 31
   )
 
-  aggregateCovariateSettings1 <- createAggregateCovariateSettings(
+  targetSettings1 <- createTargetBaselineSettings(
     targetIds = targetIds,
-    outcomeIds = outcomeIds,
-    riskWindowStart = 1,
-    startAnchor = "cohort start",
-    riskWindowEnd = 365,
-    endAnchor = "cohort start",
     covariateSettings = FeatureExtraction::createCovariateSettings(
-      useDemographicsGender = T,
-      useDemographicsAge = T,
-      useDemographicsRace = T
+      useDemographicsGender = TRUE
     )
   )
 
-  aggregateCovariateSettings2 <- createAggregateCovariateSettings(
+  targetSettings2 <- createTargetBaselineSettings(
     targetIds = targetIds,
-    outcomeIds = outcomeIds,
-    riskWindowStart = 1,
-    startAnchor = "cohort start",
-    riskWindowEnd = 365,
-    endAnchor = "cohort start",
     covariateSettings = FeatureExtraction::createCovariateSettings(
-      useDemographicsGender = T,
-      useDemographicsAge = T,
-      useDemographicsRace = T
+      useDemographicsAge = TRUE,
+      useDemographicsRace = TRUE
     )
   )
 
@@ -71,9 +58,9 @@ test_that("prepareCharacterizationShiny works", {
     dechallengeRechallengeSettings = list(
       dechallengeRechallengeSettings
     ),
-    aggregateCovariateSettings = list(
-      aggregateCovariateSettings1,
-      aggregateCovariateSettings2
+    targetBaselineSettings = list(
+      targetSettings1,
+      targetSettings2
     )
   )
 
@@ -84,15 +71,24 @@ test_that("prepareCharacterizationShiny works", {
     targetTable = "cohort",
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
+
+    outputDatabaseSchema = 'main',
+    outputTable = 'char_cohort',
+    tempEmulationSchema = 'main',
+
     characterizationSettings = characterizationSettings,
     outputDirectory = file.path(resultLocation, "result"),
     executionPath = file.path(resultLocation, "execution"),
     csvFilePrefix = "c_",
     databaseId = "1",
+    nTargetJobs = 1,
     threads = 1,
-    incremental = T,
+    incremental = TRUE,
     minCellCount = 0,
-    minCharacterizationMean = 0.01
+    minCharacterizationMean = 0.01,
+    minSMD = 0,
+    minCovariateCount = 0,
+    mode = 'Efficient'
   )
 
   settings <- prepareCharacterizationShiny(

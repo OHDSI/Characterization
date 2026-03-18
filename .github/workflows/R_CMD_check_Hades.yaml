@@ -26,6 +26,7 @@ jobs:
 
     env:
       GITHUB_PAT: ${{ secrets.GH_TOKEN }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       RSPM: ${{ matrix.config.rspm }}
       CDM5_ORACLE_CDM_SCHEMA: ${{ secrets.CDM5_ORACLE_CDM_SCHEMA }}
@@ -64,7 +65,21 @@ jobs:
       CDM_BIG_QUERY_OHDSI_SCHEMA: ${{ secrets.CDM_BIG_QUERY_OHDSI_SCHEMA }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Setup Java non Linux
+        if: runner.os != 'Linux'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '8'
+
+      - name: Setup Java Linux
+        if: runner.os == 'Linux'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
       - uses: r-lib/actions/setup-r@v2
         with:
@@ -77,15 +92,14 @@ jobs:
       - name: Install system requirements
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get install -y make
-          sudo apt-get install -y libcurl4-openssl-dev
           sudo apt-get install -y libssh-dev
-          sudo apt-get install -y libssl-dev
+          sudo R CMD javareconf
           Rscript -e 'install.packages("remotes")'
           while read -r cmd
           do
             eval sudo $cmd
           done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "22.04"))')
+
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

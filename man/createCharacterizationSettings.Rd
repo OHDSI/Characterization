@@ -7,7 +7,9 @@
 createCharacterizationSettings(
   timeToEventSettings = NULL,
   dechallengeRechallengeSettings = NULL,
-  aggregateCovariateSettings = NULL
+  targetBaselineSettings = NULL,
+  riskFactorSettings = NULL,
+  caseSeriesSettings = NULL
 )
 }
 \arguments{
@@ -15,7 +17,11 @@ createCharacterizationSettings(
 
 \item{dechallengeRechallengeSettings}{A list of dechallengeRechallenge settings}
 
-\item{aggregateCovariateSettings}{A list of aggregateCovariate settings}
+\item{targetBaselineSettings}{A list of targetBaselineSettings settings}
+
+\item{riskFactorSettings}{A list of riskFactorSettings settings}
+
+\item{caseSeriesSettings}{A list of caseSeriesSettings settings}
 }
 \value{
 Returns the connection to the sqlite database

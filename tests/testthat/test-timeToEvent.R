@@ -42,65 +42,43 @@ test_that("computeTimeToEventSettings", {
     databaseId = "tte_test"
   )
 
-  testthat::expect_true(file.exists(file.path(tteFolder, "time_to_event.csv")))
+  testthat::expect_true(file.exists(file.path(tteFolder, "result")))
 
-  tte <- readr::read_csv(
-    file = file.path(tteFolder, "time_to_event.csv"),
-    show_col_types = F
-  )
+  res <- Andromeda::loadAndromeda(file.path(tteFolder, "result"))
+  tte <- as.data.frame(res$timeToEvent)
 
   testthat::expect_true(nrow(tte) == 102)
-  testthat::expect_true("database_id" %in% colnames(tte))
-  testthat::expect_true(tte$database_id[1] == "tte_test")
+  testthat::expect_true("databaseId" %in% colnames(tte))
+  testthat::expect_true(tte$databaseId[1] == "tte_test")
 
   testthat::expect_true(
     length(
       unique(
-        tte$target_cohort_definition_id
+        tte$targetCohortDefinition_id
       )
     ) <= length(targetIds)
   )
   testthat::expect_true(
     sum(unique(
-      tte$target_cohort_definition_id
+      tte$targetCohortDefinitionId
     ) %in% targetIds) ==
-      length(unique(tte$target_cohort_definition_id))
+      length(unique(tte$targetCohortDefinitionId))
   )
 
 
   testthat::expect_true(
     length(
       unique(
-        tte$outcome_cohort_definition_id
+        tte$outcomeCohortDefinitionId
       )
     ) <= length(outcomeIds)
   )
   testthat::expect_true(
     sum(
-      unique(tte$outcome_cohort_definition_id)
+      unique(tte$outcomeCohortDefinitionId)
       %in% outcomeIds
     ) ==
-      length(unique(tte$outcome_cohort_definition_id))
+      length(unique(tte$outcomeCohortDefinitionId))
   )
 
-
-  # test minCellCount
-  tteFolder <- tempfile("tte2")
-  computeTimeToEventAnalyses(
-    connectionDetails = connectionDetails,
-    cdmDatabaseSchema = "main",
-    targetDatabaseSchema = "main",
-    targetTable = "cohort",
-    settings = res,
-    outputFolder = tteFolder,
-    databaseId = "tte_test",
-    minCellCount = 9999
-  )
-
-  tte <- readr::read_csv(
-    file = file.path(tteFolder, "time_to_event.csv"),
-    show_col_types = F
-  )
-
-  testthat::expect_true(max(tte$num_events) == -9999)
 })
