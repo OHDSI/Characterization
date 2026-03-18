@@ -1,66 +1,83 @@
--- all targets
-drop table if exists #targets_all;
-select * into #targets_all
-from @target_database_schema.@target_table
-where cohort_definition_id in
-(@target_ids);
+-- first entry in washout days and min prior obs
 
--- first T with > minPrioObs
-drop table if exists #targets_inclusions;
-select * into #targets_inclusions
-from
-(select *,
-  row_number() over(partition by subject_id, cohort_definition_id order by cohort_start_date asc) as rn
-  from @target_database_schema.@target_table
-  where cohort_definition_id in
-  (@target_ids)
-) temp_t
-inner join @cdm_database_schema.observation_period op
-on op.person_id = temp_t.subject_id
-and temp_t.cohort_start_date >= op.observation_period_start_date
-and temp_t.cohort_start_date <= op.observation_period_end_date
-where temp_t.rn = 1
-and datediff(day, op.observation_period_start_date, temp_t.cohort_start_date) >= @min_prior_observation;
+IF OBJECT_ID('tempdb..#temp_target', 'U') IS NOT NULL DROP TABLE #temp_target;
+
+SELECT
+CAST(target_settings.characterization_target_id AS BIGINT) AS cohort_definition_id,
+row_number() over(PARTITION BY CAST(target_settings.characterization_target_id AS BIGINT) ORDER BY temp_cohort.subject_id, temp_cohort.cohort_start_date ASC) AS row_number,
+temp_cohort.subject_id,
+temp_cohort.cohort_start_date,
+temp_cohort.cohort_end_date,
+op.observation_period_start_date,
+op.observation_period_end_date,
+'target' as char_type
+
+INTO #temp_target
+
+FROM (SELECT
+      cohort_definition_id,
+      @limit_to_first_in_n_days AS limit_to_first_in_n_days,
+      @min_prior_observation AS min_prior_observation,
+      subject_id,
+      cohort_start_date,
+      cohort_end_date,
+      ISNULL(datediff(day, LAG(cohort_end_date) OVER(partition BY subject_id, cohort_definition_id ORDER BY cohort_start_date ASC), cohort_start_date ), -1) AS time_between
+      FROM @cohort_schema.@cohort_table WHERE cohort_definition_id IN (@cohort_ids)
+) temp_cohort
+
+INNER JOIN @cdm_database_schema.observation_period op
+ON op.person_id = temp_cohort.subject_id
+AND temp_cohort.cohort_start_date >= op.observation_period_start_date
+AND temp_cohort.cohort_start_date <= op.observation_period_end_date
+
+INNER JOIN
+(SELECT * FROM @target_settings_schema.@target_settings_table
+ WHERE limit_to_first_in_n_days = @limit_to_first_in_n_days
+ AND min_prior_observation = @min_prior_observation
+) target_settings
+ON temp_cohort.cohort_definition_id = target_settings.target_id
+
+WHERE (temp_cohort.time_between >= @limit_to_first_in_n_days OR temp_cohort.time_between = -1)
+AND datediff(day, op.observation_period_start_date, temp_cohort.cohort_start_date) >= @min_prior_observation;
+
+-- remove existing rows with cohort ids
+DELETE FROM @characterization_schema.@characterization_table
+WHERE char_type = 'target'
+AND cohort_definition_id in (SELECT DISTINCT cohort_definition_id FROM #temp_target)
+;
+
+-- insert the new rows
+-- now determine the non-cases
+  INSERT INTO @characterization_schema.@characterization_table(
+    cohort_definition_id, row_number, subject_id, cohort_start_date, cohort_end_date,
+    observation_period_start_date, observation_period_end_date, char_type
+  )
+
+  SELECT
+  temp.cohort_definition_id,
+  temp.row_number,
+  temp.subject_id,
+  temp.cohort_start_date,
+  temp.cohort_end_date,
+  temp.observation_period_start_date,
+  temp.observation_period_end_date,
+  'target' as char_type
+
+  FROM #temp_target temp;
 
 
----- Create TAR agnostic cohorts
-drop table if exists #agg_cohorts_before;
-select * into #agg_cohorts_before
+INSERT INTO @characterization_schema.@attrition_table
 
-from
-(
+SELECT
+cohort_definition_id,
+'Target first in @limit_to_first_in_n_days - @min_prior_observation prior obs' as attr_reason,
+count(*) as n
 
-select distinct
-t.subject_id,
-t.cohort_start_date,
-t.cohort_end_date,
-cd.cohort_definition_id
-from #targets_inclusions as t
-INNER JOIN #cohort_details cd
-on cd.target_cohort_id = t.cohort_definition_id
-and cd.cohort_type = 'Target'
+FROM #temp_target
 
+GROUP BY
+cohort_definition_id
+;
 
-) temp_ts2;
-
-
-
--- add extra cohorts
-drop table if exists #agg_cohorts_extras;
-select * into #agg_cohorts_extras
-
-from
-(
-
-select distinct
-t.subject_id,
-t.cohort_start_date,
-t.cohort_end_date,
-cd.cohort_definition_id
-from #targets_all as t
-INNER JOIN #cohort_details cd
-on cd.target_cohort_id = t.cohort_definition_id
-and cd.cohort_type = 'Tall'
-
-
-) temp_ts2;
+-- clean up
+IF OBJECT_ID('tempdb..#temp_target', 'U') IS NOT NULL DROP TABLE #temp_target;

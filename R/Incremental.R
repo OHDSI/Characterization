@@ -113,7 +113,8 @@ cleanIncremental <- function(
     fixedExecution <- executionFile[!executionFile$job_id %in% issues, ]
     utils::write.csv(
       x = fixedExecution,
-      file = file.path(executionFolder, "execution.csv")
+      file = file.path(executionFolder, "execution.csv"),
+      row.names = FALSE
     )
   }
 
@@ -189,7 +190,7 @@ cleanNonIncremental <- function(
     path = executionFolder,
     recursive = TRUE,
     full.names = TRUE,
-    pattern = ".csv"
+    pattern = "result"
   )
   if (length(files) > 0) {
     for (file in files) {
@@ -205,11 +206,11 @@ checkResultFilesNonIncremental <- function(
     path = executionFolder,
     recursive = TRUE,
     full.names = TRUE,
-    pattern = ".csv"
+    pattern = "result"
   )
   if (length(files) > 0) {
     errorMessage <- paste0(
-      "Running in non-incremental but csv files exist in execution folder.",
+      "Running in non-incremental but result files exist in execution folder.",
       " please delete manually or using cleanNonIncremental()"
     )
     stop(errorMessage)

@@ -245,11 +245,10 @@ computeDechallengeRechallengeAnalyses <- function(
     )
 
     # export results to csv
-    message("exporting to csv file")
-    exportDechallengeRechallengeToCsv(
-      result = result,
-      saveDirectory = outputFolder,
-      minCellCount = minCellCount
+    message("exporting to andomeda")
+    saveCharacterizationAndromeda(
+      andromeda = result,
+      outputFolder = outputFolder
     )
 
     return(invisible(TRUE))
@@ -268,6 +267,7 @@ computeDechallengeRechallengeAnalyses <- function(
 #' @param outputFolder A directory to save the results as csv files
 #' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
 #' @param progressBar Whether to display a progress bar while the analysis is running
+#' @param executionId a unique id for the run
 #' @param ... extra inputs
 #' @family DechallengeRechallenge
 #'
@@ -305,6 +305,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     outputFolder,
     minCellCount = 0,
     progressBar = interactive(),
+    executionId,
     ...) {
 
   if(missing(outputFolder)){
@@ -413,10 +414,10 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     )
 
     # add the csv export here
-    message("exporting to csv file")
-    exportRechallengeFailCaseSeriesToCsv(
-      result = result,
-      saveDirectory = outputFolder
+    message("exporting to andromeda")
+    saveCharacterizationAndromeda(
+      andromeda = result,
+      outputFolder = outputFolder
     )
 
     return(invisible(TRUE))
@@ -425,7 +426,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
 
 getDechallengeRechallengeJobs <- function(
     characterizationSettings,
-    threads) {
+    nTargetJobs) {
   characterizationSettings <- characterizationSettings$dechallengeRechallengeSettings
   if (length(characterizationSettings) == 0) {
     return(NULL)
@@ -481,9 +482,9 @@ getDechallengeRechallengeJobs <- function(
       )
   )
 
-  if (threads > max(tcount, ocount)) {
-    message("Tnput parameter threads greater than number of targets and outcomes")
-    message(paste0("Only using ", max(tcount, ocount), " threads for TimeToEvent"))
+  if (nTargetJobs > max(tcount, ocount)) {
+    message("Input parameter nTargetJobs greater than number of targets and outcomes")
+    message(paste0("Only using ", max(tcount, ocount), " nTargetJobs for DechallengeRechallenge"))
   }
 
   if (tcount >= ocount) {
@@ -493,7 +494,7 @@ getDechallengeRechallengeJobs <- function(
         .data$dechallengeStopInterval,
         .data$dechallengeEvaluationWindow
       )
-    threadDf$thread <- rep(1:threads, ceiling(tcount / threads))[1:tcount]
+    threadDf$nTargetJobs <- rep(1:nTargetJobs, ceiling(tcount / nTargetJobs))[1:tcount]
     mergeColumn <- c("targetId", "dechallengeStopInterval", "dechallengeEvaluationWindow")
   } else {
     threadDf <- combinations %>%
@@ -502,19 +503,19 @@ getDechallengeRechallengeJobs <- function(
         .data$dechallengeStopInterval,
         .data$dechallengeEvaluationWindow
       )
-    threadDf$thread <- rep(1:threads, ceiling(ocount / threads))[1:ocount]
+    threadDf$nTargetJobs <- rep(1:nTargetJobs, ceiling(ocount / nTargetJobs))[1:ocount]
     mergeColumn <- c("outcomeId", "dechallengeStopInterval", "dechallengeEvaluationWindow")
   }
 
   combinations <- merge(combinations, threadDf, by = mergeColumn)
   sets <- lapply(
-    X = 1:max(threadDf$thread),
+    X = 1:max(threadDf$nTargetJobs),
     FUN = function(i) {
       createDechallengeRechallengeSettings(
-        targetIds = unique(combinations$targetId[combinations$thread == i]),
-        outcomeIds = unique(combinations$outcomeId[combinations$thread == i]),
-        dechallengeStopInterval = unique(combinations$dechallengeStopInterval[combinations$thread == i]),
-        dechallengeEvaluationWindow = unique(combinations$dechallengeEvaluationWindow[combinations$thread == i])
+        targetIds = unique(combinations$targetId[combinations$nTargetJobs == i]),
+        outcomeIds = unique(combinations$outcomeId[combinations$nTargetJobs == i]),
+        dechallengeStopInterval = unique(combinations$dechallengeStopInterval[combinations$nTargetJobs == i]),
+        dechallengeEvaluationWindow = unique(combinations$dechallengeEvaluationWindow[combinations$nTargetJobs == i])
       )
     }
   )

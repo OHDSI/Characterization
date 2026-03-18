@@ -64,8 +64,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
     targetTable = "cohort",
     settings = res,
     databaseId = "testing",
-    outputFolder = dcLoc,
-    minCellCount = 0
+    outputFolder = dcLoc
   )
   testthat::expect_true(dc)
 
@@ -118,9 +117,9 @@ test_that("computeDechallengeRechallengeAnalyses", {
     connection = con,
     databaseSchema = "main",
     tableName = "cohort_dechal",
-    createTable = T,
-    dropTableIfExists = T,
-    camelCaseToSnakeCase = F
+    createTable = TRUE,
+    dropTableIfExists = TRUE,
+    camelCaseToSnakeCase = FALSE
   )
 
   DatabaseConnector::disconnect(con)
@@ -139,14 +138,19 @@ test_that("computeDechallengeRechallengeAnalyses", {
     targetTable = "cohort_dechal",
     settings = res,
     databaseId = "testing",
-    outputFolder = dcLoc,
-    minCellCount = 0
+    outputFolder = dcLoc
   )
-  dc <- readr::read_csv(file.path(dcLoc, "dechallenge_rechallenge.csv"), show_col_types = F)
+
+  res <- Andromeda::loadAndromeda(file.path(dcLoc, "result"))
+
+  dc <- as.data.frame(res$dechallengeRechallenge)
   # one T and 2 Os, so should have 2 rows
   testthat::expect_true(nrow(dc) == 1)
-  testthat::expect_true(dc$num_persons_exposed == 4)
-  testthat::expect_true(dc$num_exposure_eras == 10)
+  testthat::expect_true(dc$numPersonsExposed == 4)
+  testthat::expect_true(dc$numExposureEras == 10)
+
+  # clean up
+  file.remove(file.path(dcLoc,"result"))
 })
 
 test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
@@ -204,7 +208,7 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
   )
   DatabaseConnector::disconnect(con)
 
-  res <- createDechallengeRechallengeSettings(
+  set <- createDechallengeRechallengeSettings(
     targetIds = 1,
     outcomeIds = 2,
     dechallengeStopInterval = 30,
@@ -216,67 +220,44 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
     connectionDetails = connectionDetailsReal,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
-    settings = res,
+    settings = set,
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     databaseId = "testing",
-    outputFolder = dcLoc,
-    minCellCount = 0
+    outputFolder = dcLoc
   )
 
+  res <- Andromeda::loadAndromeda(file.path(dcLoc, "result"))
+
   # person 2 should be in results
-  dc <- readr::read_csv(file.path(dcLoc, "rechallenge_fail_case_series.csv"), show_col_types = F)
+  dc <- as.data.frame(res$rechallengeFailCaseSeries)
   testthat::expect_equal(nrow(dc), 1)
 
-  testthat::expect_true(is.na(dc$subject_id))
+  testthat::expect_true(is.na(dc$subjectId))
 
   dcLoc <- tempfile("runADechal3")
   dc <- computeRechallengeFailCaseSeriesAnalyses(
     connectionDetails = connectionDetailsReal,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
-    settings = res,
+    settings = set,
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     databaseId = "testing",
-    showSubjectId = T,
-    outputFolder = dcLoc,
-    minCellCount = 0
+    showSubjectId = TRUE,
+    outputFolder = dcLoc
   )
 
   # person 2 should be in results
-  dc <- readr::read_csv(file.path(dcLoc, "rechallenge_fail_case_series.csv"), show_col_types = F)
+  res <- Andromeda::loadAndromeda(file.path(dcLoc, "result"))
+  dc <- as.data.frame(res$rechallengeFailCaseSeries)
+
   testthat::expect_equal(nrow(dc), 1)
-  testthat::expect_equal(dc$subject_id, 2)
+  testthat::expect_equal(dc$subjectId, 2)
 
+  # clean up
+  file.remove(file.path(dcLoc, "result"))
 
-  # check minCellCount
-  dcLoc <- tempfile("runADechal4")
-  dr <- computeDechallengeRechallengeAnalyses(
-    connectionDetails = connectionDetailsReal,
-    targetDatabaseSchema = "main",
-    targetTable = "cohort",
-    settings = res,
-    outcomeDatabaseSchema = "main",
-    outcomeTable = "cohort",
-    databaseId = "testing",
-    outputFolder = dcLoc,
-    minCellCount = 9999
-  )
-
-  # checking minCellCount
-  # person 2 should be in results but all min cell count
-  # values should be censored
-  dr <- readr::read_csv(file.path(dcLoc, "dechallenge_rechallenge.csv"), show_col_types = F)
-  testthat::expect_true(nrow(dr) > 0)
-  testthat::expect_equal(max(dr$num_persons_exposed), -9999)
-  testthat::expect_equal(max(dr$num_cases), -9999)
-  testthat::expect_equal(max(dr$dechallenge_attempt), -9999)
-  testthat::expect_equal(max(dr$dechallenge_fail), -9999)
-  testthat::expect_equal(max(dr$dechallenge_success), -9999)
-  testthat::expect_equal(max(dr$rechallenge_attempt), -9999)
-  testthat::expect_equal(max(dr$rechallenge_fail), -9999)
-  testthat::expect_equal(max(dr$rechallenge_success), -9999)
 })
 
 
@@ -291,11 +272,11 @@ test_that("computeDechallengeRechallengeAnalyses", {
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 30
   )
-  jobs <- Characterization:::getDechallengeRechallengeJobs(
+  jobs <- getDechallengeRechallengeJobs(
     characterizationSettings = createCharacterizationSettings(
       dechallengeRechallengeSettings = res
     ),
-    threads = 1
+    nTargetJobs = 1
   )
 
   # as 1 thread should be 2 rows for two analyses
@@ -323,11 +304,11 @@ test_that("computeDechallengeRechallengeAnalyses", {
 
 
   # checking more threads 3
-  jobs <- Characterization:::getDechallengeRechallengeJobs(
+  jobs <- getDechallengeRechallengeJobs(
     characterizationSettings = createCharacterizationSettings(
       dechallengeRechallengeSettings = res
     ),
-    threads = 3
+    nTargetJobs = 3
   )
 
   # as 3 thread should be 2*3 rows for two analyses
@@ -356,11 +337,11 @@ test_that("computeDechallengeRechallengeAnalyses", {
 
 
   # checking more threads than needed 20
-  jobs <- Characterization:::getDechallengeRechallengeJobs(
+  jobs <- getDechallengeRechallengeJobs(
     characterizationSettings = createCharacterizationSettings(
       dechallengeRechallengeSettings = res
     ),
-    threads = 20
+    nTargetJobs = 20
   )
 
   # as 3 thread should be 2*5 rows for two analyses

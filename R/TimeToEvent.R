@@ -74,6 +74,7 @@ createTimeToEventSettings <- function(
 #' @param outputFolder A directory to save the results as csv files
 #' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
 #' @param progressBar Whether to display a progress bar while the analysis is running
+#' @param executionId a unique id for the run
 #' @param ... extra inputs
 #' @family TimeToEvent
 #'
@@ -115,6 +116,7 @@ computeTimeToEventAnalyses <- function(
     outputFolder,
     minCellCount = 0,
     progressBar = interactive(),
+    executionId,
     ...) {
 
   if(missing(outputFolder)){
@@ -239,11 +241,11 @@ computeTimeToEventAnalyses <- function(
     )
 
     # add the csv export here
-    message("exporting to csv file")
-    exportTimeToEventToCsv(
-      result = result,
-      saveDirectory = outputFolder,
-      minCellCount = minCellCount
+    message("exporting to andromeda")
+    # export to andromeda
+    saveCharacterizationAndromeda(
+      andromeda = result,
+      outputFolder = outputFolder
     )
 
     return(invisible(TRUE))
@@ -255,7 +257,7 @@ computeTimeToEventAnalyses <- function(
 # based on the number of threads
 getTimeToEventJobs <- function(
     characterizationSettings,
-    threads) {
+    nTargetJobs) {
   characterizationSettings <- characterizationSettings$timeToEventSettings
   if (length(characterizationSettings) == 0) {
     return(NULL)
@@ -287,32 +289,32 @@ getTimeToEventJobs <- function(
   tcount <- length(unique(tnos$targetId))
   ocount <- length(unique(tnos$outcomeId))
 
-  if (threads > max(tcount, ocount)) {
-    message("Tnput parameter threads greater than number of targets and outcomes")
-    message(paste0("Only using ", max(tcount, ocount), " threads for TimeToEvent"))
+  if (nTargetJobs > max(tcount, ocount)) {
+    message("Input parameter nTargetJobs greater than number of targets and outcomes")
+    message(paste0("Only using ", max(tcount, ocount), " nTargetJobs for TimeToEvent"))
   }
 
   if (tcount >= ocount) {
     threadDf <- data.frame(
       targetId = unique(tnos$targetId),
-      thread = rep(1:threads, ceiling(tcount / threads))[1:tcount]
+      nTargetJobs = rep(1:nTargetJobs, ceiling(tcount / nTargetJobs))[1:tcount]
     )
     mergeColumn <- "targetId"
   } else {
     threadDf <- data.frame(
       outcomeId = unique(tnos$outcomeId),
-      thread = rep(1:threads, ceiling(ocount / threads))[1:ocount]
+      nTargetJobs = rep(1:nTargetJobs, ceiling(ocount / nTargetJobs))[1:ocount]
     )
     mergeColumn <- "outcomeId"
   }
 
   tnos <- merge(tnos, threadDf, by = mergeColumn)
   sets <- lapply(
-    X = 1:max(threadDf$thread),
+    X = 1:max(threadDf$nTargetJobs),
     FUN = function(i) {
       createTimeToEventSettings(
-        targetIds = unique(tnos$targetId[tnos$thread == i]),
-        outcomeIds = unique(tnos$outcomeId[tnos$thread == i])
+        targetIds = unique(tnos$targetId[tnos$nTargetJobs == i]),
+        outcomeIds = unique(tnos$outcomeId[tnos$nTargetJobs == i])
       )
     }
   )

@@ -16,6 +16,12 @@ getDbDuringCovariateData(
   covariateSettings,
   minCharacterizationMean = 0,
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
+  targetDatabaseSchema = NULL,
+  targetCovariateTable = NULL,
+  targetCovariateContinuousTable = NULL,
+  targetCovariateRefTable = NULL,
+  targetAnalysisRefTable = NULL,
+  targetTimeRefTable = NULL,
   ...
 )
 }
@@ -38,11 +44,32 @@ getDbDuringCovariateData(
 
 \item{covariateSettings}{settings for the covariate cohorts and time periods}
 
-\item{minCharacterizationMean}{the minimum value for a covariate to be extracted}
+\item{minCharacterizationMean}{The minimum mean value for binary characterization output. Values below this will be cut off from output. This
+will help reduce the file size of the characterization output, but will remove information
+on covariates that have very low values. The default is 0.}
 
 \item{tempEmulationSchema}{Some database platforms like Oracle and Impala do not truly support temp tables.
 To emulate temp tables, provide a schema with write privileges where temp tables
 can be created}
+
+\item{targetDatabaseSchema}{(Optional) The schema to save the tables targetCovariateTable/targetCovariateContinuousTable/targetCovariateRefTable/targetCovariateRefTable/targetAnalysisRefTable
+when they are not temp tables and the output is being exported to database tables.}
+
+\item{targetCovariateTable}{(Optional) The name of the table where the resulting binary covariates will
+be stored. If not provided, results will be fetched to R. The table can be
+a permanent table in the \code{targetDatabaseSchema} or a temp table. If
+it is a temp table, do not specify \code{targetDatabaseSchema}.}
+
+\item{targetCovariateContinuousTable}{(Optional) The name of the table where the resulting continuous covariates will
+be stored. If not provided, results will be fetched to R. The table can be
+a permanent table in the \code{targetDatabaseSchema} or a temp table. If
+it is a temp table, do not specify \code{targetDatabaseSchema}.}
+
+\item{targetCovariateRefTable}{(Optional) The name of the table where the covariate reference will be stored.}
+
+\item{targetAnalysisRefTable}{(Optional) The name of the table where the analysis reference will be stored.}
+
+\item{targetTimeRefTable}{(Optional) The name of the table for the time reference}
 
 \item{...}{additional arguments from FeatureExtraction}
 }
