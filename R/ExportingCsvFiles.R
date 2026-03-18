@@ -54,7 +54,7 @@ checkExport <- function(outputDirectory){
 }
 
 confirmExport <- function(outputDirectory){
-  write.table(x = '', file = file.path(outputDirectory,'export-complete.txt'))
+  utils::write.table(x = '', file = file.path(outputDirectory,'export-complete.txt'))
 }
 
 # this function exports Andromeda tables to csv results
