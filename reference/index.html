@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Characterization</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">3.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,25 +41,37 @@
 
       <div class="section-desc"><p>This analysis calculates the aggregate characteristics for a Target cohort (T), an Outcome cohort (O) and combiations of T with O during time at risk and T without O during time at risk.</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
 
       <dl><dt>
 
-          <code><a href="createAggregateCovariateSettings.html">createAggregateCovariateSettings()</a></code>
+          <code><a href="createCaseSeriesSettings.html">createCaseSeriesSettings()</a></code>
 
         </dt>
         <dd>Create aggregate covariate study settings</dd>
+
+        <dt>
+
+          <code><a href="createRiskFactorSettings.html">createRiskFactorSettings()</a></code>
+
+        </dt>
+        <dd>Create risk factor study settings</dd>
+
+        <dt>
+
+          <code><a href="createTargetBaselineSettings.html">createTargetBaselineSettings()</a></code>
+
+        </dt>
+        <dd>Create target baseline aggregate covariate study settings</dd>
       </dl></div><div class="section level2">
       <h2 id="dechallenge-rechallenge-analysis">Dechallenge Rechallenge Analysis<a class="anchor" aria-label="anchor" href="#dechallenge-rechallenge-analysis"></a></h2>
 
       <div class="section-desc"><p>For a given Target cohort (T) and Outcome cohort (O) find any occurrances of a dechallenge (when the T cohort stops close to when O started) and a rechallenge (when T restarts and O starts again) This is useful for investigating causality between drugs and events.</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -70,13 +82,15 @@
 
         </dt>
         <dd>Compute dechallenge rechallenge study</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="computeRechallengeFailCaseSeriesAnalyses.html">computeRechallengeFailCaseSeriesAnalyses()</a></code>
 
         </dt>
         <dd>Compute fine the subjects that fail the dechallenge rechallenge study</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="createDechallengeRechallengeSettings.html">createDechallengeRechallengeSettings()</a></code>
 
@@ -87,8 +101,7 @@
 
       <div class="section-desc"><p>This analysis calculates the timing between the Target cohort (T) and an Outcome cohort (O).</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -99,7 +112,8 @@
 
         </dt>
         <dd>Compute time to event study</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="createTimeToEventSettings.html">createTimeToEventSettings()</a></code>
 
@@ -110,8 +124,7 @@
 
       <div class="section-desc"><p>Run multipe aggregate covariate analysis, time to event and dechallenge/rechallenge studies.</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -122,19 +135,22 @@
 
         </dt>
         <dd>Create the settings for a large scale characterization study</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="loadCharacterizationSettings.html">loadCharacterizationSettings()</a></code>
 
         </dt>
         <dd>Load the characterization settings previously saved as a json file</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="runCharacterizationAnalyses.html">runCharacterizationAnalyses()</a></code>
 
         </dt>
         <dd>execute a large-scale characterization study</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="saveCharacterizationSettings.html">saveCharacterizationSettings()</a></code>
 
@@ -145,20 +161,17 @@
 
       <div class="section-desc"><p>Functions to save the analysis settings and the results (as sqlite or csv files).</p></div>
 
-
-    </div><div class="section level2">
-
+      <dl></dl></div><div class="section level2">
 
 
 
 
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
       <h2 id="insert-into-database">Insert into Database<a class="anchor" aria-label="anchor" href="#insert-into-database"></a></h2>
 
       <div class="section-desc"><p>Functions to insert the results into a database.</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -169,13 +182,15 @@
 
         </dt>
         <dd>Create the results tables to store characterization results into a database</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="createSqliteDatabase.html">createSqliteDatabase()</a></code>
 
         </dt>
         <dd>Create an sqlite database connection</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="insertResultsToDatabase.html">insertResultsToDatabase()</a></code>
 
@@ -186,8 +201,7 @@
 
       <div class="section-desc"><p>Functions to interactively exlore the results from runCharacterizationAnalyses().</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -203,8 +217,7 @@
 
       <div class="section-desc"><p>Code to create covariates during cohort start and end</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -215,7 +228,8 @@
 
         </dt>
         <dd>Create during covariate settings</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="getDbDuringCovariateData.html">getDbDuringCovariateData()</a></code>
 
@@ -226,8 +240,7 @@
 
       <div class="section-desc"><p>Code to run incremetal model</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -238,7 +251,8 @@
 
         </dt>
         <dd>Removes csv files from folders that have not been marked as completed and removes the record of the execution file</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="cleanNonIncremental.html">cleanNonIncremental()</a></code>
 
@@ -249,8 +263,7 @@
 
       <div class="section-desc"><p>Helper functions such as example data for users</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -271,7 +284,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

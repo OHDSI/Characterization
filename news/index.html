@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Characterization</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">3.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,11 +34,26 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/OHDSI/Characterization/blob/v2.2.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/OHDSI/Characterization/blob/develop/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="2.2.0" id="characterization-220">Characterization 2.2.0<a class="anchor" aria-label="anchor" href="#characterization-220"></a></h2>
+<h2 class="pkg-version" data-toc-text="3.0.0" id="characterization-300">Characterization 3.0.0<a class="anchor" aria-label="anchor" href="#characterization-300"></a></h2>
+<ul><li>Splitting the aggregateCovariates into: riskFactor, targetBaseline and caseSeries to make the inputs clearer.</li>
+<li>Adding a new function for cohort generation for the riskFactor, targetBaseline and caseSeries settings to ensure cohort generation is efficient and remove redundancies.</li>
+<li>Updating the results tables for the partitioning of aggregateCovariates into riskFactor, targetBaseline and caseSeries</li>
+<li>riskFactor analysis now has three modes: efficient (target without case vs case), CohortIncidence (target without case who have some TAR vs case) and PatientLevelPrediction (target without case and without people with outcome during washout period before TAR vs case).</li>
+<li>riskFactor analysis calculates SMD during execution and min SMD values can be specified to reduce result size.<br></li>
+<li>User can specify the number of target jobs (how many groups of targetIds to partition the jobs into) and the number of threads (how many threads to run the jobs in parallel).</li>
+<li>Intermediate results are stored as Andromeda files rather than csv files</li>
+<li>minCellCount censoring is done when exporting the intermediate results so it can be changed after execution without rerunning whole analysis.</li>
+<li>When running in incremental model results are checked to ensure all jobs executed successful before exporting to csv otherwise an error is returned to show some jobs were incomplete.</li>
+<li>riskFactor and caseSeries use the new FeatureExtarction option of exporting the features into a database table rather than downloading this enables additional processing to be done efficiently in SQL instead of R.</li>
+<li>The cohorts used by riskFactor, targetBaseline and caseSeries are saved into a user specified database and table</li>
+<li>The attritions for riskFactor, targetBaseline and caseSeries cohort creation are saved to enable users to see where patients were removed.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.2.0" id="characterization-220">Characterization 2.2.0<a class="anchor" aria-label="anchor" href="#characterization-220"></a></h2><p class="text-muted">CRAN release: 2025-09-10</p>
 <ul><li>fixed csv spec: made mean_exposure_time a float and specified that min_characterization_mean in covariate table must be non-null and is in the pk.</li>
 <li>changed Line 284 in AggregateCovariates.R to cast exposure_time summary values to bigint due to integer overflow in some dbms.</li>
 <li>added dummy sql code to prevent warnings about missing variables</li>
@@ -143,7 +158,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
