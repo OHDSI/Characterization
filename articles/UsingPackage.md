@@ -519,7 +519,7 @@ runCharacterizationAnalyses(
   executionPath = file.path(tempdir(), "example", "execution"),
   csvFilePrefix = "c_",
   databaseId = "1",
-  incremental = F,
+  incremental = FALSE,
   minCharacterizationMean = 0.01,
   minCellCount = 5
 )

@@ -58,9 +58,9 @@ targetIds <- c(1,2,4)
     riskWindowEnd = 365,
     endAnchor = 'cohort start',
     covariateSettings = FeatureExtraction::createCovariateSettings(
-      useDemographicsGender = T,
-      useDemographicsAge = T,
-      useDemographicsRace = T
+      useDemographicsGender = TRUE,
+      useDemographicsAge = TRUE,
+      useDemographicsRace = TRUE
     )
   )
 
@@ -72,7 +72,7 @@ targetIds <- c(1,2,4)
     riskWindowEnd = 365,
     endAnchor = 'cohort start',
     covariateSettings = FeatureExtraction::createCovariateSettings(
-      useConditionOccurrenceLongTerm = T
+      useConditionOccurrenceLongTerm = TRUE
     )
   )
 

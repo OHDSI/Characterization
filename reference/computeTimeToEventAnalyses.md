@@ -124,8 +124,8 @@ result <- computeTimeToEventAnalyses(
 #> Uploading #cohort_settings
 #> Inserting data took 0.0124 secs
 #> Computing time to event results
-#> Executing SQL took 0.022 secs
-#> Computing time-to-event for 2 T-O pairs took 0.273 secs
+#> Executing SQL took 0.0314 secs
+#> Computing time-to-event for 2 T-O pairs took 0.302 secs
 #> exporting to andromeda
 #> Disconnected Andromeda. This data object can no longer be used
 
