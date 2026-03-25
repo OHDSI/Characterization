@@ -202,9 +202,9 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
     connection = con,
     databaseSchema = "main",
     tableName = "cohort",
-    createTable = T,
-    dropTableIfExists = T,
-    camelCaseToSnakeCase = F
+    createTable = TRUE,
+    dropTableIfExists = TRUE,
+    camelCaseToSnakeCase = FALSE
   )
   DatabaseConnector::disconnect(con)
 
