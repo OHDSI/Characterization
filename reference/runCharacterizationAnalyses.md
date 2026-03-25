@@ -189,8 +189,8 @@ runCharacterizationAnalyses(
   characterizationSettings = cSet,
   outputDirectory = file.path(tempdir(),'runChar')
 )
-#> Creating directory /tmp/RtmpoyGKqv/runChar
-#> Creating directory /tmp/RtmpoyGKqv/runChar/execution
+#> Creating directory /tmp/RtmpZK6JT8/runChar
+#> Creating directory /tmp/RtmpZK6JT8/runChar/execution
 #> Currently in a tryCatch or withCallingHandlers block, so unable to add global calling handlers. ParallelLogger will not capture R messages, errors, and warnings, only explicit calls to ParallelLogger. (This message will not be shown again this R session)
 #> Connecting using SQLite driver
 #> Extracting cohort jobs
@@ -198,12 +198,12 @@ runCharacterizationAnalyses(
 #> Creating new cluster
 #> Connecting using SQLite driver
 #> Uploading #cohort_settings
-#> Inserting data took 0.0374 secs
+#> Inserting data took 0.0373 secs
 #> Computing time to event results
-#> Executing SQL took 0.0216 secs
-#> Computing time-to-event for 2 T-O pairs took 0.253 secs
+#> Executing SQL took 0.0217 secs
+#> Computing time-to-event for 2 T-O pairs took 0.255 secs
 #> exporting to andromeda
 #> Disconnected Andromeda. This data object can no longer be used
 #> Removing any existing results in outputFolder directory
-#> Loading andromeda result at /tmp/RtmpoyGKqv/runChar/execution/tte_1
+#> Loading andromeda result at /tmp/RtmpZK6JT8/runChar/execution/tte_1
 ```
