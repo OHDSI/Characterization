@@ -228,8 +228,7 @@ prepareCharacterizationShiny <- function(
 }
 
 viewChars <- function(
-    databaseSettings,
-    testApp = F
+    databaseSettings
     ) {
   ensure_installed("OhdsiShinyAppBuilder")
 

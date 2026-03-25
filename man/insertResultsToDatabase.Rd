@@ -37,45 +37,45 @@ Calls ResultModelManager uploadResults function to upload the csv files
 }
 \examples{
 
-# generate results into resultsFolder
-conDet <- exampleOmopConnectionDetails()
+## generate results into resultsFolder
+#conDet <- exampleOmopConnectionDetails()
 
-tteSet <- createTimeToEventSettings(
-targetIds = c(1,2),
-  outcomeIds = 3
-  )
+#tteSet <- createTimeToEventSettings(
+#targetIds = c(1,2),
+#  outcomeIds = 3
+#  )
 
-cSet <- createCharacterizationSettings(
-  timeToEventSettings = tteSet
-)
+#cSet <- createCharacterizationSettings(
+#  timeToEventSettings = tteSet
+#)
 
-runCharacterizationAnalyses(
-  connectionDetails = conDet,
-  targetDatabaseSchema = 'main',
-  targetTable = 'cohort',
-  outcomeDatabaseSchema = 'main',
-  outcomeTable = 'cohort',
-  cdmDatabaseSchema = 'main',
-  characterizationSettings = cSet,
-  outputDirectory = file.path(tempdir(),'database')
-)
+#runCharacterizationAnalyses(
+#  connectionDetails = conDet,
+#  targetDatabaseSchema = 'main',
+#  targetTable = 'cohort',
+#  outcomeDatabaseSchema = 'main',
+#  outcomeTable = 'cohort',
+#  cdmDatabaseSchema = 'main',
+#  characterizationSettings = cSet,
+#  outputDirectory = file.path(tempdir(),'database')
+#)
 
-# create sqlite database
-charResultDbCD <- createSqliteDatabase()
+## create sqlite database
+#charResultDbCD <- createSqliteDatabase()
 
-# create database results tables
-createCharacterizationTables(
-   connectionDetails = charResultDbCD,
-   resultSchema = 'main'
- )
+## create database results tables
+#createCharacterizationTables(
+#   connectionDetails = charResultDbCD,
+#   resultSchema = 'main'
+# )
 
-# insert results
-insertResultsToDatabase(
- connectionDetails = charResultDbCD,
- schema = 'main',
- resultsFolder = file.path(tempdir(),'database'),
- includedFiles = c('time_to_event')
-)
+## insert results
+#insertResultsToDatabase(
+# connectionDetails = charResultDbCD,
+# schema = 'main',
+# resultsFolder = file.path(tempdir(),'database'),
+# includedFiles = c('time_to_event')
+#)
 
 
 }
