@@ -233,7 +233,7 @@ test_that("checkResultFilesIncremental ", {
     append = TRUE
   )
 
-  testthat::expect_error(Characterization:::checkResultFilesIncremental(
+  testthat::expect_error(checkResultFilesIncremental(
     executionFolder = logFolder3
   ))
 })

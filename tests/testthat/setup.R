@@ -1,4 +1,4 @@
-connectionDetails <- Characterization::exampleOmopConnectionDetails()
+connectionDetails <- exampleOmopConnectionDetails()
 readr::local_edition(1)
 withr::defer(
   {

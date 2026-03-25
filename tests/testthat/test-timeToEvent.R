@@ -1,6 +1,3 @@
-# library(Characterization)
-# library(testthat)
-
 context("TimeToEvent")
 
 test_that("createTimeToEventSettings", {
