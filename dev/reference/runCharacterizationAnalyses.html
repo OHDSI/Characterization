@@ -9,7 +9,7 @@ the characterization settings and the directory to save the results to"><meta na
 
     <a class="navbar-brand me-2" href="../index.html">Characterization</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.0.9999</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">3.0.0.9999</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,6 +53,8 @@ the characterization settings and the directory to save the results to</p>
 <span>  <span class="va">targetTable</span>,</span>
 <span>  <span class="va">outcomeDatabaseSchema</span>,</span>
 <span>  <span class="va">outcomeTable</span>,</span>
+<span>  outputDatabaseSchema <span class="op">=</span> <span class="va">targetDatabaseSchema</span>,</span>
+<span>  outputTable <span class="op">=</span> <span class="st">"characterization_cohort"</span>,</span>
 <span>  tempEmulationSchema <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"sqlRenderTempEmulationSchema"</span><span class="op">)</span>,</span>
 <span>  <span class="va">cdmDatabaseSchema</span>,</span>
 <span>  <span class="va">characterizationSettings</span>,</span>
@@ -64,7 +66,12 @@ the characterization settings and the directory to save the results to</p>
 <span>  minCellCount <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  incremental <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  threads <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  minCharacterizationMean <span class="op">=</span> <span class="fl">0.01</span></span>
+<span>  cohortGenerationThreads <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nTargetJobs <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  minCharacterizationMean <span class="op">=</span> <span class="fl">0.01</span>,</span>
+<span>  minCovariateCount <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  mode <span class="op">=</span> <span class="st">"CohortIncidence"</span>,</span>
+<span>  minSMD <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -94,6 +101,14 @@ this should include both the database and schema name, for example
 
 <dt id="arg-outcometable">outcomeTable<a class="anchor" aria-label="anchor" href="#arg-outcometable"></a></dt>
 <dd><p>Name of the outcome cohort table.</p></dd>
+
+
+<dt id="arg-outputdatabaseschema">outputDatabaseSchema<a class="anchor" aria-label="anchor" href="#arg-outputdatabaseschema"></a></dt>
+<dd><p>The schema where the characterization cohort table will be saved into</p></dd>
+
+
+<dt id="arg-outputtable">outputTable<a class="anchor" aria-label="anchor" href="#arg-outputtable"></a></dt>
+<dd><p>The table name where the characterization cohort table will be saved into</p></dd>
 
 
 <dt id="arg-tempemulationschema">tempEmulationSchema<a class="anchor" aria-label="anchor" href="#arg-tempemulationschema"></a></dt>
@@ -139,11 +154,31 @@ can be created</p></dd>
 
 
 <dt id="arg-threads">threads<a class="anchor" aria-label="anchor" href="#arg-threads"></a></dt>
-<dd><p>The number of threads to use when running aggregate covariates</p></dd>
+<dd><p>The number of threads to use when running analyses jobs in parallel</p></dd>
+
+
+<dt id="arg-cohortgenerationthreads">cohortGenerationThreads<a class="anchor" aria-label="anchor" href="#arg-cohortgenerationthreads"></a></dt>
+<dd><p>(optional) The number of threads to use when generating the cohorts in parallel (Note: some database management systems do not allow insert parallelization)</p></dd>
+
+
+<dt id="arg-ntargetjobs">nTargetJobs<a class="anchor" aria-label="anchor" href="#arg-ntargetjobs"></a></dt>
+<dd><p>Partition the targets into this number of groups (e.g., if there are 20 targets and njobs is 5 then there will be 4 targets per job and 5 jobs)</p></dd>
 
 
 <dt id="arg-mincharacterizationmean">minCharacterizationMean<a class="anchor" aria-label="anchor" href="#arg-mincharacterizationmean"></a></dt>
 <dd><p>The minimum mean threshold to extract when running aggregate covariates</p></dd>
+
+
+<dt id="arg-mincovariatecount">minCovariateCount<a class="anchor" aria-label="anchor" href="#arg-mincovariatecount"></a></dt>
+<dd><p>The minimum number of patients who must have the covariate when running aggregate covariates</p></dd>
+
+
+<dt id="arg-mode">mode<a class="anchor" aria-label="anchor" href="#arg-mode"></a></dt>
+<dd><p>Select from Efficient (no exclusions to target based on washout)/CohortIncidence (excludes targets with outcome in washout if they have no time at risk)/PatientLevelPrediction (excludes targets with outcome during washout prior to index)</p></dd>
+
+
+<dt id="arg-minsmd">minSMD<a class="anchor" aria-label="anchor" href="#arg-minsmd"></a></dt>
+<dd><p>The minimum standardized mean difference for the risk factor analysis</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -158,9 +193,9 @@ specified saveDirectory</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other LargeScale:
-<code><a href="createCharacterizationSettings.html">createCharacterizationSettings</a>()</code>,
-<code><a href="loadCharacterizationSettings.html">loadCharacterizationSettings</a>()</code>,
-<code><a href="saveCharacterizationSettings.html">saveCharacterizationSettings</a>()</code></p></div>
+<code><a href="createCharacterizationSettings.html">createCharacterizationSettings()</a></code>,
+<code><a href="loadCharacterizationSettings.html">loadCharacterizationSettings()</a></code>,
+<code><a href="saveCharacterizationSettings.html">saveCharacterizationSettings()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -187,17 +222,23 @@ specified saveDirectory</p>
 <span class="r-in"><span>  characterizationSettings <span class="op">=</span> <span class="va">cSet</span>,</span></span>
 <span class="r-in"><span>  outputDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,<span class="st">'runChar'</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Creating directory /tmp/Rtmp6HxEc5/runChar</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Creating directory /tmp/Rtmp6HxEc5/runChar/execution</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Creating directory /tmp/Rtmpm5gzJo/runChar</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Creating directory /tmp/Rtmpm5gzJo/runChar/execution</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Currently in a tryCatch or withCallingHandlers block, so unable to add global calling handlers. ParallelLogger will not capture R messages, errors, and warnings, only explicit calls to ParallelLogger. (This message will not be shown again this R session)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Connecting using SQLite driver</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Extracting cohort jobs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Connecting using SQLite driver</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Creating new cluster</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Connecting using SQLite driver</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Uploading #cohort_settings</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Inserting data took 0.00749 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inserting data took 0.034 secs</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Computing time to event results</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.0217 secs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Computing time-to-event for 2 T-O pairs took 0.195 secs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> exporting to csv file</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Writing 96 rows to csv</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.0221 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Computing time-to-event for 2 T-O pairs took 0.259 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> exporting to andromeda</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Disconnected Andromeda. This data object can no longer be used</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Removing any existing results in outputFolder directory</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading andromeda result at /tmp/Rtmpm5gzJo/runChar/execution/tte_1</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -210,7 +251,7 @@ specified saveDirectory</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

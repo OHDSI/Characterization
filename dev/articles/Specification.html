@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Characterization</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.0.9999</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">3.0.0.9999</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
       <h1>Characterization Package Specification</h1>
                         <h4 data-toc-skip class="author">Jenna Reps</h4>
             
-            <h4 data-toc-skip class="date">2025-08-28</h4>
+            <h4 data-toc-skip class="date">2026-04-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/develop/vignettes/Specification.Rmd" class="external-link"><code>vignettes/Specification.Rmd</code></a></small>
       <div class="d-none name"><code>Specification.Rmd</code></div>
@@ -827,26 +827,27 @@ window.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="aggregate-covariates">Aggregate Covariates<a class="anchor" aria-label="anchor" href="#aggregate-covariates"></a>
+<h2 id="target-baseline-covariates">Target Baseline Covariates<a class="anchor" aria-label="anchor" href="#target-baseline-covariates"></a>
 </h2>
 <div class="section level3">
 <h3 id="inputs-2">Inputs<a class="anchor" aria-label="anchor" href="#inputs-2"></a>
 </h3>
 <p>A vector of targetIds plus the minimum prior observation required for
-the target cohorts and specifying which features to extract
-(covariateSettings).</p>
+the target cohorts and minimum time before target exposures and
+specifying which features to extract (covariateSettings).</p>
 </div>
 <div class="section level3">
 <h3 id="outputs">Outputs<a class="anchor" aria-label="anchor" href="#outputs"></a>
 </h3>
 <p>For each target cohort restricted to only the patients with minimum
-prior observation at index and first occurrence the mean value for each
-feature of interest is extracted into a data.frame.</p>
+prior observation at index and first occurrence in the specified number
+of days the mean value for each feature of interest is extracted into a
+data.frame.</p>
 </div>
 <div class="section level3">
 <h3 id="worked-example-2">Worked Example<a class="anchor" aria-label="anchor" href="#worked-example-2"></a>
 </h3>
-<p>The aggregate covariates calculates the mean value of a feature
+<p>The target baseline covariates calculates the mean value of a feature
 within a cohort of patients. In this analysis we restrict to first
 occurrence in the cohort with a minimum prior observation in days
 specified by the user (default 365 days). This restriction is
@@ -858,11 +859,19 @@ the mean value and this makes interpretation difficult.</p>
 <p>Here we consider the inputs are:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">minPriorObservation</span> <span class="op">&lt;-</span> <span class="fl">365</span></span>
+<span><span class="va">limitToFirstInNDays</span> <span class="op">&lt;-</span> <span class="fl">99999</span> <span class="co"># all time prior</span></span>
 <span><span class="va">covariateSettings</span> <span class="op">&lt;-</span> <span class="fu">FeatureExtraction</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">createCovariateSettings</a></span><span class="op">(</span></span>
 <span>  useDemographicsAge <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  useDemographicsGender <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>  useConditionOccurrenceAnyTimePrior <span class="op">=</span> <span class="cn">T</span>, includedCovariateConceptIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">201820</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="va">targetSettings</span> <span class="op">&lt;-</span> <span class="fu">Characterization</span><span class="fu">::</span><span class="fu"><a href="../reference/createTargetBaselineSettings.html">createTargetBaselineSettings</a></span><span class="op">(</span></span>
+<span>  targetIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, </span>
+<span>  limitToFirstInNDays <span class="op">=</span> <span class="va">limitToFirstInNDays</span>, </span>
+<span>  minPriorObservation <span class="op">=</span> <span class="va">minPriorObservation</span>, </span>
+<span>  covariateSettings <span class="op">=</span> <span class="va">covariateSettings</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="example-data">Example Data<a class="anchor" aria-label="anchor" href="#example-data"></a>
@@ -1035,7 +1044,8 @@ their sex as features.</p>
 </h4>
 <p>We calculate the mean values for each feature per cohort:</p>
 <table class="table">
-<caption>Example aggregate features for two example cohorts.</caption>
+<caption>Example target baseline features for two example
+cohorts.</caption>
 <thead><tr class="header">
 <th align="right">cohortId</th>
 <th align="left">feature</th>
@@ -1074,15 +1084,13 @@ their sex as features.</p>
 </tr>
 </tbody>
 </table>
-<p>The database and cohort comparison implements the aggregate covariate
-analysis for all target and outcome ids fed into characterization across
-all OMOP CDM databases available and then lets users compare the mean
-values of the features between databases for the same cohort or across
-different cohorts within the same database. The standardized mean
-different is calculated between two cohorts when possible, this is
-calculated per feature as: abs(mean value in cohort 1 - mean value in
-cohort 2)/((standard deviation of values in cohort 1 squared plus
-standard deviation of values in cohort 2 squared)/2).</p>
+<p>This analysis lets users compare the mean values of the features
+between databases for the same cohort or across different cohorts within
+the same database. The standardized mean different is calculated between
+two cohorts when possible, this is calculated per feature as: abs(mean
+value in cohort 1 - mean value in cohort 2)/((standard deviation of
+values in cohort 1 squared plus standard deviation of values in cohort 2
+squared)/2).</p>
 </div>
 </div>
 </div>
@@ -1121,6 +1129,7 @@ relative to the target cohort index).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">targetId</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
 <span><span class="va">outcomeId</span> <span class="op">&lt;-</span> <span class="fl">2</span></span>
+<span><span class="va">limitToFirstInNDays</span> <span class="op">&lt;-</span> <span class="fl">99999</span> <span class="co"># first ever</span></span>
 <span><span class="va">minPriorObservation</span> <span class="op">&lt;-</span> <span class="fl">365</span></span>
 <span><span class="va">outcomeWashoutDays</span> <span class="op">&lt;-</span> <span class="fl">365</span></span>
 <span><span class="va">riskWindowStart</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
@@ -1131,6 +1140,19 @@ relative to the target cohort index).</p>
 <span>  useDemographicsAge <span class="op">=</span> <span class="cn">T</span>, </span>
 <span>  useDemographicsGender <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>  useConditionOccurrenceAnyTimePrior <span class="op">=</span> <span class="cn">T</span>, includedCovariateConceptIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">201820</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="va">rfSettings</span> <span class="op">&lt;-</span> <span class="fu">Characterization</span><span class="fu">::</span><span class="fu"><a href="../reference/createRiskFactorSettings.html">createRiskFactorSettings</a></span><span class="op">(</span></span>
+<span>  targetIds <span class="op">=</span> <span class="va">targetId</span>, </span>
+<span>  outcomeIds <span class="op">=</span> <span class="va">outcomeId</span>, </span>
+<span>  limitToFirstInNDays <span class="op">=</span> <span class="va">limitToFirstInNDays</span>, </span>
+<span>  minPriorObservation <span class="op">=</span> <span class="va">minPriorObservation</span>, </span>
+<span>  outcomeWashoutDays <span class="op">=</span> <span class="va">outcomeWashoutDays</span>, </span>
+<span>  riskWindowStart <span class="op">=</span> <span class="va">riskWindowStart</span>, </span>
+<span>  startAnchor <span class="op">=</span> <span class="va">startAnchor</span>, </span>
+<span>  riskWindowEnd <span class="op">=</span> <span class="va">riskWindowEnd</span>, </span>
+<span>  endAnchor <span class="op">=</span> <span class="va">endAnchor</span>, </span>
+<span>  covariateSettings <span class="op">=</span> <span class="va">covariateSettings</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
@@ -1556,6 +1578,7 @@ index and outcome index and the 1 year after outcome index.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">targetId</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
 <span><span class="va">outcomeId</span> <span class="op">&lt;-</span> <span class="fl">2</span></span>
+<span><span class="va">limitToFirstInNDays</span> <span class="op">&lt;-</span> <span class="fl">99999</span> <span class="co"># first ever</span></span>
 <span><span class="va">minPriorObservation</span> <span class="op">&lt;-</span> <span class="fl">365</span></span>
 <span><span class="va">outcomeWashoutDays</span> <span class="op">&lt;-</span> <span class="fl">365</span></span>
 <span><span class="va">preTargetIndexDays</span> <span class="op">&lt;-</span> <span class="fl">365</span></span>
@@ -1564,8 +1587,24 @@ index and outcome index and the 1 year after outcome index.</p>
 <span><span class="va">startAnchor</span> <span class="op">&lt;-</span> <span class="st">'cohort start'</span></span>
 <span><span class="va">riskWindowEnd</span> <span class="op">&lt;-</span> <span class="fl">180</span></span>
 <span><span class="va">endAnchor</span> <span class="op">&lt;-</span> <span class="st">'cohort start'</span></span>
-<span><span class="va">covariateSettings</span> <span class="op">&lt;-</span> <span class="fu">FeatureExtraction</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">createCovariateSettings</a></span><span class="op">(</span></span>
-<span>  useConditionOccurrenceAnyTimePrior <span class="op">=</span> <span class="cn">T</span>, includedCovariateConceptIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">201820</span><span class="op">)</span></span>
+<span><span class="va">caseCovariateSettings</span> <span class="op">&lt;-</span> <span class="fu">Characterization</span><span class="fu">::</span><span class="fu"><a href="../reference/createDuringCovariateSettings.html">createDuringCovariateSettings</a></span><span class="op">(</span></span>
+<span>  useConditionOccurrenceDuring <span class="op">=</span>  <span class="cn">TRUE</span>,</span>
+<span>  includedCovariateConceptIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">201820</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="va">caseSeriesSettings</span> <span class="op">&lt;-</span> <span class="fu">Characterization</span><span class="fu">::</span><span class="fu"><a href="../reference/createCaseSeriesSettings.html">createCaseSeriesSettings</a></span><span class="op">(</span></span>
+<span>  targetIds <span class="op">=</span> <span class="va">targetId</span>, </span>
+<span>  outcomeIds <span class="op">=</span> <span class="va">outcomeId</span>, </span>
+<span>  limitToFirstInNDays <span class="op">=</span> <span class="va">limitToFirstInNDays</span>, </span>
+<span>  minPriorObservation <span class="op">=</span> <span class="va">minPriorObservation</span>, </span>
+<span>  outcomeWashoutDays <span class="op">=</span> <span class="va">outcomeWashoutDays</span>, </span>
+<span>  riskWindowStart <span class="op">=</span> <span class="va">riskWindowStart</span>, </span>
+<span>  startAnchor <span class="op">=</span> <span class="va">startAnchor</span>, </span>
+<span>  riskWindowEnd <span class="op">=</span> <span class="va">riskWindowEnd</span>, </span>
+<span>  endAnchor <span class="op">=</span> <span class="va">endAnchor</span>, </span>
+<span>  caseCovariateSettings <span class="op">=</span> <span class="va">caseCovariateSettings</span>, </span>
+<span>  casePreTargetDuration <span class="op">=</span> <span class="fl">365</span>, </span>
+<span>  casePostOutcomeDuration <span class="op">=</span> <span class="fl">365</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
@@ -1931,7 +1970,7 @@ are:</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

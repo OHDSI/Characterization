@@ -3,6 +3,7 @@
 <url><loc>/dev/articles/UsingPackage.html</loc></url>
 <url><loc>/dev/articles/index.html</loc></url>
 <url><loc>/dev/authors.html</loc></url>
+<url><loc>/dev/copilot-instructions.html</loc></url>
 <url><loc>/dev/index.html</loc></url>
 <url><loc>/dev/news/index.html</loc></url>
 <url><loc>/dev/reference/Characterization-package.html</loc></url>
@@ -11,12 +12,14 @@
 <url><loc>/dev/reference/computeDechallengeRechallengeAnalyses.html</loc></url>
 <url><loc>/dev/reference/computeRechallengeFailCaseSeriesAnalyses.html</loc></url>
 <url><loc>/dev/reference/computeTimeToEventAnalyses.html</loc></url>
-<url><loc>/dev/reference/createAggregateCovariateSettings.html</loc></url>
+<url><loc>/dev/reference/createCaseSeriesSettings.html</loc></url>
 <url><loc>/dev/reference/createCharacterizationSettings.html</loc></url>
 <url><loc>/dev/reference/createCharacterizationTables.html</loc></url>
 <url><loc>/dev/reference/createDechallengeRechallengeSettings.html</loc></url>
 <url><loc>/dev/reference/createDuringCovariateSettings.html</loc></url>
+<url><loc>/dev/reference/createRiskFactorSettings.html</loc></url>
 <url><loc>/dev/reference/createSqliteDatabase.html</loc></url>
+<url><loc>/dev/reference/createTargetBaselineSettings.html</loc></url>
 <url><loc>/dev/reference/createTimeToEventSettings.html</loc></url>
 <url><loc>/dev/reference/exampleOmopConnectionDetails.html</loc></url>
 <url><loc>/dev/reference/getDbDuringCovariateData.html</loc></url>

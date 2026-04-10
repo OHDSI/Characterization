@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Characterization</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.0.9999</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">3.0.0.9999</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,6 +57,7 @@
 <span>  <span class="va">outputFolder</span>,</span>
 <span>  minCellCount <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  progressBar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">executionId</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -120,6 +121,10 @@ can be created</p></dd>
 <dd><p>Whether to display a progress bar while the analysis is running</p></dd>
 
 
+<dt id="arg-executionid">executionId<a class="anchor" aria-label="anchor" href="#arg-executionid"></a></dt>
+<dd><p>a unique id for the run</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>extra inputs</p></dd>
 
@@ -131,8 +136,8 @@ can be created</p></dd>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other DechallengeRechallenge:
-<code><a href="computeDechallengeRechallengeAnalyses.html">computeDechallengeRechallengeAnalyses</a>()</code>,
-<code><a href="createDechallengeRechallengeSettings.html">createDechallengeRechallengeSettings</a>()</code></p></div>
+<code><a href="computeDechallengeRechallengeAnalyses.html">computeDechallengeRechallengeAnalyses()</a></code>,
+<code><a href="createDechallengeRechallengeSettings.html">createDechallengeRechallengeSettings()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -155,10 +160,10 @@ can be created</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Inputs checked</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Connecting using SQLite driver</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Computing dechallenge rechallenge fails results</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.0151 secs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Computing dechallenge failed case series for 2 target IDs and 1 outcome IDs took 0.209 secs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> exporting to csv file</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Writing 0 rows to csv</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.0146 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Computing dechallenge failed case series for 2 target IDs and 1 outcome IDs took 0.238 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> exporting to andromeda</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Disconnected Andromeda. This data object can no longer be used</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -171,7 +176,7 @@ can be created</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

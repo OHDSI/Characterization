@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">Characterization</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.0.9999</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">3.0.0.9999</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,7 +104,7 @@
 <span>    dechallengeEvaluationWindow <span class="op">=</span> <span class="fl">31</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span>  <span class="va">aggregateCovariateSettings1</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/createAggregateCovariateSettings.html">createAggregateCovariateSettings</a></span><span class="op">(</span></span>
+<span>  <span class="va">riskFactorSettings1</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/createRiskFactorSettings.html">createRiskFactorSettings</a></span><span class="op">(</span></span>
 <span>    targetIds <span class="op">=</span> <span class="va">targetIds</span>,</span>
 <span>    outcomeIds <span class="op">=</span> <span class="va">outcomeIds</span>,</span>
 <span>    riskWindowStart <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -112,13 +112,13 @@
 <span>    riskWindowEnd <span class="op">=</span> <span class="fl">365</span>,</span>
 <span>    endAnchor <span class="op">=</span> <span class="st">'cohort start'</span>,</span>
 <span>    covariateSettings <span class="op">=</span> <span class="fu">FeatureExtraction</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">createCovariateSettings</a></span><span class="op">(</span></span>
-<span>      useDemographicsGender <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>      useDemographicsAge <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>      useDemographicsRace <span class="op">=</span> <span class="cn">T</span></span>
+<span>      useDemographicsGender <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>      useDemographicsAge <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>      useDemographicsRace <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span>  <span class="va">aggregateCovariateSettings2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/createAggregateCovariateSettings.html">createAggregateCovariateSettings</a></span><span class="op">(</span></span>
+<span>  <span class="va">riskFactorSettings2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/createRiskFactorSettings.html">createRiskFactorSettings</a></span><span class="op">(</span></span>
 <span>    targetIds <span class="op">=</span> <span class="va">targetIds</span>,</span>
 <span>    outcomeIds <span class="op">=</span> <span class="va">outcomeIds</span>,</span>
 <span>    riskWindowStart <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -126,7 +126,7 @@
 <span>    riskWindowEnd <span class="op">=</span> <span class="fl">365</span>,</span>
 <span>    endAnchor <span class="op">=</span> <span class="st">'cohort start'</span>,</span>
 <span>    covariateSettings <span class="op">=</span> <span class="fu">FeatureExtraction</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">createCovariateSettings</a></span><span class="op">(</span></span>
-<span>      useConditionOccurrenceLongTerm <span class="op">=</span> <span class="cn">T</span></span>
+<span>      useConditionOccurrenceLongTerm <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
@@ -137,10 +137,10 @@
 <span>      <span class="op">)</span>,</span>
 <span>    dechallengeRechallengeSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>      <span class="va">dechallengeRechallengeSettings</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    aggregateCovariateSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      <span class="va">aggregateCovariateSettings1</span>,</span>
-<span>      <span class="va">aggregateCovariateSettings2</span></span>
+<span>    <span class="op">)</span>,  </span>
+<span>    riskFactorSettings <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      <span class="va">riskFactorSettings1</span>,</span>
+<span>      <span class="va">riskFactorSettings2</span></span>
 <span>      <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span>  </span>
@@ -151,11 +151,14 @@
 <span>  targetTable <span class="op">=</span> <span class="st">'cohort'</span>,</span>
 <span>  outcomeDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
 <span>  outcomeTable <span class="op">=</span> <span class="st">'cohort'</span>,</span>
+<span>  outputDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>,</span>
+<span>  outputTable <span class="op">=</span> <span class="st">'char_cohort'</span>,</span>
 <span>  characterizationSettings <span class="op">=</span> <span class="va">characterizationSettings</span>,   </span>
 <span>  outputDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">'example'</span>, <span class="st">'results'</span><span class="op">)</span>,</span>
 <span>  executionPath <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">'example'</span>, <span class="st">'execution'</span><span class="op">)</span>,</span>
 <span>  csvFilePrefix <span class="op">=</span> <span class="st">'c_'</span>,</span>
-<span>  databaseId <span class="op">=</span> <span class="st">'Eunomia'</span></span>
+<span>  databaseId <span class="op">=</span> <span class="st">'Eunomia'</span>,</span>
+<span>  minSMD <span class="op">=</span> <span class="fl">0.1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level1">
@@ -254,7 +257,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

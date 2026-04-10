@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Characterization</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.0.9999</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">3.0.0.9999</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,9 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">createCharacterizationSettings</span><span class="op">(</span></span>
 <span>  timeToEventSettings <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dechallengeRechallengeSettings <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  aggregateCovariateSettings <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  targetBaselineSettings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  riskFactorSettings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  caseSeriesSettings <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -63,8 +65,16 @@
 <dd><p>A list of dechallengeRechallenge settings</p></dd>
 
 
-<dt id="arg-aggregatecovariatesettings">aggregateCovariateSettings<a class="anchor" aria-label="anchor" href="#arg-aggregatecovariatesettings"></a></dt>
-<dd><p>A list of aggregateCovariate settings</p></dd>
+<dt id="arg-targetbaselinesettings">targetBaselineSettings<a class="anchor" aria-label="anchor" href="#arg-targetbaselinesettings"></a></dt>
+<dd><p>A list of targetBaselineSettings settings</p></dd>
+
+
+<dt id="arg-riskfactorsettings">riskFactorSettings<a class="anchor" aria-label="anchor" href="#arg-riskfactorsettings"></a></dt>
+<dd><p>A list of riskFactorSettings settings</p></dd>
+
+
+<dt id="arg-caseseriessettings">caseSeriesSettings<a class="anchor" aria-label="anchor" href="#arg-caseseriessettings"></a></dt>
+<dd><p>A list of caseSeriesSettings settings</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -78,9 +88,9 @@
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other LargeScale:
-<code><a href="loadCharacterizationSettings.html">loadCharacterizationSettings</a>()</code>,
-<code><a href="runCharacterizationAnalyses.html">runCharacterizationAnalyses</a>()</code>,
-<code><a href="saveCharacterizationSettings.html">saveCharacterizationSettings</a>()</code></p></div>
+<code><a href="loadCharacterizationSettings.html">loadCharacterizationSettings()</a></code>,
+<code><a href="runCharacterizationAnalyses.html">runCharacterizationAnalyses()</a></code>,
+<code><a href="saveCharacterizationSettings.html">saveCharacterizationSettings()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -107,7 +117,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
