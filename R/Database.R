@@ -382,7 +382,7 @@ getResultTables <- function() {
 # https://github.com/tidyverse/readr/issues/671#issuecomment-300567232
 formatDouble <- function(x, scientific = FALSE, ...) {
   doubleCols <- vapply(x, is.double, logical(1))
-  x[doubleCols] <- lapply(x[doubleCols], format, scientific = scientific, ...)
+  x[doubleCols] <- lapply(x[doubleCols], format, trim = TRUE, scientific = scientific, ...)
 
   return(x)
 }
