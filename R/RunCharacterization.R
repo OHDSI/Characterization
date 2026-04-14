@@ -762,7 +762,7 @@ exportSharedObjects <- function(
     data$database_id <- databaseId
     data$setting_id <- executionId
     utils::write.csv(
-      x = data,
+      x = formatDouble(data),
       file = file.path(saveLocation, paste0(tablePrefix,'target_settings.csv')),
       row.names = FALSE
     )
@@ -791,7 +791,7 @@ exportSharedObjects <- function(
     data$database_id <- databaseId
     data$setting_id <- executionId
     utils::write.csv(
-      x = data,
+      x = formatDouble(data),
       file = file.path(saveLocation, paste0(tablePrefix,'case_settings.csv')),
       row.names = FALSE
     )
