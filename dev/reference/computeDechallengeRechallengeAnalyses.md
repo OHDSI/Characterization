@@ -111,8 +111,8 @@ computeDechallengeRechallengeAnalyses(
 #> Inputs checked
 #> Connecting using SQLite driver
 #> Computing dechallenge rechallenge results
-#> Executing SQL took 0.0219 secs
-#> Computing dechallenge rechallenge for 2 target ids and 1 outcome ids took 0.487 secs
+#> Executing SQL took 0.015 secs
+#> Computing dechallenge rechallenge for 2 target ids and 1 outcome ids took 0.471 secs
 #> exporting to andomeda
 #> Disconnected Andromeda. This data object can no longer be used
 
