@@ -50,22 +50,22 @@ runCharacterizationAnalyses(
   characterizationSettings = cSet,
   outputDirectory = file.path(tempdir(),'view')
 )
-#> Creating directory /tmp/RtmpZK6JT8/view
-#> Creating directory /tmp/RtmpZK6JT8/view/execution
+#> Creating directory /tmp/RtmpQchHeK/view
+#> Creating directory /tmp/RtmpQchHeK/view/execution
 #> Connecting using SQLite driver
 #> Extracting cohort jobs
 #> Connecting using SQLite driver
 #> Creating new cluster
 #> Connecting using SQLite driver
 #> Uploading #cohort_settings
-#> Inserting data took 0.00722 secs
+#> Inserting data took 0.00689 secs
 #> Computing time to event results
-#> Executing SQL took 0.022 secs
-#> Computing time-to-event for 2 T-O pairs took 0.223 secs
+#> Executing SQL took 0.0217 secs
+#> Computing time-to-event for 2 T-O pairs took 0.221 secs
 #> exporting to andromeda
 #> Disconnected Andromeda. This data object can no longer be used
 #> Removing any existing results in outputFolder directory
-#> Loading andromeda result at /tmp/RtmpZK6JT8/view/execution/tte_1
+#> Loading andromeda result at /tmp/RtmpQchHeK/view/execution/tte_1
 
 # interactive shiny app
 if (FALSE) { # \dontrun{
