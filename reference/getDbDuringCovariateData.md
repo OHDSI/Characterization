@@ -157,10 +157,10 @@ duringData <- getDbDuringCovariateData(
   cohortTable = 'cohort'
 )
 #> Constructing during cohort covariates
-#> Executing SQL took 0.00316 secs
-#> Executing SQL took 0.00279 secs
+#> Executing SQL took 0.00337 secs
+#> Executing SQL took 0.00263 secs
 #> Executing during sql code for ConditionOccurrenceDuring
-#> Executing SQL took 0.0175 secs
+#> Executing SQL took 0.0184 secs
 #> Execution took 0.02 secs
 #> Extracting covariates
 #> Downloading covariates
