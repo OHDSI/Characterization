@@ -147,16 +147,16 @@ test_that("manual data runCharacterizationAnalyses", {
   )
 
   # create settings and run
-  characterizationSettings <- Characterization::createCharacterizationSettings(
-    timeToEventSettings = Characterization::createTimeToEventSettings(
+  characterizationSettings <- createCharacterizationSettings(
+    timeToEventSettings = createTimeToEventSettings(
       targetIds = 1,
       outcomeIds = 2
     ),
-    dechallengeRechallengeSettings = Characterization::createDechallengeRechallengeSettings(
+    dechallengeRechallengeSettings = createDechallengeRechallengeSettings(
       targetIds = 1,
       outcomeIds = 2
     ),
-    targetBaselineSettings = Characterization::createTargetBaselineSettings(
+    targetBaselineSettings = createTargetBaselineSettings(
       targetIds = 1,
       limitToFirstInNDays = 99999,
       minPriorObservation = 365,
@@ -167,7 +167,7 @@ test_that("manual data runCharacterizationAnalyses", {
       )
     ),
 
-    riskFactorSettings = Characterization::createRiskFactorSettings(
+    riskFactorSettings = createRiskFactorSettings(
       targetIds = 1,
       outcomeIds = 2,
       limitToFirstInNDays = 99999,
@@ -190,7 +190,7 @@ test_that("manual data runCharacterizationAnalyses", {
       outcomeWashoutDays = 30,
       riskWindowStart = 1,
       riskWindowEnd = 90,
-      caseCovariateSettings = Characterization::createDuringCovariateSettings(
+      caseCovariateSettings = createDuringCovariateSettings(
         useConditionEraDuring = TRUE
       )
     )

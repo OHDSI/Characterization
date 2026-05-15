@@ -21,7 +21,7 @@ getPlatformConnectionDetails <- function(dbmsPlatform) {
 
   options("sqlRenderTempEmulationSchema" = NULL)
   if (dbmsPlatform == "sqlite") {
-    connectionDetails <- Characterization::exampleOmopConnectionDetails()
+    connectionDetails <- exampleOmopConnectionDetails()
     cdmDatabaseSchema <- "main"
     vocabularyDatabaseSchema <- "main"
     cohortDatabaseSchema <- "main"
@@ -230,7 +230,7 @@ for (dbmsPlatform in dbmsPlatforms) {
         startAnchor = "cohort start",
         riskWindowEnd = 365,
         endAnchor = "cohort start",
-        caseCovariateSettings = Characterization::createDuringCovariateSettings(
+        caseCovariateSettings = createDuringCovariateSettings(
           useDrugEraDuring = TRUE
           )
       )

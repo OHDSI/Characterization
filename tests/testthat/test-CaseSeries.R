@@ -1,6 +1,3 @@
-# library(Characterization)
-# library(testthat)
-
 context("CaseSeries")
 
 tempFolder1 <- tempfile("runCs1")

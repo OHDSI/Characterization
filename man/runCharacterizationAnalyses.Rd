@@ -25,7 +25,7 @@ runCharacterizationAnalyses(
   threads = 1,
   cohortGenerationThreads = NULL,
   nTargetJobs = 1,
-  minCharacterizationMean = 0.01,
+  minCharacterizationMean = 0.001,
   minCovariateCount = 0,
   mode = "CohortIncidence",
   minSMD = 0

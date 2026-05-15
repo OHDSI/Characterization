@@ -57,7 +57,7 @@ test_that("getCohortJobs", {
     startAnchor = "cohort start",
     riskWindowEnd = 365,
     endAnchor = "cohort start",
-    caseCovariateSettings = Characterization::createDuringCovariateSettings(
+    caseCovariateSettings = createDuringCovariateSettings(
       useVisitCountDuring = TRUE,
       useConditionOccurrenceDuring = TRUE
     )

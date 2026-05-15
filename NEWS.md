@@ -1,3 +1,7 @@
+Characterization 3.0.1
+======================
+- Fix issue with uploading results into database for shiny viewer (spacing was added to csv and causing issues and continuous covariates that are floats were incorrectly bigints)
+
 Characterization 3.0.0
 ======================
 - Splitting the aggregateCovariates into: riskFactor, targetBaseline and caseSeries to make the inputs clearer.

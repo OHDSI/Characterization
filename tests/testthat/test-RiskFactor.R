@@ -181,7 +181,7 @@ test_that("getRiskFactorJobs", {
   )
 
   jobDf <-  getRiskFactorJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       riskFactorSettings = res
     ),
     nTargetJobs = 1
@@ -207,7 +207,7 @@ test_that("getRiskFactorJobs", {
 
   # now check nTargetJobs = 2
   jobDf <-  getRiskFactorJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       riskFactorSettings = res
     ),
     nTargetJobs = 2
@@ -216,7 +216,7 @@ test_that("getRiskFactorJobs", {
 
   # now check nTargetJobs = 3
   jobDf <-  getRiskFactorJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       riskFactorSettings = res
     ),
     nTargetJobs = 3
@@ -230,7 +230,7 @@ test_that("getRiskFactorJobs", {
 
   # now check nTargetJobs = 4
   jobDf <-  getRiskFactorJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       riskFactorSettings = res
     ),
     nTargetJobs = 4
@@ -239,7 +239,7 @@ test_that("getRiskFactorJobs", {
 
   # now check threads = 50
   jobDf <-  getRiskFactorJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       riskFactorSettings = res
     ),
     nTargetJobs = 50

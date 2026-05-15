@@ -339,7 +339,7 @@ test_that("censorResults", {
     averageValue = c(4,1,11,14,150)/200
   )
 
-  newdata <- Characterization:::censorResults(
+  newdata <- censorResults(
     data = data,
     tableName = 'targetCovariates',
     minCellCount = 0
@@ -348,7 +348,7 @@ test_that("censorResults", {
   # check minCellCount 0 does nothing
   testthat::expect_identical(data, newdata)
 
-  newdata <- Characterization:::censorResults(
+  newdata <- censorResults(
     data = data,
     tableName = 'targetCovariates',
     minCellCount = 10
@@ -371,7 +371,7 @@ test_that("censorResults", {
     nonCaseAverageValue = c(1,0,100,90,50)/100
   )
 
-  newdata <- Characterization:::censorResults(
+  newdata <- censorResults(
     data = data,
     tableName = 'riskFactorCovariates',
     minCellCount = 10
@@ -403,7 +403,7 @@ test_that("censorResults", {
     afterAverageValue = c(1,0,200,9,50)/200
   )
 
-  newdata <- Characterization:::censorResults(
+  newdata <- censorResults(
     data = data,
     tableName = 'caseSeriesCovariates',
     minCellCount = 10
@@ -443,7 +443,7 @@ test_that("censorResults", {
     timeScale = 'per 1-day'
   )
 
-  newdata <- Characterization:::censorResults(
+  newdata <- censorResults(
     data = data,
     tableName = 'timeToEvent',
     minCellCount = 10
@@ -478,7 +478,7 @@ test_that("censorResults", {
     pctRechallengeSuccess = 0.2,
     pctRechallengeFail = 0.2
   )
-  newdata <- Characterization:::censorResults(
+  newdata <- censorResults(
     data = data,
     tableName = 'dechallengeRechallenge',
     minCellCount = 5
@@ -752,7 +752,7 @@ test_that("exportAttrition", {
   )
 
   # save to temp folder
-  Characterization:::saveCharacterizationAndromeda(
+  saveCharacterizationAndromeda(
     andromeda = andromeda,
     outputFolder = file.path(tempFolder3,'attrition')
       )

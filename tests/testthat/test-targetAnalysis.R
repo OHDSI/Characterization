@@ -1,6 +1,3 @@
-# library(Characterization)
-# library(testthat)
-
 context("TargetAnalysis")
 
 tempFolder1 <- tempfile("runTarget1")
@@ -121,7 +118,7 @@ test_that("getTargetBaselineJobs", {
   )
 
   jobDf <-  getTargetBaselineJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       targetBaselineSettings = res
     ),
     nTargetJobs = 1
@@ -151,7 +148,7 @@ test_that("getTargetBaselineJobs", {
 
   # now check nTargetJobs = 2
   jobDf <-  getTargetBaselineJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       targetBaselineSettings = res
     ),
     nTargetJobs = 2
@@ -168,7 +165,7 @@ test_that("getTargetBaselineJobs", {
 
   # now check nTargetJobs = 3
   jobDf <- getTargetBaselineJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       targetBaselineSettings = res
     ),
     nTargetJobs = 3
@@ -182,7 +179,7 @@ test_that("getTargetBaselineJobs", {
 
   # now check nTargetJobs = 4
   jobDf <- getTargetBaselineJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       targetBaselineSettings = res
     ),
     nTargetJobs = 4
@@ -191,7 +188,7 @@ test_that("getTargetBaselineJobs", {
 
   # now check threads = 50
   jobDf <- getTargetBaselineJobs(
-    characterizationSettings = Characterization::createCharacterizationSettings(
+    characterizationSettings = createCharacterizationSettings(
       targetBaselineSettings = res
     ),
     nTargetJobs = 50
@@ -222,7 +219,7 @@ test_that("computeTargetBaselineAnalyses", {
     nTargetJobs = 1
   )
 
-  tables <- Characterization:::generateCohorts(
+  tables <- generateCohorts(
     characterizationSettings = createCharacterizationSettings(
       targetBaselineSettings = res
     ),

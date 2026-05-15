@@ -59,7 +59,7 @@ test_that("runCharacterizationAnalyses", {
     startAnchor = "cohort start",
     riskWindowEnd = 365,
     endAnchor = "cohort start",
-    caseCovariateSettings = Characterization::createDuringCovariateSettings(
+    caseCovariateSettings = createDuringCovariateSettings(
       useVisitCountDuring = TRUE,
       useConditionOccurrenceDuring = TRUE
       )
@@ -361,16 +361,16 @@ test_that("min cell count works", {
   )
 
   # create settings and run
-  characterizationSettings <- Characterization::createCharacterizationSettings(
-    timeToEventSettings = Characterization::createTimeToEventSettings(
+  characterizationSettings <- createCharacterizationSettings(
+    timeToEventSettings = createTimeToEventSettings(
       targetIds = 1,
       outcomeIds = 2
     ),
-    dechallengeRechallengeSettings = Characterization::createDechallengeRechallengeSettings(
+    dechallengeRechallengeSettings = createDechallengeRechallengeSettings(
       targetIds = 1,
       outcomeIds = 2
     ),
-    targetBaselineSettings = Characterization::createTargetBaselineSettings(
+    targetBaselineSettings = createTargetBaselineSettings(
       targetIds = 1,
       minPriorObservation = 365,
       covariateSettings = FeatureExtraction::createCovariateSettings(
@@ -381,7 +381,7 @@ test_that("min cell count works", {
     )
   )
 
-  Characterization::runCharacterizationAnalyses(
+  runCharacterizationAnalyses(
     connectionDetails = connectionDetails,
     cdmDatabaseSchema = "main",
     targetDatabaseSchema = "main",
