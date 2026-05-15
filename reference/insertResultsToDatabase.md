@@ -59,6 +59,7 @@ Other Database:
 ## Examples
 
 ``` r
+
 ## generate results into resultsFolder
 #conDet <- exampleOmopConnectionDetails()
 

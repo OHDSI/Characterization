@@ -62,6 +62,7 @@ Other Aggregate:
 ## Examples
 
 ``` r
+
 aggregateSetting <- createTargetBaselineSettings(
   targetIds = c(1,2),
   limitToFirstInNDays = 99999,

@@ -27,6 +27,7 @@ target and a comparator cohort.
 
 ``` r
 
+
 library(Characterization)
 
 connectionDetails <- Characterization::exampleOmopConnectionDetails()
@@ -127,6 +128,7 @@ require Java.
     Characterization:
 
 ``` r
+
 install.packages("remotes")
 remotes::install_github("ohdsi/Characterization")
 ```

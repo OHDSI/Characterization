@@ -29,6 +29,7 @@ Input is the output of ...
 ## Examples
 
 ``` r
+
 conDet <- exampleOmopConnectionDetails()
 
 tteSet <- createTimeToEventSettings(
@@ -50,22 +51,22 @@ runCharacterizationAnalyses(
   characterizationSettings = cSet,
   outputDirectory = file.path(tempdir(),'view')
 )
-#> Creating directory /tmp/RtmpQchHeK/view
-#> Creating directory /tmp/RtmpQchHeK/view/execution
+#> Creating directory /tmp/RtmpBpCScL/view
+#> Creating directory /tmp/RtmpBpCScL/view/execution
 #> Connecting using SQLite driver
 #> Extracting cohort jobs
 #> Connecting using SQLite driver
 #> Creating new cluster
 #> Connecting using SQLite driver
 #> Uploading #cohort_settings
-#> Inserting data took 0.00689 secs
+#> Inserting data took 0.00696 secs
 #> Computing time to event results
-#> Executing SQL took 0.0217 secs
-#> Computing time-to-event for 2 T-O pairs took 0.221 secs
+#> Executing SQL took 0.0205 secs
+#> Computing time-to-event for 2 T-O pairs took 0.215 secs
 #> exporting to andromeda
 #> Disconnected Andromeda. This data object can no longer be used
 #> Removing any existing results in outputFolder directory
-#> Loading andromeda result at /tmp/RtmpQchHeK/view/execution/tte_1
+#> Loading andromeda result at /tmp/RtmpBpCScL/view/execution/tte_1
 
 # interactive shiny app
 if (FALSE) { # \dontrun{

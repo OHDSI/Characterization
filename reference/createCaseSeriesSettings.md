@@ -93,6 +93,7 @@ Other Aggregate:
 ## Examples
 
 ``` r
+
 caseSeriesSetting <- createCaseSeriesSettings(
   targetIds = c(1,2),
   outcomeIds = c(3),

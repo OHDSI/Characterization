@@ -31,6 +31,7 @@ Other Database:
 ## Examples
 
 ``` r
+
 charResultDbCD <- createSqliteDatabase()
 
 ```

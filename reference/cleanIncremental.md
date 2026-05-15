@@ -30,6 +30,7 @@ Other Incremental: [`cleanNonIncremental()`](cleanNonIncremental.md)
 ## Examples
 
 ``` r
+
 cleanIncremental(
   file.path(tempdir(), 'incremental'),
   ignoreWhenEmpty = TRUE

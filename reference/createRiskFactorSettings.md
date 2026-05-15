@@ -108,6 +108,7 @@ Other Aggregate:
 ## Examples
 
 ``` r
+
 riskFactorSetting <- createRiskFactorSettings(
   targetIds = c(1,2),
   outcomeIds = c(3),

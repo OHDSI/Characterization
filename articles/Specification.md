@@ -23,6 +23,7 @@ exposures and after last target exposure).
 Here we consider the inputs are:
 
 ``` r
+
 targetIds <- c(1)
 outcomeIds <- c(2) 
 ```
@@ -58,7 +59,7 @@ Figure 2 - Example data for five patients with timing.
 |         5 |                  1 | 2005-02-01      | 2005-10-08    |
 |         5 |                  1 | 2007-04-03      | 2007-05-03    |
 
-Example time-to-event data with dates.
+Example time-to-event data with dates. {.table}
 
 | patientId | cohortDefinitionId | cohortStartDate | cohortEndDate |
 |----------:|-------------------:|:----------------|:--------------|
@@ -70,7 +71,7 @@ Example time-to-event data with dates.
 |         5 |                  2 | 2006-07-21      | 2006-08-03    |
 |         5 |                  2 | 2008-01-01      | 2008-01-09    |
 
-Example time-to-event data with timing.
+Example time-to-event data with timing. {.table}
 
 For all rows in the outcome table, we calculate the time between the
 patients first exposure in the target cohort and the outcome date
@@ -100,17 +101,17 @@ first time he has the outcome occurs between drug exposure eras and the
 subsequent outcome occurs after the last exposure era. This is
 summarized in Table 3.
 
-| patientId | outcomeDate | firstExposureDate | timeToEvent | type                  | outcomeType |
-|----------:|:------------|:------------------|------------:|:----------------------|:------------|
-|         1 | 1999-10-03  | 2001-01-20        |        -475 | Before first exposure | First       |
-|         1 | 2001-10-30  | 2001-01-20        |         283 | During subsequent     | Subsequent  |
-|         3 | 2004-05-16  | 2004-04-02        |          44 | During first          | First       |
-|         4 | 2002-06-03  | 2002-03-03        |          92 | During first          | First       |
-|         4 | 2003-02-20  | 2002-03-03        |         354 | During subsequent     | Subsequent  |
-|         5 | 2006-07-21  | 2005-02-01        |         535 | Between eras          | First       |
-|         5 | 2008-01-01  | 2005-02-01        |        1064 | After last exposure   | Subsequent  |
+| patientId | outcomeDate | firstExposureDate | timeToEvent | type | outcomeType |
+|---:|:---|:---|---:|:---|:---|
+| 1 | 1999-10-03 | 2001-01-20 | -475 | Before first exposure | First |
+| 1 | 2001-10-30 | 2001-01-20 | 283 | During subsequent | Subsequent |
+| 3 | 2004-05-16 | 2004-04-02 | 44 | During first | First |
+| 4 | 2002-06-03 | 2002-03-03 | 92 | During first | First |
+| 4 | 2003-02-20 | 2002-03-03 | 354 | During subsequent | Subsequent |
+| 5 | 2006-07-21 | 2005-02-01 | 535 | Between eras | First |
+| 5 | 2008-01-01 | 2005-02-01 | 1064 | After last exposure | Subsequent |
 
-Table 3: Time-to-event intermediate summary.
+Table 3: Time-to-event intermediate summary. {.table}
 
 The time-to-event output aggregates the summary table into three
 different perspectives:
@@ -152,7 +153,7 @@ in Table 4.
 | 365-day  | Between eras          | First       |       366 |     730 |     1 |
 | 365-day  | After last exposure   | Subsequent  |       731 |    1095 |     1 |
 
-Table 4: Time-to-event output.
+Table 4: Time-to-event output. {.table}
 
 ## Dechallenge-rechallenge
 
@@ -192,6 +193,7 @@ does occur during the rechallenge exposure era).
 Here we consider the inputs are:
 
 ``` r
+
 targetIds <- c(1)
 outcomeIds <- c(2) 
 dechallengeStopInterval <- 30
@@ -221,7 +223,7 @@ Figure 3 - Example data for five patients with dates.
 |         5 |                  1 | 2005-02-01      | 2005-10-08    |
 |         5 |                  1 | 2007-04-03      | 2007-05-03    |
 
-Example dechallenge-rechallenge data with dates.
+Example dechallenge-rechallenge data with dates. {.table}
 
 | patientId | cohortDefinitionId | cohortStartDate | cohortEndDate |
 |----------:|-------------------:|:----------------|:--------------|
@@ -233,7 +235,7 @@ Example dechallenge-rechallenge data with dates.
 |         5 |                  2 | 2006-07-21      | 2006-08-03    |
 |         5 |                  2 | 2008-01-01      | 2008-01-09    |
 
-Example time-to-event data with timing.
+Example time-to-event data with timing. {.table}
 
 Let’s consider ten patients in Table 5 and Table 6 with 30 days for the
 dechallenge stop interval and 31 days for the decallenge evaluation
@@ -251,14 +253,15 @@ rechallenge is a success, otherwise it is a failure.
 #### Intermediary Table
 
 | patientId | outcomeDate | exposureEnd | outcomeAfter | futureExposure | futureOutcome | dechallengeType | rechallengeType |
-|----------:|:------------|:------------|:-------------|:---------------|:--------------|:----------------|:----------------|
-|         1 | 2001-11-30  | 2001-12-05  | \-           | \-             | \-            | Success         | \-              |
-|         2 | 2006-03-10  | 2006-03-21  | \-           | 2006-05-03     | \-            | Seccess         | Success         |
-|         3 | 2004-05-16  | 2004-05-17  | 2004-01-12   | \-             | \-            | Fail            | \-              |
-|         4 | 2002-06-03  | 2002-06-12  | \-           | 2003-01-01     | 2003-02-20    | Success         | Fail            |
+|---:|:---|:---|:---|:---|:---|:---|:---|
+| 1 | 2001-11-30 | 2001-12-05 | \- | \- | \- | Success | \- |
+| 2 | 2006-03-10 | 2006-03-21 | \- | 2006-05-03 | \- | Seccess | Success |
+| 3 | 2004-05-16 | 2004-05-17 | 2004-01-12 | \- | \- | Fail | \- |
+| 4 | 2002-06-03 | 2002-06-12 | \- | 2003-01-01 | 2003-02-20 | Success | Fail |
 
 Dehcallenge-rechallenge summary table showing each dechallenge. Only
-some patients with a dechallenge will have a rechallenge.
+some patients with a dechallenge will have a rechallenge. {.table
+style="width:100%;"}
 
 #### Intermediary Plots
 
@@ -282,10 +285,10 @@ rechallenges with 1 being a fail and 1 being a success, see Table 8 as
 the example output for one target and outcome.
 
 | dechallengeAttempts | dechallengeSuccess | dechallengeFailure | rechallengeAttempts | rechallengeSuccess | rechallangeFailure |
-|--------------------:|-------------------:|-------------------:|--------------------:|-------------------:|-------------------:|
-|                   4 |                  3 |                  1 |                   2 |                  1 |                  1 |
+|---:|---:|---:|---:|---:|---:|
+| 4 | 3 | 1 | 2 | 1 | 1 |
 
-Dehcallenge-rechallenge output.
+Dehcallenge-rechallenge output. {.table}
 
 **Note:** The way an outcome and exposure phenotype are designed can
 make it impossible or unlikely to see a dechallenge fail. For example,
@@ -327,6 +330,7 @@ the mean value and this makes interpretation difficult.
 Here we consider the inputs are:
 
 ``` r
+
 minPriorObservation <- 365
 limitToFirstInNDays <- 99999 # all time prior
 covariateSettings <- FeatureExtraction::createCovariateSettings(
@@ -381,7 +385,7 @@ their sex as features.
 |         3 |        2 | sex      | Female |
 |         3 |        2 | diabetes | No     |
 
-Example patient level feature data.
+Example patient level feature data. {.table}
 
 #### Results
 
@@ -396,7 +400,7 @@ We calculate the mean values for each feature per cohort:
 |        2 | Sex: Male     |  0.0 |
 |        2 | Diabetes: Yes |  0.0 |
 
-Example target baseline features for two example cohorts.
+Example target baseline features for two example cohorts. {.table}
 
 This analysis lets users compare the mean values of the features between
 databases for the same cohort or across different cohorts within the
@@ -435,6 +439,7 @@ to target cohort start + 180.
 #### Example Inputs
 
 ``` r
+
 targetId <- 1
 outcomeId <- 2
 limitToFirstInNDays <- 99999 # first ever
@@ -478,7 +483,7 @@ rfSettings <- Characterization::createRiskFactorSettings(
 |         5 |              1 | 2005-02-01      | 2005-10-08    | 2001-02-01       |
 |         5 |              1 | 2007-04-03      | 2007-05-03    | 2001-02-01       |
 
-Example target cohort.
+Example target cohort. {.table}
 
 | patientId | targetCohortId | cohortStartDate | cohortEndDate |
 |----------:|---------------:|:----------------|:--------------|
@@ -490,7 +495,7 @@ Example target cohort.
 |         5 |              2 | 2006-07-21      | 2006-08-03    |
 |         5 |              2 | 2008-01-01      | 2008-01-09    |
 
-Example outcome cohort.
+Example outcome cohort. {.table}
 
 #### Intermedeiary Tables
 
@@ -506,7 +511,7 @@ This leaves:
 |         4 |              1 | 2002-03-03      | 2002-06-12    |
 |         5 |              1 | 2005-02-01      | 2005-10-08    |
 
-Example target cohort meeting risk factor inclusion criteria.
+Example target cohort meeting risk factor inclusion criteria. {.table}
 
 We then find the patients in the target cohort with the outcome and
 no-outcome occurring during 1 day to 180 days after index:
@@ -518,7 +523,8 @@ no-outcome occurring during 1 day to 180 days after index:
 |         4 |              1 | 2002-03-03      | 2002-06-12    | Outcome     |
 |         5 |              1 | 2005-02-01      | 2005-10-08    | Non-outcome |
 
-Example target cohort meeting risk factor inclusion criteria.
+Example target cohort meeting risk factor inclusion criteria. {.table
+style="width:100%;"}
 
 **Note:** we also remove patients in the target who have the outcome
 during outcome washout days prior to target index. In the example,
@@ -541,7 +547,7 @@ If the features for these four patients are:
 |         5 | Non-outcome | sex      | Male   |
 |         5 | Non-outcome | diabetes | No     |
 
-Example patient level feature data.
+Example patient level feature data. {.table}
 
 #### Results
 
@@ -557,7 +563,7 @@ outcome cohort:
 | Non-outcome | Sex: Male     |  1.0 |
 | Non-outcome | Diabetes: Yes |  0.5 |
 
-Example aggregate features for risk factor analysis.
+Example aggregate features for risk factor analysis. {.table}
 
 We can then implement the standardized mean different calculated between
 the outcome and non-outcome cohorts, this is calculated per feature as:
@@ -608,6 +614,7 @@ outcome index and the 1 year after outcome index.
 Here we consider the inputs are:
 
 ``` r
+
 targetId <- 1
 outcomeId <- 2
 limitToFirstInNDays <- 99999 # first ever
@@ -654,7 +661,7 @@ caseSeriesSettings <- Characterization::createCaseSeriesSettings(
 |         5 |              1 | 2005-02-01      | 2005-10-08    | 2001-02-01       |
 |         5 |              1 | 2007-04-03      | 2007-05-03    | 2001-02-01       |
 
-Example target cohort.
+Example target cohort. {.table}
 
 | patientId | targetCohortId | cohortStartDate | cohortEndDate |
 |----------:|---------------:|:----------------|:--------------|
@@ -666,7 +673,7 @@ Example target cohort.
 |         5 |              2 | 2006-07-21      | 2006-08-03    |
 |         5 |              2 | 2008-01-01      | 2008-01-09    |
 
-Example outcome cohort.
+Example outcome cohort. {.table}
 
 #### Intermedeiary Tables
 
@@ -682,7 +689,7 @@ This leaves:
 |         4 |              1 | 2002-03-03      | 2002-06-12    |
 |         5 |              1 | 2005-02-01      | 2005-10-08    |
 
-Example target cohort meeting risk factor inclusion criteria.
+Example target cohort meeting risk factor inclusion criteria. {.table}
 
 We then find the patients in the target cohort with the outcome
 occurring during 1 day to 180 days after index:
@@ -692,7 +699,7 @@ occurring during 1 day to 180 days after index:
 |         3 |              1 | 2004-04-02      | 2004-05-17    | Outcome |
 |         4 |              1 | 2002-03-03      | 2002-06-12    | Outcome |
 
-Example target cohort meeting case inclusion criteria.
+Example target cohort meeting case inclusion criteria. {.table}
 
 **Note:** we also remove patients in the target who have the outcome
 during outcome washout days prior to target index. In the example,
@@ -703,11 +710,12 @@ index), between (target index plus 1 and outcome) and after (outcome
 index plus 1 to outcome index plus 365):
 
 | patientId | targetCohortId | targetStartDate | outcomeStartDate | beforeStartDate | beforeEndDate | duringStartDate | duringEndDate | afterStartDate | afterEndDate |
-|----------:|---------------:|:----------------|:-----------------|:----------------|:--------------|:----------------|:--------------|:---------------|:-------------|
-|         3 |              1 | 2004-04-02      | 2004-05-16       | 2003-04-03      | 2004-04-02    | 2004-04-03      | 2004-05-16    | 2004-05-17     | 2005-05-16   |
-|         4 |              1 | 2002-03-03      | 2002-06-03       | 2001-03-03      | 2002-03-03    | 2002-03-04      | 2002-06-03    | 2002-06-04     | 2003-06-03   |
+|---:|---:|:---|:---|:---|:---|:---|:---|:---|:---|
+| 3 | 1 | 2004-04-02 | 2004-05-16 | 2003-04-03 | 2004-04-02 | 2004-04-03 | 2004-05-16 | 2004-05-17 | 2005-05-16 |
+| 4 | 1 | 2002-03-03 | 2002-06-03 | 2001-03-03 | 2002-03-03 | 2002-03-04 | 2002-06-03 | 2002-06-04 | 2003-06-03 |
 
-Example cases with before/during/after dates.
+Example cases with before/during/after dates. {.table
+style="width:100%;"}
 
 If the features for these two patients at the three time periods are:
 
@@ -720,7 +728,7 @@ If the features for these two patients at the three time periods are:
 |         4 | diabetes | during     | Yes   |
 |         4 | diabetes | after      | Yes   |
 
-Example patient level case feature data.
+Example patient level case feature data. {.table}
 
 #### Results
 
@@ -732,4 +740,4 @@ Finally, we aggregate over the time periods:
 | diabetes: Yes | during     |   0.5 |
 | diabetes: Yes | after      |   1.0 |
 
-Example patient level case feature data.
+Example patient level case feature data. {.table}

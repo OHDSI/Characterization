@@ -42,12 +42,14 @@ package currently contains five different types of analyses:
 First we need to install the `Characterization` package:
 
 ``` r
+
 remotes::install_github("ohdsi/Characterization")
 ```
 
 and then load it:
 
 ``` r
+
 library(Characterization)
 library(dplyr)
 ```
@@ -70,6 +72,7 @@ SQLITE database containing an example observational medical outcomes
 partnership (OMOP) common data model (CDM) data in a temporary location.
 
 ``` r
+
 connectionDetails <- Characterization::exampleOmopConnectionDetails()
 ```
 
@@ -95,6 +98,7 @@ Using the Eunomia data were we previous generated four cohorts, we can
 use cohort ids 1,2 and 4 as the targetIds:
 
 ``` r
+
 exampleTargetIds <- c(1, 2, 4)
 ```
 
@@ -103,6 +107,7 @@ Comorbidity index we can create the settings using
 [`FeatureExtraction::createCovariateSettings`](https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html):
 
 ``` r
+
 exampleCovariateSettings <- FeatureExtraction::createCovariateSettings(
   useDemographicsGender = TRUE,
   useDemographicsAge = TRUE,
@@ -115,6 +120,7 @@ restricted to the first ever target index and those where the patient
 was observed for 365 days or more prior to index, we can run:
 
 ``` r
+
 exampleTargetBaselineSettings <- createTargetBaselineSettings(
   targetIds = exampleTargetIds,
   limitToFirstInNDays = 99999,
@@ -134,6 +140,7 @@ specified settings on the simulated Eunomia data, but we can specify the
 be written to.
 
 ``` r
+
 runCharacterizationAnalyses(
   connectionDetails = connectionDetails,
   cdmDatabaseSchema = "main",
@@ -187,6 +194,7 @@ use cohort ids 1,2 and 4 as the targetIds and cohort id 3 as the
 outcomeIds:
 
 ``` r
+
 exampleTargetIds <- c(1, 2, 4)
 exampleOutcomeIds <- 3
 ```
@@ -196,6 +204,7 @@ Comorbidity index we can create the settings using
 [`FeatureExtraction::createCovariateSettings`](https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html):
 
 ``` r
+
 exampleCovariateSettings <- FeatureExtraction::createCovariateSettings(
   useDemographicsGender = TRUE,
   useDemographicsAge = TRUE,
@@ -212,6 +221,7 @@ and only include targets where the patient was observed for 365 days or
 more prior, we can run:
 
 ``` r
+
 exampleRiskFactorSettings <- createRiskFactorSettings(
   targetIds = exampleTargetIds,
   outcomeIds = exampleOutcomeIds,
@@ -246,6 +256,7 @@ currently three supported modes:
   outcome washout days prior to index.
 
 ``` r
+
 runCharacterizationAnalyses(
   connectionDetails = connectionDetails,
   cdmDatabaseSchema = "main",
@@ -305,6 +316,7 @@ use cohort ids 1,2 and 4 as the targetIds and cohort id 3 as the
 outcomeIds:
 
 ``` r
+
 exampleTargetIds <- c(1, 2, 4)
 exampleOutcomeIds <- 3
 ```
@@ -312,6 +324,7 @@ exampleOutcomeIds <- 3
 If we want to get information on the conditions and visit counts:
 
 ``` r
+
 exampleCaseCovariateSettings <- Characterization::createDuringCovariateSettings(
   useConditionOccurrenceDuring = TRUE, 
   useVisitCountDuring = TRUE
@@ -327,6 +340,7 @@ outcome). The case covariates are also extracted between target index
 and outcome (answers the question what happens during target exposure).
 
 ``` r
+
 exampleCaseSeriesSettings <- createCaseSeriesSettings(
   targetIds = exampleTargetIds,
   outcomeIds = exampleOutcomeIds,
@@ -352,6 +366,7 @@ specified settings on the simulated Eunomia data, but we can specify the
 be written to.
 
 ``` r
+
 runCharacterizationAnalyses(
   connectionDetails = connectionDetails,
   cdmDatabaseSchema = "main",
@@ -397,6 +412,7 @@ use cohort ids 1,2 and 4 as the targetIds and cohort id 3 as the
 outcomeIds:
 
 ``` r
+
 exampleTargetIds <- c(1, 2, 4)
 exampleOutcomeIds <- 3
 ```
@@ -406,6 +422,7 @@ cohorts and our outcome cohort with a 30 day dechallengeStopInterval and
 31 day dechallengeEvaluationWindow:
 
 ``` r
+
 exampleDechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
   targetIds = exampleTargetIds,
   outcomeIds = exampleOutcomeIds,
@@ -420,6 +437,7 @@ specified, with `minCellCount` removing values less than the specified
 value:
 
 ``` r
+
 dc <- computeDechallengeRechallengeAnalyses(
   connectionDetails = connectionDetails,
   targetDatabaseSchema = "main",
@@ -434,6 +452,7 @@ dc <- computeDechallengeRechallengeAnalyses(
 Next it is possible to compute the failed rechallenge cases
 
 ``` r
+
 failed <- computeRechallengeFailCaseSeriesAnalyses(
   connectionDetails = connectionDetails,
   targetDatabaseSchema = "main",
@@ -456,6 +475,7 @@ using `createTimeToEventSettings`. This requires specifying:
 - one or more outcomeIds (these must be pre-generated in a cohort table)
 
 ``` r
+
 exampleTimeToEventSettings <- createTimeToEventSettings(
   targetIds = exampleTargetIds,
   outcomeIds = exampleOutcomeIds
@@ -466,6 +486,7 @@ We can then run the analysis on the Eunomia data using
 `computeTimeToEventAnalyses` and the settings previously specified:
 
 ``` r
+
 tte <- computeTimeToEventAnalyses(
   connectionDetails = connectionDetails,
   cdmDatabaseSchema = "main",
@@ -486,6 +507,7 @@ each of the settings (or NULL if you do not want to run one type of
 analysis). To run all the analyses previously shown in one function:
 
 ``` r
+
 characterizationSettings <- createCharacterizationSettings(
   timeToEventSettings = list(
     exampleTimeToEventSettings
@@ -529,6 +551,7 @@ This will create csv files with the results in the saveDirectory. You
 can run the following code to view the results in a shiny app:
 
 ``` r
+
 viewCharacterization(
   resultFolder = file.path(tempdir(), "example", "results"),
   cohortDefinitionSet = NULL

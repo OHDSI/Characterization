@@ -137,8 +137,8 @@ Other CovariateSetting:
 ## Examples
 
 ``` r
+
 conDet <- exampleOmopConnectionDetails()
-#> Closing database connection
 connection <- DatabaseConnector::connect(conDet)
 #> Connecting using SQLite driver
 
@@ -157,10 +157,10 @@ duringData <- getDbDuringCovariateData(
   cohortTable = 'cohort'
 )
 #> Constructing during cohort covariates
-#> Executing SQL took 0.00308 secs
-#> Executing SQL took 0.00243 secs
+#> Executing SQL took 0.00347 secs
+#> Executing SQL took 0.00289 secs
 #> Executing during sql code for ConditionOccurrenceDuring
-#> Executing SQL took 0.0186 secs
+#> Executing SQL took 0.0173 secs
 #> Execution took 0.02 secs
 #> Extracting covariates
 #> Downloading covariates
