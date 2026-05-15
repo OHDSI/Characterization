@@ -263,7 +263,7 @@ runCharacterizationAnalyses <- function(
     threads = 1,
     cohortGenerationThreads = NULL,
     nTargetJobs = 1,
-    minCharacterizationMean = 0.01, # is this global or within cov set?
+    minCharacterizationMean = 0.001, # is this global or within cov set?
     minCovariateCount = 0, # is this global or within cov set?
     mode = 'CohortIncidence',
     minSMD = 0
