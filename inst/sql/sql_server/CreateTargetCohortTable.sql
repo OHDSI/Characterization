@@ -14,6 +14,6 @@ char_type VARCHAR(20)
 DROP TABLE IF EXISTS @characterization_schema.@attrition_table;
 CREATE TABLE @characterization_schema.@attrition_table(
 cohort_definition_id BIGINT,
-attr_reason VARCHAR(50),
+attr_reason VARCHAR(100),
 n BIGINT
 );
