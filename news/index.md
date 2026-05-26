@@ -2,6 +2,8 @@
 
 ## Characterization 3.0.1
 
+CRAN release: 2026-05-15
+
 - Fix issue with uploading results into database for shiny viewer
   (spacing was added to csv and causing issues and continuous covariates
   that are floats were incorrectly bigints)
