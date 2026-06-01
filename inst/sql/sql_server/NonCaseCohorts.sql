@@ -1,5 +1,8 @@
 -- clean this table at the end
 IF OBJECT_ID('tempdb..#temp_non_cases', 'U') IS NOT NULL DROP TABLE #temp_non_cases;
+IF OBJECT_ID('tempdb..#temp_non_cases_with_tar', 'U') IS NOT NULL DROP TABLE #temp_non_cases_with_tar;
+IF OBJECT_ID('tempdb..#temp_non_cases_pass_washout', 'U') IS NOT NULL DROP TABLE #temp_non_cases_pass_washout;
+
 
 SELECT
     case_settings.characterization_case_id*10+2 as cohort_definition_id,
@@ -103,45 +106,130 @@ AND cohort_definition_id in (SELECT DISTINCT cohort_definition_id FROM #temp_non
   ;
 
 
+-- add counts
+-- add case count table
+DELETE FROM @characterization_schema.@case_count_table
+WHERE cohort_type = 'non-cases'
+AND characterization_case_id in
+(SELECT DISTINCT (cohort_definition_id-2.0)/10.0 FROM #temp_non_cases);
 
-INSERT INTO @characterization_schema.@attrition_table
-
+INSERT INTO @characterization_schema.@case_count_table
 SELECT
-cohort_definition_id,
-attr_reason,
-count(*) as n
+(cohort_definition_id-2.0)/10.0 as characterization_case_id,
+'non-cases' as cohort_type,
+count(*) as n_events, -- new
+count(distinct subject_id) as n_people -- new
 
-FROM
+FROM  #temp_non_cases temp
 
-(SELECT
-  temp.cohort_definition_id,
-  temp.row_number,
+-- not a case
+WHERE temp.outcome_during_tar = 0
 
-{@use_plp}?{
-CASE
-WHEN temp.no_tar_ignoring_outcome_washout = 1 OR temp.no_tar_obs = 1 THEN '1. No TAR due to TAR start > TAR end or observation end'
-WHEN temp.outcome_in_washout_before_tar = 1 THEN '2. Outcome occurs during washout'
-WHEN temp.outcome_during_tar = 1 THEN '3. Has outcome during TAR'
-END attr_reason
-}
-{@use_ci}?{
-CASE
-WHEN temp.no_tar_ignoring_outcome_washout = 1 OR temp.no_tar_obs = 1 THEN '1. No TAR due to TAR start > TAR end or observation end'
-WHEN temp.no_tar_because_outcome_washout = 1 OR temp.no_tar_washout_and_obs = 1 THEN '2. No TAR due to outcome washout'
-WHEN temp.outcome_during_tar = 1 THEN '3. Has outcome during TAR'
-END attr_reason
-}
-
-FROM #temp_non_cases temp
-) attrition
-
-WHERE attr_reason IS NOT NULL
+  {@use_plp}?{ -- exclude anyone with with outcome during washout before TAR or no TAR
+    AND temp.outcome_in_washout_before_tar = 0
+    AND temp.no_tar_ignoring_outcome_washout = 0
+    AND temp.no_tar_obs = 0
+  }
+  {@use_ci}?{ -- exclude anyone without 1+ days of TAR
+    AND temp.no_tar_ignoring_outcome_washout = 0
+    AND temp.no_tar_because_outcome_washout = 0
+    AND temp.no_tar_washout_and_obs = 0
+    AND temp.no_tar_obs = 0
+  }
 
 GROUP BY
-cohort_definition_id,
-attr_reason
+cohort_definition_id
 ;
+
+
+
+
+-- add the reasons for lost people due to tar/washout
+SELECT *
+INTO #temp_non_cases_with_tar
+FROM #temp_non_cases temp
+
+{@use_plp}?{
+WHERE temp.no_tar_ignoring_outcome_washout = 0 AND temp.no_tar_obs = 0
+}
+{@use_ci}?{
+WHERE temp.no_tar_ignoring_outcome_washout = 0 AND temp.no_tar_obs = 0
+}
+;
+
+SELECT *
+INTO #temp_non_cases_pass_washout
+FROM #temp_non_cases_with_tar temp
+
+{@use_plp}?{
+WHERE temp.outcome_in_washout_before_tar = 0
+}
+{@use_ci}?{
+WHERE temp.no_tar_because_outcome_washout = 0 AND temp.no_tar_washout_and_obs = 0
+}
+;
+
+
+-- next
+DELETE FROM @characterization_schema.@case_attrition_table
+WHERE characterization_case_id in
+(SELECT DISTINCT (cohort_definition_id-2.0)/10.0 FROM #temp_non_cases);
+
+
+INSERT INTO @characterization_schema.@case_attrition_table
+
+SELECT
+(cohort_definition_id - 2.0)/10.0 as characterization_case_id,
+8 as attr_order, -- new
+'Has some TAR' as attr_reason,
+count(*) as n_events, -- new
+count(distinct subject_id) as n_people -- new
+
+FROM #temp_non_cases_with_tar
+GROUP BY cohort_definition_id
+
+-- add 0s
+UNION
+SELECT DISTINCT
+(cohort_definition_id - 2.0)/10.0 as characterization_case_id,
+8 as attr_order, -- new
+'Has some TAR' as attr_reason,
+0 as n_events,
+0 as n_people
+FROM #temp_non_cases
+WHERE cohort_definition_id NOT IN
+(SELECT distinct cohort_definition_id FROM #temp_non_cases_with_tar)
+
+;
+
+INSERT INTO @characterization_schema.@case_attrition_table
+SELECT
+(cohort_definition_id - 2.0)/10.0 as characterization_case_id,
+9 as attr_order, -- new
+'Remains after outcome washout' as attr_reason,
+count(*) as n_events, -- new
+count(distinct subject_id) as n_people -- new
+
+FROM #temp_non_cases_pass_washout
+GROUP BY cohort_definition_id
+
+UNION
+
+SELECT DISTINCT
+(cohort_definition_id - 2.0)/10.0 as characterization_case_id,
+9 as attr_order, -- new
+'Remains after outcome washout' as attr_reason,
+0 as n_events,
+0 as n_people
+FROM #temp_non_cases_with_tar
+WHERE cohort_definition_id NOT IN
+(SELECT distinct cohort_definition_id FROM #temp_non_cases_pass_washout)
+;
+
+
 
 -- cleaning table
 IF OBJECT_ID('tempdb..#temp_non_cases', 'U') IS NOT NULL DROP TABLE #temp_non_cases;
+IF OBJECT_ID('tempdb..#temp_non_cases_with_tar', 'U') IS NOT NULL DROP TABLE #temp_non_cases_with_tar;
+IF OBJECT_ID('tempdb..#temp_non_cases_pass_washout', 'U') IS NOT NULL DROP TABLE #temp_non_cases_pass_washout;
 

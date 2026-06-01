@@ -10,6 +10,8 @@ runCharacterizationAnalyses(
   targetTable,
   outcomeDatabaseSchema,
   outcomeTable,
+  nestingCohortTable,
+  nestingCohortDatabaseSchema,
   outputDatabaseSchema = targetDatabaseSchema,
   outputTable = "characterization_cohort",
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
@@ -25,7 +27,7 @@ runCharacterizationAnalyses(
   threads = 1,
   cohortGenerationThreads = NULL,
   nTargetJobs = 1,
-  minCharacterizationMean = 0.01,
+  minCharacterizationMean = 0.001,
   minCovariateCount = 0,
   mode = "CohortIncidence",
   minSMD = 0
@@ -45,6 +47,10 @@ this should include both the database and schema name, for example
 'scratch.dbo'.}
 
 \item{outcomeTable}{Name of the outcome cohort table.}
+
+\item{nestingCohortTable}{The cohort table to extract the nesting cohort from}
+
+\item{nestingCohortDatabaseSchema}{The schema containing the nestingCohortTable}
 
 \item{outputDatabaseSchema}{The schema where the characterization cohort table will be saved into}
 

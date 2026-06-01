@@ -8,30 +8,40 @@ test_that("runCharacterizationAnalyses", {
   outcomeIds <- c(3)
 
   timeToEventSettings1 <- createTimeToEventSettings(
-    targetIds = 1,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = 1
+      ),
     outcomeIds = c(3, 4)
   )
   timeToEventSettings2 <- createTimeToEventSettings(
-    targetIds = 2,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = 2
+    ),
     outcomeIds = c(3, 4)
   )
 
   dechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     outcomeIds = outcomeIds,
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 31
   )
 
   targetBaselineSettings1 <- createTargetBaselineSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     covariateSettings = FeatureExtraction::createCovariateSettings(
       useDemographicsGender = TRUE
     )
   )
 
   targetBaselineSettings2 <- createTargetBaselineSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     covariateSettings = FeatureExtraction::createCovariateSettings(
       useDemographicsAge = TRUE,
       useDemographicsRace = TRUE
@@ -39,7 +49,9 @@ test_that("runCharacterizationAnalyses", {
   )
 
   riskFactorSettings <- createRiskFactorSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     outcomeIds = outcomeIds,
     riskWindowStart = 1,
     startAnchor = "cohort start",
@@ -53,7 +65,9 @@ test_that("runCharacterizationAnalyses", {
   )
 
   caseSeriesSettings <- createCaseSeriesSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     outcomeIds = outcomeIds,
     riskWindowStart = 1,
     startAnchor = "cohort start",
@@ -89,8 +103,22 @@ test_that("runCharacterizationAnalyses", {
     length(characterizationSettings$timeToEventSettings) == 2
   )
   testthat::expect_true(
+    length(characterizationSettings$timeToEventSettings[[1]]$characterizationTargetIds) == 1
+  )
+  testthat::expect_true(
+    is.null(characterizationSettings$timeToEventSettings[[1]]$studyPopulationSettings)
+  )
+
+  testthat::expect_true(
     length(characterizationSettings$dechallengeRechallengeSettings) == 1
   )
+  testthat::expect_true(
+    length(characterizationSettings$dechallengeRechallengeSettings[[1]]$characterizationTargetIds) == 3
+  )
+  testthat::expect_true(
+    is.null(characterizationSettings$dechallengeRechallengeSettings[[1]]$studyPopulationSettings)
+  )
+
   testthat::expect_true(
     length(characterizationSettings$targetBaselineSettings) == 2
   )
@@ -132,7 +160,6 @@ test_that("runCharacterizationAnalyses", {
 
   tempFolder <- tempfile("Characterization")
   on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
-
 
   runCharacterizationAnalyses(
     connectionDetails = connectionDetails,

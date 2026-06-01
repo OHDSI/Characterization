@@ -131,12 +131,18 @@ FROM #characterization_cases;
 
 }
 
--- add to attrition table using risk factor id
-INSERT INTO @characterization_schema.@attrition_table
+-- add case count table
+DELETE FROM @characterization_schema.@case_count_table
+WHERE cohort_type = 'Cases'
+AND characterization_case_id in
+(SELECT DISTINCT cohort_definition_id FROM #characterization_cases);
+
+INSERT INTO @characterization_schema.@case_count_table
 SELECT
-cohort_definition_id*10+1,
-'Cases' as attr_reason,
-count(*) as n
+cohort_definition_id as characterization_case_id,
+'Cases' as cohort_type,
+count(*) as n_events, -- new
+count(distinct subject_id) as n_people -- new
 
 FROM #characterization_cases
 

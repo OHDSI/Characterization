@@ -5,10 +5,8 @@
 \title{Create risk factor study settings}
 \usage{
 createRiskFactorSettings(
-  targetIds,
+  studyPopulationSettings,
   outcomeIds,
-  limitToFirstInNDays = 99999,
-  minPriorObservation = 0,
   outcomeWashoutDays = 0,
   riskWindowStart = 1,
   startAnchor = "cohort start",
@@ -34,13 +32,9 @@ createRiskFactorSettings(
 )
 }
 \arguments{
-\item{targetIds}{A list of cohortIds for the target cohorts}
+\item{studyPopulationSettings}{A list of objects created using \code{createStudyPopulationSettings} that specifies target cohorts and inclusion criteria}
 
 \item{outcomeIds}{A list of cohortIds for the outcome cohorts}
-
-\item{limitToFirstInNDays}{whether to limit each target cohort to the first entry into the cohort per N days per subject}
-
-\item{minPriorObservation}{The minimum time (in days) in the database a patient in the target cohorts must be observed prior to index}
 
 \item{outcomeWashoutDays}{Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis}
 
@@ -69,9 +63,12 @@ Create risk factor study settings
 \examples{
 
 riskFactorSetting <- createRiskFactorSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    minPriorObservation = 365,
+    limitToFirstInNDays = 99999
+  ),
   outcomeIds = c(3),
-  minPriorObservation = 365,
   outcomeWashoutDays = 90,
   riskWindowStart = 1,
   startAnchor = "cohort start",

@@ -89,7 +89,80 @@ createCharacterizationSettings <- function(
     caseSeriesSettings = caseSeriesSettings
   )
 
+  # update the settings replace the popSet with the characterizationTargetIds
+  settings <- addCharacterizationTargetIds(
+    settings = settings
+  )
+
   class(settings) <- "characterizationSettings"
+
+  return(settings)
+}
+
+# this function extracts all the target ids and subset logic then gives each a unique id
+# then it replaces the sudyPopulationSettings with characterizationTargetIds
+addCharacterizationTargetIds <- function(settings){
+
+  settingTypes <- c('timeToEventSettings', 'dechallengeRechallengeSettings',
+                    'targetBaselineSettings', 'riskFactorSettings', 'caseSeriesSettings')
+
+  # extract out studyPopulationSettings
+  studyPopulationList <- list()
+
+  for(settingType in settingTypes){
+    if(!is.null(settings[[settingType]])){
+      studyPopulationList <- append(
+        studyPopulationList,
+        lapply(settings[[settingType]], function(x){
+          x$studyPopulationSettings %>%
+            dplyr::mutate(
+              timeToEventSettings = !!settingType == 'timeToEventSettings',
+              dechallengeRechallengeSettings = !!settingType == 'dechallengeRechallengeSettings',
+              targetBaselineSettings = !!settingType == 'targetBaselineSettings',
+              riskFactorSettings = !!settingType == 'riskFactorSettings',
+              caseSeriesSettings = !!settingType == 'caseSeriesSettings',
+            )
+          })
+      )
+    }
+  }
+
+  # get the unique target + subsets
+  studyPopulation <- unique(do.call('rbind', studyPopulationList)) %>%
+    dplyr::group_by(dplyr::across(-settingTypes)) %>%
+    dplyr::summarise(
+      timeToEventSettings = any(.data$timeToEventSettings),
+      dechallengeRechallengeSettings = any(.data$dechallengeRechallengeSettings),
+      targetBaselineSettings = any(.data$targetBaselineSettings),
+      riskFactorSettings = any(.data$riskFactorSettings),
+      caseSeriesSettings = any(.data$caseSeriesSettings),
+    )
+  # give a new id called characterizationTargetIds per target and subset
+  # characterizationTargetId always ends in 0
+  studyPopulation$characterizationTargetId <- (1:nrow(studyPopulation))*10
+
+  settings$characterizationTargetLookup <- studyPopulation
+
+  # Now update the settings to replace studyPopulationSettings with characterizationTargetIds
+  for(settingType in settingTypes){
+    if(!is.null(settings[[settingType]])){
+
+      for(i in 1:length(settings[[settingType]])){
+
+        popSet <- settings[[settingType]][[i]]$studyPopulationSettings
+        settings[[settingType]][[i]]$studyPopulationSettings <- NULL
+
+        studyPopulationInSetting <- merge(
+          x = popSet,
+          y = studyPopulation,
+          by = colnames(popSet)
+        )
+        settings[[settingType]][[i]]$characterizationTargetIds <- unique(studyPopulationInSetting$characterizationTargetId)
+
+      }
+
+    }
+  }# end updating settings
 
   return(settings)
 }
@@ -194,6 +267,8 @@ loadCharacterizationSettings <- function(
 #' @param connectionDetails  The connection details to the database containing the OMOP CDM data
 #' @template TargetOutcomeTables
 #' @template TempEmulationSchema
+#' @param nestingCohortTable           The cohort table to extract the nesting cohort from
+#' @param nestingCohortDatabaseSchema  The schema containing the nestingCohortTable
 #' @param outputDatabaseSchema The schema where the characterization cohort table will be saved into
 #' @param outputTable The table name where the characterization cohort table will be saved into
 #' @param cdmDatabaseSchema The schema with the OMOP CDM data
@@ -212,6 +287,8 @@ loadCharacterizationSettings <- function(
 #' @param minCovariateCount The minimum number of patients who must have the covariate when running aggregate covariates
 #' @param mode Select from Efficient (no exclusions to target based on washout)/CohortIncidence (excludes targets with outcome in washout if they have no time at risk)/PatientLevelPrediction (excludes targets with outcome during washout prior to index)
 #' @param minSMD The minimum standardized mean difference for the risk factor analysis
+#' @param minTargetSize The minimum target size to be included in targetBaseline, riskFactor or caseSeries
+#' @param minCaseSize The minimum case or non-case size to be included in riskFactor or caseSeries
 #' @family LargeScale
 #'
 #' @return
@@ -248,6 +325,8 @@ runCharacterizationAnalyses <- function(
     targetTable,
     outcomeDatabaseSchema,
     outcomeTable,
+    nestingCohortTable,
+    nestingCohortDatabaseSchema,
     outputDatabaseSchema = targetDatabaseSchema,
     outputTable = 'characterization_cohort',
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
@@ -263,10 +342,12 @@ runCharacterizationAnalyses <- function(
     threads = 1,
     cohortGenerationThreads = NULL,
     nTargetJobs = 1,
-    minCharacterizationMean = 0.001, # is this global or within cov set?
-    minCovariateCount = 0, # is this global or within cov set?
+    minCharacterizationMean = 0.001,
+    minCovariateCount = 0,
     mode = 'CohortIncidence',
-    minSMD = 0
+    minSMD = 0,
+    minTargetSize = 0,
+    minCaseSize = 0
     ) {
   # inputs checks
   errorMessages <- checkmate::makeAssertCollection()
@@ -426,6 +507,10 @@ runCharacterizationAnalyses <- function(
     targetTable = targetTable,
     outcomeDatabaseSchema = outcomeDatabaseSchema,
     outcomeTable = outcomeTable,
+
+    nestingCohortTable = nestingCohortTable,
+    nestingCohortDatabaseSchema = nestingCohortDatabaseSchema,
+
     outputDatabaseSchema = outputDatabaseSchema,
     outputTable = outputTable,
     cdmDatabaseSchema = cdmDatabaseSchema,
@@ -447,7 +532,10 @@ runCharacterizationAnalyses <- function(
     connectionDetails = connectionDetails,
     tempEmulationSchema = tempEmulationSchema,
     outputDatabaseSchema = outputDatabaseSchema,
-    attritionTable = tableNames$attritionTable,
+    caseAttritionTable = tableNames$caseAttritionTable,
+    targetAttritionTable = tableNames$targetAttritionTable,
+    caseCountTable = tableNames$caseCountTable,
+    targetCountTable = tableNames$targetCountTable,
     targetSettingsTable = tableNames$targetSettingsTable,
     caseSettingsTable = tableNames$caseSettingsTable,
     dbHash = dbHash,
@@ -457,7 +545,7 @@ runCharacterizationAnalyses <- function(
     minSMD = minSMD
   )
 
-  # Now loop over the jobs
+  # Now loop over the analysis jobs
   inputSettings <- list(
     connectionDetails = connectionDetails,
     targetDatabaseSchema = targetDatabaseSchema,
@@ -479,6 +567,12 @@ runCharacterizationAnalyses <- function(
     characterizationTable = tableNames$characterizationTable,
     targetSettingsTable = tableNames$targetSettingsTable,
     caseSettingsTable = tableNames$caseSettingsTable,
+
+    targetCountTable = tableNames$targetCountTable,
+    caseCountTable = tableNames$caseCountTable,
+    minTargetSize = minTargetSize,
+    minCaseSize = minCaseSize,
+
     mode = mode,
     minSMD = minSMD,
     executionId = executionId
@@ -656,7 +750,10 @@ exportSharedObjects <- function(
     connectionDetails,
     outputDatabaseSchema,
     tempEmulationSchema,
-    attritionTable,
+    caseAttritionTable,
+    targetAttritionTable,
+    caseCountTable,
+    targetCountTable,
     targetSettingsTable,
     caseSettingsTable,
 
@@ -707,15 +804,94 @@ exportSharedObjects <- function(
     row.names = FALSE
   )
 
-  # extract attrition, target_settings
-  if(!is.null(characterizationSettings$caseSeriesSettings) |
-     !is.null(characterizationSettings$riskFactorSettings) |
-     !is.null(characterizationSettings$targetBaselineSettings)){
 
-    # export attrition table
+  # extract target attrition
+  # export target attrition table
+  sql <- SqlRender::render(
+    sql = "SELECT * FROM @attrition_table;",
+    attrition_table = paste0(outputDatabaseSchema, '.' ,targetAttritionTable)
+  )
+  sql <- SqlRender::translate(
+    sql = sql,
+    targetDialect = attributes(connection)$dbms,
+    tempEmulationSchema = tempEmulationSchema
+  )
+
+  andromeda <- Andromeda::andromeda()
+
+  DatabaseConnector::querySqlToAndromeda(
+    connection = connection,
+    sql = sql,
+    andromeda = andromeda,
+    andromedaTableName = 'target_attrition',
+    snakeCaseToCamelCase = TRUE
+  )
+
+  addDbAndSettings(
+    andromeda = andromeda,
+    databaseId = databaseId,
+    settingId = executionId
+  )
+
+  saveCharacterizationAndromeda(
+    andromeda = andromeda,
+    outputFolder = file.path(executionPath, 'target_attrition')
+  )
+
+  # export target settings table
+  sql <- SqlRender::render(
+    sql = "SELECT * FROM @target_settings_table;",
+    target_settings_table = paste0(outputDatabaseSchema, '.' ,targetSettingsTable)
+  )
+  sql <- SqlRender::translate(
+    sql = sql,
+    targetDialect = attributes(connection)$dbms,
+    tempEmulationSchema = tempEmulationSchema
+  )
+  data <- DatabaseConnector::querySql(
+    connection = connection,
+    sql = sql,
+    snakeCaseToCamelCase = FALSE
+  )
+  data$database_id <- databaseId
+  data$setting_id <- executionId
+  utils::write.csv(
+    x = formatDouble(data),
+    file = file.path(saveLocation, paste0(tablePrefix,'target_settings.csv')),
+    row.names = FALSE
+  )
+
+  # export target count table
+  sql <- SqlRender::render(
+    sql = "SELECT * FROM @target_count_table;",
+    target_count_table = paste0(outputDatabaseSchema, '.' ,targetCountTable)
+  )
+  sql <- SqlRender::translate(
+    sql = sql,
+    targetDialect = attributes(connection)$dbms,
+    tempEmulationSchema = tempEmulationSchema
+  )
+  data <- DatabaseConnector::querySql(
+    connection = connection,
+    sql = sql,
+    snakeCaseToCamelCase = FALSE
+  )
+  data$database_id <- databaseId
+  data$setting_id <- executionId
+  utils::write.csv(
+    x = formatDouble(data),
+    file = file.path(saveLocation, paste0(tablePrefix,'target_counts.csv')),
+    row.names = FALSE
+  )
+
+  # extract case attrition
+  if(!is.null(characterizationSettings$caseSeriesSettings) |
+     !is.null(characterizationSettings$riskFactorSettings) ){
+
+    # export target attrition table
     sql <- SqlRender::render(
-      sql = "SELECT cohort_definition_id,	attr_reason, n FROM @attrition_table;",
-      attrition_table = paste0(outputDatabaseSchema, '.' ,attritionTable)
+      sql = "SELECT * FROM @attrition_table;",
+      attrition_table = paste0(outputDatabaseSchema, '.' ,caseAttritionTable)
     )
     sql <- SqlRender::translate(
       sql = sql,
@@ -729,7 +905,7 @@ exportSharedObjects <- function(
       connection = connection,
       sql = sql,
       andromeda = andromeda,
-      andromedaTableName = 'attrition',
+      andromedaTableName = 'case_attrition',
       snakeCaseToCamelCase = TRUE
     )
 
@@ -741,41 +917,12 @@ exportSharedObjects <- function(
 
     saveCharacterizationAndromeda(
       andromeda = andromeda,
-      outputFolder = file.path(executionPath, 'attrition')
+      outputFolder = file.path(executionPath, 'case_attrition')
     )
 
-    # export target settings table
+    # export case settings table
     sql <- SqlRender::render(
-      sql = "SELECT target_id,	limit_to_first_in_n_days,	min_prior_observation, characterization_target_id FROM @target_settings_table;",
-      target_settings_table = paste0(outputDatabaseSchema, '.' ,targetSettingsTable)
-    )
-    sql <- SqlRender::translate(
-      sql = sql,
-      targetDialect = attributes(connection)$dbms,
-      tempEmulationSchema = tempEmulationSchema
-    )
-    data <- DatabaseConnector::querySql(
-      connection = connection,
-      sql = sql,
-      snakeCaseToCamelCase = FALSE
-    )
-    data$database_id <- databaseId
-    data$setting_id <- executionId
-    utils::write.csv(
-      x = formatDouble(data),
-      file = file.path(saveLocation, paste0(tablePrefix,'target_settings.csv')),
-      row.names = FALSE
-    )
-
-  }
-
-  # extract case_settings
-  if(!is.null(characterizationSettings$caseSeriesSettings) |
-     !is.null(characterizationSettings$riskFactorSettings) ){
-
-    # export target settings table
-    sql <- SqlRender::render(
-      sql = "SELECT characterization_case_id, characterization_target_id, outcome_id,	outcome_washout_days,	risk_window_start,	start_anchor,	risk_window_end,	end_anchor,	runtype	 FROM @case_settings_table;",
+      sql = "SELECT characterization_case_id, characterization_target_id, outcome_id,	outcome_washout_days,	risk_window_start,	start_anchor,	risk_window_end,	end_anchor,	risk_factor_settings, case_series_settings FROM @case_settings_table;",
       case_settings_table = paste0(outputDatabaseSchema, '.' ,caseSettingsTable)
     )
     sql <- SqlRender::translate(
@@ -793,6 +940,29 @@ exportSharedObjects <- function(
     utils::write.csv(
       x = formatDouble(data),
       file = file.path(saveLocation, paste0(tablePrefix,'case_settings.csv')),
+      row.names = FALSE
+    )
+
+    # export case count table
+    sql <- SqlRender::render(
+      sql = "SELECT * FROM @case_count_table;",
+      case_count_table = paste0(outputDatabaseSchema, '.' ,caseCountTable)
+    )
+    sql <- SqlRender::translate(
+      sql = sql,
+      targetDialect = attributes(connection)$dbms,
+      tempEmulationSchema = tempEmulationSchema
+    )
+    data <- DatabaseConnector::querySql(
+      connection = connection,
+      sql = sql,
+      snakeCaseToCamelCase = FALSE
+    )
+    data$database_id <- databaseId
+    data$setting_id <- executionId
+    utils::write.csv(
+      x = formatDouble(data),
+      file = file.path(saveLocation, paste0(tablePrefix,'case_counts.csv')),
       row.names = FALSE
     )
 

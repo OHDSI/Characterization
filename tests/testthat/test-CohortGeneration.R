@@ -6,30 +6,40 @@ test_that("getCohortJobs", {
   outcomeIds <- c(3)
 
   timeToEventSettings1 <- createTimeToEventSettings(
-    targetIds = 1,
+    createStudyPopulationSettings(
+      targetIds = 1
+    ),
     outcomeIds = c(3, 4)
   )
   timeToEventSettings2 <- createTimeToEventSettings(
-    targetIds = 2,
+    createStudyPopulationSettings(
+      targetIds = 2
+    ),
     outcomeIds = c(3, 4)
   )
 
   dechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
-    targetIds = targetIds,
+    createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     outcomeIds = outcomeIds,
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 31
   )
 
   targetBaselineSettings1 <- createTargetBaselineSettings(
-    targetIds = targetIds,
+    createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     covariateSettings = FeatureExtraction::createCovariateSettings(
       useDemographicsGender = TRUE
     )
   )
 
   targetBaselineSettings2 <- createTargetBaselineSettings(
-    targetIds = targetIds,
+    createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     covariateSettings = FeatureExtraction::createCovariateSettings(
       useDemographicsAge = TRUE,
       useDemographicsRace = TRUE
@@ -37,7 +47,11 @@ test_that("getCohortJobs", {
   )
 
   riskFactorSettings <- createRiskFactorSettings(
-    targetIds = targetIds,
+    createStudyPopulationSettings(
+      targetIds = targetIds,
+      limitToFirstInNDays = 365,
+      minPriorObservation = 365
+    ),
     outcomeIds = outcomeIds,
     riskWindowStart = 1,
     startAnchor = "cohort start",
@@ -51,7 +65,11 @@ test_that("getCohortJobs", {
   )
 
   caseSeriesSettings <- createCaseSeriesSettings(
-    targetIds = targetIds,
+    createStudyPopulationSettings(
+      targetIds = targetIds,
+      limitToFirstInNDays = 365,
+      minPriorObservation = 365
+    ),
     outcomeIds = outcomeIds,
     riskWindowStart = 1,
     startAnchor = "cohort start",
@@ -86,9 +104,9 @@ jobs <- getCohortJobs(
   nTargetJobs = 1
   )
 
-testthat::expect_true(nrow(jobs$targets) == 3)
+testthat::expect_true(nrow(jobs$targets) == 6)
 testthat::expect_true(nrow(jobs$cases) == 3)
-testthat::expect_true(nrow(jobs$jobs) == 2)
+testthat::expect_true(nrow(jobs$jobs) == 3)
 
 testthat::expect_true(sum(ParallelLogger::convertJsonToSettings(jobs$jobs$settings[1])$targetIds %in% targetIds) == 3)
 
@@ -99,9 +117,9 @@ jobs <- getCohortJobs(
   nTargetJobs = 2
 )
 
-testthat::expect_true(nrow(jobs$targets) == 3)
+testthat::expect_true(nrow(jobs$targets) == 6)
 testthat::expect_true(nrow(jobs$cases) == 3)
-testthat::expect_true(nrow(jobs$jobs) == 4)
+testthat::expect_true(nrow(jobs$jobs) == 6)
 
 testthat::expect_true(sum(unique(c(ParallelLogger::convertJsonToSettings(jobs$jobs$settings[1])$targetIds, ParallelLogger::convertJsonToSettings(jobs$jobs$settings[2])$targetIds)) %in% targetIds) == 3)
 
@@ -112,9 +130,9 @@ jobs <- getCohortJobs(
   nTargetJobs = 3
 )
 
-testthat::expect_true(nrow(jobs$targets) == 3)
+testthat::expect_true(nrow(jobs$targets) == 6)
 testthat::expect_true(nrow(jobs$cases) == 3)
-testthat::expect_true(nrow(jobs$jobs) == 6)
+testthat::expect_true(nrow(jobs$jobs) == 9)
 
 testthat::expect_true(sum(unique(
   c(ParallelLogger::convertJsonToSettings(jobs$jobs$settings[1])$targetIds,
@@ -129,9 +147,9 @@ jobs <- getCohortJobs(
   nTargetJobs = 4
 )
 
-testthat::expect_true(nrow(jobs$targets) == 3)
+testthat::expect_true(nrow(jobs$targets) == 6)
 testthat::expect_true(nrow(jobs$cases) == 3)
-testthat::expect_true(nrow(jobs$jobs) == 6)
+testthat::expect_true(nrow(jobs$jobs) == 9)
 
 testthat::expect_true(sum(unique(
   c(ParallelLogger::convertJsonToSettings(jobs$jobs$settings[1])$targetIds,
@@ -147,9 +165,9 @@ jobs <- getCohortJobs(
   nTargetJobs = 4
 )
 
-testthat::expect_true(nrow(jobs$targets) == 3)
+testthat::expect_true(nrow(jobs$targets) == 6)
 testthat::expect_true(nrow(jobs$cases) == 3)
-testthat::expect_true(nrow(jobs$jobs) == 9)
+testthat::expect_true(nrow(jobs$jobs) == 12)
 
 testthat::expect_true(sum(unique(
   c(ParallelLogger::convertJsonToSettings(jobs$jobs$settings[1])$targetIds,
@@ -158,15 +176,15 @@ testthat::expect_true(sum(unique(
 ) == 3)
 
 
-jobs <- getCohortJobs(
+jobs <- Characterization:::getCohortJobs(
   characterizationSettings = characterizationSettings,
   mode = 'PatientLevelPrediction',
   nTargetJobs = 4
 )
 
-testthat::expect_true(nrow(jobs$targets) == 3)
+testthat::expect_true(nrow(jobs$targets) == 6)
 testthat::expect_true(nrow(jobs$cases) == 3)
-testthat::expect_true(nrow(jobs$jobs) == 9)
+testthat::expect_true(nrow(jobs$jobs) == 12)
 
 testthat::expect_true(sum(unique(
   c(ParallelLogger::convertJsonToSettings(jobs$jobs$settings[1])$targetIds,

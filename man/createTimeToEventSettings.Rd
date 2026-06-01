@@ -4,10 +4,10 @@
 \alias{createTimeToEventSettings}
 \title{Create time to event study settings}
 \usage{
-createTimeToEventSettings(targetIds, outcomeIds)
+createTimeToEventSettings(studyPopulationSettings, outcomeIds)
 }
 \arguments{
-\item{targetIds}{A list of cohortIds for the target cohorts}
+\item{studyPopulationSettings}{An object created using \code{createStudyPopulationSettings} or a list of \code{createStudyPopulationSettings} that specifies cohort inclusion criteria}
 
 \item{outcomeIds}{A list of cohortIds for the outcome cohorts}
 }
@@ -21,7 +21,11 @@ Create time to event study settings
 # example code
 
 tteSet <- createTimeToEventSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 

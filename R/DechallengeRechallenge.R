@@ -16,7 +16,7 @@
 
 #' Create dechallenge rechallenge study settings
 #'
-#' @param targetIds   A list of cohortIds for the target cohorts
+#' @param studyPopulationSettings An object created using \code{createStudyPopulationSettings} of a list of \code{createStudyPopulationSettings} that specifies cohort inclusion criteria
 #' @param outcomeIds   A list of cohortIds for the outcome cohorts
 #' @param dechallengeStopInterval  An integer specifying the how much time to add to the cohort_end when determining whether the event starts during cohort and ends after
 #' @param dechallengeEvaluationWindow An integer specifying the period of time after the cohort_end when you cannot see an outcome for a dechallenge success
@@ -27,24 +27,29 @@
 #'
 #' @examples
 #' drSet <- createDechallengeRechallengeSettings(
-#'   targetIds = c(1,2),
+#'   studyPopulationSettings = createStudyPopulationSettings(
+#'     targetIds = c(1,2),
+#'     limitToFirstInNDays = 0,
+#'     minPriorObservation = 0
+#'     ),
 #'   outcomeIds = 3
 #' )
 #'
 #'
 #' @export
 createDechallengeRechallengeSettings <- function(
-    targetIds,
+    studyPopulationSettings,
     outcomeIds,
     dechallengeStopInterval = 30,
-    dechallengeEvaluationWindow = 30) {
+    dechallengeEvaluationWindow = 30
+    ) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
-  .checkCohortIds(
-    cohortIds = targetIds,
-    type = "target",
-    errorMessages = errorMessages
-  )
+  #.checkCohortIds(
+  #  cohortIds = targetIds,
+  #  type = "target",
+  #  errorMessages = errorMessages
+  #)
   # check outcomeIds is a vector of int/double
   .checkCohortIds(
     cohortIds = outcomeIds,
@@ -78,7 +83,7 @@ createDechallengeRechallengeSettings <- function(
 
   # create data.frame with all combinations
   result <- list(
-    targetCohortDefinitionIds = targetIds,
+    studyPopulationSettings = combineStudyPopulationSettings(studyPopulationSettings),
     outcomeCohortDefinitionIds = outcomeIds,
     dechallengeStopInterval = dechallengeStopInterval,
     dechallengeEvaluationWindow = dechallengeEvaluationWindow
@@ -92,6 +97,8 @@ createDechallengeRechallengeSettings <- function(
 #'
 #' @template ConnectionDetails
 #' @template TargetOutcomeTables
+#' @param characterizationDatabaseSchema ...
+#' @param characterizationTable ...
 #' @template TempEmulationSchema
 #' @param settings   The settings for the timeToEvent study
 #' @param databaseId An identifier for the database (string)
@@ -125,10 +132,12 @@ createDechallengeRechallengeSettings <- function(
 #' @export
 computeDechallengeRechallengeAnalyses <- function(
     connectionDetails = NULL,
-    targetDatabaseSchema,
-    targetTable,
+    targetDatabaseSchema, # not needed
+    targetTable,    # not needed
     outcomeDatabaseSchema = targetDatabaseSchema,
     outcomeTable = targetTable,
+    characterizationDatabaseSchema, # updated
+    characterizationTable, # updated
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
     databaseId = "database 1",
@@ -145,8 +154,8 @@ computeDechallengeRechallengeAnalyses <- function(
   errorMessages <- checkmate::makeAssertCollection()
   .checkConnectionDetails(connectionDetails, errorMessages)
   .checkCohortDetails(
-    cohortDatabaseSchema = targetDatabaseSchema,
-    cohortTable = targetTable,
+    cohortDatabaseSchema = characterizationDatabaseSchema,
+    cohortTable = characterizationTable,
     type = "target",
     errorMessages = errorMessages
   )
@@ -160,10 +169,10 @@ computeDechallengeRechallengeAnalyses <- function(
     tempEmulationSchema = tempEmulationSchema,
     errorMessages = errorMessages
   )
-  .checkDechallengeRechallengeSettings(
-    settings = settings,
-    errorMessages = errorMessages
-  )
+  #.checkDechallengeRechallengeSettings(
+  #  settings = settings,
+  #  errorMessages = errorMessages
+  #)
 
   valid <- checkmate::reportAssertions(
     collection = errorMessages
@@ -189,12 +198,12 @@ computeDechallengeRechallengeAnalyses <- function(
       dbms = connection@dbms,
       tempEmulationSchema = tempEmulationSchema,
       database_id = databaseId,
-      target_database_schema = targetDatabaseSchema,
-      target_table = targetTable,
+      characterization_database_schema = characterizationDatabaseSchema, # updated
+      characterization_table = characterizationTable, # updated,
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
-      target_ids = paste(settings$targetCohortDefinitionIds, sep = "", collapse = ","),
-      outcome_ids = paste(settings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
+      characterization_target_ids = paste(settings$characterizationTargetIds, sep = "", collapse = ","),
+      outcome_ids = paste(settings$outcomeIds, sep = "", collapse = ","),
       dechallenge_stop_interval = settings$dechallengeStopInterval,
       dechallenge_evaluation_window = settings$dechallengeEvaluationWindow
     )
@@ -237,8 +246,8 @@ computeDechallengeRechallengeAnalyses <- function(
     message(
       paste0(
         "Computing dechallenge rechallenge for ",
-        length(settings$targetCohortDefinitionIds), " target ids and ",
-        length(settings$outcomeCohortDefinitionIds), " outcome ids took ",
+        length(settings$characterizationTargetIds), " target ids and ",
+        length(settings$outcomeIds), " outcome ids took ",
         signif(delta, 3), " ",
         attr(delta, "units")
       )
@@ -260,6 +269,9 @@ computeDechallengeRechallengeAnalyses <- function(
 #'
 #' @template ConnectionDetails
 #' @template TargetOutcomeTables
+#' @param characterizationDatabaseSchema ...
+#' @param characterizationTable ...
+#' @param targetSettingsTable The name of the target settings table
 #' @template TempEmulationSchema
 #' @param settings   The settings for the timeToEvent study
 #' @param databaseId An identifier for the database (string)
@@ -298,6 +310,9 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     targetTable,
     outcomeDatabaseSchema = targetDatabaseSchema,
     outcomeTable = targetTable,
+    characterizationDatabaseSchema, # updated
+    characterizationTable, # updated
+    targetSettingsTable, # added
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
     databaseId = "database 1",
@@ -350,6 +365,9 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       DatabaseConnector::disconnect(connection)
     )
 
+    # TODO: lookup targetIds based on settings$studyPopulationSettings
+
+
     message("Computing dechallenge rechallenge fails results")
     sql <- SqlRender::loadRenderTranslateSql(
       sqlFilename = "RechallengeFailCaseSeries.sql",
@@ -357,12 +375,15 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       dbms = connection@dbms,
       tempEmulationSchema = tempEmulationSchema,
       database_id = databaseId,
+      characterization_database_schema = characterizationDatabaseSchema, # updated
+      characterization_table = characterizationTable, # updated
+      target_settings = targetSettingsTable, #updated
       target_database_schema = targetDatabaseSchema,
       target_table = targetTable,
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
-      target_ids = paste(settings$targetCohortDefinitionIds, sep = "", collapse = ","),
-      outcome_ids = paste(settings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
+      characterization_target_ids = paste(settings$characterizationTargetIds, sep = "", collapse = ","),
+      outcome_ids = paste(settings$outcomeIds, sep = "", collapse = ","),
       dechallenge_stop_interval = settings$dechallengeStopInterval,
       dechallenge_evaluation_window = settings$dechallengeEvaluationWindow,
       show_subject_id = showSubjectId
@@ -406,8 +427,8 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     message(
       paste0(
         "Computing dechallenge failed case series for ",
-        length(settings$targetCohortDefinitionIds), " target IDs and ",
-        length(settings$outcomeCohortDefinitionIds), " outcome IDs took ",
+        length(settings$characterizationTargetIds), " target IDs and ",
+        length(settings$outcomeIds), " outcome IDs took ",
         signif(delta, 3), " ",
         attr(delta, "units")
       )
@@ -432,8 +453,8 @@ getDechallengeRechallengeJobs <- function(
     return(NULL)
   }
   ind <- 1:length(characterizationSettings)
-  targetIds <- lapply(ind, function(i) {
-    characterizationSettings[[i]]$targetCohortDefinitionIds
+  characterizationTargetIds <- lapply(ind, function(i) {
+    characterizationSettings[[i]]$characterizationTargetIds
   })
   outcomeIds <- lapply(ind, function(i) {
     characterizationSettings[[i]]$outcomeCohortDefinitionIds
@@ -451,10 +472,10 @@ getDechallengeRechallengeJobs <- function(
     what = "rbind",
     args =
       lapply(
-        1:length(targetIds),
+        1:length(characterizationTargetIds),
         function(i) {
           result <- expand.grid(
-            targetId = targetIds[[i]],
+            characterizationTargetId = characterizationTargetIds[[i]],
             outcomeId = outcomeIds[[i]]
           )
           result$dechallengeStopInterval <- dechallengeStopIntervals[[i]]
@@ -467,7 +488,7 @@ getDechallengeRechallengeJobs <- function(
   tcount <- nrow(
     combinations %>%
       dplyr::count(
-        .data$targetId,
+        .data$characterizationTargetId,
         .data$dechallengeStopInterval,
         .data$dechallengeEvaluationWindow
       )
@@ -490,12 +511,12 @@ getDechallengeRechallengeJobs <- function(
   if (tcount >= ocount) {
     threadDf <- combinations %>%
       dplyr::count(
-        .data$targetId,
+        .data$characterizationTargetId,
         .data$dechallengeStopInterval,
         .data$dechallengeEvaluationWindow
       )
     threadDf$nTargetJobs <- rep(1:nTargetJobs, ceiling(tcount / nTargetJobs))[1:tcount]
-    mergeColumn <- c("targetId", "dechallengeStopInterval", "dechallengeEvaluationWindow")
+    mergeColumn <- c("characterizationTargetId", "dechallengeStopInterval", "dechallengeEvaluationWindow")
   } else {
     threadDf <- combinations %>%
       dplyr::count(
@@ -508,43 +529,75 @@ getDechallengeRechallengeJobs <- function(
   }
 
   combinations <- merge(combinations, threadDf, by = mergeColumn)
-  sets <- lapply(
-    X = 1:max(threadDf$nTargetJobs),
-    FUN = function(i) {
-      createDechallengeRechallengeSettings(
-        targetIds = unique(combinations$targetId[combinations$nTargetJobs == i]),
-        outcomeIds = unique(combinations$outcomeId[combinations$nTargetJobs == i]),
-        dechallengeStopInterval = unique(combinations$dechallengeStopInterval[combinations$nTargetJobs == i]),
-        dechallengeEvaluationWindow = unique(combinations$dechallengeEvaluationWindow[combinations$nTargetJobs == i])
-      )
-    }
-  )
+
+
+  # create settings based on dechallengeStopInterval/dechallengeEvaluationWindow
+
+  settingCols <- c("dechallengeStopInterval", "dechallengeEvaluationWindow")
+  executionSettings <- combinations %>%
+    dplyr::select(dplyr::all_of(settingCols)) %>%
+    dplyr::distinct() %>%
+    dplyr::mutate(
+      settingId = dplyr::row_number()
+    )
+  combinations <- merge(combinations, executionSettings, by = settingCols)
+
 
   # recreate settings
   settings <- c()
-  for (i in 1:length(sets)) {
-    settings <- rbind(
-      settings,
-      data.frame(
-        functionName = "computeDechallengeRechallengeAnalyses",
-        settings = as.character(ParallelLogger::convertSettingsToJson(
-          sets[[i]]
-        )),
-        executionFolder = paste0("dr_", i),
-        jobId = paste0("dr_", i)
+  for (settingId in unique(combinations$settingId)) {
+    for (targetJobId in unique(combinations$nTargetJobs)){
+
+      restrictedCombo <- combinations %>%
+        dplyr::filter(.data$settingId == !!settingId) %>%
+        dplyr::filter(.data$nTargetJobs == !!targetJobId)
+
+
+      settings <- rbind(
+        settings,
+        data.frame(
+          functionName = "computeDechallengeRechallengeAnalyses",
+          settings = as.character(ParallelLogger::convertSettingsToJson(
+            list(
+              characterizationTargetIds = unique(restrictedCombo$characterizationTargetId),
+              outcomeIds = unique(restrictedCombo$outcomeId),
+              dechallengeStopInterval = unique(restrictedCombo$dechallengeStopInterval),
+              dechallengeEvaluationWindow = unique(restrictedCombo$dechallengeEvaluationWindow)
+            )
+          )),
+          executionFolder = paste("dr", targetJobId,
+                                   unique(restrictedCombo$dechallengeStopInterval),
+                                   unique(restrictedCombo$dechallengeEvaluationWindow),
+                                  sep = '_'),
+          jobId = paste("dr", targetJobId,
+                        unique(restrictedCombo$dechallengeStopInterval),
+                        unique(restrictedCombo$dechallengeEvaluationWindow),
+                        sep = '_')
+        )
       )
-    )
-    settings <- rbind(
-      settings,
-      data.frame(
-        functionName = "computeRechallengeFailCaseSeriesAnalyses",
-        settings = as.character(ParallelLogger::convertSettingsToJson(
-          sets[[i]]
-        )),
-        executionFolder = paste0("rfcs_", i),
-        jobId = paste0("rfcs_", i)
+      settings <- rbind(
+        settings,
+        data.frame(
+          functionName = "computeRechallengeFailCaseSeriesAnalyses",
+          settings = as.character(ParallelLogger::convertSettingsToJson(
+            list(
+              characterizationTargetIds = unique(restrictedCombo$characterizationTargetId),
+              outcomeIds = unique(restrictedCombo$outcomeId),
+              dechallengeStopInterval = unique(restrictedCombo$dechallengeStopInterval),
+              dechallengeEvaluationWindow = unique(restrictedCombo$dechallengeEvaluationWindow)
+            )
+          )),
+          executionFolder = paste("rfcs", targetJobId,
+                                  unique(restrictedCombo$dechallengeStopInterval),
+                                  unique(restrictedCombo$dechallengeEvaluationWindow),
+                                  sep = '_'),
+          jobId = paste("rfcs", targetJobId,
+                        unique(restrictedCombo$dechallengeStopInterval),
+                        unique(restrictedCombo$dechallengeEvaluationWindow),
+                        sep = '_')
+        )
       )
-    )
+    }
   }
 
   return(settings)
