@@ -65,8 +65,20 @@ lookupCases <- function(
    risk_window_end
 
    FROM @lookup_schema.@lookup_table lt
-   INNER JOIN @lookup_schema.@case_count_table cct
+
+   INNER JOIN
+   (SELECT * FROM @lookup_schema.@case_count_table
+    WHERE cohort_type = 'Cases'
+    AND n_people >= @min_case_size
+   ) cct
    ON lt.characterization_case_id = cct.characterization_case_id
+
+    INNER JOIN
+   (SELECT * FROM @lookup_schema.@case_count_table
+    WHERE cohort_type = 'non-cases'
+    AND n_people >= @min_case_size
+   ) ncct
+   ON lt.characterization_case_id = ncct.characterization_case_id
 
    WHERE lt.characterization_target_id in (@char_ids)
    AND lt.outcome_id in (@outcome_ids)
@@ -75,7 +87,6 @@ lookupCases <- function(
    AND lt.risk_window_start = @risk_window_start
    AND lt.end_anchor = '@end_anchor'
    AND lt.risk_window_end = @risk_window_end
-   AND cct.n_people >= @min_case_size
    ;
    "
 

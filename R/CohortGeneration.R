@@ -647,7 +647,7 @@ generateCases <- function(
 
     characterization_schema = characterizationDatabaseSchema,
     characterization_table = characterizationTable,
-    case_attrition_table = caseAttritionTable,
+    #case_attrition_table = caseAttritionTable,
     case_count_table = caseCountTable,
     case_settings_schema = characterizationDatabaseSchema,
     case_settings_table = caseSettingsTable,

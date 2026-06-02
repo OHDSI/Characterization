@@ -13,9 +13,9 @@ tc.cohort_end_date,
 CASE WHEN sc.subject_id is NULL THEN 0 ELSE 1 END included
 INTO #target_cohort
 FROM @target_database_schema.@target_table tc
-INNER JOIN @characterization_schema.@target_settings ts
+INNER JOIN @characterization_database_schema.@target_settings ts
 ON tc.cohort_definition_id = ts.target_id
-LEFT JOIN @characterization_schema.@characterization_table sc
+LEFT JOIN @characterization_database_schema.@characterization_table sc
 ON sc.subject_id = tc.subject_id
 AND sc.cohort_start_date = tc.cohort_start_date
 AND sc.cohort_definition_id = ts.characterization_target_id

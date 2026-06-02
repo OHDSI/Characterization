@@ -345,10 +345,10 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
     tempEmulationSchema = tempEmulationSchema,
     errorMessages = errorMessages
   )
-  .checkDechallengeRechallengeSettings(
-    settings = settings,
-    errorMessages = errorMessages
-  )
+  #.checkDechallengeRechallengeSettings(
+  #  settings = settings,
+  #  errorMessages = errorMessages
+  #)
 
   valid <- checkmate::reportAssertions(errorMessages)
 
