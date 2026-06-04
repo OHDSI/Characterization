@@ -19,7 +19,11 @@
 #' # example code
 #'
 #' drSet <- createDechallengeRechallengeSettings(
-#'   targetIds = c(1,2),
+#'   studyPopulationSettings = createStudyPopulationSettings(
+#'     targetIds = c(1,2),
+#'     limitToFirstInNDays = 0,
+#'     minPriorObservation = 0
+#'     ),
 #'   outcomeIds = 3
 #' )
 #'
@@ -129,13 +133,14 @@ addCharacterizationTargetIds <- function(settings){
 
   # get the unique target + subsets
   studyPopulation <- unique(do.call('rbind', studyPopulationList)) %>%
-    dplyr::group_by(dplyr::across(-settingTypes)) %>%
+    dplyr::group_by(dplyr::across(-dplyr::all_of(settingTypes))) %>%
     dplyr::summarise(
       timeToEventSettings = any(.data$timeToEventSettings),
       dechallengeRechallengeSettings = any(.data$dechallengeRechallengeSettings),
       targetBaselineSettings = any(.data$targetBaselineSettings),
       riskFactorSettings = any(.data$riskFactorSettings),
       caseSeriesSettings = any(.data$caseSeriesSettings),
+      .groups = "drop"
     )
   # give a new id called characterizationTargetIds per target and subset
   # characterizationTargetId always ends in 0
@@ -184,7 +189,11 @@ addCharacterizationTargetIds <- function(settings){
 #'
 #' @examples
 #' drSet <- createDechallengeRechallengeSettings(
-#'   targetIds = c(1,2),
+#'   studyPopulationSettings = createStudyPopulationSettings(
+#'     targetIds = c(1,2),
+#'     limitToFirstInNDays = 0,
+#'     minPriorObservation = 0
+#'     ),
 #'   outcomeIds = 3
 #' )
 #'
@@ -229,7 +238,11 @@ saveCharacterizationSettings <- function(
 #' setPath <- file.path(tempdir(), 'charSet.json')
 #'
 #' drSet <- createDechallengeRechallengeSettings(
-#'   targetIds = c(1,2),
+#'   studyPopulationSettings = createStudyPopulationSettings(
+#'     targetIds = c(1,2),
+#'     limitToFirstInNDays = 0,
+#'     minPriorObservation = 0
+#'     ),
 #'   outcomeIds = 3
 #' )
 #'
@@ -325,8 +338,8 @@ runCharacterizationAnalyses <- function(
     targetTable,
     outcomeDatabaseSchema,
     outcomeTable,
-    nestingCohortTable,
-    nestingCohortDatabaseSchema,
+    nestingCohortTable = targetTable,
+    nestingCohortDatabaseSchema = targetDatabaseSchema,
     outputDatabaseSchema = targetDatabaseSchema,
     outputTable = 'characterization_cohort',
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
@@ -542,7 +555,9 @@ runCharacterizationAnalyses <- function(
     mode = mode,
     minCharacterizationMean = minCharacterizationMean,
     minCovariateCount = minCovariateCount,
-    minSMD = minSMD
+    minSMD = minSMD,
+    minTargetSize = minTargetSize,
+    minCaseSize = minCaseSize
   )
 
   # Now loop over the analysis jobs
@@ -625,6 +640,12 @@ runCharacterizationAnalyses <- function(
     minCellCount = minCellCount
   )
   exportAttrition(
+    executionPath = executionPath,
+    outputFolder = outputDirectory,
+    csvFilePrefix = csvFilePrefix,
+    minCellCount = minCellCount
+  )
+  exportCounts(
     executionPath = executionPath,
     outputFolder = outputDirectory,
     csvFilePrefix = csvFilePrefix,
@@ -761,7 +782,9 @@ exportSharedObjects <- function(
     mode,
     minCharacterizationMean,
     minCovariateCount,
-    minSMD
+    minSMD,
+    minTargetSize = minTargetSize,
+    minCaseSize = minCaseSize
 ){
 
   # add code here to save execution_settings,
@@ -871,17 +894,26 @@ exportSharedObjects <- function(
     targetDialect = attributes(connection)$dbms,
     tempEmulationSchema = tempEmulationSchema
   )
-  data <- DatabaseConnector::querySql(
+
+  andromeda <- Andromeda::andromeda()
+
+  DatabaseConnector::querySqlToAndromeda(
     connection = connection,
     sql = sql,
-    snakeCaseToCamelCase = FALSE
+    andromeda = andromeda,
+    andromedaTableName = 'target_counts',
+    snakeCaseToCamelCase = TRUE
   )
-  data$database_id <- databaseId
-  data$setting_id <- executionId
-  utils::write.csv(
-    x = formatDouble(data),
-    file = file.path(saveLocation, paste0(tablePrefix,'target_counts.csv')),
-    row.names = FALSE
+
+  addDbAndSettings(
+    andromeda = andromeda,
+    databaseId = databaseId,
+    settingId = executionId
+  )
+
+  saveCharacterizationAndromeda(
+    andromeda = andromeda,
+    outputFolder = file.path(executionPath, 'target_counts')
   )
 
   # extract case attrition
@@ -953,17 +985,26 @@ exportSharedObjects <- function(
       targetDialect = attributes(connection)$dbms,
       tempEmulationSchema = tempEmulationSchema
     )
-    data <- DatabaseConnector::querySql(
+
+    andromeda <- Andromeda::andromeda()
+
+    DatabaseConnector::querySqlToAndromeda(
       connection = connection,
       sql = sql,
-      snakeCaseToCamelCase = FALSE
+      andromeda = andromeda,
+      andromedaTableName = 'case_counts',
+      snakeCaseToCamelCase = TRUE
     )
-    data$database_id <- databaseId
-    data$setting_id <- executionId
-    utils::write.csv(
-      x = formatDouble(data),
-      file = file.path(saveLocation, paste0(tablePrefix,'case_counts.csv')),
-      row.names = FALSE
+
+    addDbAndSettings(
+      andromeda = andromeda,
+      databaseId = databaseId,
+      settingId = executionId
+    )
+
+    saveCharacterizationAndromeda(
+      andromeda = andromeda,
+      outputFolder = file.path(executionPath, 'case_counts')
     )
 
   }
@@ -977,7 +1018,9 @@ exportSharedObjects <- function(
       mode = mode,
       min_characterization_mean = minCharacterizationMean,
       min_covariate_count = minCovariateCount,
-      min_smd = minSMD
+      min_smd = minSMD,
+      min_target_size = minTargetSize,
+      min_case_size = minCaseSize
     ),
     file = file.path(saveLocation, paste0(tablePrefix,'execution_settings.csv')),
     row.names = FALSE

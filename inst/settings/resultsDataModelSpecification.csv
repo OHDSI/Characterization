@@ -89,6 +89,8 @@ execution_settings,mode,varchar(25),No,No,No,No,Whether Efficient/CohortIncidenc
 execution_settings,min_characterization_mean,float,No,No,No,No,The minimum fraction of patients who have a covariate for the covariate to be included in results
 execution_settings,min_covariate_count,int,No,No,No,No,The minimum number of patients who have a covariate for the covariate to be included in results (useful if cohorts are small)
 execution_settings,min_smd,float,No,No,No,No,The minimum standardized mean value a risk factor must have to be included in results
+execution_settings,min_target_size,bigint,No,No,No,No,The minimum target cohort size to be included in target baseline, risk factor and case series results
+execution_settings,min_case_size,bigint,No,No,No,No,The minimum case cohort size to be included in risk factor and case series results
 target_settings,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
 target_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 target_settings,characterization_target_id,bigint,Yes,Yes,No,No,The target cohort id after inclusion criteria used internally by characterization

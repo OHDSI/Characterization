@@ -26,9 +26,7 @@ createRiskFactorSettings(
     useProcedureOccurrenceShortTerm = TRUE, useMeasurementShortTerm = TRUE,
     useObservationShortTerm = TRUE, useDeviceExposureShortTerm = TRUE,
     useVisitConceptCountShortTerm = TRUE, endDays = 0, longTermStartDays = -365,
-    shortTermStartDays = -30),
-  minTargetSize = 0,
-  minTwithOSize = 0
+    shortTermStartDays = -30)
 )
 }
 \arguments{
@@ -49,10 +47,6 @@ or `"cohort end"`.}
 or `"cohort end"`.}
 
 \item{covariateSettings}{An object created using \code{FeatureExtraction::createCovariateSettings}}
-
-\item{minTargetSize}{The minimum size of the target cohorts for them to have aggregate covariates calculated}
-
-\item{minTwithOSize}{The minimum size of the cohorts corresponding to patients in the target with the outcome during time-at-risk for them to have aggregate covariates calculated}
 }
 \value{
 A list with the settings

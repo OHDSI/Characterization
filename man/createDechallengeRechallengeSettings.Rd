@@ -38,9 +38,4 @@ drSet <- createDechallengeRechallengeSettings(
 
 
 }
-\seealso{
-Other DechallengeRechallenge: 
-\code{\link{computeDechallengeRechallengeAnalyses}()},
-\code{\link{computeRechallengeFailCaseSeriesAnalyses}()}
-}
 \concept{DechallengeRechallenge}

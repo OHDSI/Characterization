@@ -18,7 +18,7 @@
 #' for creating the study populations of interest
 #' @examples
 #' # Create study population settings with a washout period of 365 days and
-#'  restricted to adults for target dates that occur for the first time in 365 days.
+#' # restricted to adults for target dates that occur for the first time in 365 days.
 #' populationSettings <- createStudyPopulationSettings(
 #'    targetId  = 1,
 #'    limitToFirstInNDays = 365,

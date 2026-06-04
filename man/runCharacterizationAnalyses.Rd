@@ -10,8 +10,8 @@ runCharacterizationAnalyses(
   targetTable,
   outcomeDatabaseSchema,
   outcomeTable,
-  nestingCohortTable,
-  nestingCohortDatabaseSchema,
+  nestingCohortTable = targetTable,
+  nestingCohortDatabaseSchema = targetDatabaseSchema,
   outputDatabaseSchema = targetDatabaseSchema,
   outputTable = "characterization_cohort",
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
@@ -30,7 +30,9 @@ runCharacterizationAnalyses(
   minCharacterizationMean = 0.001,
   minCovariateCount = 0,
   mode = "CohortIncidence",
-  minSMD = 0
+  minSMD = 0,
+  minTargetSize = 0,
+  minCaseSize = 0
 )
 }
 \arguments{
@@ -91,6 +93,10 @@ can be created}
 \item{mode}{Select from Efficient (no exclusions to target based on washout)/CohortIncidence (excludes targets with outcome in washout if they have no time at risk)/PatientLevelPrediction (excludes targets with outcome during washout prior to index)}
 
 \item{minSMD}{The minimum standardized mean difference for the risk factor analysis}
+
+\item{minTargetSize}{The minimum target size to be included in targetBaseline, riskFactor or caseSeries}
+
+\item{minCaseSize}{The minimum case or non-case size to be included in riskFactor or caseSeries}
 }
 \value{
 Multiple csv files in the outputDirectory.

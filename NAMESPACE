@@ -2,9 +2,6 @@
 
 export(cleanIncremental)
 export(cleanNonIncremental)
-export(computeDechallengeRechallengeAnalyses)
-export(computeRechallengeFailCaseSeriesAnalyses)
-export(computeTimeToEventAnalyses)
 export(createCaseSeriesSettings)
 export(createCharacterizationSettings)
 export(createCharacterizationTables)

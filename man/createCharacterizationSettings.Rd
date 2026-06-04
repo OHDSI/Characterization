@@ -36,7 +36,11 @@ Specify one or more timeToEvent, dechallengeRechallenge and aggregateCovariate s
 # example code
 
 drSet <- createDechallengeRechallengeSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 

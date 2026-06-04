@@ -69,46 +69,7 @@ createTimeToEventSettings <- function(
   return(result)
 }
 
-#' Compute time to event study
-#'
-#' @template ConnectionDetails
-#' @template TargetOutcomeTables
-#' @template TempEmulationSchema
-#' @param cdmDatabaseSchema The database schema containing the OMOP CDM data
-#' @param settings   The settings for the timeToEvent study
-#' @param databaseId An identifier for the database (string)
-#' @param outputFolder A directory to save the results as csv files
-#' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
-#' @param progressBar Whether to display a progress bar while the analysis is running
-#' @param executionId a unique id for the run
-#' @param ... extra inputs
-#' @family TimeToEvent
-#'
-#' @return
-#' An \code{Andromeda::andromeda()} object containing the time to event results.
-#'
-#' @examples
-#' # example code
-#'
-#' conDet <- exampleOmopConnectionDetails()
-#'
-#' tteSet <- createTimeToEventSettings(
-#'   targetIds = c(1,2),
-#'   outcomeIds = 3
-#' )
-#'
-#' result <- computeTimeToEventAnalyses(
-#'   connectionDetails = conDet,
-#'   targetDatabaseSchema = 'main',
-#'   targetTable = 'cohort',
-#'   cdmDatabaseSchema = 'main',
-#'   settings = tteSet,
-#'   outputFolder = file.path(tempdir(), 'tte')
-#' )
-#'
-#'
-#'
-#' @export
+
 computeTimeToEventAnalyses <- function(
     connectionDetails = NULL,
     targetDatabaseSchema,

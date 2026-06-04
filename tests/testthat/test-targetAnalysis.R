@@ -220,6 +220,8 @@ test_that("getTargetBaselineJobs", {
 })
 
 test_that("computeTargetBaselineAnalyses", {
+  skipIfCreateTargetCohortSqlUnavailable()
+
   targetIds <- c(1, 2, 4)
   covariateSettings <- FeatureExtraction::createCovariateSettings(
     useDemographicsGender = TRUE,
@@ -271,6 +273,8 @@ test_that("computeTargetBaselineAnalyses", {
     cdmVersion = 5,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
+    targetCountTable = tables$targetCountTable,
+    minTargetSize = 0,
 
     characterizationDatabaseSchema = 'main',
     characterizationTable = tables$characterizationTable, # contains char cohorts

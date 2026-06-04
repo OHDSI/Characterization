@@ -44,7 +44,11 @@ targetIds <- c(1,2,4)
   )
 
   dechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+     targetIds = c(1,2),
+     limitToFirstInNDays = 0,
+     minPriorObservation = 0
+     ),
     outcomeIds = outcomeIds,
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 31

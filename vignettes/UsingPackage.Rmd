@@ -54,9 +54,7 @@ connectionDetails <- Characterization::exampleOmopConnectionDetails()
 
 To run an 'Target Baseline Covariate' analysis you need to create a setting object using `createTargetBaselineSettings`.  This requires specifying:
 
-- one or more targetIds (these must be pre-generated in a cohort table)
-- a limitToFirstInNDays that removes target exposures that occur within this number of days of a prior exposure.  Use 99999 to restrict to first target exposure.
-- a minPriorObservation that specifies the minimum number of days in the database a person needs to have at target index to be included. 
+- studyPopulationSettings created using `createStudyPopulationSettings` to define targetIds and population restrictions.
 - the covariate settings using `FeatureExtraction::createCovariateSettings` or by creating your own custom feature extraction code.
 
 Using the Eunomia data were we previous generated four cohorts, we can use cohort ids 1,2 and 4 as the targetIds:  
@@ -79,9 +77,11 @@ If we want to create the aggregate features for all our target cohort restricted
 
 ```{r eval=TRUE}
 exampleTargetBaselineSettings <- createTargetBaselineSettings(
-  targetIds = exampleTargetIds,
-  limitToFirstInNDays = 99999,
-  minPriorObservation = 365,
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds,
+    limitToFirstInNDays = 99999,
+    minPriorObservation = 365
+  ),
   covariateSettings = exampleCovariateSettings
 )
 ```
@@ -118,10 +118,8 @@ You can then see the results in the location `file.path(tempdir(), 'example_char
 
 To run an 'Risk Factor Covariate' analysis you need to create a setting object using `createRiskFactorSettings`.  This requires specifying:
 
-- one or more targetIds (these must be pre-generated in a cohort table)
+- studyPopulationSettings created using `createStudyPopulationSettings` to define targetIds and population restrictions.
 - one or more outcomeIds (these must be pre-generated in a cohort table)
-- a limitToFirstInNDays that removes target exposures that occur within this number of days of a prior exposure.  Use 99999 to restrict to first target exposure.
-- a minPriorObservation that specifies the minimum number of days in the database a person needs to have at target index to be included. 
 - the covariate settings using `FeatureExtraction::createCovariateSettings` or by creating your own custom feature extraction code.
 - the time-at-risk settings
 + riskWindowStart
@@ -150,13 +148,15 @@ If we want to create the aggregate features for all our cases/non-cases which ar
 
 ```{r eval=TRUE}
 exampleRiskFactorSettings <- createRiskFactorSettings(
-  targetIds = exampleTargetIds,
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds,
+    limitToFirstInNDays = 99999, # limit to first target exposure
+    minPriorObservation = 365
+  ),
   outcomeIds = exampleOutcomeIds,
-  limitToFirstInNDays = 99999, # limit to first target exposure
   riskWindowStart = 1, startAnchor = "cohort start",
   riskWindowEnd = 365, endAnchor = "cohort start",
   outcomeWashoutDays = 9999,
-  minPriorObservation = 365,
   covariateSettings = exampleCovariateSettings 
 )
 ```
@@ -202,10 +202,8 @@ You can then see the results in the location `file.path(tempdir(), 'example_char
 
 To run an 'Case Series Covariate' analysis you need to create a setting object using `createCaseSeriesSettings`.  This requires specifying:
 
-- one or more targetIds (these must be pre-generated in a cohort table)
+- studyPopulationSettings created using `createStudyPopulationSettings` to define targetIds and population restrictions.
 - one or more outcomeIds (these must be pre-generated in a cohort table)
-- a limitToFirstInNDays that removes target exposures that occur within this number of days of a prior exposure.  Use 99999 to restrict to first target exposure.
-- a minPriorObservation that specifies the minimum number of days in the database a person needs to have at target index to be included. 
 - the case covariate settings using `Characterization::createDuringCovariateSettings` or by creating your own custom feature extraction code.
 - the time-at-risk settings
 + riskWindowStart
@@ -235,13 +233,15 @@ We also need to specify two variables `casePreTargetDuration` which is the numbe
 
 ```{r eval=TRUE}
 exampleCaseSeriesSettings <- createCaseSeriesSettings(
-  targetIds = exampleTargetIds,
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds,
+    limitToFirstInNDays = 99999, # limit to first target index
+    minPriorObservation = 365
+  ),
   outcomeIds = exampleOutcomeIds,
-  limitToFirstInNDays = 99999, # limit to first target index
   riskWindowStart = 1, startAnchor = "cohort start",
   riskWindowEnd = 365, endAnchor = "cohort start",
   outcomeWashoutDays = 9999,
-  minPriorObservation = 365,
   caseCovariateSettings = exampleCaseCovariateSettings,
   casePreTargetDuration = 90,
   casePostOutcomeDuration = 90
@@ -282,7 +282,7 @@ You can then see the results in the location `file.path(tempdir(), 'example_char
 
 To run a 'Dechallenge Rechallenge' analysis you need to create a setting object using `createDechallengeRechallengeSettings`.  This requires specifying:
 
-- one or more targetIds (these must be pre-generated in a cohort table)
+- studyPopulationSettings created using `createStudyPopulationSettings` to define targetIds and population restrictions.
 - one or more outcomeIds (these must be pre-generated in a cohort table)
 - dechallengeStopInterval
 - dechallengeEvaluationWindow
@@ -298,7 +298,9 @@ If we want to create the dechallenge rechallenge for all our target cohorts and 
 
 ```{r eval=TRUE}
 exampleDechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
-  targetIds = exampleTargetIds,
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds
+  ),
   outcomeIds = exampleOutcomeIds,
   dechallengeStopInterval = 30,
   dechallengeEvaluationWindow = 31
@@ -339,12 +341,14 @@ failed <- computeRechallengeFailCaseSeriesAnalyses(
 
 To run a 'Time-to-event' analysis you need to create a setting object using `createTimeToEventSettings`.  This requires specifying:
 
-- one or more targetIds (these must be pre-generated in a cohort table)
+- studyPopulationSettings created using `createStudyPopulationSettings` to define targetIds and population restrictions.
 - one or more outcomeIds (these must be pre-generated in a cohort table)
 
 ```{r eval=TRUE}
 exampleTimeToEventSettings <- createTimeToEventSettings(
-  targetIds = exampleTargetIds,
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds
+  ),
   outcomeIds = exampleOutcomeIds
 )
 ```

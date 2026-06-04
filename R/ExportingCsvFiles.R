@@ -555,3 +555,76 @@ exportAttrition <- function(
 
 
 
+exportCounts <- function(
+    executionPath,
+    outputFolder,
+    csvFilePrefix = 'c_',
+    minCellCount = 0
+){
+
+  # export target attrition
+  if(file.exists(file.path(executionPath, 'target_counts', 'result'))){
+    andromeda <- Andromeda::loadAndromeda(file.path(executionPath, 'target_counts', 'result'))
+
+    # censor
+    data <- andromeda$target_counts %>% dplyr::mutate(
+      nEvents = ifelse(.data$nEvents < !!minCellCount & .data$nEvents > 0, -1*minCellCount, .data$nEvents),
+      nPeople = ifelse(.data$nPeople < !!minCellCount & .data$nPeople > 0, -1*minCellCount, .data$nPeople)
+    ) %>%
+      dplyr::collect()
+
+    colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
+
+    # save the attrition
+    utils::write.csv(
+      x = data,
+      file = file.path(outputFolder, paste0(csvFilePrefix, 'target_counts', '.csv')),
+      row.names = FALSE
+    )
+  }
+
+  # export case attrition
+  if(file.exists(file.path(executionPath, 'case_counts', 'result'))){
+    andromeda <- Andromeda::loadAndromeda(file.path(executionPath, 'case_counts', 'result'))
+
+    # censor if the cases or non-cases are < min count
+    remove <- andromeda$case_counts %>% dplyr::filter(
+      .data$nEvents < !!minCellCount & .data$nEvents > 0,
+      .data$nPeople < !!minCellCount & .data$nPeople > 0
+    ) %>%
+      dplyr::select("characterizationCaseId") %>%
+      dplyr::distinct() %>%
+      dplyr::mutate(
+        filter = TRUE
+      ) %>%
+      dplyr::collect()
+
+    data <- andromeda$case_counts %>%
+      dplyr::left_join(
+        y = remove,
+        by = "characterizationCaseId",
+        copy = TRUE
+        ) %>%
+      dplyr::mutate(filter = dplyr::if_else(is.na(.data$filter), FALSE,.data$filter)) %>%
+      dplyr::mutate(
+        nEvents = ifelse(.data$filter, NA, .data$nEvents),
+        nPeople = ifelse(.data$filter, NA, .data$nPeople)
+      ) %>%
+      dplyr::select(-"filter") %>%
+      dplyr::collect()
+
+    colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
+
+    # save the attrition
+    utils::write.csv(
+      x = data,
+      file = file.path(outputFolder, paste0(csvFilePrefix, 'case_counts', '.csv')),
+      row.names = FALSE
+    )
+  }
+
+  return(invisible(TRUE))
+}
+
+
+

@@ -40,7 +40,7 @@ AND temp_cohort.cohort_start_date <= op.observation_period_end_date
 
 -- this is just to get the characterization_target_id
 INNER JOIN
-(SELECT * FROM @target_settings_schema.@target_settings_table
+(SELECT distinct * FROM @target_settings_schema.@target_settings_table
  WHERE limit_to_first_in_n_days = @limit_to_first_in_n_days
  AND min_prior_observation = @min_prior_observation
  -- added:

@@ -21,8 +21,6 @@
 #' @param outcomeWashoutDays Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
 #' @template timeAtRisk
 #' @param covariateSettings   An object created using \code{FeatureExtraction::createCovariateSettings}
-#' @param minTargetSize The minimum size of the target cohorts for them to have aggregate covariates calculated
-#' @param minTwithOSize The minimum size of the cohorts corresponding to patients in the target with the outcome during time-at-risk for them to have aggregate covariates calculated
 #'
 #' @family Aggregate
 #' @return
@@ -230,7 +228,8 @@ computeRiskFactorAnalyses <- function(
     riskWindowStart = settings$riskWindowStart,
     endAnchor = settings$endAnchor,
     riskWindowEnd = settings$riskWindowEnd,
-    minCaseSize = minCaseSize
+    minCaseSize = minCaseSize,
+    applyMinSizeToNonCases = TRUE
   )
 
   # generate the targets, cases and non-cases ids

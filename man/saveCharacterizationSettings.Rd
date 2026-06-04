@@ -22,7 +22,11 @@ Input the characterization settings and output a json file to a file named 'char
 }
 \examples{
 drSet <- createDechallengeRechallengeSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 

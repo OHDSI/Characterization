@@ -93,43 +93,7 @@ createDechallengeRechallengeSettings <- function(
   return(result)
 }
 
-#' Compute dechallenge rechallenge study
-#'
-#' @template ConnectionDetails
-#' @template TargetOutcomeTables
-#' @param characterizationDatabaseSchema ...
-#' @param characterizationTable ...
-#' @template TempEmulationSchema
-#' @param settings   The settings for the timeToEvent study
-#' @param databaseId An identifier for the database (string)
-#' @param outputFolder A directory to save the results as csv files
-#' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
-#' @param progressBar Whether to display a progress bar while the analysis is running
-#' @param ... extra inputs
-#' @family DechallengeRechallenge
-#'
-#' @return
-#' An \code{Andromeda::andromeda()} object containing the dechallenge rechallenge results
-#'
-#' @examples
-#'
-#' conDet <- exampleOmopConnectionDetails()
-#'
-#' drSet <- createDechallengeRechallengeSettings(
-#'   targetIds = c(1,2),
-#'   outcomeIds = 3
-#' )
-#'
-#' computeDechallengeRechallengeAnalyses(
-#'   connectionDetails = conDet,
-#'   targetDatabaseSchema = 'main',
-#'   targetTable = 'cohort',
-#'   settings = drSet,
-#'   outputFolder = tempdir()
-#' )
-#'
-#'
-#' @export
+
 computeDechallengeRechallengeAnalyses <- function(
     connectionDetails = NULL,
     targetDatabaseSchema, # not needed
@@ -203,7 +167,7 @@ computeDechallengeRechallengeAnalyses <- function(
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
       characterization_target_ids = paste(settings$characterizationTargetIds, sep = "", collapse = ","),
-      outcome_ids = paste(settings$outcomeIds, sep = "", collapse = ","),
+      outcome_ids = paste(settings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
       dechallenge_stop_interval = settings$dechallengeStopInterval,
       dechallenge_evaluation_window = settings$dechallengeEvaluationWindow
     )
@@ -265,45 +229,6 @@ computeDechallengeRechallengeAnalyses <- function(
 }
 
 
-#' Compute fine the subjects that fail the dechallenge rechallenge study
-#'
-#' @template ConnectionDetails
-#' @template TargetOutcomeTables
-#' @param characterizationDatabaseSchema ...
-#' @param characterizationTable ...
-#' @param targetSettingsTable The name of the target settings table
-#' @template TempEmulationSchema
-#' @param settings   The settings for the timeToEvent study
-#' @param databaseId An identifier for the database (string)
-#' @param showSubjectId if F then subject_ids are hidden (recommended if sharing results)
-#' @param outputFolder A directory to save the results as csv files
-#' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
-#' @param progressBar Whether to display a progress bar while the analysis is running
-#' @param executionId a unique id for the run
-#' @param ... extra inputs
-#' @family DechallengeRechallenge
-#'
-#' @return
-#' An \code{Andromeda::andromeda()} object with the case series details of the failed rechallenge
-#'
-#' @examples
-#'
-#' conDet <- exampleOmopConnectionDetails()
-#'
-#' drSet <- createDechallengeRechallengeSettings(
-#'   targetIds = c(1,2),
-#'   outcomeIds = 3
-#' )
-#'
-#' computeRechallengeFailCaseSeriesAnalyses(
-#'   connectionDetails = conDet,
-#'   targetDatabaseSchema = 'main',
-#'   targetTable = 'cohort',
-#'   settings = drSet,
-#'   outputFolder = tempdir()
-#' )
-#'
-#' @export
 computeRechallengeFailCaseSeriesAnalyses <- function(
     connectionDetails = NULL,
     targetDatabaseSchema,
@@ -383,7 +308,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
       characterization_target_ids = paste(settings$characterizationTargetIds, sep = "", collapse = ","),
-      outcome_ids = paste(settings$outcomeIds, sep = "", collapse = ","),
+      outcome_ids = paste(settings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
       dechallenge_stop_interval = settings$dechallengeStopInterval,
       dechallenge_evaluation_window = settings$dechallengeEvaluationWindow,
       show_subject_id = showSubjectId

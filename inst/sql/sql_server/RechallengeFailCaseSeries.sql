@@ -6,7 +6,7 @@
 IF OBJECT_ID('tempdb..#target_cohort', 'U') IS NOT NULL DROP TABLE #target_cohort;
 
 SELECT
-ts.characterization_cohort_id as cohort_definition_id,
+ts.characterization_target_id as cohort_definition_id,
 tc.subject_id,
 tc.cohort_start_date,
 tc.cohort_end_date,

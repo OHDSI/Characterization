@@ -209,7 +209,8 @@ computeCaseSeriesAnalyses <- function(
     riskWindowStart = settings$riskWindowStart,
     endAnchor = settings$endAnchor,
     riskWindowEnd = settings$riskWindowEnd,
-    minCaseSize = minCaseSize
+    minCaseSize = minCaseSize,
+    applyMinSizeToNonCases = FALSE
   )
 
   completionTime <- Sys.time() - start

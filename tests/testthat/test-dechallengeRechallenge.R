@@ -51,6 +51,8 @@ test_that("createDechallengeRechallengeSettings", {
 })
 
 test_that("computeDechallengeRechallengeAnalyses", {
+  skipIfCreateTargetCohortSqlUnavailable()
+
   targetIds <- c(2)
   outcomeIds <- c(3, 4)
 
@@ -69,18 +71,41 @@ test_that("computeDechallengeRechallengeAnalyses", {
     dechallengeRechallengeSettings = drSet
     )
 
-  charSet$dechallengeRechallengeSettings[[1]]$characterizationTargetIds <- 2
+  jobDf <- getDechallengeRechallengeJobs(
+    characterizationSettings = charSet,
+    nTargetJobs = 1
+  )
+
+  dcLoc <- tempfile("runADechal")
+  tables <- generateCohorts(
+    characterizationSettings = charSet,
+    mode = 'PatientLevelPrediction',
+    incremental = FALSE,
+    executionPath = dcLoc,
+    connectionDetails = connectionDetails,
+    targetDatabaseSchema = "main",
+    targetTable = "cohort",
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort",
+    outputDatabaseSchema = 'main',
+    outputTable = 'char_cohort',
+    cdmDatabaseSchema = "main",
+    tempEmulationSchema = "main",
+    progressBar = FALSE,
+    settingHash = 'set1',
+    dbHash = 'db1'
+  )
 
   # make the cohorts in a table
-  dcLoc <- tempfile("runADechal")
-  dc <- Characterization::computeDechallengeRechallengeAnalyses(
+
+  dc <- computeDechallengeRechallengeAnalyses(
     connectionDetails = connectionDetails,
     #targetDatabaseSchema = "main",
     #targetTable = "cohort",
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     characterizationDatabaseSchema = "main",
-    characterizationTable = "cohort",
+    characterizationTable = tables$characterizationTable,
     settings = charSet$dechallengeRechallengeSettings[[1]],
     databaseId = "testing",
     outputFolder = dcLoc
@@ -141,10 +166,40 @@ test_that("computeDechallengeRechallengeAnalyses", {
     camelCaseToSnakeCase = FALSE
   )
 
+  DatabaseConnector::insertTable(
+    data = data.frame(
+      person_id = 1:4,
+      observation_period_start_date = rep(as.Date('1900-01-01'), 4),
+      observation_period_end_date = rep(as.Date('2100-01-01'), 4)
+    ),
+    connection = con,
+    databaseSchema = "main",
+    tableName = "observation_period",
+    createTable = TRUE,
+    dropTableIfExists = TRUE,
+    camelCaseToSnakeCase = FALSE
+  )
+
+  DatabaseConnector::insertTable(
+    data = data.frame(
+      person_id = 1:4,
+      year_of_birth = rep(1980, 4),
+      gender_concept_id = rep(0, 4)
+    ),
+    connection = con,
+    databaseSchema = "main",
+    tableName = "person",
+    createTable = TRUE,
+    dropTableIfExists = TRUE,
+    camelCaseToSnakeCase = FALSE
+  )
+
   DatabaseConnector::disconnect(con)
 
   drSet <- createDechallengeRechallengeSettings(
-    targetIds = 1,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = 1
+    ),
     outcomeIds = 2,
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 30
@@ -154,10 +209,32 @@ test_that("computeDechallengeRechallengeAnalyses", {
     dechallengeRechallengeSettings = drSet
   )
 
-  charSet$dechallengeRechallengeSettings[[1]]$characterizationTargetIds <- 1
-
+  jobDf <- getDechallengeRechallengeJobs(
+    characterizationSettings = charSet,
+    nTargetJobs = 1
+  )
 
   dcLoc <- tempfile("runADechal2")
+
+  tables <- generateCohorts(
+    characterizationSettings = charSet,
+    mode = 'PatientLevelPrediction',
+    incremental = FALSE,
+    executionPath = dcLoc,
+    connectionDetails = connectionDetailsReal,
+    targetDatabaseSchema = "main",
+    targetTable = "cohort_dechal",
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort_dechal",
+    outputDatabaseSchema = 'main',
+    outputTable = 'char_cohort',
+    cdmDatabaseSchema = "main",
+    tempEmulationSchema = "main",
+    progressBar = FALSE,
+    settingHash = 'set1',
+    dbHash = 'db1'
+  )
+
   dc <- computeDechallengeRechallengeAnalyses(
     connectionDetails = connectionDetailsReal,
     #targetDatabaseSchema = "main",
@@ -165,7 +242,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort_dechal",
     characterizationDatabaseSchema = "main",
-    characterizationTable = "cohort_dechal",
+    characterizationTable = tables$characterizationTable,
     settings = charSet$dechallengeRechallengeSettings[[1]],
     databaseId = "testing",
     outputFolder = dcLoc
@@ -184,6 +261,8 @@ test_that("computeDechallengeRechallengeAnalyses", {
 })
 
 test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
+  skipIfCreateTargetCohortSqlUnavailable()
+
   # check with made up date
   # subject 1 has 1 exposure for 30 days
   # subject 2 has 4 exposures for ~30 days with ~30 day gaps
@@ -236,6 +315,33 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
     dropTableIfExists = TRUE,
     camelCaseToSnakeCase = FALSE
   )
+  DatabaseConnector::insertTable(
+    data = data.frame(
+      person_id = 1:4,
+      observation_period_start_date = rep(as.Date('1900-01-01'), 4),
+      observation_period_end_date = rep(as.Date('2100-01-01'), 4)
+    ),
+    connection = con,
+    databaseSchema = "main",
+    tableName = "observation_period",
+    createTable = TRUE,
+    dropTableIfExists = TRUE,
+    camelCaseToSnakeCase = FALSE
+  )
+
+  DatabaseConnector::insertTable(
+    data = data.frame(
+      person_id = 1:4,
+      year_of_birth = rep(1980, 4),
+      gender_concept_id = rep(0, 4)
+    ),
+    connection = con,
+    databaseSchema = "main",
+    tableName = "person",
+    createTable = TRUE,
+    dropTableIfExists = TRUE,
+    camelCaseToSnakeCase = FALSE
+  )
   DatabaseConnector::disconnect(con)
 
   drSet <- createDechallengeRechallengeSettings(
@@ -250,62 +356,43 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
     dechallengeRechallengeSettings = drSet
   )
 
-  # add the target_settings table
-  con <- DatabaseConnector::connect(connectionDetails = connectionDetailsReal)
 
-  DatabaseConnector::insertTable(
-    data = data.frame(
-      characterizationTargetIds = c(10),
-      targetId = c(1)
-    ),
-    connection = con,
-    databaseSchema = "main",
-    tableName = "target_settings",
-    createTable = TRUE,
-    dropTableIfExists = TRUE,
-    camelCaseToSnakeCase = FALSE
+  jobDf <- getDechallengeRechallengeJobs(
+    characterizationSettings = charSet,
+    nTargetJobs = 1
   )
-  DatabaseConnector::disconnect(con)
-
-  # add the characterization cohort table "characterization"
-  con <- DatabaseConnector::connect(connectionDetails = connectionDetailsReal)
-
-  DatabaseConnector::insertTable(
-    data = data.frame(
-      cohort_definition_id = rep(10, 10),
-      subject_id = c(1, 2, 2, 2, 2, 3, 3, 3, 4, 4),
-      cohort_start_date = as.Date(c(
-        "2001-01-01",
-        "2001-01-01", "2001-03-14", "2001-05-01", "2001-07-01",
-        "2001-01-01", "2001-03-01", "2001-05-01",
-        "2001-01-01", "2001-03-01"
-      )),
-      cohort_end_date = as.Date(c(
-        "2001-01-31",
-        "2001-01-31", "2001-03-16", "2001-05-30", "2001-07-31",
-        "2001-01-31", "2001-03-30", "2001-05-30",
-        "2001-01-31", "2001-03-30"
-      ))
-    ),
-    connection = con,
-    databaseSchema = "main",
-    tableName = "characterization",
-    createTable = TRUE,
-    dropTableIfExists = TRUE,
-    camelCaseToSnakeCase = FALSE
-  )
-  DatabaseConnector::disconnect(con)
 
   dcLoc <- tempfile("runADechal2")
+
+  tables <- generateCohorts(
+    characterizationSettings = charSet,
+    mode = 'PatientLevelPrediction',
+    incremental = FALSE,
+    executionPath = dcLoc,
+    connectionDetails = connectionDetailsReal,
+    targetDatabaseSchema = "main",
+    targetTable = "cohort",
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort",
+    outputDatabaseSchema = 'main',
+    outputTable = 'char_cohort',
+    cdmDatabaseSchema = "main",
+    tempEmulationSchema = "main",
+    progressBar = FALSE,
+    settingHash = 'set1',
+    dbHash = 'db1'
+  )
+
   dc <- computeRechallengeFailCaseSeriesAnalyses(
     connectionDetails = connectionDetailsReal,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
+    targetSettingsTable = tables$targetSettingsTable,
     settings = charSet$dechallengeRechallengeSettings[[1]],
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     characterizationDatabaseSchema = "main",
-    characterizationTable = "characterization",
+    characterizationTable = tables$characterizationTable,
     databaseId = "testing",
     outputFolder = dcLoc
   )
@@ -319,13 +406,13 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
   testthat::expect_true(is.na(dc$subjectId))
 
   dcLoc <- tempfile("runADechal3")
-  dc <- Characterization::computeRechallengeFailCaseSeriesAnalyses(
+  dc <- computeRechallengeFailCaseSeriesAnalyses(
     connectionDetails = connectionDetailsReal,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
+    targetSettingsTable = tables$targetSettingsTable,
     characterizationDatabaseSchema = "main",
-    characterizationTable = "characterization",
-    targetSettingsTable = "target_settings", # new
+    characterizationTable = tables$characterizationTable,
     settings = charSet$dechallengeRechallengeSettings[[1]],
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",

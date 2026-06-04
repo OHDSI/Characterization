@@ -50,7 +50,8 @@ lookupCases <- function(
     riskWindowStart,
     endAnchor,
     riskWindowEnd,
-    minCaseSize # new
+    minCaseSize = 0, # new
+    applyMinSizeToNonCases = FALSE
 ){
 
   sql <- "
@@ -73,12 +74,16 @@ lookupCases <- function(
    ) cct
    ON lt.characterization_case_id = cct.characterization_case_id
 
+
+{@non_case_min}?{
     INNER JOIN
+
    (SELECT * FROM @lookup_schema.@case_count_table
     WHERE cohort_type = 'non-cases'
     AND n_people >= @min_case_size
    ) ncct
    ON lt.characterization_case_id = ncct.characterization_case_id
+}
 
    WHERE lt.characterization_target_id in (@char_ids)
    AND lt.outcome_id in (@outcome_ids)
@@ -102,7 +107,8 @@ lookupCases <- function(
     risk_window_start = riskWindowStart,
     end_anchor = endAnchor,
     risk_window_end = riskWindowEnd,
-    min_case_size = minCaseSize
+    min_case_size = minCaseSize,
+    non_case_min = applyMinSizeToNonCases
   )
 
   sql <- SqlRender::translate(

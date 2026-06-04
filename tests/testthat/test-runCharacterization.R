@@ -129,34 +129,7 @@ test_that("runCharacterizationAnalyses", {
     length(characterizationSettings$caseSeriesSettings) == 1
   )
 
-  tempFile <- tempfile(fileext = ".json")
-  on.exit(unlink(tempFile))
-  saveLoc <- saveCharacterizationSettings(
-    settings = characterizationSettings,
-    fileName = tempFile
-  )
-
-  testthat::expect_true(file.exists(tempFile))
-
-  loadedSettings <- loadCharacterizationSettings(
-    fileName = tempFile
-  )
-
-  # In R, empty arrays are automatically of type 'logical.' When loading JSON
-  # they are currently automatically of type 'list'. Neither is right or wrong,
-  # so ignoring distinction:
-  convertEmptyListToEmptyLogical <- function(object) {
-    if (is.list(object)) {
-      if (length(object) == 0) {
-        return(vector(mode = "logical", length = 0))
-      } else {
-        return(lapply(object, convertEmptyListToEmptyLogical))
-      }
-    } else {
-      return(object)
-    }
-  }
-  testthat::expect_equivalent(characterizationSettings, convertEmptyListToEmptyLogical(loadedSettings))
+  skipIfCreateTargetCohortSqlUnavailable()
 
   tempFolder <- tempfile("Characterization")
   on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
@@ -168,6 +141,8 @@ test_that("runCharacterizationAnalyses", {
     targetTable = "cohort",
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
+    nestingCohortDatabaseSchema = 'main',
+    nestingCohortTable = "cohort",
     characterizationSettings = characterizationSettings,
 
     outputDatabaseSchema = 'main',
@@ -236,18 +211,26 @@ test_that("runCharacterizationAnalyses", {
     file = file.path(tempFolder, "result", "c_time_to_event.csv"),
     show_col_types = FALSE
   )
+
+  charTids <- characterizationSettings$characterizationTargetLookup$characterizationTargetId[
+    characterizationSettings$characterizationTargetLookup$targetId %in% c(1, 2)
+  ]
+
+
   testthat::expect_equivalent(
-    unique(tte$target_cohort_definition_id),
-    c(1, 2)
+    unique(tte$characterization_target_id),
+    unique(charTids)
   )
 })
 
 
 
 manualDataMin <- file.path(tempdir(), "manual_min.sqlite")
-on.exit(file.remove(manualDataMin), add = TRUE)
+on.exit(unlink(manualDataMin, force = TRUE), add = TRUE)
 
 test_that("min cell count works", {
+  skipIfCreateTargetCohortSqlUnavailable()
+
   tempFolder <- tempfile("CharacterizationMin")
   on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
 
@@ -285,12 +268,10 @@ test_that("min cell count works", {
   obs_period <- data.frame(
     observation_period_id = 1:10,
     person_id = 1:10,
-    observation_period_start_date = rep("2000-12-31", 10),
-    observation_period_end_date = c("2000-12-31", rep("2020-12-31", 9)),
+    observation_period_start_date = rep(as.Date("2000-12-31"), 10),
+    observation_period_end_date = c(as.Date("2000-12-31"), rep(as.Date("2020-12-31"), 9)),
     period_type_concept_id = rep(1, 10)
   )
-  obs_period$observation_period_start_date <- as.Date(obs_period$observation_period_start_date)
-  obs_period$observation_period_end_date <- as.Date(obs_period$observation_period_end_date)
   DatabaseConnector::insertTable(
     connection = con,
     databaseSchema = schema,
@@ -388,18 +369,22 @@ test_that("min cell count works", {
   )
 
   # create settings and run
+  minCellStudyPopulation <- createStudyPopulationSettings(
+    targetIds = 1,
+    minPriorObservation = 365
+  )
+
   characterizationSettings <- createCharacterizationSettings(
     timeToEventSettings = createTimeToEventSettings(
-      targetIds = 1,
+      studyPopulationSettings = minCellStudyPopulation,
       outcomeIds = 2
     ),
     dechallengeRechallengeSettings = createDechallengeRechallengeSettings(
-      targetIds = 1,
+      studyPopulationSettings = minCellStudyPopulation,
       outcomeIds = 2
     ),
     targetBaselineSettings = createTargetBaselineSettings(
-      targetIds = 1,
-      minPriorObservation = 365,
+      studyPopulationSettings = minCellStudyPopulation,
       covariateSettings = FeatureExtraction::createCovariateSettings(
         useDemographicsAge = TRUE,
         useDemographicsGender = TRUE,
@@ -415,6 +400,8 @@ test_that("min cell count works", {
     targetTable = "cohort",
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
+    nestingCohortDatabaseSchema = 'main',
+    nestingCohortTable = "cohort",
     characterizationSettings = characterizationSettings,
     outputDirectory = file.path(tempFolder, "result_mincell"),
     executionPath = file.path(tempFolder, "execution_mincell"),

@@ -5,12 +5,14 @@ test_that("createTimeToEventSettings", {
   outcomeIds <- sample(x = 100, size = sample(10, 1))
 
   res <- createTimeToEventSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     outcomeIds = outcomeIds
   )
 
   testthat::expect_true(
-    length(unique(res$targetIds)) == length(targetIds)
+    length(unique(res$studyPopulationSettings$targetId)) == length(targetIds)
   )
 
   testthat::expect_true(
@@ -19,22 +21,58 @@ test_that("createTimeToEventSettings", {
 })
 
 test_that("computeTimeToEventSettings", {
+  skipIfCreateTargetCohortSqlUnavailable()
+
   targetIds <- c(1, 2)
   outcomeIds <- c(3, 4)
 
   res <- createTimeToEventSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     outcomeIds = outcomeIds
   )
 
+  characterizationSettings <- createCharacterizationSettings(
+    timeToEventSettings = res
+  )
+
+  jobDf <- getTimeToEventJobs(
+    characterizationSettings = characterizationSettings,
+    nTargetJobs = 1
+  )
+
   tteFolder <- tempfile("tte")
+
+  tables <- generateCohorts(
+    characterizationSettings = characterizationSettings,
+    mode = 'PatientLevelPrediction',
+    incremental = FALSE,
+    executionPath = tteFolder,
+    connectionDetails = connectionDetails,
+    targetDatabaseSchema = "main",
+    targetTable = "cohort",
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort",
+    outputDatabaseSchema = 'main',
+    outputTable = 'char_cohort',
+    cdmDatabaseSchema = "main",
+    tempEmulationSchema = "main",
+    progressBar = FALSE,
+    settingHash = 'set1',
+    dbHash = 'db1'
+  )
 
   computeTimeToEventAnalyses(
     connectionDetails = connectionDetails,
     cdmDatabaseSchema = "main",
     targetDatabaseSchema = "main",
     targetTable = "cohort",
-    settings = res,
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort",
+    characterizationDatabaseSchema = 'main',
+    characterizationTable = tables$characterizationTable,
+    settings = ParallelLogger::convertJsonToSettings(jobDf$settings[1]),
     outputFolder = tteFolder,
     databaseId = "tte_test"
   )
@@ -55,13 +93,17 @@ test_that("computeTimeToEventSettings", {
       )
     ) <= length(targetIds)
   )
+
+  charTargetIds <- characterizationSettings$characterizationTargetLookup$characterizationTargetId[
+    characterizationSettings$characterizationTargetLookup$targetId %in% targetIds
+  ]
+
   testthat::expect_true(
     sum(unique(
-      tte$targetCohortDefinitionId
-    ) %in% targetIds) ==
-      length(unique(tte$targetCohortDefinitionId))
+      tte$characterizationTargetId
+    ) %in% charTargetIds) ==
+      length(unique(tte$characterizationTargetId))
   )
-
 
   testthat::expect_true(
     length(

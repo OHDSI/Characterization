@@ -31,8 +31,4 @@ tteSet <- createTimeToEventSettings(
 
 
 }
-\seealso{
-Other TimeToEvent: 
-\code{\link{computeTimeToEventAnalyses}()}
-}
 \concept{TimeToEvent}
