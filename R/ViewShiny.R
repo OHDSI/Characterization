@@ -155,33 +155,13 @@ prepareCharacterizationShiny <- function(
           connection = con,
           sql = paste0("select distinct TARGET_ID from ", tablePrefix, csvTablePrefix, "target_settings;"),
           snakeCaseToCamelCase = TRUE
-          )$targetCohortId,
+          )$targetId,
         DatabaseConnector::querySql(
           connection = con,
           sql = paste0("select distinct OUTCOME_ID from ", tablePrefix, csvTablePrefix, "case_settings;"),
           snakeCaseToCamelCase = TRUE
-          )$outcomeCohortId,
-        DatabaseConnector::querySql(
-          connection = con,
-          sql = paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
-          snakeCaseToCamelCase = TRUE
-            )$targetCohortDefinitionId,
-        DatabaseConnector::querySql(
-          connection = con,
-          sql = paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
-          snakeCaseToCamelCase = TRUE
-          )$outcomeCohortDefinitionId,
-        DatabaseConnector::querySql(
-          connection = con,
-          sql = paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"),
-          snakeCaseToCamelCase = TRUE
-          )$targetCohortDefinitionId,
-        DatabaseConnector::querySql(
-          connection = con,
-          sql = paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"),
-          snakeCaseToCamelCase = TRUE
-            )$outcomeCohortDefinitionId
-      )
+          )$outcomeId
+    )
     )
 
 

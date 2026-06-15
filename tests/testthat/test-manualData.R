@@ -1,12 +1,14 @@
 context("manual data")
 
 manualData <- file.path(tempdir(), "manual.sqlite")
-on.exit(file.remove(manualData), add = TRUE)
+on.exit(unlink(manualData, force = TRUE), add = TRUE)
 
 manualData2 <- file.path(tempdir(), "manual2.sqlite")
-on.exit(file.remove(manualData2), add = TRUE)
+on.exit(unlink(manualData2, force = TRUE), add = TRUE)
 
 test_that("manual data runCharacterizationAnalyses", {
+  skipIfCreateTargetCohortSqlUnavailable()
+
   # this test creates made-up OMOP CDM data
   # and runs runCharacterizationAnalyses on the data
   # to check whether the results are as expected
@@ -147,19 +149,23 @@ test_that("manual data runCharacterizationAnalyses", {
   )
 
   # create settings and run
+  manualStudyPopulation <- createStudyPopulationSettings(
+    targetIds = 1,
+    limitToFirstInNDays = 99999,
+    minPriorObservation = 365
+  )
+
   characterizationSettings <- createCharacterizationSettings(
     timeToEventSettings = createTimeToEventSettings(
-      targetIds = 1,
+      studyPopulationSettings = manualStudyPopulation,
       outcomeIds = 2
     ),
     dechallengeRechallengeSettings = createDechallengeRechallengeSettings(
-      targetIds = 1,
+      studyPopulationSettings = manualStudyPopulation,
       outcomeIds = 2
     ),
     targetBaselineSettings = createTargetBaselineSettings(
-      targetIds = 1,
-      limitToFirstInNDays = 99999,
-      minPriorObservation = 365,
+      studyPopulationSettings = manualStudyPopulation,
       covariateSettings = FeatureExtraction::createCovariateSettings(
         useDemographicsAge = TRUE,
         useDemographicsGender = TRUE,
@@ -168,10 +174,8 @@ test_that("manual data runCharacterizationAnalyses", {
     ),
 
     riskFactorSettings = createRiskFactorSettings(
-      targetIds = 1,
+      studyPopulationSettings = manualStudyPopulation,
       outcomeIds = 2,
-      limitToFirstInNDays = 99999,
-      minPriorObservation = 365,
       outcomeWashoutDays = 30,
       riskWindowStart = 1,
       riskWindowEnd = 90,
@@ -183,10 +187,8 @@ test_that("manual data runCharacterizationAnalyses", {
       ),
 
     caseSeriesSettings = createCaseSeriesSettings(
-      targetIds = 1,
+      studyPopulationSettings = manualStudyPopulation,
       outcomeIds = 2,
-      limitToFirstInNDays = 99999,
-      minPriorObservation = 365,
       outcomeWashoutDays = 30,
       riskWindowStart = 1,
       riskWindowEnd = 90,
@@ -201,6 +203,8 @@ test_that("manual data runCharacterizationAnalyses", {
     targetTable = "cohort",
     outcomeDatabaseSchema = schema,
     outcomeTable = "cohort",
+    nestingCohortTable = "cohort",
+    nestingCohortDatabaseSchema = schema,
     cdmDatabaseSchema = schema,
     characterizationSettings = characterizationSettings,
     outputDirectory = file.path(tempdir(), "result"),
@@ -273,7 +277,7 @@ test_that("manual data runCharacterizationAnalyses", {
   testthat::expect_true(tset$min_prior_observation == 365)
   testthat::expect_true(tset$characterization_target_id == tset$target_id*10)
 
-  attrition <- utils::read.csv(file.path(tempdir(), "result", "c_attrition.csv"))
+  attrition <- utils::read.csv(file.path(tempdir(), "result", "c_target_attrition.csv"))
   # there should be 9 people as the first subject has cohort date outside observation
   testthat::expect_true(attrition$n[attrition$cohort_definition_id==10] == 9)
 

@@ -219,6 +219,8 @@ CREATE TABLE @my_schema.@table_prefixexecution_settings (
     min_characterization_mean FLOAT,
     min_covariate_count INT,
     min_smd FLOAT,
+    min_target_size BIGINT,
+    min_case_size BIGINT,
     PRIMARY KEY (setting_id, database_id)
 );
 
@@ -252,14 +254,4 @@ CREATE TABLE @my_schema.@table_prefixcase_series_settings (
     case_pre_target_duration int,
     case_post_outcome_duration int,
     PRIMARY KEY (setting_id)
-);
-
--- added this table
-CREATE TABLE @my_schema.@table_prefixattrition (
-    database_id varchar(100) NOT NULL,
-    setting_id varchar(50) NOT NULL,
-    cohort_definition_id BIGINT,
-    attr_reason VARCHAR(200),
-    n BIGINT,
-    PRIMARY KEY (setting_id, database_id, cohort_definition_id, attr_reason)
 );
