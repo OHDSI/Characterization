@@ -1,8 +1,8 @@
 Package: Characterization
 Type: Package
 Title: Implement Descriptive Studies Using the Common Data Model
-Version: 3.1.0
-Date: 2026-4-15
+Version: 4.0.0.9999
+Date: 2026-6-15
 Authors@R: c(
   person("Jenna", "Reps", , "jreps@its.jnj.com", role = c("aut", "cre")),
   person("Patrick", "Ryan", , "ryan@ohdsi.org", role = c("aut")),

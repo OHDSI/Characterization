@@ -35,7 +35,7 @@ test_that("createDechallengeRechallengeSettings", {
   )
 
   testthat::expect_equal(
-    res$outcomeCohortDefinitionIds,
+    res$outcomeIds,
     outcomeIds
   )
 

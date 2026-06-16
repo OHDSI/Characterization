@@ -84,7 +84,7 @@ createDechallengeRechallengeSettings <- function(
   # create data.frame with all combinations
   result <- list(
     studyPopulationSettings = combineStudyPopulationSettings(studyPopulationSettings),
-    outcomeCohortDefinitionIds = outcomeIds,
+    outcomeIds = outcomeIds,
     dechallengeStopInterval = dechallengeStopInterval,
     dechallengeEvaluationWindow = dechallengeEvaluationWindow
   )
@@ -382,7 +382,7 @@ getDechallengeRechallengeJobs <- function(
     characterizationSettings[[i]]$characterizationTargetIds
   })
   outcomeIds <- lapply(ind, function(i) {
-    characterizationSettings[[i]]$outcomeCohortDefinitionIds
+    characterizationSettings[[i]]$outcomeIds
   })
   dechallengeStopIntervals <- lapply(ind, function(i) {
     characterizationSettings[[i]]$dechallengeStopInterval
