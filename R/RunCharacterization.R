@@ -312,7 +312,11 @@ loadCharacterizationSettings <- function(
 #' conDet <- exampleOmopConnectionDetails()
 #'
 #' tteSet <- createTimeToEventSettings(
-#'   targetIds = c(1,2),
+#'   studyPopulationSettings = createStudyPopulationSettings(
+#'     targetIds = c(1,2),
+#'     limitToFirstInNDays = 0,
+#'     minPriorObservation = 0
+#'     ),
 #'   outcomeIds = 3
 #' )
 #'

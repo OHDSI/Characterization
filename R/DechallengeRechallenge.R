@@ -167,7 +167,7 @@ computeDechallengeRechallengeAnalyses <- function(
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
       characterization_target_ids = paste(settings$characterizationTargetIds, sep = "", collapse = ","),
-      outcome_ids = paste(settings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
+      outcome_ids = paste(settings$outcomeIds, sep = "", collapse = ","),
       dechallenge_stop_interval = settings$dechallengeStopInterval,
       dechallenge_evaluation_window = settings$dechallengeEvaluationWindow
     )
@@ -308,7 +308,7 @@ computeRechallengeFailCaseSeriesAnalyses <- function(
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable,
       characterization_target_ids = paste(settings$characterizationTargetIds, sep = "", collapse = ","),
-      outcome_ids = paste(settings$outcomeCohortDefinitionIds, sep = "", collapse = ","),
+      outcome_ids = paste(settings$outcomeIds, sep = "", collapse = ","),
       dechallenge_stop_interval = settings$dechallengeStopInterval,
       dechallenge_evaluation_window = settings$dechallengeEvaluationWindow,
       show_subject_id = showSubjectId
