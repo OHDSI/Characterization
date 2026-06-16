@@ -31,25 +31,25 @@ SELECT *
 FROM
 (
 SELECT
-IFNULL(non_cases.characterization_case_id, cases.characterization_case_id) as characterization_case_id,
-IFNULL(non_cases.covariate_id, cases.covariate_id) as covariate_id,
-IFNULL(non_case_sum_value, 0) as non_case_sum_value,
-IFNULL(case_sum_value, 0) as case_sum_value,
-IFNULL(non_case_average_value, 0) as non_case_average_value,
-IFNULL(case_average_value, 0) as case_average_value,
-(IFNULL(case_average_value, 0.0) - IFNULL(non_case_average_value, 0.0))/
+ISNULL(non_cases.characterization_case_id, cases.characterization_case_id) as characterization_case_id,
+ISNULL(non_cases.covariate_id, cases.covariate_id) as covariate_id,
+ISNULL(non_case_sum_value, 0) as non_case_sum_value,
+ISNULL(case_sum_value, 0) as case_sum_value,
+ISNULL(non_case_average_value, 0) as non_case_average_value,
+ISNULL(case_average_value, 0) as case_average_value,
+(ISNULL(case_average_value, 0.0) - ISNULL(non_case_average_value, 0.0))/
 SQRT(
 (
   (
-    (POWER((1.0 - IFNULL(case_average_value, 0.0)),2) * IFNULL(case_sum_value*1.0, 0.0)) +
-    (POWER((0.0 - IFNULL(case_average_value, 0.0)),2) * (IFNULL(case_n*1.0, 0.0) - IFNULL(case_sum_value*1.0, 0.0)))
-  )/CASE WHEN IFNULL(case_n*1.0-1.0, 1.0) = 0 THEN 1.0 ELSE IFNULL(case_n*1.0-1.0, 1.0) END
+    (POWER((1.0 - ISNULL(case_average_value, 0.0)),2) * ISNULL(case_sum_value*1.0, 0.0)) +
+    (POWER((0.0 - ISNULL(case_average_value, 0.0)),2) * (ISNULL(case_n*1.0, 0.0) - ISNULL(case_sum_value*1.0, 0.0)))
+  )/CASE WHEN ISNULL(case_n*1.0-1.0, 1.0) = 0 THEN 1.0 ELSE ISNULL(case_n*1.0-1.0, 1.0) END
 
 +
   (
-    (POWER((1.0 - IFNULL(non_case_average_value, 0.0)),2) * IFNULL(non_case_sum_value*1.0, 0.0)) +
-    (POWER((0.0 - IFNULL(non_case_average_value, 0.0)),2) * (IFNULL(non_case_n*1.0, 0.0) - IFNULL(non_case_sum_value*1.0, 0)))
-  )/CASE WHEN IFNULL(non_case_n*1.0-1.0, 1.0) = 0 THEN 1.0 ELSE IFNULL(non_case_n*1.0-1.0, 1.0) END
+    (POWER((1.0 - ISNULL(non_case_average_value, 0.0)),2) * ISNULL(non_case_sum_value*1.0, 0.0)) +
+    (POWER((0.0 - ISNULL(non_case_average_value, 0.0)),2) * (ISNULL(non_case_n*1.0, 0.0) - ISNULL(non_case_sum_value*1.0, 0)))
+  )/CASE WHEN ISNULL(non_case_n*1.0-1.0, 1.0) = 0 THEN 1.0 ELSE ISNULL(non_case_n*1.0-1.0, 1.0) END
 
   )/2.0
   ) as standardized_mean_difference
@@ -90,6 +90,6 @@ AND non_cases.covariate_id = cases.covariate_id
 ) smd_table
 
 WHERE  abs(smd_table.standardized_mean_difference) >= @smd_min
-AND (IFNULL(non_case_sum_value, 0) + IFNULL(case_sum_value, 0) ) >= @min_count
+AND (ISNULL(non_case_sum_value, 0) + ISNULL(case_sum_value, 0) ) >= @min_count
 ;
 

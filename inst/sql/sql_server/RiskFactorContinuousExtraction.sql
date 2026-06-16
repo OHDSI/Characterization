@@ -34,31 +34,31 @@ SELECT *
 FROM
 (
 SELECT
-IFNULL(non_cases.characterization_case_id, cases.characterization_case_id) as characterization_case_id,
-IFNULL(non_cases.covariate_id, cases.covariate_id) as covariate_id,
-IFNULL(non_case_count_value, 0) as non_case_count_value,
-IFNULL(case_count_value, 0) as case_count_value,
-IFNULL(non_case_min_value, 0) as non_case_min_value,
-IFNULL(case_min_value, 0) as case_min_value,
-IFNULL(non_case_max_value, 0) as non_case_max_value,
-IFNULL(case_max_value, 0) as case_max_value,
-IFNULL(non_case_average_value, 0) as non_case_average_value,
-IFNULL(case_average_value, 0) as case_average_value,
-IFNULL(non_case_median_value, 0) as non_case_median_value,
-IFNULL(case_median_value, 0) as case_median_value,
-IFNULL(non_case_p10_value, 0) as non_case_p10_value,
-IFNULL(case_p10_value, 0) as case_p10_value,
-IFNULL(non_case_p25_value, 0) as non_case_p25_value,
-IFNULL(case_p25_value, 0) as case_p25_value,
-IFNULL(non_case_p75_value, 0) as non_case_p75_value,
-IFNULL(case_p75_value, 0) as case_p75_value,
-IFNULL(non_case_p90_value, 0) as non_case_p90_value,
-IFNULL(case_p90_value, 0) as case_p90_value,
-IFNULL(non_case_standard_deviation, 0) as non_case_standard_deviation,
-IFNULL(case_standard_deviation, 0) as case_standard_deviation,
-(IFNULL(case_average_value, 0.0) - IFNULL(non_case_average_value, 0.0))/
+ISNULL(non_cases.characterization_case_id, cases.characterization_case_id) as characterization_case_id,
+ISNULL(non_cases.covariate_id, cases.covariate_id) as covariate_id,
+ISNULL(non_case_count_value, 0) as non_case_count_value,
+ISNULL(case_count_value, 0) as case_count_value,
+ISNULL(non_case_min_value, 0) as non_case_min_value,
+ISNULL(case_min_value, 0) as case_min_value,
+ISNULL(non_case_max_value, 0) as non_case_max_value,
+ISNULL(case_max_value, 0) as case_max_value,
+ISNULL(non_case_average_value, 0) as non_case_average_value,
+ISNULL(case_average_value, 0) as case_average_value,
+ISNULL(non_case_median_value, 0) as non_case_median_value,
+ISNULL(case_median_value, 0) as case_median_value,
+ISNULL(non_case_p10_value, 0) as non_case_p10_value,
+ISNULL(case_p10_value, 0) as case_p10_value,
+ISNULL(non_case_p25_value, 0) as non_case_p25_value,
+ISNULL(case_p25_value, 0) as case_p25_value,
+ISNULL(non_case_p75_value, 0) as non_case_p75_value,
+ISNULL(case_p75_value, 0) as case_p75_value,
+ISNULL(non_case_p90_value, 0) as non_case_p90_value,
+ISNULL(case_p90_value, 0) as case_p90_value,
+ISNULL(non_case_standard_deviation, 0) as non_case_standard_deviation,
+ISNULL(case_standard_deviation, 0) as case_standard_deviation,
+(ISNULL(case_average_value, 0.0) - ISNULL(non_case_average_value, 0.0))/
 SQRT(
-(POWER(IFNULL(case_standard_deviation, 0.0),2) + POWER(IFNULL(non_case_standard_deviation, 0.0),2))
+(POWER(ISNULL(case_standard_deviation, 0.0),2) + POWER(ISNULL(non_case_standard_deviation, 0.0),2))
 /2.0) as standardized_mean_difference
 
 
@@ -113,5 +113,5 @@ AND non_cases.covariate_id = cases.covariate_id
 ) temp
 
 WHERE  abs(temp.standardized_mean_difference) >= @smd_min
-AND (IFNULL(non_case_count_value, 0) + IFNULL(case_count_value, 0) ) >= @min_count
+AND (ISNULL(non_case_count_value, 0) + ISNULL(case_count_value, 0) ) >= @min_count
 ;
