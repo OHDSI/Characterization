@@ -1,3 +1,7 @@
+Characterization 3.0.2
+======================
+- Replacing IFNULL with ISNULL as SQL server errors with IFNULL
+
 Characterization 3.0.1
 ======================
 - Fix issue with uploading results into database for shiny viewer (spacing was added to csv and causing issues and continuous covariates that are floats were incorrectly bigints)
