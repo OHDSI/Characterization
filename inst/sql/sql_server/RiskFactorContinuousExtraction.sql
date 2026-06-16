@@ -30,7 +30,10 @@ SELECT case_id FROM cohort_of_int
 GROUP BY cohort_definition_id
 )
 
-SELECT *
+SELECT *,
+CASE WHEN st_dev = 0 THEN mean_diff ELSE mean_diff/st_dev END as standardized_mean_difference
+
+
 FROM
 (
 SELECT
@@ -56,10 +59,10 @@ ISNULL(non_case_p90_value, 0) as non_case_p90_value,
 ISNULL(case_p90_value, 0) as case_p90_value,
 ISNULL(non_case_standard_deviation, 0) as non_case_standard_deviation,
 ISNULL(case_standard_deviation, 0) as case_standard_deviation,
-(ISNULL(case_average_value, 0.0) - ISNULL(non_case_average_value, 0.0))/
+(ISNULL(case_average_value, 0.0) - ISNULL(non_case_average_value, 0.0))*1.0 as mean_diff,
 SQRT(
 (POWER(ISNULL(case_standard_deviation, 0.0),2) + POWER(ISNULL(non_case_standard_deviation, 0.0),2))
-/2.0) as standardized_mean_difference
+/2.0) as st_dev
 
 
 FROM
@@ -112,6 +115,6 @@ AND non_cases.covariate_id = cases.covariate_id
 
 ) temp
 
-WHERE  abs(temp.standardized_mean_difference) >= @smd_min
+WHERE  abs(CASE WHEN st_dev = 0 THEN mean_diff ELSE mean_diff/st_dev END) >= @smd_min
 AND (ISNULL(non_case_count_value, 0) + ISNULL(case_count_value, 0) ) >= @min_count
 ;
