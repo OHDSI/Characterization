@@ -157,14 +157,14 @@ duringData <- getDbDuringCovariateData(
   cohortTable = 'cohort'
 )
 #> Constructing during cohort covariates
-#> Executing SQL took 0.00352 secs
-#> Executing SQL took 0.00345 secs
+#> Executing SQL took 0.00338 secs
+#> Executing SQL took 0.00288 secs
 #> Executing during sql code for ConditionOccurrenceDuring
-#> Executing SQL took 0.018 secs
+#> Executing SQL took 0.0177 secs
 #> Execution took 0.02 secs
 #> Extracting covariates
 #> Downloading covariates
-#> Extracting covariates took 0.21 secs
+#> Extracting covariates took 0.19 secs
 #> Removing temp covariate tables
 
 DatabaseConnector::disconnect(connection)

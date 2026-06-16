@@ -14,13 +14,13 @@ Source:
 [`DESCRIPTION`](https://github.com/OHDSI/Characterization/blob/develop/DESCRIPTION)
 
 Reps J, Ryan P, Knoll C (2026). *Characterization: Implement Descriptive
-Studies Using the Common Data Model*. R package version 3.0.1,
+Studies Using the Common Data Model*. R package version 3.0.2,
 <https://ohdsi.github.io/Characterization/>.
 
     @Manual{,
       title = {Characterization: Implement Descriptive Studies Using the Common Data Model},
       author = {Jenna Reps and Patrick Ryan and Chris Knoll},
       year = {2026},
-      note = {R package version 3.0.1},
+      note = {R package version 3.0.2},
       url = {https://ohdsi.github.io/Characterization/},
     }

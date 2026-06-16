@@ -1,5 +1,9 @@
 # Changelog
 
+## Characterization 3.0.2
+
+- Replacing IFNULL with ISNULL as SQL server errors with IFNULL
+
 ## Characterization 3.0.1
 
 CRAN release: 2026-05-15
