@@ -27,7 +27,13 @@ SELECT case_id FROM cohort_of_int
 GROUP BY cohort_definition_id
 )
 
-SELECT *,
+SELECT
+characterization_case_id,
+covariate_id,
+non_case_sum_value,
+case_sum_value,
+non_case_average_value,
+case_average_value,
 CASE WHEN st_dev = 0 THEN mean_diff ELSE mean_diff/st_dev END as standardized_mean_difference
 
 FROM
