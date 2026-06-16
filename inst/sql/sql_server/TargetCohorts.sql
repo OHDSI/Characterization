@@ -110,7 +110,7 @@ AND YEAR(t.cohort_start_date) - p.year_of_birth <= @max_age;
 {@gender_concept_ids != ''}?{
 SELECT *
 INTO #temp_target_gender
-FROM #temp_target_age
+FROM #temp_target_age t
 INNER JOIN
 @cdm_database_schema.person p
 ON p.person_id = t.subject_id
