@@ -1,7 +1,7 @@
 -- first entry in washout days and min prior obs
 
 IF OBJECT_ID('tempdb..#temp_target', 'U') IS NOT NULL DROP TABLE #temp_target;
-IF OBJECT_ID('tempdb..#temp_target_first', 'U') IS NOT NULL DROP TABLE #temp_target_fist;
+IF OBJECT_ID('tempdb..#temp_target_first', 'U') IS NOT NULL DROP TABLE #temp_target_first;
 IF OBJECT_ID('tempdb..#temp_target_prior', 'U') IS NOT NULL DROP TABLE #temp_target_prior;
 IF OBJECT_ID('tempdb..#temp_target_nest', 'U') IS NOT NULL DROP TABLE #temp_target_nest;
 IF OBJECT_ID('tempdb..#temp_target_age', 'U') IS NOT NULL DROP TABLE #temp_target_age;
@@ -178,6 +178,7 @@ WHERE characterization_target_id in (SELECT DISTINCT cohort_definition_id FROM #
 INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people)
+
 SELECT
 cohort_definition_id,
 1,
@@ -185,13 +186,13 @@ cohort_definition_id,
 count(*),
 count(distinct subject_id)
 FROM #temp_target
-GROUP BY
-cohort_definition_id
+GROUP BY cohort_definition_id
 ;
 
 INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people)
+
 SELECT
 cohort_definition_id,
 2,
@@ -202,8 +203,8 @@ FROM #temp_target_first
 GROUP BY
 cohort_definition_id
 
--- add 0s
 UNION
+
 SELECT
 cohort_definition_id,
 2,
@@ -219,6 +220,7 @@ WHERE cohort_definition_id NOT IN
 INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people)
+
 SELECT
 cohort_definition_id,
 3,
@@ -229,8 +231,8 @@ FROM #temp_target_prior
 GROUP BY
 cohort_definition_id
 
--- add 0s
 UNION
+
 SELECT
 cohort_definition_id,
 3,
@@ -246,6 +248,7 @@ WHERE cohort_definition_id NOT IN
 INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people)
+
 SELECT
 cohort_definition_id,
 4,
@@ -256,8 +259,8 @@ FROM #temp_target_nest
 GROUP BY
 cohort_definition_id
 
--- add 0s
 UNION
+
 SELECT
 cohort_definition_id,
 4,
@@ -273,6 +276,7 @@ WHERE cohort_definition_id NOT IN
 INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people)
+
 SELECT
 cohort_definition_id,
 5,
@@ -283,11 +287,11 @@ FROM #temp_target_age
 GROUP BY
 cohort_definition_id
 
--- add 0s
 UNION
+
 SELECT
 cohort_definition_id,
-5, -- new
+5,
 'Aged @min_age to @max_age',
 0,
 0
@@ -300,6 +304,7 @@ WHERE cohort_definition_id NOT IN
 INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people)
+
 SELECT
 cohort_definition_id,
 6,
@@ -310,8 +315,8 @@ FROM #temp_target_gender
 GROUP BY
 cohort_definition_id
 
--- add 0s
 UNION
+
 SELECT
 cohort_definition_id,
 6,
@@ -328,6 +333,7 @@ INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people
 )
+
 SELECT
 cohort_definition_id,
 7,
@@ -339,15 +345,15 @@ FROM #temp_target_date
 GROUP BY
 cohort_definition_id
 
--- add 0s
 UNION
+
 SELECT
 cohort_definition_id,
 7,
 'Starting between @study_start to @study_end',
 0,
 0
-FROM #temp_target_gender -- preious
+FROM #temp_target_gender
 WHERE cohort_definition_id NOT IN
 (SELECT distinct cohort_definition_id FROM #temp_target_date)
 
@@ -376,7 +382,7 @@ cohort_definition_id
 -- =========================
 -- clean up
 IF OBJECT_ID('tempdb..#temp_target', 'U') IS NOT NULL DROP TABLE #temp_target;
-IF OBJECT_ID('tempdb..#temp_target_first', 'U') IS NOT NULL DROP TABLE #temp_target_fist;
+IF OBJECT_ID('tempdb..#temp_target_first', 'U') IS NOT NULL DROP TABLE #temp_target_first;
 IF OBJECT_ID('tempdb..#temp_target_prior', 'U') IS NOT NULL DROP TABLE #temp_target_prior;
 IF OBJECT_ID('tempdb..#temp_target_nest', 'U') IS NOT NULL DROP TABLE #temp_target_nest;
 IF OBJECT_ID('tempdb..#temp_target_age', 'U') IS NOT NULL DROP TABLE #temp_target_age;
