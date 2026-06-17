@@ -183,6 +183,8 @@ characterization_case_id, attr_order, attr_reason,
 n_events, n_people
 )
 
+SELECT * FROM
+(
 SELECT
 CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT),
 8,
@@ -192,10 +194,11 @@ count(distinct subject_id)
 
 FROM #temp_non_cases_with_tar
 GROUP BY cohort_definition_id
+) temp
 
 -- add 0s
 UNION
-SELECT DISTINCT
+SELECT
 CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT),
 8,
 'Has some TAR',
@@ -211,6 +214,9 @@ INSERT INTO @characterization_schema.@case_attrition_table(
 characterization_case_id, attr_order, attr_reason,
 n_events, n_people
 )
+
+SELECT * FROM
+(
 SELECT
 CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT),
 9,
@@ -220,10 +226,11 @@ count(distinct subject_id)
 
 FROM #temp_non_cases_pass_washout
 GROUP BY cohort_definition_id
+) temp
 
 UNION
 
-SELECT DISTINCT
+SELECT
 CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT),
 9,
 'Remains after outcome washout',
