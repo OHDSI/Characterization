@@ -111,14 +111,16 @@ AND cohort_definition_id in (SELECT DISTINCT cohort_definition_id FROM #temp_non
 DELETE FROM @characterization_schema.@case_count_table
 WHERE cohort_type = 'non-cases'
 AND characterization_case_id in
-(SELECT DISTINCT (cohort_definition_id-2.0)/10.0 FROM #temp_non_cases);
+(SELECT DISTINCT CAST((cohort_definition_id-2.0)/10.0 as BIGINT) FROM #temp_non_cases);
 
-INSERT INTO @characterization_schema.@case_count_table
+INSERT INTO @characterization_schema.@case_count_table(
+characterization_case_id, cohort_type, n_events, n_people
+)
 SELECT
-(cohort_definition_id-2.0)/10.0 as characterization_case_id,
-'non-cases' as cohort_type,
-count(*) as n_events, -- new
-count(distinct subject_id) as n_people -- new
+CAST((cohort_definition_id-2.0)/10.0 as BIGINT),
+'non-cases',
+count(*),
+count(distinct subject_id)
 
 FROM  #temp_non_cases temp
 
