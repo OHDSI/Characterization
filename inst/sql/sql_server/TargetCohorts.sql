@@ -193,15 +193,15 @@ INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people)
 
-SELECT
+SELECT * FROM
+(SELECT
 cohort_definition_id,
 2,
 'First in @limit_to_first_in_n_days days',
 count(*),
 count(distinct subject_id)
 FROM #temp_target_first
-GROUP BY
-cohort_definition_id
+GROUP BY cohort_definition_id) main
 
 UNION
 
@@ -221,15 +221,15 @@ INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people)
 
-SELECT
+SELECT * FROM
+(SELECT
 cohort_definition_id,
 3,
 'With @min_prior_observation prior obs',
 count(*),
 count(distinct subject_id)
 FROM #temp_target_prior
-GROUP BY
-cohort_definition_id
+GROUP BY cohort_definition_id) main
 
 UNION
 
@@ -249,15 +249,15 @@ INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people)
 
-SELECT
+SELECT * FROM
+(SELECT
 cohort_definition_id,
 4,
 'Nested in @nesting_cohort_id',
 count(*),
 count(distinct subject_id)
 FROM #temp_target_nest
-GROUP BY
-cohort_definition_id
+GROUP BY cohort_definition_id) main
 
 UNION
 
@@ -277,15 +277,15 @@ INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people)
 
-SELECT
+SELECT * FROM
+(SELECT
 cohort_definition_id,
 5,
 'Aged @min_age to @max_age',
 count(*),
 count(distinct subject_id)
 FROM #temp_target_age
-GROUP BY
-cohort_definition_id
+GROUP BY cohort_definition_id) main
 
 UNION
 
@@ -305,15 +305,15 @@ INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people)
 
-SELECT
+SELECT * FROM
+(SELECT
 cohort_definition_id,
 6,
 'Gender in @gender_concept_ids',
 count(*),
 count(distinct subject_id)
 FROM #temp_target_gender
-GROUP BY
-cohort_definition_id
+GROUP BY cohort_definition_id) main
 
 UNION
 
@@ -325,16 +325,15 @@ cohort_definition_id,
 0
 FROM #temp_target_age -- preious
 WHERE cohort_definition_id NOT IN
-(SELECT distinct cohort_definition_id FROM #temp_target_gender)
-
-;
+(SELECT distinct cohort_definition_id FROM #temp_target_gender);
 
 INSERT INTO @characterization_schema.@target_attrition_table(
 characterization_target_id, attr_order, attr_reason,
 n_events, n_people
 )
 
-SELECT
+SELECT * FROM
+(SELECT
 cohort_definition_id,
 7,
 'Starting between @study_start to @study_end',
@@ -342,8 +341,7 @@ count(*),
 count(distinct subject_id)
 
 FROM #temp_target_date
-GROUP BY
-cohort_definition_id
+GROUP BY cohort_definition_id) main
 
 UNION
 
