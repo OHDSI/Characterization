@@ -173,17 +173,20 @@ WHERE temp.no_tar_because_outcome_washout = 0 AND temp.no_tar_washout_and_obs = 
 -- next
 DELETE FROM @characterization_schema.@case_attrition_table
 WHERE characterization_case_id in
-(SELECT DISTINCT (cohort_definition_id-2.0)/10.0 FROM #temp_non_cases);
+(SELECT DISTINCT CAST((cohort_definition_id-2.0)/10.0 AS BIGINT) FROM #temp_non_cases);
 
 
-INSERT INTO @characterization_schema.@case_attrition_table
+INSERT INTO @characterization_schema.@case_attrition_table(
+characterization_case_id, attr_order, attr_reason,
+n_events, n_people
+)
 
 SELECT
-(cohort_definition_id - 2.0)/10.0 as characterization_case_id,
-8 as attr_order, -- new
-'Has some TAR' as attr_reason,
-count(*) as n_events, -- new
-count(distinct subject_id) as n_people -- new
+CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT),
+8,
+'Has some TAR',
+count(*),
+count(distinct subject_id)
 
 FROM #temp_non_cases_with_tar
 GROUP BY cohort_definition_id
@@ -191,24 +194,27 @@ GROUP BY cohort_definition_id
 -- add 0s
 UNION
 SELECT DISTINCT
-(cohort_definition_id - 2.0)/10.0 as characterization_case_id,
-8 as attr_order, -- new
-'Has some TAR' as attr_reason,
-0 as n_events,
-0 as n_people
+CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT),
+8,
+'Has some TAR',
+0,
+0
 FROM #temp_non_cases
 WHERE cohort_definition_id NOT IN
 (SELECT distinct cohort_definition_id FROM #temp_non_cases_with_tar)
 
 ;
 
-INSERT INTO @characterization_schema.@case_attrition_table
+INSERT INTO @characterization_schema.@case_attrition_table(
+characterization_case_id, attr_order, attr_reason,
+n_events, n_people
+)
 SELECT
-(cohort_definition_id - 2.0)/10.0 as characterization_case_id,
-9 as attr_order, -- new
-'Remains after outcome washout' as attr_reason,
-count(*) as n_events, -- new
-count(distinct subject_id) as n_people -- new
+CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT),
+9,
+'Remains after outcome washout',
+count(*),
+count(distinct subject_id)
 
 FROM #temp_non_cases_pass_washout
 GROUP BY cohort_definition_id
@@ -216,11 +222,11 @@ GROUP BY cohort_definition_id
 UNION
 
 SELECT DISTINCT
-(cohort_definition_id - 2.0)/10.0 as characterization_case_id,
-9 as attr_order, -- new
-'Remains after outcome washout' as attr_reason,
-0 as n_events,
-0 as n_people
+CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT),
+9,
+'Remains after outcome washout',
+0,
+0
 FROM #temp_non_cases_with_tar
 WHERE cohort_definition_id NOT IN
 (SELECT distinct cohort_definition_id FROM #temp_non_cases_pass_washout)

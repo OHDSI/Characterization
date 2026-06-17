@@ -72,7 +72,7 @@ INSERT INTO @characterization_schema.@characterization_table(
 cohort_definition_id, row_number, subject_id, cohort_start_date, cohort_end_date, char_type
 )
 SELECT
-cohort_definition_id*10+1,
+CAST(cohort_definition_id*10+1 as BIGINT),
 row_number,
 subject_id,
 cohort_start_date,
@@ -98,7 +98,7 @@ INSERT INTO @characterization_schema.@characterization_table(
 cohort_definition_id, row_number, subject_id, cohort_start_date, cohort_end_date, char_type
 )
 SELECT
-cohort_definition_id*10+3,
+CAST(cohort_definition_id*10+3 as BIGINT),
 row_number,
 subject_id,
 DATEADD(day, -@case_series_before, cohort_start_date),
@@ -110,7 +110,7 @@ FROM #characterization_cases
 UNION
 
 SELECT
-cohort_definition_id*10+4,
+CAST(cohort_definition_id*10+4 as BIGINT),
 row_number,
 subject_id,
 DATEADD(day, 1, cohort_start_date),
@@ -121,7 +121,7 @@ FROM #characterization_cases
 UNION
 
 SELECT
-cohort_definition_id*10+5,
+CAST(cohort_definition_id*10+5 as BIGINT),
 row_number,
 subject_id,
 DATEADD(day, 1, outcome_start_date),
@@ -137,17 +137,19 @@ WHERE cohort_type = 'Cases'
 AND characterization_case_id in
 (SELECT DISTINCT cohort_definition_id FROM #characterization_cases);
 
-INSERT INTO @characterization_schema.@case_count_table
+INSERT INTO @characterization_schema.@case_count_table(
+characterization_case_id, cohort_type, n_events, n_people
+)
 SELECT
-cohort_definition_id as characterization_case_id,
-'Cases' as cohort_type,
-count(*) as n_events, -- new
-count(distinct subject_id) as n_people -- new
+CAST(cohort_definition_id as BIGINT),
+'Cases',
+count(*),
+count(distinct subject_id)
 
 FROM #characterization_cases
 
 GROUP BY
-cohort_definition_id
+CAST(cohort_definition_id as BIGINT)
 ;
 
 -- clean up
