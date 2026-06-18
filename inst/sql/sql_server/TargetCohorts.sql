@@ -195,11 +195,11 @@ n_events, n_people)
 
 SELECT * FROM
 (SELECT
-cohort_definition_id,
-2,
-'First in @limit_to_first_in_n_days days',
-count(*),
-count(distinct subject_id)
+cohort_definition_id as characterization_target_id,
+2 as attr_order,
+'First in @limit_to_first_in_n_days days' as attr_reason,
+count(*) as n_events,
+count(distinct subject_id) as n_people
 FROM #temp_target_first
 GROUP BY cohort_definition_id) main
 
@@ -223,11 +223,11 @@ n_events, n_people)
 
 SELECT * FROM
 (SELECT
-cohort_definition_id,
-3,
-'With @min_prior_observation prior obs',
-count(*),
-count(distinct subject_id)
+cohort_definition_id as characterization_target_id,
+3 as attr_order,
+'With @min_prior_observation prior obs' as attr_reason,
+count(*) as n_events,
+count(distinct subject_id) as n_people
 FROM #temp_target_prior
 GROUP BY cohort_definition_id) main
 
@@ -251,11 +251,11 @@ n_events, n_people)
 
 SELECT * FROM
 (SELECT
-cohort_definition_id,
-4,
-'Nested in @nesting_cohort_id',
-count(*),
-count(distinct subject_id)
+cohort_definition_id as characterization_target_id,
+4 as attr_order,
+'Nested in @nesting_cohort_id' as attr_reason,
+count(*) as n_events,
+count(distinct subject_id) as n_people
 FROM #temp_target_nest
 GROUP BY cohort_definition_id) main
 
@@ -279,11 +279,11 @@ n_events, n_people)
 
 SELECT * FROM
 (SELECT
-cohort_definition_id,
-5,
-'Aged @min_age to @max_age',
-count(*),
-count(distinct subject_id)
+cohort_definition_id as characterization_target_id,
+5 as attr_order,
+'Aged @min_age to @max_age' as attr_reason,
+count(*) as n_events,
+count(distinct subject_id) as n_people
 FROM #temp_target_age
 GROUP BY cohort_definition_id) main
 
@@ -307,11 +307,11 @@ n_events, n_people)
 
 SELECT * FROM
 (SELECT
-cohort_definition_id,
-6,
-'Gender in @gender_concept_ids',
-count(*),
-count(distinct subject_id)
+cohort_definition_id as characterization_target_id,
+6 as attr_order,
+'Gender in @gender_concept_ids' as attr_reason,
+count(*) as n_events,
+count(distinct subject_id) as n_people
 FROM #temp_target_gender
 GROUP BY cohort_definition_id) main
 
@@ -334,11 +334,11 @@ n_events, n_people
 
 SELECT * FROM
 (SELECT
-cohort_definition_id,
-7,
-'Starting between @study_start to @study_end',
-count(*),
-count(distinct subject_id)
+cohort_definition_id as characterization_target_id,
+7 as attr_order,
+'Starting between @study_start to @study_end' as attr_reason,
+count(*) as n_events,
+count(distinct subject_id) as n_people
 
 FROM #temp_target_date
 GROUP BY cohort_definition_id) main

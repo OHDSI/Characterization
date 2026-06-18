@@ -186,11 +186,11 @@ n_events, n_people
 SELECT * FROM
 (
 SELECT
-CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT),
-8,
-'Has some TAR',
-count(*),
-count(distinct subject_id)
+CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT) as characterization_case_id,
+8 as attr_order,
+'Has some TAR' as attr_reason,
+count(*) as n_events,
+count(distinct subject_id) as n_people
 
 FROM #temp_non_cases_with_tar
 GROUP BY cohort_definition_id
@@ -218,11 +218,11 @@ n_events, n_people
 SELECT * FROM
 (
 SELECT
-CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT),
-9,
-'Remains after outcome washout',
-count(*),
-count(distinct subject_id)
+CAST((cohort_definition_id - 2.0)/10.0 AS BIGINT) as characterization_case_id,
+9 as attr_order,
+'Remains after outcome washout' as attr_reason,
+count(*) as n_events,
+count(distinct subject_id) as n_people
 
 FROM #temp_non_cases_pass_washout
 GROUP BY cohort_definition_id
