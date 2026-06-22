@@ -245,18 +245,12 @@ computeRiskFactorAnalyses <- function(
   completionTime <- Sys.time() - start
   message(paste0("Risk factor analysis: Finding temp Ids took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
+  if(length(cohortIds) == 0){
+    message('No cohorts with number of people >= minSize')
+    return(invisible(TRUE))
+  }
 
-
-  ## 2) get attrition
-  #start <- Sys.time()
-  #message("Risk factor analysis: Extracting cohort attritions")
-  # TODO get attrition from CohortGenerator when it is in there
-
-  #completionTime <- Sys.time() - start
-  #message(paste0("Risk factor analysis: Extracting cohort attritions took ", round(completionTime, digits = 1), " ", units(completionTime)))
-
-
-  ## 3) run FE with all the cohorts of interest - ideally inserting the aggregate features into a new table
+  ## 2) run FE with all the cohorts of interest - ideally inserting the aggregate features into a new table
   start <- Sys.time()
   message("Risk factor analysis: Running FeatureExtraction")
   FeatureExtraction::getDbCovariateData(
@@ -287,7 +281,7 @@ computeRiskFactorAnalyses <- function(
 
 
 
-  ## 4) for each target,exclude,cases join the tables and calculate the SMD
+  ## 3) for each target,exclude,cases join the tables and calculate the SMD
   start <- Sys.time()
   message("Risk factor analysis: Calculating SMD for binary")
 

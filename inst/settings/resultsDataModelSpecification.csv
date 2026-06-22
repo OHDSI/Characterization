@@ -11,7 +11,7 @@ rechallenge_fail_case_series,database_id,varchar(100),Yes,Yes,No,No,The database
 rechallenge_fail_case_series,dechallenge_stop_interval,int,Yes,Yes,No,No,The time period that É
 rechallenge_fail_case_series,dechallenge_evaluation_window,int,Yes,Yes,No,No,The time period that É
 rechallenge_fail_case_series,characterization_target_id,bigint,Yes,Yes,No,No,The cohort definition id for the target cohort
-rechallenge_fail_case_series,included,bit,No,No,No,No,Whether this was included in the study population settings eras
+rechallenge_fail_case_series,included,int,No,No,No,No,Whether this was included in the study population settings eras
 rechallenge_fail_case_series,outcome_cohort_definition_id,bigint,Yes,Yes,No,No,The cohort definition id for the outcome cohort
 rechallenge_fail_case_series,person_key,int,Yes,Yes,No,No,The dense rank for the patient (an identifier that is not the same as the database)
 rechallenge_fail_case_series,subject_id,bigint,No,No,No,No,The person identifier for the failed case series (optional)

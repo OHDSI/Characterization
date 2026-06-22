@@ -145,3 +145,11 @@ ADD COLUMN risk_factor_settings VARCHAR(50);
 ALTER TABLE  @database_schema.@table_prefixcase_settings
 ADD COLUMN case_series_settings VARCHAR(50);
 
+
+-- ===========================
+-- 8) Add included to rechallenge_fail_case_series
+-- ===========================
+ALTER TABLE  @database_schema.@table_prefixrechallenge_fail_case_series
+ADD COLUMN included INT;
+
+

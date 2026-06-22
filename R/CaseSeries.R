@@ -217,6 +217,11 @@ computeCaseSeriesAnalyses <- function(
   message(paste0("Case series analysis: Finding temp Ids took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
 
+  if(nrow(caseIds) == 0){
+    message('No case cohorts of minCaseSize')
+    return(invisible(TRUE))
+  }
+
   ## 4) run FE with all the cohorts of interest - ideally inserting the aggregate features into a new table
   start <- Sys.time()
   message("Case series analysis: Running FeatureExtraction")
