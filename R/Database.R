@@ -331,9 +331,10 @@ migrateDataModel <- function(
   migrator$executeMigrations()
   migrator$finalize()
 
-  ParallelLogger::logInfo("Updating version number")
+  ParallelLogger::logInfo(paste0("Updating version number to ", utils::packageVersion("Characterization") ))
   updateVersionSql <- SqlRender::loadRenderTranslateSql("UpdateVersionNumber.sql",
     packageName = utils::packageName(),
+    version_number = utils::packageVersion("Characterization"),
     database_schema = databaseSchema,
     table_prefix = tablePrefix,
     dbms = connectionDetails$dbms

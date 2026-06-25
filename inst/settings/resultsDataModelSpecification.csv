@@ -11,7 +11,7 @@ rechallenge_fail_case_series,database_id,varchar(100),Yes,Yes,No,No,The database
 rechallenge_fail_case_series,dechallenge_stop_interval,int,Yes,Yes,No,No,The time period that É
 rechallenge_fail_case_series,dechallenge_evaluation_window,int,Yes,Yes,No,No,The time period that É
 rechallenge_fail_case_series,characterization_target_id,bigint,Yes,Yes,No,No,The cohort definition id for the target cohort
-rechallenge_fail_case_series,included,int,No,No,No,No,Whether this was included in the study population settings eras
+rechallenge_fail_case_series,included,char(1),No,No,No,No,Whether this was included in the study population settings eras
 rechallenge_fail_case_series,outcome_cohort_definition_id,bigint,Yes,Yes,No,No,The cohort definition id for the outcome cohort
 rechallenge_fail_case_series,person_key,int,Yes,Yes,No,No,The dense rank for the patient (an identifier that is not the same as the database)
 rechallenge_fail_case_series,subject_id,bigint,No,No,No,No,The person identifier for the failed case series (optional)
@@ -100,14 +100,14 @@ target_settings,min_prior_observation,int,No,No,No,No,"Target exposures with < m
 target_settings,nesting_cohort_id,bigint,No,No,No,No,The nesting id for the popualtion of interest
 target_settings,min_age,int,No,No,No,No,The min age to be includedfor the popualtion of interest
 target_settings,max_age,int,No,No,No,No,The max age to be includedfor the popualtion of interest
-target_settings,study_start,date,No,No,No,No,The earliest date to be included for the popualtion of interest
-target_settings,study_end,date,No,No,No,No,The latest date to be included for the popualtion of interest
+target_settings,study_start,char(8),No,No,No,No,The earliest date to be included for the popualtion of interest
+target_settings,study_end,char(8),No,No,No,No,The latest date to be included for the popualtion of interest
 target_settings,gender_concept_ids,varchar(100),No,No,No,No,The gender conept ids to be included for the popualtion of interest
-target_settings,time_to_event_settings,bit,No,No,No,No,Whether used in time to event
-target_settings,dechallenge_rechallenge_settings,bit,No,No,No,No,Whether used in dechal-rechal
-target_settings,target_baseline_settings,bit,No,No,No,No,Whether used in target baseline
-target_settings,risk_factor_settings,bit,No,No,No,No,Whether used in risk factor
-target_settings,case_series_settings,bit,No,No,No,No,Whether used in case series
+target_settings,time_to_event_settings,char(1),No,No,No,No,Whether used in time to event
+target_settings,dechallenge_rechallenge_settings,char(1),No,No,No,No,Whether used in dechal-rechal
+target_settings,target_baseline_settings,char(1),No,No,No,No,Whether used in target baseline
+target_settings,risk_factor_settings,char(1),No,No,No,No,Whether used in risk factor
+target_settings,case_series_settings,char(1),No,No,No,No,Whether used in case series
 case_settings,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
 case_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 case_settings,characterization_case_id,bigint,Yes,Yes,No,No,"The case cohort id that is unique per characterization_target_id, outcome_id, outcome_washout_days and time-at-risk settings"
@@ -118,8 +118,8 @@ case_settings,start_anchor,varchar(15),No,No,No,No,The start anchor
 case_settings,end_anchor,varchar(15),No,No,No,No,The end anchor
 case_settings,risk_window_start,int,No,No,No,No,The risk window start
 case_settings,risk_window_end,int,No,No,No,No,The risk window end
-case_settings,risk_factor_settings,varchar(50),No,No,No,No,Whether this case was used in risk-factor
-case_settings,case_series_settings,varchar(50),No,No,No,No,Whether this case was used in case-series
+case_settings,risk_factor_settings,char(1),No,No,No,No,Whether this case was used in risk-factor
+case_settings,case_series_settings,char(1),No,No,No,No,Whether this case was used in case-series
 case_series_settings,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
 case_series_settings,case_pre_target_duration,int,No,No,No,No,The number of days before target index to create the before target period in case series
 case_series_settings,case_post_outcome_duration,int,No,No,No,No,The number of days after first outcome after target to create the after outcome period in case series
@@ -225,3 +225,11 @@ case_attrition,n_events,bigint,No,No,No,No,The number of events remaining
 case_attrition,n_people,bigint,No,No,No,No,The number of people remaining
 case_attrition,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 case_attrition,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
+time_to_event_settings,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
+time_to_event_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+time_to_event_settings,characterization_target_id,bigint,Yes,Yes,No,No,The characterization cohort id
+time_to_event_settings,outcome_id,bigint,Yes,Yes,No,No,The outcome cohort id
+dechallenge_rechallenge_settings,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
+dechallenge_rechallenge_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+dechallenge_rechallenge_settings,characterization_target_id,bigint,Yes,Yes,No,No,The characterization cohort id
+dechallenge_rechallenge_settings,outcome_id,bigint,Yes,Yes,No,No,The outcome cohort id

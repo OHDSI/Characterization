@@ -1,8 +1,3 @@
--- Database migrations for verion 0.3.0
--- This migration updates the schema:
- -- 1. to store the charcterization version
- -- 2. Add a migrations table for supporting database migrations
-
 {DEFAULT @package_version = package_version}
 {DEFAULT @migration = migration}
 {DEFAULT @table_prefix = ''}
@@ -116,21 +111,21 @@ ADD COLUMN min_age INT;
 ALTER TABLE  @database_schema.@table_prefixtarget_settings
 ADD COLUMN max_age INT;
 ALTER TABLE  @database_schema.@table_prefixtarget_settings
-ADD COLUMN study_start DATE;
+ADD COLUMN study_start CHAR(8);
 ALTER TABLE  @database_schema.@table_prefixtarget_settings
-ADD COLUMN study_end DATE;
+ADD COLUMN study_end CHAR(8);
 ALTER TABLE  @database_schema.@table_prefixtarget_settings
 ADD COLUMN gender_concept_ids VARCHAR(100);
 ALTER TABLE  @database_schema.@table_prefixtarget_settings
-ADD COLUMN time_to_event_settings BIT;
+ADD COLUMN time_to_event_settings CHAR(1);
 ALTER TABLE  @database_schema.@table_prefixtarget_settings
-ADD COLUMN dechallenge_rechallenge_settings BIT;
+ADD COLUMN dechallenge_rechallenge_settings CHAR(1);
 ALTER TABLE  @database_schema.@table_prefixtarget_settings
-ADD COLUMN target_baseline_settings BIT;
+ADD COLUMN target_baseline_settings CHAR(1);
 ALTER TABLE  @database_schema.@table_prefixtarget_settings
-ADD COLUMN risk_factor_settings BIT;
+ADD COLUMN risk_factor_settings CHAR(1);
 ALTER TABLE  @database_schema.@table_prefixtarget_settings
-ADD COLUMN case_series_settings BIT;
+ADD COLUMN case_series_settings CHAR(1);
 
 
 -- ===========================
@@ -141,15 +136,33 @@ ADD COLUMN case_series_settings BIT;
 ALTER TABLE @database_schema.@table_prefixcase_settings DROP COLUMN runtype;
 --   add: risk_factor_settings varchar(50) / case_series_settings varchar(50)
 ALTER TABLE  @database_schema.@table_prefixcase_settings
-ADD COLUMN risk_factor_settings VARCHAR(50);
+ADD COLUMN risk_factor_settings CHAR(1);
 ALTER TABLE  @database_schema.@table_prefixcase_settings
-ADD COLUMN case_series_settings VARCHAR(50);
+ADD COLUMN case_series_settings CHAR(1);
 
 
 -- ===========================
 -- 8) Add included to rechallenge_fail_case_series
 -- ===========================
 ALTER TABLE  @database_schema.@table_prefixrechallenge_fail_case_series
-ADD COLUMN included INT;
+ADD COLUMN included CHAR(1);
 
+-- ===========================
+-- 8) Add new settings tables
+-- ===========================
+CREATE TABLE @database_schema.@table_prefixtime_to_event_settings(
+  setting_id VARCHAR(50),
+  database_id	VARCHAR(100),
+  characterization_target_id BIGINT,
+  outcome_id BIGINT,
+  PRIMARY KEY (setting_id, database_id,characterization_target_id, outcome_id)
+);
+
+CREATE TABLE @database_schema.@table_prefixdechallenge_rechallenge_settings(
+  setting_id VARCHAR(50),
+  database_id	VARCHAR(100),
+  characterization_target_id BIGINT,
+  outcome_id BIGINT,
+  PRIMARY KEY (setting_id, database_id,characterization_target_id, outcome_id)
+);
 

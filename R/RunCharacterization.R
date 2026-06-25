@@ -135,11 +135,11 @@ addCharacterizationTargetIds <- function(settings){
   studyPopulation <- unique(do.call('rbind', studyPopulationList)) %>%
     dplyr::group_by(dplyr::across(-dplyr::all_of(settingTypes))) %>%
     dplyr::summarise(
-      timeToEventSettings = any(.data$timeToEventSettings),
-      dechallengeRechallengeSettings = any(.data$dechallengeRechallengeSettings),
-      targetBaselineSettings = any(.data$targetBaselineSettings),
-      riskFactorSettings = any(.data$riskFactorSettings),
-      caseSeriesSettings = any(.data$caseSeriesSettings),
+      timeToEventSettings = any(.data$timeToEventSettings)*1,
+      dechallengeRechallengeSettings = any(.data$dechallengeRechallengeSettings)*1,
+      targetBaselineSettings = any(.data$targetBaselineSettings)*1,
+      riskFactorSettings = any(.data$riskFactorSettings)*1,
+      caseSeriesSettings = any(.data$caseSeriesSettings)*1,
       .groups = "drop"
     )
   # give a new id called characterizationTargetIds per target and subset
@@ -865,6 +865,28 @@ exportSharedObjects <- function(
     outputFolder = file.path(executionPath, 'target_attrition')
   )
 
+  # NEW to improve extraction
+  # extract tte and dechal settings to T/O pairs
+  # ==============
+  tte_settings <- extractSettings(characterizationSettings, type = 'timeToEventSettings')
+  tte_settings$database_id <- databaseId
+  tte_settings$setting_id <- executionId
+  utils::write.csv(
+    x = formatDouble(tte_settings),
+    file = file.path(saveLocation, paste0(tablePrefix,'time_to_event_settings.csv')),
+    row.names = FALSE
+  )
+
+  dcrc_settings <- extractSettings(characterizationSettings, type = 'dechallengeRechallengeSettings')
+  dcrc_settings$database_id <- databaseId
+  dcrc_settings$setting_id <- executionId
+  utils::write.csv(
+    x = formatDouble(dcrc_settings),
+    file = file.path(saveLocation, paste0(tablePrefix,'dechallenge_rechallenge_settings.csv')),
+    row.names = FALSE
+  )
+  # ==============
+
   # export target settings table
   sql <- SqlRender::render(
     sql = "SELECT * FROM @target_settings_table;",
@@ -1033,4 +1055,34 @@ exportSharedObjects <- function(
   return(invisible(TRUE))
 }
 
+
+
+extractSettings  <- function(characterizationSettings, type = 'timeToEventSettings'){
+  settings <- characterizationSettings[[type]]
+
+  if(!is.null(settings)){
+
+    extractedSettings <- unique(do.call(
+      what = 'rbind',
+      args = lapply(
+        X = settings,
+        FUN = function(x){
+          expand.grid(
+            characterization_target_id = as.integer(x$characterizationTargetIds),
+            outcome_id = as.integer(x$outcomeIds)
+          )
+        }
+      )))
+
+    return(extractedSettings)
+
+  } else{
+    return(
+      data.frame(
+        characterization_target_id = 0,
+        outcome_id = 0
+      ))
+  }
+
+}
 

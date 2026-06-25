@@ -277,8 +277,8 @@ getCohortJobs <- function(
                   startAnchor = x$startAnchor,
                   riskWindowEnd = x$riskWindowEnd,
                   endAnchor = x$endAnchor,
-                  riskFactorSettings = TRUE,
-                  caseSeriesSettings = FALSE
+                  riskFactorSettings = 1,
+                  caseSeriesSettings = 0
                 )
               }
             )
@@ -315,8 +315,8 @@ getCohortJobs <- function(
                   startAnchor = x$startAnchor,
                   riskWindowEnd = x$riskWindowEnd,
                   endAnchor = x$endAnchor,
-                  riskFactorSettings = FALSE,
-                  caseSeriesSettings = TRUE
+                  riskFactorSettings = 0,
+                  caseSeriesSettings = 1
                 )
               }
             )
@@ -406,8 +406,8 @@ getCohortJobs <- function(
         .data$riskWindowEnd, .data$endAnchor
       ) %>%
       dplyr::summarize(
-        riskFactorSettings = any(.data$riskFactorSettings),
-        caseSeriesSettings = any(.data$caseSeriesSettings)
+        riskFactorSettings = max(.data$riskFactorSettings),
+        caseSeriesSettings = max(.data$caseSeriesSettings)
       ) %>%
       dplyr::ungroup() %>%
       dplyr::inner_join(
@@ -466,8 +466,8 @@ getCohortJobs <- function(
             startAnchor = unique(coi$startAnchor[ind]),
             riskWindowEnd = unique(coi$riskWindowEnd[ind]),
             endAnchor = unique(coi$endAnchor[ind]),
-            generateRiskFactors = any(coi$riskFactorSettings[ind]) ,
-            generateCaseSeries = any(coi$caseSeriesSettings[ind])
+            generateRiskFactors = max(coi$riskFactorSettings[ind]) ,
+            generateCaseSeries = max(coi$caseSeriesSettings[ind])
           )
           )),
           jobId = paste("cases",i, paste0(settingVal, collapse = "_"), sep = "_")
@@ -475,7 +475,7 @@ getCohortJobs <- function(
 
 
         if(mode != 'Efficient'){
-          if(any(coi$riskFactorSettings[ind])){
+          if(max(coi$riskFactorSettings[ind]) == 1){
             nNonCase <- nNonCase + 1
             jobs <- rbind(jobs, data.frame(
               functionName = 'generateNonCases',
