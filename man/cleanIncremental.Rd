@@ -29,7 +29,7 @@ cleanIncremental(
 
 }
 \seealso{
-Other Incremental: 
-\code{\link{cleanNonIncremental}()}
+Other Incremental:
+\code{\link[=cleanNonIncremental]{cleanNonIncremental()}}
 }
 \concept{Incremental}

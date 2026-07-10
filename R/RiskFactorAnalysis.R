@@ -259,7 +259,7 @@ computeRiskFactorAnalyses <- function(
     cohortTable = characterizationTable,
     cohortDatabaseSchema = characterizationDatabaseSchema,
     cohortIds = cohortIds,
-    rowIdField = 'row_number',
+    rowIdField = 'row_id',
     covariateSettings = ParallelLogger::convertJsonToSettings(settings$covariateSettings),
     aggregated = TRUE,
     minCharacterizationMean = minCharacterizationMean,

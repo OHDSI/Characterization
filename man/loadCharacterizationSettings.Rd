@@ -46,9 +46,9 @@ setting <- loadCharacterizationSettings(setPath)
 
 }
 \seealso{
-Other LargeScale: 
-\code{\link{createCharacterizationSettings}()},
-\code{\link{runCharacterizationAnalyses}()},
-\code{\link{saveCharacterizationSettings}()}
+Other LargeScale:
+\code{\link[=createCharacterizationSettings]{createCharacterizationSettings()}},
+\code{\link[=runCharacterizationAnalyses]{runCharacterizationAnalyses()}},
+\code{\link[=saveCharacterizationSettings]{saveCharacterizationSettings()}}
 }
 \concept{LargeScale}

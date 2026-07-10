@@ -6,7 +6,7 @@ IF OBJECT_ID('tempdb..#characterization_cases', 'U') IS NOT NULL DROP TABLE #cha
 
 SELECT
 case_settings.characterization_case_id as cohort_definition_id,
-t.row_number,
+t.row_id,
 t.subject_id,
 t.cohort_start_date,
 t.cohort_end_date,
@@ -48,13 +48,13 @@ AND o.cohort_start_date >= t.observation_period_start_date
 AND o.cohort_start_date <= t.observation_period_end_date
 -- outcome starts before TAR end
 AND o.cohort_start_date <= dateadd(day, @risk_window_end, t.@end_anchor_date)
--- outcome starts (ends?) after TAR start
+-- outcome starts after TAR start
 AND o.cohort_start_date >= dateadd(day, @risk_window_start, t.@start_anchor_date)
 -- make sure to only get first outcome date during TAR
 
 GROUP BY
 case_settings.characterization_case_id,
-t.row_number,
+t.row_id,
 t.subject_id,
 t.cohort_start_date,
 t.cohort_end_date,
@@ -71,11 +71,11 @@ WHERE char_type = 'cases'
 AND cohort_definition_id in (SELECT DISTINCT cohort_definition_id*10+1 FROM #characterization_cases);
 
 INSERT INTO @characterization_schema.@characterization_table(
-cohort_definition_id, row_number, subject_id, cohort_start_date, cohort_end_date, char_type
+cohort_definition_id, row_id, subject_id, cohort_start_date, cohort_end_date, char_type
 )
 SELECT
 CAST(cohort_definition_id*10+1 as BIGINT),
-row_number,
+row_id,
 subject_id,
 cohort_start_date,
 cohort_end_date,
@@ -97,11 +97,11 @@ SELECT cohort_definition_id*10+5 FROM #characterization_cases
 
 
 INSERT INTO @characterization_schema.@characterization_table(
-cohort_definition_id, row_number, subject_id, cohort_start_date, cohort_end_date, char_type
+cohort_definition_id, row_id, subject_id, cohort_start_date, cohort_end_date, char_type
 )
 SELECT
 CAST(cohort_definition_id*10+3 as BIGINT),
-row_number,
+row_id,
 subject_id,
 DATEADD(day, -@case_series_before, cohort_start_date),
 DATEADD(day, 0, cohort_start_date),
@@ -113,7 +113,7 @@ UNION
 
 SELECT
 CAST(cohort_definition_id*10+4 as BIGINT),
-row_number,
+row_id,
 subject_id,
 DATEADD(day, 1, cohort_start_date),
 DATEADD(day, 0, outcome_start_date),
@@ -124,7 +124,7 @@ UNION
 
 SELECT
 CAST(cohort_definition_id*10+5 as BIGINT),
-row_number,
+row_id,
 subject_id,
 DATEADD(day, 1, outcome_start_date),
 DATEADD(day, @case_series_after, outcome_end_date),

@@ -27,6 +27,7 @@ generateCohorts <- function(
 
   # tables names
   characterizationTableWithHash <- paste0(outputTable, '_',settingHash, '_', dbHash)
+  outcomeEraTableWithHash <- paste0('outcome_era', '_',settingHash, '_', dbHash)
 
   targetSettingsTableWithHash <- paste0('target_settings', '_',settingHash, '_', dbHash)
   targetAttritionTableWithHash <- paste0('target_attrition', '_',settingHash, '_', dbHash)
@@ -106,7 +107,8 @@ generateCohorts <- function(
         target_attrition_table = targetAttritionTableWithHash,
         target_count_table = targetCountTableWithHash,
         case_attrition_table = caseAttritionTableWithHash,
-        case_count_table = caseCountTableWithHash
+        case_count_table = caseCountTableWithHash,
+        outcome_era_table = outcomeEraTableWithHash
       )
 
       DatabaseConnector::executeSql(connection, sql, progressBar = progressBar)
@@ -149,7 +151,8 @@ generateCohorts <- function(
       target_attrition_table = targetAttritionTableWithHash,
       target_count_table = targetCountTableWithHash,
       case_attrition_table = caseAttritionTableWithHash,
-      case_count_table = caseCountTableWithHash
+      case_count_table = caseCountTableWithHash,
+      outcome_era_table = outcomeEraTableWithHash
       )
 
     DatabaseConnector::executeSql(connection, sql, progressBar = progressBar)
@@ -202,7 +205,7 @@ generateCohorts <- function(
               settings = ParallelLogger::convertJsonToSettings(cohortJobs$jobs[i,"settings"]),
               jobId = cohortJobs$jobs[i, "jobId"],
 
-              restrictWashoutToObs = characterizationSettings$restrictWashoutToObs
+              outcomeEraTable = outcomeEraTableWithHash
             )
 
           }
@@ -225,7 +228,8 @@ return(list(
   targetAttritionTable = targetAttritionTableWithHash,
   caseAttritionTable = caseAttritionTableWithHash,
   targetCountTable = targetCountTableWithHash,
-  caseCountTable = caseCountTableWithHash
+  caseCountTable = caseCountTableWithHash,
+  outcomeEraTable = outcomeEraTableWithHash
 )
 )
 }
@@ -477,6 +481,7 @@ getCohortJobs <- function(
 
 
         if(mode != 'Efficient'){
+
           if(max(coi$riskFactorSettings[ind]) == 1){
             nNonCase <- nNonCase + 1
             jobs <- rbind(jobs, data.frame(
@@ -501,6 +506,27 @@ getCohortJobs <- function(
     }
     message(paste0('Adding ',nNonCase,' Non-Case Cohort Jobs'))
 
+  }
+
+
+  # add in job for outcome eras per washout
+  # only run if there are cases and mode is not Efficient
+  # since efficient mode doesnt need the outcomes
+  if(!is.null(nrow(cases))){
+    if(mode != 'Efficient'){
+      ooi <- unique(cases[, c('outcomeId', 'outcomeWashoutDays')])
+      for(outcomeWashoutDay in unique(ooi$outcomeWashoutDays)){
+        jobs <- rbind(jobs, data.frame(
+          functionName = 'generateOutcomeEras',
+          settings = as.character(ParallelLogger::convertSettingsToJson(list(
+            outcomeIds = ooi$outcomeId[ooi$outcomeWashoutDays == outcomeWashoutDay],
+            outcomeWashoutDays = outcomeWashoutDay
+          )
+          )),
+          jobId = paste("outcome_eras",i,outcomeWashoutDay, sep = "_")
+        ))
+      }
+    }
   }
 
   # removing nTargetJobs
@@ -698,6 +724,7 @@ generateNonCases <- function(
     connectionDetails,
     cdmDatabaseSchema,
     characterizationTable,
+    outcomeEraTable,
     caseAttritionTable,
     caseCountTable,
     targetSettingsTable,
@@ -714,7 +741,6 @@ generateNonCases <- function(
     jobId,
     mode,
     incremental,
-    restrictWashoutToObs,
     ...
 ){
 
@@ -739,6 +765,7 @@ generateNonCases <- function(
 
     outcome_cohort_ids = paste0(settings$outcomeIds, collapse = ','),
     characterization_target_ids = paste0(settings$characterizationTargetIds, collapse = ','),
+    outcome_era_table = outcomeEraTable,
     outcome_washout = settings$outcomeWashoutDays,
     risk_window_start = settings$riskWindowStart,
     start_anchor = settings$startAnchor,
@@ -749,9 +776,7 @@ generateNonCases <- function(
     cohort_table = outcomeTable,
 
     use_plp = mode == 'PatientLevelPrediction',
-    use_ci = mode == 'CohortIncidence',
-
-    restrict_washout_to_obs = restrictWashoutToObs
+    use_ci = mode == 'CohortIncidence'
   )
 
   DatabaseConnector::executeSql(
@@ -775,6 +800,73 @@ generateNonCases <- function(
   message(paste0("Creating Non Cases: took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
   return(invisible(TRUE))
+}
+
+generateOutcomeEras <- function(
+    connectionDetails,
+    cdmDatabaseSchema,
+    characterizationTable,
+    caseAttritionTable,
+    caseCountTable,
+    targetSettingsTable,
+    caseSettingsTable,
+    characterizationDatabaseSchema,
+    tempEmulationSchema,
+    targetDatabaseSchema,
+    targetTable,
+    outcomeDatabaseSchema,
+    outcomeTable,
+    progressBar = interactive(),
+    executionPath,
+    settings,
+    jobId,
+    mode,
+    incremental,
+    outcomeEraTable,
+    ...
+){
+
+  message(paste("Creating outcome eras for washout ", settings$outcomeWashoutDays))
+  start <- Sys.time()
+
+  connection <- DatabaseConnector::connect(connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection))
+
+  sql <- SqlRender::loadRenderTranslateSql(
+    sqlFilename = 'OutcomeEras.sql',
+    packageName = 'Characterization',
+    dbms =  attributes(connection)$dbms,
+    tempEmulationSchema = tempEmulationSchema,
+    characterization_schema = characterizationDatabaseSchema,
+    outcome_era_table = outcomeEraTable,
+    outcome_ids = paste0(settings$outcomeIds, collapse = ','),
+    outcome_washout = settings$outcomeWashoutDays,
+    cohort_schema = outcomeDatabaseSchema,
+    cohort_table = outcomeTable
+  )
+
+  DatabaseConnector::executeSql(
+    connection = connection,
+    sql = sql,
+    progressBar = progressBar,
+    reportOverallTime = FALSE
+  )
+  completionTime <- Sys.time() - start
+
+  if(incremental){
+    readr::write_csv(
+      file = file.path(executionPath,'cohort_job_tracker.csv'),
+      x = data.frame(
+        jobId = jobId,
+        completeDate = date()
+      ),
+      append = TRUE
+    )
+  }
+  message(paste0("Creating Outcome Eras: took ", round(completionTime, digits = 1), " ", units(completionTime)))
+
+  return(invisible(TRUE))
+
 }
 
 
@@ -803,6 +895,7 @@ dropCohorts <- function(
   caseAttritionTableWithHash <- paste0('case_attrition', '_',settingHash, '_', dbHash)
   targetCountTableWithHash <- paste0('target_count', '_',settingHash, '_', dbHash)
   caseCountTableWithHash <- paste0('case_count', '_',settingHash, '_', dbHash)
+  outcomeEraTableWithHash <- paste0('outcome_era', '_',settingHash, '_', dbHash)
 
 
   sql <- SqlRender::loadRenderTranslateSql(
@@ -817,7 +910,8 @@ dropCohorts <- function(
     target_count_table = targetCountTableWithHash,
     case_count_table = caseCountTableWithHash,
     target_settings_table = targetSettingsTableWithHash,
-    case_settings_table = caseSettingsTableWithHash
+    case_settings_table = caseSettingsTableWithHash,
+    outcome_era_table = outcomeEraTableWithHash
   )
 
   DatabaseConnector::executeSql(connection, sql, progressBar = progressBar)

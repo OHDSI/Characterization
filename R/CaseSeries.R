@@ -234,7 +234,7 @@ computeCaseSeriesAnalyses <- function(
     cohortIds = c(caseIds$characterizationCaseId*10+3,
                   caseIds$characterizationCaseId*10+4,
                   caseIds$characterizationCaseId*10+5),
-    rowIdField = 'row_number',
+    rowIdField = 'row_id',
     covariateSettings = ParallelLogger::convertJsonToSettings(settings$covariateSettings),
     aggregated = TRUE,
     minCharacterizationMean = minCharacterizationMean,

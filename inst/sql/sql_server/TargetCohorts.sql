@@ -11,7 +11,7 @@ IF OBJECT_ID('tempdb..#temp_target_date', 'U') IS NOT NULL DROP TABLE #temp_targ
 -- =========================
 SELECT
 CAST(target_settings.characterization_target_id AS BIGINT) AS cohort_definition_id,
-row_number() over(PARTITION BY CAST(target_settings.characterization_target_id AS BIGINT) ORDER BY temp_cohort.subject_id, temp_cohort.cohort_start_date ASC) AS row_number,
+row_number() over(PARTITION BY CAST(target_settings.characterization_target_id AS BIGINT) ORDER BY temp_cohort.subject_id, temp_cohort.cohort_start_date ASC) AS row_id,
 temp_cohort.subject_id,
 temp_cohort.cohort_start_date,
 temp_cohort.cohort_end_date,
@@ -73,7 +73,7 @@ WHERE datediff(day, observation_period_start_date, cohort_start_date) >= @min_pr
 -- now nesting
 {@nesting_cohort_id != 0}?{SELECT
 t.cohort_definition_id,
-t.row_number,
+t.row_id,
 t.subject_id,
 t.cohort_start_date,
 -- use the nesting end date if it is before the target end date
@@ -125,7 +125,7 @@ FROM #temp_target_age;
 {@study_start != '' | @study_end != ''}?{
 SELECT
 cohort_definition_id,
-row_number,
+row_id,
 subject_id,
 cohort_start_date,
 -- edit the end date if after study end
@@ -163,13 +163,13 @@ AND cohort_definition_id in (SELECT DISTINCT cohort_definition_id FROM #temp_tar
 -- insert the new rows
 -- now determine the non-cases
   INSERT INTO @characterization_schema.@characterization_table(
-    cohort_definition_id, row_number, subject_id, cohort_start_date, cohort_end_date,
+    cohort_definition_id, row_id, subject_id, cohort_start_date, cohort_end_date,
     observation_period_start_date, observation_period_end_date, char_type
   )
 
   SELECT
   temp.cohort_definition_id,
-  temp.row_number,
+  temp.row_id,
   temp.subject_id,
   temp.cohort_start_date,
   temp.cohort_end_date, -- TODO: update cohort_end_date to be study_end_date if study_end_date is before?

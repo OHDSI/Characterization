@@ -6,7 +6,7 @@ IF OBJECT_ID('tempdb..#temp_non_cases_pass_washout', 'U') IS NOT NULL DROP TABLE
 
 SELECT
     case_settings.characterization_case_id*10+2 as cohort_definition_id,
-    t.row_number,
+    t.row_id,
     t.subject_id,
     t.cohort_start_date,
     t.cohort_end_date,
@@ -26,7 +26,7 @@ SELECT
     THEN 1 else 0 END) AS outcome_in_washout_before_tar,
 
     -- ADD has outcome in TAR (left join CASES on characterization_target_id, row_id and )
-    MAX(CASE WHEN cases.row_number IS NOT NULL THEN 1 else 0 END) AS outcome_during_tar
+    MAX(CASE WHEN cases.row_id IS NOT NULL THEN 1 else 0 END) AS outcome_during_tar
 
     INTO #temp_non_cases
     FROM @characterization_schema.@characterization_table t
@@ -41,23 +41,24 @@ SELECT
     ) case_settings
     ON t.cohort_definition_id = case_settings.characterization_target_id
 
-    LEFT JOIN @cohort_schema.@cohort_table o
+    -- EDITED to collapse using outcome washout
+     LEFT JOIN @characterization_schema.@outcome_era_table o
+     --LEFT JOIN @cohort_schema.@cohort_table o
+
     ON t.subject_id = o.subject_id
     AND case_settings.outcome_id = o.cohort_definition_id
-    {@restrict_washout_to_obs}?{
-    AND o.cohort_start_date >= t.observation_period_start_date
-    AND o.cohort_start_date <= t.observation_period_end_date
-    }
+    AND o.outcome_washout = @outcome_washout
+
     -- outcome starts before TAR start
     AND o.cohort_start_date < dateadd(day, @risk_window_start, t.@start_anchor_date)
     -- outcome end after washout prior before TAR start
     AND o.cohort_end_date >= dateadd(day, -@outcome_washout, dateadd(day, @risk_window_start, t.@start_anchor_date))
 
-    -- use real table not temp case table?
+    -- join to cases
     LEFT JOIN (SELECT * from @characterization_schema.@characterization_table
     WHERE char_type = 'cases' ) cases
     ON cases.cohort_definition_id = case_settings.characterization_case_id*10+1
-    AND cases.row_number = t.row_number
+    AND cases.row_id = t.row_id
 
     WHERE case_settings.outcome_id IN (@outcome_cohort_ids)
     AND case_settings.characterization_target_id IN (@characterization_target_ids)
@@ -65,7 +66,7 @@ SELECT
 
     GROUP BY
     case_settings.characterization_case_id,
-    t.row_number,
+    t.row_id,
     t.subject_id,
     t.cohort_start_date,
     t.cohort_end_date;
@@ -78,12 +79,12 @@ AND cohort_definition_id in (SELECT DISTINCT cohort_definition_id FROM #temp_non
 
 -- now determine the non-cases
   INSERT INTO @characterization_schema.@characterization_table(
-    cohort_definition_id, row_number, subject_id, cohort_start_date, cohort_end_date, char_type
+    cohort_definition_id, row_id, subject_id, cohort_start_date, cohort_end_date, char_type
   )
 
   SELECT
   temp.cohort_definition_id,
-  temp.row_number,
+  temp.row_id,
   temp.subject_id,
   temp.cohort_start_date,
   temp.cohort_end_date,

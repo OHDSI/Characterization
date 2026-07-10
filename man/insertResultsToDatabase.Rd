@@ -84,8 +84,8 @@ Calls ResultModelManager uploadResults function to upload the csv files
 
 }
 \seealso{
-Other Database: 
-\code{\link{createCharacterizationTables}()},
-\code{\link{createSqliteDatabase}()}
+Other Database:
+\code{\link[=createCharacterizationTables]{createCharacterizationTables()}},
+\code{\link[=createSqliteDatabase]{createSqliteDatabase()}}
 }
 \concept{Database}

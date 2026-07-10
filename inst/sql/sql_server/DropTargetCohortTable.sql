@@ -2,6 +2,8 @@
 {DEFAULT @drop_char_counts = true}
 {DEFAULT @drop_char_attr = true}
 {DEFAULT @drop_char_settings = true}
+{DEFAULT @drop_outcome_era = true}
+
 
 {@drop_char_cohorts}?{
 DROP TABLE IF EXISTS @characterization_schema.@characterization_table;
@@ -22,3 +24,6 @@ DROP TABLE IF EXISTS @characterization_schema.@target_settings_table;
 DROP TABLE IF EXISTS @characterization_schema.@case_settings_table;
 }
 
+{@drop_outcome_era}?{
+DROP TABLE IF EXISTS @characterization_schema.@outcome_era_table;
+}

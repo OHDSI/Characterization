@@ -457,7 +457,7 @@ data1 <- FeatureExtraction::getDbCovariateData(
   cohortTable = 'char_cohort_set1_db1',
   cohortDatabaseSchema = "main",
   cohortIds = c(10,20,40), # the targets
-  rowIdField = 'row_number',
+  rowIdField = 'row_id',
   exportToTable = FALSE,
   aggregated = TRUE,
   minCharacterizationMean = 0.01,
@@ -483,7 +483,7 @@ data2 <- FeatureExtraction::getDbCovariateData(
   cohortTable = 'char_cohort_set1_db1',
   cohortDatabaseSchema = "main",
   cohortIds = c(10,20,40), # the targets
-  rowIdField = 'row_number',
+  rowIdField = 'row_id',
   exportToTable = FALSE,
   aggregated = TRUE,
   minCharacterizationMean = 0.01,
@@ -506,7 +506,7 @@ data3 <- FeatureExtraction::getDbCovariateData(
   cohortTable = 'char_cohort_set1_db1',
   cohortDatabaseSchema = "main",
   cohortIds = c(10,20,40), # the targets
-  rowIdField = 'row_number',
+  rowIdField = 'row_id',
   exportToTable = FALSE,
   aggregated = TRUE,
   minCharacterizationMean = 0.01,

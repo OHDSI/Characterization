@@ -105,7 +105,7 @@ settings <- createDuringCovariateSettings(
 
 }
 \seealso{
-Other CovariateSetting: 
-\code{\link{getDbDuringCovariateData}()}
+Other CovariateSetting:
+\code{\link[=getDbDuringCovariateData]{getDbDuringCovariateData()}}
 }
 \concept{CovariateSetting}

@@ -41,9 +41,9 @@ saveCharacterizationSettings(
 
 }
 \seealso{
-Other LargeScale: 
-\code{\link{createCharacterizationSettings}()},
-\code{\link{loadCharacterizationSettings}()},
-\code{\link{runCharacterizationAnalyses}()}
+Other LargeScale:
+\code{\link[=createCharacterizationSettings]{createCharacterizationSettings()}},
+\code{\link[=loadCharacterizationSettings]{loadCharacterizationSettings()}},
+\code{\link[=runCharacterizationAnalyses]{runCharacterizationAnalyses()}}
 }
 \concept{LargeScale}

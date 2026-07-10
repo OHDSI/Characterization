@@ -46,8 +46,8 @@ aggregateSetting <- createTargetBaselineSettings(
 
 }
 \seealso{
-Other Aggregate: 
-\code{\link{createCaseSeriesSettings}()},
-\code{\link{createRiskFactorSettings}()}
+Other Aggregate:
+\code{\link[=createCaseSeriesSettings]{createCaseSeriesSettings()}},
+\code{\link[=createRiskFactorSettings]{createRiskFactorSettings()}}
 }
 \concept{Aggregate}
