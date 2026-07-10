@@ -79,22 +79,22 @@ createCharacterizationTables(
 #> Connecting using SQLite driver
 #> Deleting existing tables
 #> Creating characterization results tables
-#> Executing SQL took 0.00959 secs
+#> Executing SQL took 0.00769 secs
 #> Migrating data set
 #> Migrator using SQL files in Characterization
 #> Connecting using SQLite driver
 #> Creating migrations table
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00349 secs
+#> Executing SQL took 0.0029 secs
 #> Migrations table created
 #> Executing migration: Migration_1-v3_0_0_store_version.sql
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00332 secs
+#> Executing SQL took 0.0028 secs
 #> Saving migration: Migration_1-v3_0_0_store_version.sql
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0027 secs
+#> Executing SQL took 0.00225 secs
 #> Migration complete Migration_1-v3_0_0_store_version.sql
 #> Closing database connection
 #> Updating version number
-#> Executing SQL took 0.00313 secs
+#> Executing SQL took 0.00247 secs
 ```

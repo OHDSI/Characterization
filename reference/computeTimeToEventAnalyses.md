@@ -122,10 +122,10 @@ result <- computeTimeToEventAnalyses(
 )
 #> Connecting using SQLite driver
 #> Uploading #cohort_settings
-#> Inserting data took 0.0131 secs
+#> Inserting data took 0.0107 secs
 #> Computing time to event results
-#> Executing SQL took 0.0207 secs
-#> Computing time-to-event for 2 T-O pairs took 0.261 secs
+#> Executing SQL took 0.0171 secs
+#> Computing time-to-event for 2 T-O pairs took 0.232 secs
 #> exporting to andromeda
 #> Disconnected Andromeda. This data object can no longer be used
 
