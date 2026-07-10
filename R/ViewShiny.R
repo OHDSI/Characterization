@@ -211,6 +211,79 @@ prepareCharacterizationShiny <- function(
     )
   }
 
+  # add the new cohort count
+  if (!"cg_cohort_count" %in% tables) {
+
+    dbIds <- unique(
+      c(
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "analysis_ref;"),
+          snakeCaseToCamelCase = TRUE
+        )$databaseId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "dechallenge_rechallenge;"),
+          snakeCaseToCamelCase = TRUE
+        )$databaseId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
+          snakeCaseToCamelCase = TRUE
+        )$databaseId
+      )
+    )
+
+    cohortIds <- unique(
+      c(
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct TARGET_ID from ", tablePrefix, csvTablePrefix, "target_settings;"),
+          snakeCaseToCamelCase = TRUE
+        )$targetCohortId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct OUTCOME_ID from ", tablePrefix, csvTablePrefix, "case_settings;"),
+          snakeCaseToCamelCase = TRUE
+        )$outcomeCohortId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
+          snakeCaseToCamelCase = TRUE
+        )$targetCohortDefinitionId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
+          snakeCaseToCamelCase = TRUE
+        )$outcomeCohortDefinitionId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"),
+          snakeCaseToCamelCase = TRUE
+        )$targetCohortDefinitionId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"),
+          snakeCaseToCamelCase = TRUE
+        )$outcomeCohortDefinitionId
+      )
+    )
+
+    DatabaseConnector::insertTable(
+      connection = con,
+      databaseSchema = "main",
+      tableName = "cg_cohort_count",
+      data = data.frame(
+        cohortDefinitionId = cohortIds,
+        cohortId = cohortIds,
+        cohortEntries = rep(1000, length(cohortIds)), # fake
+        cohortSubjects = rep(1000, length(cohortIds)), # fake
+        databaseId = dbIds
+      ),
+      camelCaseToSnakeCase = TRUE
+    )
+  }
+
 
   # create the settings for the database
   databaseSettings <- list(
