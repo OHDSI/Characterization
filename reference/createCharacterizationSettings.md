@@ -11,7 +11,8 @@ createCharacterizationSettings(
   dechallengeRechallengeSettings = NULL,
   targetBaselineSettings = NULL,
   riskFactorSettings = NULL,
-  caseSeriesSettings = NULL
+  caseSeriesSettings = NULL,
+  restrictWashoutToObs = TRUE
 )
 ```
 
@@ -36,6 +37,11 @@ createCharacterizationSettings(
 - caseSeriesSettings:
 
   A list of caseSeriesSettings settings
+
+- restrictWashoutToObs:
+
+  Whether to restrict to outcomes in observation period for washout in
+  risk factors
 
 ## Value
 

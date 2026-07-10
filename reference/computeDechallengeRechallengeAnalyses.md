@@ -112,8 +112,11 @@ computeDechallengeRechallengeAnalyses(
 #> Inputs checked
 #> Connecting using SQLite driver
 #> Computing dechallenge rechallenge results
-#> Executing SQL took 0.0219 secs
-#> Computing dechallenge rechallenge for 2 target ids and 1 outcome ids took 0.526 secs
+#> Executing SQL took 0.016 secs
+#> duckdb: caching downloaded extensions in the package library:
+#> ℹ /home/runner/work/_temp/Library/duckdb/extensions
+#> ℹ This is removed when the package is re-installed; see `?duckdb_storage` to choose a different location.
+#> Computing dechallenge rechallenge for 2 target ids and 1 outcome ids took 0.481 secs
 #> exporting to andomeda
 #> Disconnected Andromeda. This data object can no longer be used
 
