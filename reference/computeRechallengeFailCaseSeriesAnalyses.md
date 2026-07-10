@@ -122,8 +122,8 @@ computeRechallengeFailCaseSeriesAnalyses(
 #> Inputs checked
 #> Connecting using SQLite driver
 #> Computing dechallenge rechallenge fails results
-#> Executing SQL took 0.0134 secs
-#> Computing dechallenge failed case series for 2 target IDs and 1 outcome IDs took 0.194 secs
+#> Executing SQL took 0.0128 secs
+#> Computing dechallenge failed case series for 2 target IDs and 1 outcome IDs took 0.218 secs
 #> exporting to andromeda
 #> Disconnected Andromeda. This data object can no longer be used
 ```
