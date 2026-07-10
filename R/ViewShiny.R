@@ -182,16 +182,10 @@ prepareCharacterizationShiny <- function(
       )
     )
 
-
-    if(length(cohortIds) == 0){
-      # if no cohortids then no results to view
-      return(invisible(list()))
-    }
-
     DatabaseConnector::insertTable(
       connection = con,
       databaseSchema = "main",
-      tableName = "cg_COHORT_DEFINITION",
+      tableName = "cg_cohort_definition",
       data = data.frame(
         cohortDefinitionId = cohortIds,
         cohortName = getCohortNames(cohortIds, cohortDefinitionSet),
@@ -201,15 +195,21 @@ prepareCharacterizationShiny <- function(
       ),
       camelCaseToSnakeCase = TRUE
     )
-
-    databaseIds <- DatabaseConnector::querySql(
-      connection = con,
-      sql = paste0("select distinct DATABASE_ID from main.DATABASE_META_DATA;"),
-      snakeCaseToCamelCase = TRUE
-    )$databaseId
-
   }
 
+  # add the new subset table
+  if (!"cg_cohort_subset_definition" %in% tables) {
+    DatabaseConnector::insertTable(
+      connection = con,
+      databaseSchema = "main",
+      tableName = "cg_cohort_subset_definition",
+      data = data.frame(
+        subsetDefinitionId = 1,
+        json = '{}'
+      ),
+      camelCaseToSnakeCase = TRUE
+    )
+  }
 
 
   # create the settings for the database
