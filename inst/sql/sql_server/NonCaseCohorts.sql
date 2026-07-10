@@ -18,6 +18,7 @@ SELECT
     MAX(CASE
     WHEN o.cohort_start_date IS NOT NULL
     AND o.cohort_start_date < dateadd(day, @risk_window_start, t.@start_anchor_date)
+    -- Note: should it be > or >= ? this will remove overlapping even when washout is 0
     AND o.cohort_end_date > dateadd(day, -@outcome_washout, dateadd(day, @risk_window_start, t.@start_anchor_date))
     THEN 1 else 0 END) AS outcome_in_washout_before_tar,
 
@@ -46,7 +47,7 @@ SELECT
       AND o.cohort_start_date <= t.observation_period_end_date
     }
     -- outcome starts before TAR start
-    AND o.cohort_start_date <= dateadd(day, @risk_window_start, t.@start_anchor_date)
+    AND o.cohort_start_date < dateadd(day, @risk_window_start, t.@start_anchor_date)
     -- outcome end after washout prior before TAR start
     AND o.cohort_end_date >= dateadd(day, -@outcome_washout, dateadd(day, @risk_window_start, t.@start_anchor_date))
 
