@@ -79,22 +79,22 @@ createCharacterizationTables(
 #> Connecting using SQLite driver
 #> Deleting existing tables
 #> Creating characterization results tables
-#> Executing SQL took 0.00939 secs
+#> Executing SQL took 0.0114 secs
 #> Migrating data set
 #> Migrator using SQL files in Characterization
 #> Connecting using SQLite driver
 #> Creating migrations table
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00317 secs
+#> Executing SQL took 0.00353 secs
 #> Migrations table created
 #> Executing migration: Migration_1-v3_0_0_store_version.sql
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00314 secs
+#> Executing SQL took 0.00355 secs
 #> Saving migration: Migration_1-v3_0_0_store_version.sql
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0025 secs
+#> Executing SQL took 0.003 secs
 #> Migration complete Migration_1-v3_0_0_store_version.sql
 #> Closing database connection
 #> Updating version number
-#> Executing SQL took 0.00296 secs
+#> Executing SQL took 0.00336 secs
 ```
