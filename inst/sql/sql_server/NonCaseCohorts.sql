@@ -21,7 +21,8 @@ SELECT
     MAX(CASE
     WHEN o.cohort_start_date IS NOT NULL
     AND o.cohort_start_date < dateadd(day, @risk_window_start, t.@start_anchor_date)
-    AND o.cohort_end_date > dateadd(day, -@outcome_washout, dateadd(day, @risk_window_start, t.@start_anchor_date))
+    -- Note: should this be >= or > ??
+    AND o.cohort_end_date >= dateadd(day, -@outcome_washout, dateadd(day, @risk_window_start, t.@start_anchor_date))
     THEN 1 else 0 END) AS outcome_in_washout_before_tar,
 
     -- ADD has outcome in TAR (left join CASES on characterization_target_id, row_id and )
