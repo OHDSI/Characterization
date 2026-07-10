@@ -24,12 +24,12 @@ INTO #temp_target
 
 FROM (SELECT
       cohort_definition_id,
-      --@limit_to_first_in_n_days AS limit_to_first_in_n_days,
-      --@min_prior_observation AS min_prior_observation,
       subject_id,
       cohort_start_date,
       cohort_end_date,
-      ISNULL(datediff(day, LAG(cohort_end_date) OVER(partition BY subject_id, cohort_definition_id ORDER BY cohort_start_date ASC), cohort_start_date ), -1) AS time_between
+      -- edited this so it works even when cohort period are not ordered nicely
+      ISNULL(DATEDIFF(day, MAX(cohort_end_date) OVER (PARTITION BY subject_id, cohort_definition_id ORDER BY cohort_start_date ASC ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), cohort_start_date), (@limit_to_first_in_n_days+1)) AS time_between
+
       FROM @cohort_schema.@cohort_table WHERE cohort_definition_id IN (@cohort_ids)
 ) temp_cohort
 
@@ -62,7 +62,7 @@ ON temp_cohort.cohort_definition_id = target_settings.target_id;
 SELECT *
 INTO #temp_target_first
 FROM #temp_target temp_cohort
-WHERE (temp_cohort.time_between >= @limit_to_first_in_n_days OR temp_cohort.time_between = -1);
+WHERE (temp_cohort.time_between >= @limit_to_first_in_n_days);
 
 -- now min prior obs
 SELECT *
@@ -123,7 +123,20 @@ FROM #temp_target_age;
 
 -- finally date:
 {@study_start != '' | @study_end != ''}?{
-SELECT *
+SELECT
+cohort_definition_id,
+row_number,
+subject_id,
+cohort_start_date,
+-- edit the end date if after study end
+{@study_end != ''}?{
+CASE WHEN @study_end < cohort_end_date THEN @study_end ELSE cohort_end_date END as cohort_end_date,
+} :
+{cohort_end_date,}
+observation_period_start_date,
+observation_period_end_date,
+time_between,
+char_type
 INTO #temp_target_date
 FROM #temp_target_gender
 WHERE 1 = 1
