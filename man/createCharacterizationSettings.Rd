@@ -9,7 +9,8 @@ createCharacterizationSettings(
   dechallengeRechallengeSettings = NULL,
   targetBaselineSettings = NULL,
   riskFactorSettings = NULL,
-  caseSeriesSettings = NULL
+  caseSeriesSettings = NULL,
+  restrictWashoutToObs = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ createCharacterizationSettings(
 \item{riskFactorSettings}{A list of riskFactorSettings settings}
 
 \item{caseSeriesSettings}{A list of caseSeriesSettings settings}
+
+\item{restrictWashoutToObs}{Whether the outcome washout can use outcomes outside the observation period when calling risk factor analysis}
 }
 \value{
 Returns the connection to the sqlite database

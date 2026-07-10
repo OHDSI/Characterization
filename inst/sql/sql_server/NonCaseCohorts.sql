@@ -43,10 +43,12 @@ SELECT
     LEFT JOIN @cohort_schema.@cohort_table o
     ON t.subject_id = o.subject_id
     AND case_settings.outcome_id = o.cohort_definition_id
+    {@restrict_washout_to_obs}?{
     AND o.cohort_start_date >= t.observation_period_start_date
     AND o.cohort_start_date <= t.observation_period_end_date
+    }
     -- outcome starts before TAR start
-    AND o.cohort_start_date <= dateadd(day, @risk_window_start, t.@start_anchor_date)
+    AND o.cohort_start_date < dateadd(day, @risk_window_start, t.@start_anchor_date)
     -- outcome end after washout prior before TAR start
     AND o.cohort_end_date >= dateadd(day, -@outcome_washout, dateadd(day, @risk_window_start, t.@start_anchor_date))
 
