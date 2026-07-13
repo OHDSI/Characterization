@@ -402,6 +402,28 @@ getCohortJobs <- function(
   }
 
 
+  # add in job for outcome eras per washout
+  # only run if there are cases and mode is not Efficient
+  # since efficient mode doesnt need the outcomes
+  # THIS NEEDS TO BE RUN BEFOR NON-CASE generation
+  if(!is.null(nrow(cases))){
+    if(mode != 'Efficient'){
+      ooi <- unique(cases[, c('outcomeId', 'outcomeWashoutDays')])
+      for(outcomeWashoutDay in unique(ooi$outcomeWashoutDays)){
+        jobs <- rbind(jobs, data.frame(
+          functionName = 'generateOutcomeEras',
+          settings = as.character(ParallelLogger::convertSettingsToJson(list(
+            outcomeIds = ooi$outcomeId[ooi$outcomeWashoutDays == outcomeWashoutDay],
+            outcomeWashoutDays = outcomeWashoutDay
+          )
+          )),
+          jobId = paste("outcome_eras",i,outcomeWashoutDay, sep = "_")
+        ))
+      }
+    }
+  }
+
+
   if(!is.null(nrow(cases))){
 
     cases <- unique(cases) %>%
@@ -508,26 +530,6 @@ getCohortJobs <- function(
 
   }
 
-
-  # add in job for outcome eras per washout
-  # only run if there are cases and mode is not Efficient
-  # since efficient mode doesnt need the outcomes
-  if(!is.null(nrow(cases))){
-    if(mode != 'Efficient'){
-      ooi <- unique(cases[, c('outcomeId', 'outcomeWashoutDays')])
-      for(outcomeWashoutDay in unique(ooi$outcomeWashoutDays)){
-        jobs <- rbind(jobs, data.frame(
-          functionName = 'generateOutcomeEras',
-          settings = as.character(ParallelLogger::convertSettingsToJson(list(
-            outcomeIds = ooi$outcomeId[ooi$outcomeWashoutDays == outcomeWashoutDay],
-            outcomeWashoutDays = outcomeWashoutDay
-          )
-          )),
-          jobId = paste("outcome_eras",i,outcomeWashoutDay, sep = "_")
-        ))
-      }
-    }
-  }
 
   # removing nTargetJobs
   if(!is.null(nrow(targets))){

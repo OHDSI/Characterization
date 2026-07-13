@@ -130,7 +130,7 @@ subject_id,
 cohort_start_date,
 -- edit the end date if after study end
 {@study_end != ''}?{
-CASE WHEN @study_end < cohort_end_date THEN @study_end ELSE cohort_end_date END as cohort_end_date,
+CASE WHEN CAST('@study_end' AS DATE) < cohort_end_date THEN CAST('@study_end' AS DATE) ELSE cohort_end_date END as cohort_end_date,
 } :
 {cohort_end_date,}
 observation_period_start_date,
