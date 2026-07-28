@@ -25,7 +25,7 @@ createCaseSeriesSettings(
 
 \item{outcomeIds}{A list of cohortIds for the outcome cohorts}
 
-\item{outcomeWashoutDays}{Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis}
+\item{outcomeWashoutDays}{A single integer value. Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis}
 
 \item{riskWindowStart}{The start of the risk window (in days) relative to the `startAnchor`.}
 
@@ -39,9 +39,9 @@ or `"cohort end"`.}
 
 \item{caseCovariateSettings}{An object created using \code{createDuringCovariateSettings}}
 
-\item{casePreTargetDuration}{The number of days prior to case index we use for FeatureExtraction}
+\item{casePreTargetDuration}{A single integer value. The number of days prior to case index we use for FeatureExtraction}
 
-\item{casePostOutcomeDuration}{The number of days prior to case index we use for FeatureExtraction}
+\item{casePostOutcomeDuration}{A single integer value. The number of days prior to case index we use for FeatureExtraction}
 }
 \value{
 A list with the settings

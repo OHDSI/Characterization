@@ -52,5 +52,11 @@ covariate_id
 ) main_table
 
 WHERE (before_sum_value + during_sum_value + after_sum_value) >= @min_count
+AND (ISNULL(before_average_value, 0) >= @min_characterization_mean
+     OR
+     ISNULL(during_average_value, 0) >= @min_characterization_mean
+     OR
+     ISNULL(after_average_value, 0) >= @min_characterization_mean
+     )
 ;
 

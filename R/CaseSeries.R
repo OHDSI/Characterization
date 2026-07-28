@@ -18,11 +18,11 @@
 #'
 #' @param studyPopulationSettings A List of object created using \code{createStudyPopulationSettings} that specifies target cohorts and inclusion criteria
 #' @param outcomeIds  A list of cohortIds for the outcome cohorts
-#' @param outcomeWashoutDays Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
+#' @param outcomeWashoutDays A single integer value. Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
 #' @template timeAtRisk
 #' @param caseCovariateSettings An object created using \code{createDuringCovariateSettings}
-#' @param casePreTargetDuration    The number of days prior to case index we use for FeatureExtraction
-#' @param casePostOutcomeDuration    The number of days prior to case index we use for FeatureExtraction
+#' @param casePreTargetDuration    A single integer value. The number of days prior to case index we use for FeatureExtraction
+#' @param casePostOutcomeDuration    A single integer value. The number of days prior to case index we use for FeatureExtraction
 #' @family Aggregate
 #' @return
 #' A list with the settings
@@ -79,6 +79,11 @@ createCaseSeriesSettings <- function(
     type = "outcome",
     errorMessages = errorMessages
   )
+
+  # check outcomeWashoutDays is length 1
+  if (length(outcomeWashoutDays) > 1) {
+    stop("Please add one outcomeWashoutDays per setting")
+  }
 
   # check TAR - EFF edit
   if (length(riskWindowStart) > 1) {
@@ -237,7 +242,7 @@ computeCaseSeriesAnalyses <- function(
     rowIdField = 'row_id',
     covariateSettings = ParallelLogger::convertJsonToSettings(settings$covariateSettings),
     aggregated = TRUE,
-    minCharacterizationMean = minCharacterizationMean,
+    minCharacterizationMean = 0, #minCharacterizationMean,
 
     exportToTable = TRUE,
     targetDatabaseSchema = NULL,
@@ -270,7 +275,8 @@ computeCaseSeriesAnalyses <- function(
                                      caseIds$characterizationCaseId*10+4,
                                      caseIds$characterizationCaseId*10+5),
                                    collapse = ','),
-    min_count = minCovariateCount
+    min_count = minCovariateCount,
+    min_characterization_mean = minCharacterizationMean
   )
 
   tryCatch(

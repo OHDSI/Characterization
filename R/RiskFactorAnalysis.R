@@ -18,7 +18,7 @@
 #'
 #' @param studyPopulationSettings A list of objects created using \code{createStudyPopulationSettings} that specifies target cohorts and inclusion criteria
 #' @param outcomeIds  A list of cohortIds for the outcome cohorts
-#' @param outcomeWashoutDays Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
+#' @param outcomeWashoutDays A single integer value. Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
 #' @template timeAtRisk
 #' @param covariateSettings   An object created using \code{FeatureExtraction::createCovariateSettings}
 #'
@@ -95,6 +95,11 @@ createRiskFactorSettings <- function(
     type = "outcome",
     errorMessages = errorMessages
   )
+
+  # check outcomeWashoutDays is length 1
+  if (length(outcomeWashoutDays) > 1) {
+    stop("Please add one outcomeWashoutDays per setting")
+  }
 
   # check TAR - EFF edit
   if (length(riskWindowStart) > 1) {
@@ -262,7 +267,7 @@ computeRiskFactorAnalyses <- function(
     rowIdField = 'row_id',
     covariateSettings = ParallelLogger::convertJsonToSettings(settings$covariateSettings),
     aggregated = TRUE,
-    minCharacterizationMean = minCharacterizationMean,
+    minCharacterizationMean = 0, #minCharacterizationMean,
 
     exportToTable = TRUE,
     targetDatabaseSchema = NULL,
@@ -298,7 +303,8 @@ computeRiskFactorAnalyses <- function(
     characterization_fe_table = '#fe_covariate_rf',
     efficient_mode =  mode == 'Efficient',
     smd_min = minSMD,
-    min_count = minCovariateCount
+    min_count = minCovariateCount,
+    min_characterization_mean = minCharacterizationMean
   )
 
   result <- Andromeda::andromeda()

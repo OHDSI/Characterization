@@ -34,7 +34,7 @@ createRiskFactorSettings(
 
 \item{outcomeIds}{A list of cohortIds for the outcome cohorts}
 
-\item{outcomeWashoutDays}{Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis}
+\item{outcomeWashoutDays}{A single integer value. Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis}
 
 \item{riskWindowStart}{The start of the risk window (in days) relative to the `startAnchor`.}
 
