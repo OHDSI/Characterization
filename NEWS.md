@@ -8,7 +8,10 @@ Characterization 4.0.0
   case_counts and target_counts and added time_to_event_settings/dechallenge_rechallenge_settings that
   let user quickly see what study population and outcome pairs were included.
 - [bug fix] fixed issues when dividing by zero in SMD calculation 
-- [bug fix] replaced IFNULL with ISNULL 
+
+Characterization 3.0.2
+======================
+- Replacing IFNULL with ISNULL as SQL server errors with IFNULL
 
 Characterization 3.0.1
 ======================
