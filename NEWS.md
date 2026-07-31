@@ -1,3 +1,15 @@
+Characterization 4.0.0
+======================
+- [enhancement] replaced targetId inputs to the settings with studyPopulationSettings that lets you specify 
+  min prior observation, first in n days, age, date, gender and nesting cohort restrictions.
+- [enhancement] outcome washout in risk factor is now used to combine outcome cohort entries that are within outcome washout days
+- [enhancement] improved attrition capture: can now see fill attrition for study population
+- [enhancement] changed csv file output to split up attrition into case_attrition and target_attrition, added
+  case_counts and target_counts and added time_to_event_settings/dechallenge_rechallenge_settings that
+  let user quickly see what study population and outcome pairs were included.
+- [bug fix] fixed issues when dividing by zero in SMD calculation 
+- [bug fix] replaced IFNULL with ISNULL 
+
 Characterization 3.0.1
 ======================
 - Fix issue with uploading results into database for shiny viewer (spacing was added to csv and causing issues and continuous covariates that are floats were incorrectly bigints)

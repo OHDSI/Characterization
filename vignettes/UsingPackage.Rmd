@@ -34,7 +34,7 @@ This vignette describes how you can use the Characterization package for various
 
 First we need to install the `Characterization` package:
 ```{r tidy=TRUE,eval=FALSE}
-remotes::install_github("ohdsi/Characterization")
+install.packages('Characterization')
 ```
 
 and then load it:
