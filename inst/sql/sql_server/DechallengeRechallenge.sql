@@ -1,7 +1,7 @@
 IF OBJECT_ID('tempdb..#target_cohort', 'U') IS NOT NULL DROP TABLE #target_cohort;
 select * into #target_cohort
-from @target_database_schema.@target_table
-where cohort_definition_id in (@target_ids)
+from @characterization_database_schema.@characterization_table
+where cohort_definition_id in (@characterization_target_ids)
 ;
 
 IF OBJECT_ID('tempdb..#outcome_cohort', 'U') IS NOT NULL DROP TABLE #outcome_cohort;
@@ -15,7 +15,7 @@ select
 '@database_id' as database_id,
 @dechallenge_stop_interval as dechallenge_stop_interval,
 @dechallenge_evaluation_window as dechallenge_evaluation_window,
-target_cohort_definition_id,
+target_cohort_definition_id as characterization_target_id, -- renamed
 outcome_cohort_definition_id,
 num_exposure_eras,
 num_persons_exposed,

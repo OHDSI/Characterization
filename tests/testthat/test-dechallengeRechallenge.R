@@ -15,7 +15,11 @@ test_that("createDechallengeRechallengeSettings", {
   outcomeIds <- sample(x = 100, size = sample(10, 1))
 
   res <- createDechallengeRechallengeSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds,
+      limitToFirstInNDays = 0,
+      minPriorObservation = 0
+    ),
     outcomeIds = outcomeIds,
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 31
@@ -26,12 +30,12 @@ test_that("createDechallengeRechallengeSettings", {
   )
 
   testthat::expect_equal(
-    res$targetCohortDefinitionIds,
+    res$studyPopulationSettings$targetId,
     targetIds
   )
 
   testthat::expect_equal(
-    res$outcomeCohortDefinitionIds,
+    res$outcomeIds,
     outcomeIds
   )
 
@@ -47,22 +51,62 @@ test_that("createDechallengeRechallengeSettings", {
 })
 
 test_that("computeDechallengeRechallengeAnalyses", {
+  skipIfCreateTargetCohortSqlUnavailable()
+
   targetIds <- c(2)
   outcomeIds <- c(3, 4)
 
-  res <- createDechallengeRechallengeSettings(
-    targetIds = targetIds,
+  drSet <- createDechallengeRechallengeSettings(
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds,
+      limitToFirstInNDays = 0,
+      minPriorObservation = 0
+    ),
     outcomeIds = outcomeIds,
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 30
   )
 
+  charSet <- createCharacterizationSettings(
+    dechallengeRechallengeSettings = drSet
+    )
+
+  jobDf <- getDechallengeRechallengeJobs(
+    characterizationSettings = charSet,
+    nTargetJobs = 1
+  )
+
   dcLoc <- tempfile("runADechal")
-  dc <- computeDechallengeRechallengeAnalyses(
+  tables <- generateCohorts(
+    characterizationSettings = charSet,
+    mode = 'PatientLevelPrediction',
+    incremental = FALSE,
+    executionPath = dcLoc,
     connectionDetails = connectionDetails,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
-    settings = res,
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort",
+    outputDatabaseSchema = 'main',
+    outputTable = 'char_cohort',
+    cdmDatabaseSchema = "main",
+    tempEmulationSchema = "main",
+    progressBar = FALSE,
+    settingHash = 'set1',
+    dbHash = 'db1'
+  )
+
+  # make the cohorts in a table
+
+  dc <- computeDechallengeRechallengeAnalyses(
+    connectionDetails = connectionDetails,
+    #targetDatabaseSchema = "main",
+    #targetTable = "cohort",
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort",
+    characterizationDatabaseSchema = "main",
+    characterizationTable = tables$characterizationTable,
+    settings = charSet$dechallengeRechallengeSettings[[1]],
     databaseId = "testing",
     outputFolder = dcLoc
   )
@@ -122,21 +166,84 @@ test_that("computeDechallengeRechallengeAnalyses", {
     camelCaseToSnakeCase = FALSE
   )
 
+  DatabaseConnector::insertTable(
+    data = data.frame(
+      person_id = 1:4,
+      observation_period_start_date = rep(as.Date('1900-01-01'), 4),
+      observation_period_end_date = rep(as.Date('2100-01-01'), 4)
+    ),
+    connection = con,
+    databaseSchema = "main",
+    tableName = "observation_period",
+    createTable = TRUE,
+    dropTableIfExists = TRUE,
+    camelCaseToSnakeCase = FALSE
+  )
+
+  DatabaseConnector::insertTable(
+    data = data.frame(
+      person_id = 1:4,
+      year_of_birth = rep(1980, 4),
+      gender_concept_id = rep(0, 4)
+    ),
+    connection = con,
+    databaseSchema = "main",
+    tableName = "person",
+    createTable = TRUE,
+    dropTableIfExists = TRUE,
+    camelCaseToSnakeCase = FALSE
+  )
+
   DatabaseConnector::disconnect(con)
 
-  res <- createDechallengeRechallengeSettings(
-    targetIds = 1,
+  drSet <- createDechallengeRechallengeSettings(
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = 1
+    ),
     outcomeIds = 2,
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 30
   )
 
+  charSet <- createCharacterizationSettings(
+    dechallengeRechallengeSettings = drSet
+  )
+
+  jobDf <- getDechallengeRechallengeJobs(
+    characterizationSettings = charSet,
+    nTargetJobs = 1
+  )
+
   dcLoc <- tempfile("runADechal2")
-  dc <- computeDechallengeRechallengeAnalyses(
+
+  tables <- generateCohorts(
+    characterizationSettings = charSet,
+    mode = 'PatientLevelPrediction',
+    incremental = FALSE,
+    executionPath = dcLoc,
     connectionDetails = connectionDetailsReal,
     targetDatabaseSchema = "main",
     targetTable = "cohort_dechal",
-    settings = res,
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort_dechal",
+    outputDatabaseSchema = 'main',
+    outputTable = 'char_cohort',
+    cdmDatabaseSchema = "main",
+    tempEmulationSchema = "main",
+    progressBar = FALSE,
+    settingHash = 'set1',
+    dbHash = 'db1'
+  )
+
+  dc <- computeDechallengeRechallengeAnalyses(
+    connectionDetails = connectionDetailsReal,
+    #targetDatabaseSchema = "main",
+    #targetTable = "cohort_dechal",
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort_dechal",
+    characterizationDatabaseSchema = "main",
+    characterizationTable = tables$characterizationTable,
+    settings = charSet$dechallengeRechallengeSettings[[1]],
     databaseId = "testing",
     outputFolder = dcLoc
   )
@@ -154,6 +261,8 @@ test_that("computeDechallengeRechallengeAnalyses", {
 })
 
 test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
+  skipIfCreateTargetCohortSqlUnavailable()
+
   # check with made up date
   # subject 1 has 1 exposure for 30 days
   # subject 2 has 4 exposures for ~30 days with ~30 day gaps
@@ -206,23 +315,84 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
     dropTableIfExists = TRUE,
     camelCaseToSnakeCase = FALSE
   )
+  DatabaseConnector::insertTable(
+    data = data.frame(
+      person_id = 1:4,
+      observation_period_start_date = rep(as.Date('1900-01-01'), 4),
+      observation_period_end_date = rep(as.Date('2100-01-01'), 4)
+    ),
+    connection = con,
+    databaseSchema = "main",
+    tableName = "observation_period",
+    createTable = TRUE,
+    dropTableIfExists = TRUE,
+    camelCaseToSnakeCase = FALSE
+  )
+
+  DatabaseConnector::insertTable(
+    data = data.frame(
+      person_id = 1:4,
+      year_of_birth = rep(1980, 4),
+      gender_concept_id = rep(0, 4)
+    ),
+    connection = con,
+    databaseSchema = "main",
+    tableName = "person",
+    createTable = TRUE,
+    dropTableIfExists = TRUE,
+    camelCaseToSnakeCase = FALSE
+  )
   DatabaseConnector::disconnect(con)
 
-  set <- createDechallengeRechallengeSettings(
-    targetIds = 1,
+  drSet <- createDechallengeRechallengeSettings(
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = 1
+    ),
     outcomeIds = 2,
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 30 # 31
   )
+  charSet <- createCharacterizationSettings(
+    dechallengeRechallengeSettings = drSet
+  )
+
+
+  jobDf <- getDechallengeRechallengeJobs(
+    characterizationSettings = charSet,
+    nTargetJobs = 1
+  )
 
   dcLoc <- tempfile("runADechal2")
+
+  tables <- generateCohorts(
+    characterizationSettings = charSet,
+    mode = 'PatientLevelPrediction',
+    incremental = FALSE,
+    executionPath = dcLoc,
+    connectionDetails = connectionDetailsReal,
+    targetDatabaseSchema = "main",
+    targetTable = "cohort",
+    outcomeDatabaseSchema = "main",
+    outcomeTable = "cohort",
+    outputDatabaseSchema = 'main',
+    outputTable = 'char_cohort',
+    cdmDatabaseSchema = "main",
+    tempEmulationSchema = "main",
+    progressBar = FALSE,
+    settingHash = 'set1',
+    dbHash = 'db1'
+  )
+
   dc <- computeRechallengeFailCaseSeriesAnalyses(
     connectionDetails = connectionDetailsReal,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
-    settings = set,
+    targetSettingsTable = tables$targetSettingsTable,
+    settings = charSet$dechallengeRechallengeSettings[[1]],
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
+    characterizationDatabaseSchema = "main",
+    characterizationTable = tables$characterizationTable,
     databaseId = "testing",
     outputFolder = dcLoc
   )
@@ -240,7 +410,10 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
     connectionDetails = connectionDetailsReal,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
-    settings = set,
+    targetSettingsTable = tables$targetSettingsTable,
+    characterizationDatabaseSchema = "main",
+    characterizationTable = tables$characterizationTable,
+    settings = charSet$dechallengeRechallengeSettings[[1]],
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
     databaseId = "testing",
@@ -262,20 +435,24 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
 
 
 # add test for job creation code
-test_that("computeDechallengeRechallengeAnalyses", {
+test_that("getDechallengeRechallengeJobs", {
   targetIds <- c(2, 5, 6, 7, 8)
   outcomeIds <- c(3, 4, 9, 10)
 
   res <- createDechallengeRechallengeSettings(
-    targetIds = targetIds,
+    createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     outcomeIds = outcomeIds,
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 30
   )
+  charSettings <- createCharacterizationSettings(
+    dechallengeRechallengeSettings = res
+  )
+
   jobs <- getDechallengeRechallengeJobs(
-    characterizationSettings = createCharacterizationSettings(
-      dechallengeRechallengeSettings = res
-    ),
+    characterizationSettings = charSettings,
     nTargetJobs = 1
   )
 
@@ -286,17 +463,22 @@ test_that("computeDechallengeRechallengeAnalyses", {
   targetIdFromSettings <- do.call(
     what = unique,
     args = lapply(1:nrow(jobs), function(i) {
-      ParallelLogger::convertJsonToSettings(jobs$settings[i])$targetCohortDefinitionIds
+      ParallelLogger::convertJsonToSettings(jobs$settings[i])$characterizationTargetIds
     })
   )
-  testthat::expect_true(sum(targetIds %in% targetIdFromSettings) ==
+
+  originalTs <- charSettings$characterizationTargetLookup$targetId[
+    charSettings$characterizationTargetLookup$characterizationTargetId %in% targetIdFromSettings
+  ]
+
+  testthat::expect_true(sum(targetIds %in% originalTs) ==
     length(targetIds))
 
   # check all outcome ids are in there
   outcomeIdFromSettings <- do.call(
     what = unique,
     args = lapply(1:nrow(jobs), function(i) {
-      ParallelLogger::convertJsonToSettings(jobs$settings[i])$outcomeCohortDefinitionIds
+      ParallelLogger::convertJsonToSettings(jobs$settings[i])$outcomeIds
     })
   )
   testthat::expect_true(sum(outcomeIds %in% outcomeIdFromSettings) ==
@@ -305,9 +487,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
 
   # checking more threads 3
   jobs <- getDechallengeRechallengeJobs(
-    characterizationSettings = createCharacterizationSettings(
-      dechallengeRechallengeSettings = res
-    ),
+    characterizationSettings = charSettings,
     nTargetJobs = 3
   )
 
@@ -318,17 +498,22 @@ test_that("computeDechallengeRechallengeAnalyses", {
   targetIdFromSettings <- do.call(
     what = c,
     args = lapply(1:nrow(jobs), function(i) {
-      ParallelLogger::convertJsonToSettings(jobs$settings[i])$targetCohortDefinitionIds
+      ParallelLogger::convertJsonToSettings(jobs$settings[i])$characterizationTargetIds
     })
   )
-  testthat::expect_true(sum(targetIds %in% targetIdFromSettings) ==
+
+  originalTs <- charSettings$characterizationTargetLookup$targetId[
+    charSettings$characterizationTargetLookup$characterizationTargetId %in% targetIdFromSettings
+  ]
+
+  testthat::expect_true(sum(targetIds %in% originalTs) ==
     length(targetIds))
 
   # check all outcome ids are in there
   outcomeIdFromSettings <- do.call(
     what = c,
     args = lapply(1:nrow(jobs), function(i) {
-      ParallelLogger::convertJsonToSettings(jobs$settings[i])$outcomeCohortDefinitionIds
+      ParallelLogger::convertJsonToSettings(jobs$settings[i])$outcomeIds
     })
   )
   testthat::expect_true(sum(outcomeIds %in% outcomeIdFromSettings) ==
@@ -338,9 +523,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
 
   # checking more threads than needed 20
   jobs <- getDechallengeRechallengeJobs(
-    characterizationSettings = createCharacterizationSettings(
-      dechallengeRechallengeSettings = res
-    ),
+    characterizationSettings = charSettings,
     nTargetJobs = 20
   )
 
@@ -351,17 +534,20 @@ test_that("computeDechallengeRechallengeAnalyses", {
   targetIdFromSettings <- do.call(
     what = c,
     args = lapply(1:nrow(jobs), function(i) {
-      ParallelLogger::convertJsonToSettings(jobs$settings[i])$targetCohortDefinitionIds
+      ParallelLogger::convertJsonToSettings(jobs$settings[i])$characterizationTargetIds
     })
   )
-  testthat::expect_true(sum(targetIds %in% targetIdFromSettings) ==
+  originalTs <- charSettings$characterizationTargetLookup$targetId[
+    charSettings$characterizationTargetLookup$characterizationTargetId %in% targetIdFromSettings
+  ]
+  testthat::expect_true(sum(targetIds %in% originalTs) ==
     length(targetIds))
 
   # check all outcome ids are in there
   outcomeIdFromSettings <- do.call(
     what = c,
     args = lapply(1:nrow(jobs), function(i) {
-      ParallelLogger::convertJsonToSettings(jobs$settings[i])$outcomeCohortDefinitionIds
+      ParallelLogger::convertJsonToSettings(jobs$settings[i])$outcomeIds
     })
   )
   testthat::expect_true(sum(outcomeIds %in% outcomeIdFromSettings) ==

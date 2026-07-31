@@ -10,6 +10,8 @@ runCharacterizationAnalyses(
   targetTable,
   outcomeDatabaseSchema,
   outcomeTable,
+  nestingCohortTable = targetTable,
+  nestingCohortDatabaseSchema = targetDatabaseSchema,
   outputDatabaseSchema = targetDatabaseSchema,
   outputTable = "characterization_cohort",
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
@@ -28,7 +30,9 @@ runCharacterizationAnalyses(
   minCharacterizationMean = 0.001,
   minCovariateCount = 0,
   mode = "CohortIncidence",
-  minSMD = 0
+  minSMD = 0,
+  minTargetSize = 0,
+  minCaseSize = 0
 )
 }
 \arguments{
@@ -45,6 +49,10 @@ this should include both the database and schema name, for example
 'scratch.dbo'.}
 
 \item{outcomeTable}{Name of the outcome cohort table.}
+
+\item{nestingCohortTable}{The cohort table to extract the nesting cohort from}
+
+\item{nestingCohortDatabaseSchema}{The schema containing the nestingCohortTable}
 
 \item{outputDatabaseSchema}{The schema where the characterization cohort table will be saved into}
 
@@ -85,6 +93,10 @@ can be created}
 \item{mode}{Select from Efficient (no exclusions to target based on washout)/CohortIncidence (excludes targets with outcome in washout if they have no time at risk)/PatientLevelPrediction (excludes targets with outcome during washout prior to index)}
 
 \item{minSMD}{The minimum standardized mean difference for the risk factor analysis}
+
+\item{minTargetSize}{The minimum target size to be included in targetBaseline, riskFactor or caseSeries}
+
+\item{minCaseSize}{The minimum case or non-case size to be included in riskFactor or caseSeries}
 }
 \value{
 Multiple csv files in the outputDirectory.
@@ -102,7 +114,11 @@ specified saveDirectory
 conDet <- exampleOmopConnectionDetails()
 
 tteSet <- createTimeToEventSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 
@@ -123,9 +139,9 @@ runCharacterizationAnalyses(
 
 }
 \seealso{
-Other LargeScale: 
-\code{\link{createCharacterizationSettings}()},
-\code{\link{loadCharacterizationSettings}()},
-\code{\link{saveCharacterizationSettings}()}
+Other LargeScale:
+\code{\link[=createCharacterizationSettings]{createCharacterizationSettings()}},
+\code{\link[=loadCharacterizationSettings]{loadCharacterizationSettings()}},
+\code{\link[=saveCharacterizationSettings]{saveCharacterizationSettings()}}
 }
 \concept{LargeScale}

@@ -1,8 +1,8 @@
 Package: Characterization
 Type: Package
 Title: Implement Descriptive Studies Using the Common Data Model
-Version: 3.0.1
-Date: 2026-4-15
+Version: 4.0.0
+Date: 2026-7-15
 Authors@R: c(
   person("Jenna", "Reps", , "jreps@its.jnj.com", role = c("aut", "cre")),
   person("Patrick", "Ryan", , "ryan@ohdsi.org", role = c("aut")),
@@ -39,6 +39,6 @@ Suggests:
   shiny,
   withr
 NeedsCompilation: no
-RoxygenNote: 7.3.2
 Encoding: UTF-8
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

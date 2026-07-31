@@ -25,8 +25,8 @@ charResultDbCD <- createSqliteDatabase()
 
 }
 \seealso{
-Other Database: 
-\code{\link{createCharacterizationTables}()},
-\code{\link{insertResultsToDatabase}()}
+Other Database:
+\code{\link[=createCharacterizationTables]{createCharacterizationTables()}},
+\code{\link[=insertResultsToDatabase]{insertResultsToDatabase()}}
 }
 \concept{Database}

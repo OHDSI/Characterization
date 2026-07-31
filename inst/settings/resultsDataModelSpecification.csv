@@ -1,6 +1,6 @@
 table_name,column_name,data_type,is_required,primary_key,empty_is_na,min_cell_count,description
 time_to_event,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-time_to_event,target_cohort_definition_id,bigint,Yes,Yes,No,No,The cohort definition id for the target cohort
+time_to_event,characterization_target_id,bigint,Yes,Yes,No,No,The characterization cohort definition id for the target cohort
 time_to_event,outcome_cohort_definition_id,bigint,Yes,Yes,No,No,The cohort definition id for the outcome cohort
 time_to_event,outcome_type,varchar(100),Yes,Yes,No,No,Is the outvome a first occurrence or repeat
 time_to_event,target_outcome_type,varchar(40),Yes,Yes,No,No,When does the outcome occur relative to target
@@ -10,7 +10,8 @@ time_to_event,time_scale,varchar(20),Yes,Yes,No,No,time scale for the number of 
 rechallenge_fail_case_series,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 rechallenge_fail_case_series,dechallenge_stop_interval,int,Yes,Yes,No,No,The time period that É
 rechallenge_fail_case_series,dechallenge_evaluation_window,int,Yes,Yes,No,No,The time period that É
-rechallenge_fail_case_series,target_cohort_definition_id,bigint,Yes,Yes,No,No,The cohort definition id for the target cohort
+rechallenge_fail_case_series,characterization_target_id,bigint,Yes,Yes,No,No,The cohort definition id for the target cohort
+rechallenge_fail_case_series,included,char(1),No,No,No,No,Whether this was included in the study population settings eras
 rechallenge_fail_case_series,outcome_cohort_definition_id,bigint,Yes,Yes,No,No,The cohort definition id for the outcome cohort
 rechallenge_fail_case_series,person_key,int,Yes,Yes,No,No,The dense rank for the patient (an identifier that is not the same as the database)
 rechallenge_fail_case_series,subject_id,bigint,No,No,No,No,The person identifier for the failed case series (optional)
@@ -27,7 +28,7 @@ rechallenge_fail_case_series,rechallenge_outcome_start_date_offset,int,Yes,No,No
 dechallenge_rechallenge,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 dechallenge_rechallenge,dechallenge_stop_interval,int,Yes,Yes,No,No,The dechallenge stop interval
 dechallenge_rechallenge,dechallenge_evaluation_window,int,Yes,Yes,No,No,The dechallenge evaluation window
-dechallenge_rechallenge,target_cohort_definition_id,bigint,Yes,Yes,No,No,The cohort definition id for the target cohort
+dechallenge_rechallenge,characterization_target_id,bigint,Yes,Yes,No,No,The characterization cohort definition id for the target cohort
 dechallenge_rechallenge,outcome_cohort_definition_id,bigint,Yes,Yes,No,No,The cohort definition id for the outcome cohort
 dechallenge_rechallenge,num_exposure_eras,int,Yes,No,No,No,The number of exposure eras
 dechallenge_rechallenge,num_persons_exposed,int,Yes,No,No,No,The number of persons exposed
@@ -83,36 +84,45 @@ target_covariates_continuous,p_75_value,float,No,No,No,No,The 75th percentile
 target_covariates_continuous,p_90_value,float,No,No,No,No,The 90th percentile
 execution_settings,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
 execution_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-execution_settings,database_hash,varchar(50),Yes,No,No,No,
+execution_settings,database_hash,varchar(50),Yes,No,No,No,The hash of the database identifier
 execution_settings,mode,varchar(25),No,No,No,No,Whether Efficient/CohortIncidence/PatientLevelPrediction mode was used for risk factor non-cases
 execution_settings,min_characterization_mean,float,No,No,No,No,The minimum fraction of patients who have a covariate for the covariate to be included in results
 execution_settings,min_covariate_count,int,No,No,No,No,The minimum number of patients who have a covariate for the covariate to be included in results (useful if cohorts are small)
 execution_settings,min_smd,float,No,No,No,No,The minimum standardized mean value a risk factor must have to be included in results
+execution_settings,min_target_size,bigint,No,No,No,No,"The minimum target cohort size to be included in target baseline, risk factor and case series results"
+execution_settings,min_case_size,bigint,No,No,No,No,The minimum case cohort size to be included in risk factor and case series results
 target_settings,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
 target_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 target_settings,characterization_target_id,bigint,Yes,Yes,No,No,The target cohort id after inclusion criteria used internally by characterization
 target_settings,target_id,bigint,No,No,No,No,The target cohort id
-target_settings,limit_to_first_in_n_days,int,No,No,No,No,Target exposures are only included if they occur >= first_in_n_days days after the last exposure
-target_settings,min_prior_observation,int,No,No,No,No,Target exposures with < min_prior_obs days observation before exposure are excluded
+target_settings,limit_to_first_in_n_days,int,No,No,No,No,"Target exposures are only included if they occur >= first_in_n_days days after the last exposure"
+target_settings,min_prior_observation,int,No,No,No,No,"Target exposures with < min_prior_obs days observation before exposure are excluded"
+target_settings,nesting_cohort_id,bigint,No,No,No,No,The nesting id for the popualtion of interest
+target_settings,min_age,int,No,No,No,No,The min age to be includedfor the popualtion of interest
+target_settings,max_age,int,No,No,No,No,The max age to be includedfor the popualtion of interest
+target_settings,study_start,char(8),No,No,No,No,The earliest date to be included for the popualtion of interest
+target_settings,study_end,char(8),No,No,No,No,The latest date to be included for the popualtion of interest
+target_settings,gender_concept_ids,varchar(100),No,No,No,No,The gender conept ids to be included for the popualtion of interest
+target_settings,time_to_event_settings,char(1),No,No,No,No,Whether used in time to event
+target_settings,dechallenge_rechallenge_settings,char(1),No,No,No,No,Whether used in dechal-rechal
+target_settings,target_baseline_settings,char(1),No,No,No,No,Whether used in target baseline
+target_settings,risk_factor_settings,char(1),No,No,No,No,Whether used in risk factor
+target_settings,case_series_settings,char(1),No,No,No,No,Whether used in case series
 case_settings,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
 case_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 case_settings,characterization_case_id,bigint,Yes,Yes,No,No,"The case cohort id that is unique per characterization_target_id, outcome_id, outcome_washout_days and time-at-risk settings"
 case_settings,characterization_target_id,bigint,Yes,No,No,No,The target cohort id after inclusion criteria used internally by characterization
 case_settings,outcome_id,bigint,No,No,No,No,The outcome cohort id
-case_settings,outcome_washout_days,int,No,No,No,No,Outcome exposures with < outcome_washout_days days after the last outcome exposure are excluded
+case_settings,outcome_washout_days,int,No,No,No,No,"Outcome exposures with < outcome_washout_days days after the last outcome exposure are excluded"
 case_settings,start_anchor,varchar(15),No,No,No,No,The start anchor
 case_settings,end_anchor,varchar(15),No,No,No,No,The end anchor
 case_settings,risk_window_start,int,No,No,No,No,The risk window start
 case_settings,risk_window_end,int,No,No,No,No,The risk window end
-case_settings,runtype,varchar(50),No,No,No,No,Whether this case was used in risk-factor and/or case-series 
+case_settings,risk_factor_settings,char(1),No,No,No,No,Whether this case was used in risk-factor
+case_settings,case_series_settings,char(1),No,No,No,No,Whether this case was used in case-series
 case_series_settings,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
 case_series_settings,case_pre_target_duration,int,No,No,No,No,The number of days before target index to create the before target period in case series
 case_series_settings,case_post_outcome_duration,int,No,No,No,No,The number of days after first outcome after target to create the after outcome period in case series
-attrition,cohort_definition_id,bigint,Yes,Yes,No,No,The characterization cohort id
-attrition,attr_reason,varchar(100),No,Yes,No,No,Description of cohort or removal
-attrition,n,bigint,No,No,No,No,The number of people remaining or removed
-attrition,database_id,varchar(100),Yes,Yes,No,No,The database identifier
-attrition,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
 risk_factor_covariates,database_id,varchar(100),Yes,Yes,No,No,The database identifier
 risk_factor_covariates,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
 risk_factor_covariates,characterization_case_id,bigint,Yes,Yes,No,No,"The case cohort id that is unique per characterization_target_id, outcome_id, outcome_washout_days and time-at-risk settings"
@@ -190,3 +200,36 @@ case_series_covariates_continuous,after_p_10_value,float,No,No,No,No,The 10th pe
 case_series_covariates_continuous,after_p_25_value,float,No,No,No,No,The 25th percentile
 case_series_covariates_continuous,after_p_75_value,float,No,No,No,No,The 75th percentile
 case_series_covariates_continuous,after_p_90_value,float,No,No,No,No,The 90th percentile
+target_counts,characterization_target_id,bigint,Yes,Yes,No,No,The characterization cohort definition id
+target_counts,n_events,bigint,No,No,No,No,The number of events
+target_counts,n_people,bigint,No,No,No,No,The number of people
+target_counts,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+target_counts,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
+case_counts,characterization_case_id,bigint,Yes,Yes,No,No,The characterization case id
+case_counts,cohort_type,varchar(50),No,Yes,No,No,Whether the count is a case or non-case
+case_counts,n_events,bigint,No,No,No,No,The number of events
+case_counts,n_people,bigint,No,No,No,No,The number of people
+case_counts,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+case_counts,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
+target_attrition,characterization_target_id,bigint,Yes,Yes,No,No,The characterization cohort id
+target_attrition,attr_order,int,No,Yes,No,No,The attrition order
+target_attrition,attr_reason,varchar(100),No,No,No,No,Description of removal rule
+target_attrition,n_events,bigint,No,No,No,No,The number of events remaining
+target_attrition,n_people,bigint,No,No,No,No,The number of people remaining
+target_attrition,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+target_attrition,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
+case_attrition,characterization_case_id,bigint,Yes,Yes,No,No,The characterization case id
+case_attrition,attr_order,int,No,Yes,No,No,The attrition order
+case_attrition,attr_reason,varchar(100),No,No,No,No,Description of removal rule
+case_attrition,n_events,bigint,No,No,No,No,The number of events remaining
+case_attrition,n_people,bigint,No,No,No,No,The number of people remaining
+case_attrition,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+case_attrition,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
+time_to_event_settings,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
+time_to_event_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+time_to_event_settings,characterization_target_id,bigint,Yes,Yes,No,No,The characterization cohort id
+time_to_event_settings,outcome_id,bigint,Yes,Yes,No,No,The outcome cohort id
+dechallenge_rechallenge_settings,setting_id,varchar(50),Yes,Yes,No,No,The run identifier
+dechallenge_rechallenge_settings,database_id,varchar(100),Yes,Yes,No,No,The database identifier
+dechallenge_rechallenge_settings,characterization_target_id,bigint,Yes,Yes,No,No,The characterization cohort id
+dechallenge_rechallenge_settings,outcome_id,bigint,Yes,Yes,No,No,The outcome cohort id

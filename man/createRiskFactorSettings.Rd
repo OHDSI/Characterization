@@ -5,10 +5,8 @@
 \title{Create risk factor study settings}
 \usage{
 createRiskFactorSettings(
-  targetIds,
+  studyPopulationSettings,
   outcomeIds,
-  limitToFirstInNDays = 99999,
-  minPriorObservation = 0,
   outcomeWashoutDays = 0,
   riskWindowStart = 1,
   startAnchor = "cohort start",
@@ -28,21 +26,15 @@ createRiskFactorSettings(
     useProcedureOccurrenceShortTerm = TRUE, useMeasurementShortTerm = TRUE,
     useObservationShortTerm = TRUE, useDeviceExposureShortTerm = TRUE,
     useVisitConceptCountShortTerm = TRUE, endDays = 0, longTermStartDays = -365,
-    shortTermStartDays = -30),
-  minTargetSize = 0,
-  minTwithOSize = 0
+    shortTermStartDays = -30)
 )
 }
 \arguments{
-\item{targetIds}{A list of cohortIds for the target cohorts}
+\item{studyPopulationSettings}{A list of objects created using \code{createStudyPopulationSettings} that specifies target cohorts and inclusion criteria}
 
 \item{outcomeIds}{A list of cohortIds for the outcome cohorts}
 
-\item{limitToFirstInNDays}{whether to limit each target cohort to the first entry into the cohort per N days per subject}
-
-\item{minPriorObservation}{The minimum time (in days) in the database a patient in the target cohorts must be observed prior to index}
-
-\item{outcomeWashoutDays}{Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis}
+\item{outcomeWashoutDays}{A single integer value. Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis}
 
 \item{riskWindowStart}{The start of the risk window (in days) relative to the `startAnchor`.}
 
@@ -55,10 +47,6 @@ or `"cohort end"`.}
 or `"cohort end"`.}
 
 \item{covariateSettings}{An object created using \code{FeatureExtraction::createCovariateSettings}}
-
-\item{minTargetSize}{The minimum size of the target cohorts for them to have aggregate covariates calculated}
-
-\item{minTwithOSize}{The minimum size of the cohorts corresponding to patients in the target with the outcome during time-at-risk for them to have aggregate covariates calculated}
 }
 \value{
 A list with the settings
@@ -69,9 +57,12 @@ Create risk factor study settings
 \examples{
 
 riskFactorSetting <- createRiskFactorSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    minPriorObservation = 365,
+    limitToFirstInNDays = 99999
+  ),
   outcomeIds = c(3),
-  minPriorObservation = 365,
   outcomeWashoutDays = 90,
   riskWindowStart = 1,
   startAnchor = "cohort start",
@@ -81,8 +72,8 @@ riskFactorSetting <- createRiskFactorSettings(
 
 }
 \seealso{
-Other Aggregate: 
-\code{\link{createCaseSeriesSettings}()},
-\code{\link{createTargetBaselineSettings}()}
+Other Aggregate:
+\code{\link[=createCaseSeriesSettings]{createCaseSeriesSettings()}},
+\code{\link[=createTargetBaselineSettings]{createTargetBaselineSettings()}}
 }
 \concept{Aggregate}

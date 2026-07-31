@@ -24,7 +24,7 @@ cleanNonIncremental(file.path(tempdir(), 'incremental'))
 
 }
 \seealso{
-Other Incremental: 
-\code{\link{cleanIncremental}()}
+Other Incremental:
+\code{\link[=cleanIncremental]{cleanIncremental()}}
 }
 \concept{Incremental}

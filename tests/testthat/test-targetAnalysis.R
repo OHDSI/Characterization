@@ -16,15 +16,17 @@ test_that("createTargetBaselineSettings", {
   )
 
   res <- createTargetBaselineSettings(
-    targetIds = targetIds,
-    limitToFirstInNDays = 9,
-    minPriorObservation = 10,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds,
+      limitToFirstInNDays = 9,
+      minPriorObservation = 10,
+    ),
     covariateSettings = covariateSettings
   )
 
   testthat::expect_equal(
-    res$targetIds,
-    targetIds
+    unique(res$studyPopulationSettings$targetId),
+    unique(targetIds)
   )
   testthat::expect_equal(
     res$covariateSettings[[1]],
@@ -32,12 +34,12 @@ test_that("createTargetBaselineSettings", {
   )
 
   testthat::expect_equal(
-    res$minPriorObservation,
+    unique(res$studyPopulationSettings$minPriorObservation),
     10
   )
 
   testthat::expect_equal(
-    res$limitToFirstInNDays,
+    unique(res$studyPopulationSettings$limitToFirstInNDays),
     9
   )
 
@@ -49,9 +51,11 @@ test_that("error when using temporal features", {
 
   testthat::expect_error(
     createTargetBaselineSettings(
-      targetIds = targetIds,
-      limitToFirstInNDays = 9,
-      minPriorObservation = 10,
+      studyPopulationSettings = createStudyPopulationSettings(
+        targetIds = targetIds,
+        limitToFirstInNDays = 9,
+        minPriorObservation = 10,
+      ),
       covariateSettings = temporalCovariateSettings
     )
   )
@@ -63,9 +67,11 @@ test_that("error when using temporal features", {
 
   testthat::expect_error(
     createTargetBaselineSettings(
-      targetIds = targetIds,
-      limitToFirstInNDays = 9,
-      minPriorObservation = 10,
+      studyPopulationSettings = createStudyPopulationSettings(
+        targetIds = targetIds,
+        limitToFirstInNDays = 9,
+        minPriorObservation = 10,
+      ),
       covariateSettings = temporalCovariateSettings
     )
   )
@@ -84,13 +90,15 @@ test_that("createTargetBaselineSettings covariateList", {
   covariateSettings <- list(covariateSettings1, covariateSettings2)
 
   res <- createTargetBaselineSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds
+    ),
     covariateSettings = covariateSettings
   )
 
   testthat::expect_equal(
-    res$targetIds,
-    targetIds
+    unique(res$studyPopulationSettings$targetId),
+    unique(targetIds)
   )
   testthat::expect_equal(
     res$covariateSettings,
@@ -110,10 +118,14 @@ test_that("getTargetBaselineJobs", {
   minPriorObservation <- sample(30, 1)
   limitToFirstInNDays <- sample(300, 1)
 
-  res <- createTargetBaselineSettings(
+  studyPop <- createStudyPopulationSettings(
     targetIds = targetIds,
     minPriorObservation = minPriorObservation,
-    limitToFirstInNDays = limitToFirstInNDays,
+    limitToFirstInNDays = limitToFirstInNDays
+  )
+
+  res <- createTargetBaselineSettings(
+    studyPopulationSettings = studyPop,
     covariateSettings = covariateSettings
   )
 
@@ -130,7 +142,7 @@ test_that("getTargetBaselineJobs", {
   testthat::expect_true(nrow(jobDf) == 1)
 
   testthat::expect_true(
-    paste(c("t_1", minPriorObservation,limitToFirstInNDays), collapse ='_') %in% jobDf$executionFolder
+    paste("t_1", collapse ='_') %in% jobDf$executionFolder
   )
 
   settings <- ParallelLogger::convertJsonToSettings(jobDf$settings[1])
@@ -157,25 +169,35 @@ test_that("getTargetBaselineJobs", {
 
   testthat::expect_true(
     sum(c(
-      paste0(c("t_1", minPriorObservation,limitToFirstInNDays), collapse = '_'),
-      paste0(c("t_2", minPriorObservation,limitToFirstInNDays), collapse = '_')
+      paste0("t_1", collapse = '_'),
+      paste0("t_2", collapse = '_')
     )
     %in% jobDf$executionFolder) == 2
   )
 
   # now check nTargetJobs = 3
+  charSettings <- createCharacterizationSettings(
+    targetBaselineSettings = res
+  )
   jobDf <- getTargetBaselineJobs(
-    characterizationSettings = createCharacterizationSettings(
-      targetBaselineSettings = res
-    ),
+    characterizationSettings = charSettings,
     nTargetJobs = 3
   )
   testthat::expect_true(nrow(jobDf) == 3)
 
   # check the target ids
-  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[1])$targetIds == targetIds[1])
-  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[2])$targetIds == targetIds[2])
-  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[3])$targetIds == targetIds[3])
+  tId1 <- charSettings$characterizationTargetLookup$characterizationTargetId[
+    charSettings$characterizationTargetLookup$targetId == res$studyPopulationSettings$targetId[1]
+  ]
+  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[1])$characterizationTargetIds == tId1)
+  tId2 <- charSettings$characterizationTargetLookup$characterizationTargetId[
+    charSettings$characterizationTargetLookup$targetId == res$studyPopulationSettings$targetId[2]
+  ]
+  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[2])$characterizationTargetIds == tId2)
+  tId3 <- charSettings$characterizationTargetLookup$characterizationTargetId[
+    charSettings$characterizationTargetLookup$targetId == res$studyPopulationSettings$targetId[3]
+  ]
+  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[3])$characterizationTargetIds == tId3)
 
   # now check nTargetJobs = 4
   jobDf <- getTargetBaselineJobs(
@@ -198,6 +220,8 @@ test_that("getTargetBaselineJobs", {
 })
 
 test_that("computeTargetBaselineAnalyses", {
+  skipIfCreateTargetCohortSqlUnavailable()
+
   targetIds <- c(1, 2, 4)
   covariateSettings <- FeatureExtraction::createCovariateSettings(
     useDemographicsGender = TRUE,
@@ -206,9 +230,11 @@ test_that("computeTargetBaselineAnalyses", {
   )
 
   res <- createTargetBaselineSettings(
-    targetIds = targetIds,
-    limitToFirstInNDays = 365,
-    minPriorObservation = 30,
+    createStudyPopulationSettings(
+      targetIds = targetIds,
+      limitToFirstInNDays = 365,
+      minPriorObservation = 30
+    ),
     covariateSettings = covariateSettings
   )
 
@@ -247,6 +273,8 @@ test_that("computeTargetBaselineAnalyses", {
     cdmVersion = 5,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
+    targetCountTable = tables$targetCountTable,
+    minTargetSize = 0,
 
     characterizationDatabaseSchema = 'main',
     characterizationTable = tables$characterizationTable, # contains char cohorts

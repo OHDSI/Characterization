@@ -16,15 +16,11 @@
 
 #' Create risk factor study settings
 #'
-#' @param targetIds   A list of cohortIds for the target cohorts
+#' @param studyPopulationSettings A list of objects created using \code{createStudyPopulationSettings} that specifies target cohorts and inclusion criteria
 #' @param outcomeIds  A list of cohortIds for the outcome cohorts
-#' @param limitToFirstInNDays whether to limit each target cohort to the first entry into the cohort per N days per subject
-#' @param minPriorObservation The minimum time (in days) in the database a patient in the target cohorts must be observed prior to index
-#' @param outcomeWashoutDays Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
+#' @param outcomeWashoutDays A single integer value. Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
 #' @template timeAtRisk
 #' @param covariateSettings   An object created using \code{FeatureExtraction::createCovariateSettings}
-#' @param minTargetSize The minimum size of the target cohorts for them to have aggregate covariates calculated
-#' @param minTwithOSize The minimum size of the cohorts corresponding to patients in the target with the outcome during time-at-risk for them to have aggregate covariates calculated
 #'
 #' @family Aggregate
 #' @return
@@ -33,9 +29,12 @@
 #' @examples
 #'
 #' riskFactorSetting <- createRiskFactorSettings(
-#'   targetIds = c(1,2),
+#'   studyPopulationSettings = createStudyPopulationSettings(
+#'     targetIds = c(1,2),
+#'     minPriorObservation = 365,
+#'     limitToFirstInNDays = 99999
+#'   ),
 #'   outcomeIds = c(3),
-#'   minPriorObservation = 365,
 #'   outcomeWashoutDays = 90,
 #'   riskWindowStart = 1,
 #'   startAnchor = "cohort start",
@@ -45,11 +44,8 @@
 #'
 #' @export
 createRiskFactorSettings <- function(
-    targetIds,
+    studyPopulationSettings,
     outcomeIds,
-    #? indicationIds
-    limitToFirstInNDays = 99999,
-    minPriorObservation = 0,
     outcomeWashoutDays = 0,
     riskWindowStart = 1,
     startAnchor = "cohort start",
@@ -84,23 +80,26 @@ createRiskFactorSettings <- function(
       endDays = 0,
       longTermStartDays = -365,
       shortTermStartDays = -30
-    ),
-    minTargetSize = 0,
-    minTwithOSize = 0
+    )
     ) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
-  .checkCohortIds(
-    cohortIds = targetIds,
-    type = "target",
-    errorMessages = errorMessages
-  )
+  #.checkCohortIds(
+  #  cohortIds = targetIds,
+  #  type = "target",
+  #  errorMessages = errorMessages
+  #)
   # check outcomeIds is a vector of int/double
   .checkCohortIds(
     cohortIds = outcomeIds,
     type = "outcome",
     errorMessages = errorMessages
   )
+
+  # check outcomeWashoutDays is length 1
+  if (length(outcomeWashoutDays) > 1) {
+    stop("Please add one outcomeWashoutDays per setting")
+  }
 
   # check TAR - EFF edit
   if (length(riskWindowStart) > 1) {
@@ -131,20 +130,20 @@ createRiskFactorSettings <- function(
   }
 
   # check minPriorObservation
-  .checkMinPriorObservation(
-    minPriorObservation = minPriorObservation,
-    errorMessages = errorMessages
-  )
+  #.checkMinPriorObservation(
+  #  minPriorObservation = minPriorObservation,
+  #  errorMessages = errorMessages
+  #)
 
   # add check for outcomeWashoutDays
 
   checkmate::reportAssertions(errorMessages)
 
   # check unique Ts and Os
-  if (length(targetIds) != length(unique(targetIds))) {
-    message("targetIds have duplicates - making unique")
-    targetIds <- unique(targetIds)
-  }
+  #if (length(targetIds) != length(unique(targetIds))) {
+  #  message("targetIds have duplicates - making unique")
+  #  targetIds <- unique(targetIds)
+  #}
   if (length(outcomeIds) != length(unique(outcomeIds))) {
     message("outcomeIds have duplicates - making unique")
     outcomeIds <- unique(outcomeIds)
@@ -153,18 +152,14 @@ createRiskFactorSettings <- function(
 
   # create list
   result <- list(
-    targetIds = targetIds,
-    limitToFirstInNDays = limitToFirstInNDays,
-    minPriorObservation = minPriorObservation,
+    studyPopulationSettings = combineStudyPopulationSettings(studyPopulationSettings),
     outcomeIds = outcomeIds,
     outcomeWashoutDays = outcomeWashoutDays,
     riskWindowStart = riskWindowStart,
     startAnchor = gsub(' ', '_',startAnchor),
     riskWindowEnd = riskWindowEnd,
     endAnchor = gsub(' ', '_',endAnchor),
-    covariateSettings = covariateSettings, # risk factors
-    minTargetSize = minTargetSize,
-    minTwithOSize = minTwithOSize
+    covariateSettings = covariateSettings # risk factors
   )
 
   class(result) <- "riskFactorSettings"
@@ -188,8 +183,8 @@ computeRiskFactorAnalyses <- function(
 
     characterizationDatabaseSchema,
     characterizationTable, # contains char cohorts
-    targetSettingsTable, # contains map between settings and char cohort id
     caseSettingsTable, # contains map between settings and case id
+    caseCountTable, # new
 
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
@@ -202,6 +197,7 @@ computeRiskFactorAnalyses <- function(
     progressBar = interactive(),
     mode,
     executionId,
+    minCaseSize, #new
     ...) {
 
   if(missing(outputFolder)){
@@ -222,28 +218,23 @@ computeRiskFactorAnalyses <- function(
   start <- Sys.time()
   message("Risk factor analysis: Finding temp Ids")
 
-  targetIds <- lookupTargets(
-    connection = connection,
-    lookupDatabaseSchema = characterizationDatabaseSchema,
-    lookupTableName = targetSettingsTable,
-    tempEmulationSchema = tempEmulationSchema,
-    targetIds = paste0(unique(settings$targetIds), collapse = ','),
-    limitToFirstInNDays = settings$limitToFirstInNDays,
-    minPriorObservation = settings$minPriorObservation
-  )
+  # TODO update this using settings$studyPopulationSettings
 
   caseIds <- lookupCases(
     connection = connection,
     lookupDatabaseSchema = characterizationDatabaseSchema,
     lookupTableName = caseSettingsTable,
+    countTable = caseCountTable,
     tempEmulationSchema = tempEmulationSchema,
-    characterizationTargetIds = paste0(unique(targetIds$characterizationTargetId), collapse = ','),
+    characterizationTargetIds = paste0(unique(settings$characterizationTargetId), collapse = ','),
     outcomeIds = paste0(unique(settings$outcomeIds), collapse = ','),
     outcomeWashoutDays = settings$outcomeWashoutDays,
     startAnchor = settings$startAnchor,
     riskWindowStart = settings$riskWindowStart,
     endAnchor = settings$endAnchor,
-    riskWindowEnd = settings$riskWindowEnd
+    riskWindowEnd = settings$riskWindowEnd,
+    minCaseSize = minCaseSize,
+    applyMinSizeToNonCases = TRUE
   )
 
   # generate the targets, cases and non-cases ids
@@ -259,18 +250,12 @@ computeRiskFactorAnalyses <- function(
   completionTime <- Sys.time() - start
   message(paste0("Risk factor analysis: Finding temp Ids took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
+  if(length(cohortIds) == 0){
+    message('No cohorts with number of people >= minSize')
+    return(invisible(TRUE))
+  }
 
-
-  ## 2) get attrition
-  #start <- Sys.time()
-  #message("Risk factor analysis: Extracting cohort attritions")
-  # TODO get attrition from CohortGenerator when it is in there
-
-  #completionTime <- Sys.time() - start
-  #message(paste0("Risk factor analysis: Extracting cohort attritions took ", round(completionTime, digits = 1), " ", units(completionTime)))
-
-
-  ## 3) run FE with all the cohorts of interest - ideally inserting the aggregate features into a new table
+  ## 2) run FE with all the cohorts of interest - ideally inserting the aggregate features into a new table
   start <- Sys.time()
   message("Risk factor analysis: Running FeatureExtraction")
   FeatureExtraction::getDbCovariateData(
@@ -279,10 +264,10 @@ computeRiskFactorAnalyses <- function(
     cohortTable = characterizationTable,
     cohortDatabaseSchema = characterizationDatabaseSchema,
     cohortIds = cohortIds,
-    rowIdField = 'row_number',
+    rowIdField = 'row_id',
     covariateSettings = ParallelLogger::convertJsonToSettings(settings$covariateSettings),
     aggregated = TRUE,
-    minCharacterizationMean = minCharacterizationMean,
+    minCharacterizationMean = 0, #minCharacterizationMean,
 
     exportToTable = TRUE,
     targetDatabaseSchema = NULL,
@@ -301,7 +286,7 @@ computeRiskFactorAnalyses <- function(
 
 
 
-  ## 4) for each target,exclude,cases join the tables and calculate the SMD
+  ## 3) for each target,exclude,cases join the tables and calculate the SMD
   start <- Sys.time()
   message("Risk factor analysis: Calculating SMD for binary")
 
@@ -318,7 +303,8 @@ computeRiskFactorAnalyses <- function(
     characterization_fe_table = '#fe_covariate_rf',
     efficient_mode =  mode == 'Efficient',
     smd_min = minSMD,
-    min_count = minCovariateCount
+    min_count = minCovariateCount,
+    min_characterization_mean = minCharacterizationMean
   )
 
   result <- Andromeda::andromeda()
@@ -387,8 +373,9 @@ computeRiskFactorAnalyses <- function(
     snakeCaseToCamelCase = TRUE
   )
 
-  result$targetSettings <- targetIds
-  result$caseSettings <- caseIds
+  # TODO - what is this used for?
+  ##result$targetSettings <- settings$characterizationTargetId
+  ##result$caseSettings <- caseIds
 
   completionTime <- Sys.time() - start
   message(paste0("Risk factor analysis: Calculating SMD and downloading took ", round(completionTime, digits = 1), " ", units(completionTime)))
@@ -449,9 +436,7 @@ getRiskFactorJobs <- function(
               FUN = function(outcomeId){
 
                 data.frame(
-                  targetId = unique(characterizationSettings[[i]]$targetIds),
-                  limitToFirstInNDays = characterizationSettings[[i]]$limitToFirstInNDays,
-                  minPriorObservation = characterizationSettings[[i]]$minPriorObservation,
+                  characterizationTargetId = unique(characterizationSettings[[i]]$characterizationTargetIds),
 
                   outcomeId = outcomeId,
                   outcomeWashoutDays = unique(characterizationSettings[[i]]$outcomeWashoutDays),
@@ -471,9 +456,8 @@ getRiskFactorJobs <- function(
 
   settings <- c()
   if(nrow(riskFactorCombinations) > 0 ){
-    jobCols <- c("targetId")
+    jobCols <- c("characterizationTargetId")
     settingCols <- c(
-      "limitToFirstInNDays", "minPriorObservation",
       "outcomeWashoutDays",
       "riskWindowStart", "startAnchor",
       "riskWindowEnd", "endAnchor"
@@ -515,11 +499,8 @@ getRiskFactorJobs <- function(
             functionName = "computeRiskFactorAnalyses",
             settings = as.character(ParallelLogger::convertSettingsToJson(
               list(
-                targetIds = unique(restrictedData$targetId[ind]),
+                characterizationTargetIds = unique(restrictedData$characterizationTargetId[ind]),
                 outcomeIds = unique(restrictedData$outcomeId[ind]),
-                minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
-                limitToFirstInNDays = unique(restrictedData$limitToFirstInNDays[ind]),
-
                 outcomeWashoutDays = unique(restrictedData$outcomeWashoutDays[ind]),
                 riskWindowStart = unique(restrictedData$riskWindowStart[ind]),
                 startAnchor = unique(restrictedData$startAnchor[ind]),

@@ -24,7 +24,11 @@ Input the directory containing the 'characterizationSettings.json' file and load
 setPath <- file.path(tempdir(), 'charSet.json')
 
 drSet <- createDechallengeRechallengeSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 
@@ -42,9 +46,9 @@ setting <- loadCharacterizationSettings(setPath)
 
 }
 \seealso{
-Other LargeScale: 
-\code{\link{createCharacterizationSettings}()},
-\code{\link{runCharacterizationAnalyses}()},
-\code{\link{saveCharacterizationSettings}()}
+Other LargeScale:
+\code{\link[=createCharacterizationSettings]{createCharacterizationSettings()}},
+\code{\link[=runCharacterizationAnalyses]{runCharacterizationAnalyses()}},
+\code{\link[=saveCharacterizationSettings]{saveCharacterizationSettings()}}
 }
 \concept{LargeScale}

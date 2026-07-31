@@ -1,8 +1,6 @@
 #' Create target baseline aggregate covariate study settings
 #'
-#' @param targetIds   A list of cohortIds for the target cohorts
-#' @param limitToFirstInNDays Whether to remove target cohort entries that occur within limitToFirstInNDays of a prior entry. limitToFirstInNDays = 99999 means limit to first entry.
-#' @param minPriorObservation The minimum time (in days) in the database a patient in the target cohorts must be observed prior to index
+#' @param studyPopulationSettings An object created using \code{createStudyPopulationSettings} or a list of \code{createStudyPopulationSettings} that specifies specific populations of interest
 #' @param covariateSettings   An object created using \code{FeatureExtraction::createCovariateSettings}
 #' @family Aggregate
 #' @return
@@ -11,16 +9,16 @@
 #' @examples
 #'
 #' aggregateSetting <- createTargetBaselineSettings(
-#'   targetIds = c(1,2),
+#'   studyPopulationSettings = createStudyPopulationSettings(
+#'   targetIds = 1:2,
 #'   limitToFirstInNDays = 99999,
 #'   minPriorObservation = 365
+#'   )
 #' )
 #'
 #' @export
 createTargetBaselineSettings <- function(
-    targetIds,
-    limitToFirstInNDays = 99999,
-    minPriorObservation = 0,
+    studyPopulationSettings,
     covariateSettings = FeatureExtraction::createCovariateSettings(
       useDemographicsGender = TRUE,
       useDemographicsAge = TRUE,
@@ -56,11 +54,11 @@ createTargetBaselineSettings <- function(
 
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
-  .checkCohortIds(
-    cohortIds = targetIds,
-    type = "target",
-    errorMessages = errorMessages
-  )
+  #.checkCohortIds(
+  #  cohortIds = targetIds,
+  #  type = "target",
+  #  errorMessages = errorMessages
+  #)
 
   # check covariateSettings
   .checkCovariateSettings(
@@ -78,17 +76,11 @@ createTargetBaselineSettings <- function(
     stop("Temporal covariateSettings not supported by createAggregateCovariateSettings()")
   }
 
-  # check minPriorObservation
-  .checkMinPriorObservation(
-    minPriorObservation = minPriorObservation,
-    errorMessages = errorMessages
-  )
+  # check studyPopulationSettings
 
   # create list
   result <- list(
-    targetIds = targetIds,
-    limitToFirstInNDays = limitToFirstInNDays,
-    minPriorObservation = minPriorObservation,
+    studyPopulationSettings = combineStudyPopulationSettings(studyPopulationSettings),
     covariateSettings = covariateSettings
   )
 
@@ -105,7 +97,6 @@ computeTargetBaselineAnalyses <- function(
     targetTable,
     characterizationDatabaseSchema,
     characterizationTable, # contains char cohorts
-    #attritionTable,
     targetSettingsTable, # contains map between settings and char cohort id
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
@@ -115,6 +106,8 @@ computeTargetBaselineAnalyses <- function(
     progressBar = interactive(),
     minCharacterizationMean = 0.01,
     minCovariateCount = 0,
+    minTargetSize = 0, # added
+    targetCountTable,  # added
     executionId,
     ...) {
 
@@ -131,15 +124,14 @@ computeTargetBaselineAnalyses <- function(
     DatabaseConnector::disconnect(connection)
   )
 
-  # first look up the cohort ids for the settings
-  cohorts <- lookupTargets(
+  # restrict to cohorts with min size
+  minSized <- minSizeCharacterizationIds(
     connection = connection,
-    lookupDatabaseSchema = characterizationDatabaseSchema,
-    lookupTableName = targetSettingsTable,
     tempEmulationSchema = tempEmulationSchema,
-    targetIds = settings$targetIds,
-    limitToFirstInNDays = settings$limitToFirstInNDays,
-    minPriorObservation = settings$minPriorObservation
+    characterizationTargetIds = settings$characterizationTargetIds,
+    minTargetSize = minTargetSize,
+    cohortDatabaseSchema = characterizationDatabaseSchema,
+    targetCountTable = targetCountTable
   )
 
   # next run FE on cohortIds
@@ -148,8 +140,8 @@ computeTargetBaselineAnalyses <- function(
     cdmDatabaseSchema = cdmDatabaseSchema,
     cohortDatabaseSchema = characterizationDatabaseSchema,
     cohortTable = characterizationTable,
-    cohortIds = unique(cohorts$characterizationTargetId),
-    covariateSettings = ParallelLogger::convertJsonToSettings(settings$covariateSettings),
+    cohortIds = minSized$characterizationTargetId,
+    covariateSettings = ParallelLogger::convertJsonToSettings(settings$covariateSettingsJson),
     cdmVersion = cdmVersion,
     aggregated = TRUE,
     minCharacterizationMean = minCharacterizationMean,
@@ -196,7 +188,7 @@ computeTargetBaselineAnalyses <- function(
   result$targetCovariatesContinuous <- result$covariatesContinuous
   result$covariatesContinuous <- NULL
 
-  result$targetSettings <- cohorts
+  ##result$targetSettings <- cohorts
 
   # export to andromeda
   result <- addDbAndSettings(
@@ -226,6 +218,8 @@ getTargetBaselineJobs <- function(
   }
   ind <- 1:length(characterizationSettings)
 
+  # characterizationTargetIds, covariateSettings
+
   # target combinations
   targetCombinations <- do.call(
     what = "rbind",
@@ -234,9 +228,7 @@ getTargetBaselineJobs <- function(
         1:length(characterizationSettings),
         function(i) {
           result <- data.frame(
-              targetIds = unique(characterizationSettings[[i]]$targetIds),
-              limitToFirstInNDays = characterizationSettings[[i]]$limitToFirstInNDays,
-              minPriorObservation = characterizationSettings[[i]]$minPriorObservation,
+              characterizationTargetId = unique(characterizationSettings[[i]]$characterizationTargetIds),
               covariateSettingsJson = as.character(ParallelLogger::convertSettingsToJson(characterizationSettings[[i]]$covariateSettings))
             )
             return(result)
@@ -246,8 +238,7 @@ getTargetBaselineJobs <- function(
 
   settings <- c()
   if (nrow(targetCombinations) > 0) {
-    jobCols <- c("targetIds")
-    settingCols <- c("minPriorObservation", "limitToFirstInNDays")
+    jobCols <- c("characterizationTargetId")
 
     # thread split - assign each target a treat
     jobSettings <- targetCombinations %>%
@@ -256,45 +247,25 @@ getTargetBaselineJobs <- function(
     jobSettings$nTargetJobs <- rep(1:nTargetJobs, ceiling(nrow(jobSettings) / nTargetJobs))[1:nrow(jobSettings)]
     targetCombinations <- merge(targetCombinations, jobSettings, by = jobCols)
 
-    executionSettings <- targetCombinations %>%
-      dplyr::select(dplyr::all_of(settingCols)) %>%
-      dplyr::distinct() %>%
-      dplyr::mutate(
-        settingId = dplyr::row_number()
-      )
-
-    targetCombinations <- merge(targetCombinations, executionSettings, by = settingCols)
-
     # recreate settings
-    for (settingId in unique(executionSettings$settingId)) {
-      settingVal <- executionSettings %>%
-        dplyr::filter(.data$settingId == !!settingId) %>%
-        dplyr::select(dplyr::all_of(settingCols))
-
-      restrictedData <- targetCombinations %>%
-        dplyr::inner_join(settingVal, by = settingCols)
-
-      for (i in unique(restrictedData$nTargetJobs)) {
-        ind <- restrictedData$nTargetJobs== i
+      for (i in unique(targetCombinations$nTargetJobs)) {
+        ind <- targetCombinations$nTargetJobs== i
         settings <- rbind(
           settings,
           data.frame(
             functionName = "computeTargetBaselineAnalyses",
             settings = as.character(ParallelLogger::convertSettingsToJson(
               list(
-                targetIds = unique(restrictedData$targetId[ind]),
-                limitToFirstInNDays = unique(restrictedData$limitToFirstInNDays[ind]),
-                minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
-                covariateSettingsJson = combineCovariateSettingsJsons(as.list(restrictedData$covariateSettingsJson[ind]))
+                characterizationTargetIds = unique(targetCombinations$characterizationTargetId[ind]),
+                covariateSettingsJson = combineCovariateSettingsJsons(as.list(targetCombinations$covariateSettingsJson[ind]))
               )
             )),
-            executionFolder = paste("t", i, paste(settingVal, collapse = "_"), sep = "_"),
-            jobId = paste("t", i, paste(settingVal, collapse = "_"), sep = "_")
+            executionFolder = paste("t", i, sep = "_"),
+            jobId = paste("t", i, sep = "_")
           )
         )
       }
     }
-  }
 
   return(settings)
 }

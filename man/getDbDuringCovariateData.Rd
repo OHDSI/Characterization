@@ -106,7 +106,7 @@ DatabaseConnector::disconnect(connection)
 
 }
 \seealso{
-Other CovariateSetting: 
-\code{\link{createDuringCovariateSettings}()}
+Other CovariateSetting:
+\code{\link[=createDuringCovariateSettings]{createDuringCovariateSettings()}}
 }
 \concept{CovariateSetting}

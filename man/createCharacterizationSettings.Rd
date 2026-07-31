@@ -36,7 +36,11 @@ Specify one or more timeToEvent, dechallengeRechallenge and aggregateCovariate s
 # example code
 
 drSet <- createDechallengeRechallengeSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 
@@ -46,9 +50,9 @@ cSet <- createCharacterizationSettings(
 
 }
 \seealso{
-Other LargeScale: 
-\code{\link{loadCharacterizationSettings}()},
-\code{\link{runCharacterizationAnalyses}()},
-\code{\link{saveCharacterizationSettings}()}
+Other LargeScale:
+\code{\link[=loadCharacterizationSettings]{loadCharacterizationSettings()}},
+\code{\link[=runCharacterizationAnalyses]{runCharacterizationAnalyses()}},
+\code{\link[=saveCharacterizationSettings]{saveCharacterizationSettings()}}
 }
 \concept{LargeScale}

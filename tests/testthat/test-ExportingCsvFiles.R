@@ -732,8 +732,9 @@ test_that("exportAttrition", {
 
   # create example attrition
   andromeda <- Andromeda::andromeda()
-  andromeda$attrition <- data.frame(
-    cohortDefinitionId = c(10,20,30,40, 11,21,31,12,22,32),
+  andromeda$target_attrition <- data.frame(
+    characterizationCohortId = c(10,20,30,40, 11,21,31,12,22,32),
+    attrOrder = 1:10,
     attrReason = c('Target first in 365 - 365 prior obs',
                    'Target first in 365 - 365 prior obs',
                    'Target first in 365 - 365 prior obs',
@@ -743,10 +744,14 @@ test_that("exportAttrition", {
                    '3. Has outcome during TAR',
                    '3. Has outcome during TAR'
                    ),
-    n = c(1000,50,400,350,
+    nEvents = c(1000,50,400,350,
           50,10,60,
           50,10,60
           ),
+    nPeople = c(1000,50,400,350,
+                50,10,60,
+                50,10,60
+    ),
     databaseId = 'db',
     settingId = 'set1'
   )
@@ -754,42 +759,8 @@ test_that("exportAttrition", {
   # save to temp folder
   saveCharacterizationAndromeda(
     andromeda = andromeda,
-    outputFolder = file.path(tempFolder3,'attrition')
+    outputFolder = file.path(tempFolder3,'target_attrition')
       )
-
-  # now create target and case settings
-  target_settings <- data.frame(
-    target_id	= c(1,2,3,4),
-    limit_to_first_in_n_days	= rep(365, 4),
-    min_prior_observation	= rep(365, 4),
-    setting_id	= 'set1',
-    characterization_target_id	= c(10,20,30,40),
-    database_id = 'db'
-  )
-
-  case_settings <- data.frame(
-    outcome_id	= rep(3,3),
-    outcome_washout_days	= rep(90,3),
-    risk_window_start	= rep(1,3),
-    start_anchor = rep('cohort_start',3),
-    risk_window_end	= rep(365,3),
-    end_anchor = rep('cohort_start',3),
-    runtype = rep('PLP',3),
-    characterization_case_id	= c(1,2,3),
-    setting_id	= 'set1',
-    characterization_target_id	= c(10,20,40),
-    database_id = 'db'
-  )
-
-  utils::write.csv(
-    x = target_settings,
-    file = file.path(tempFolder3, 'c_target_settings.csv')
-      )
-
-  utils::write.csv(
-    x = case_settings,
-    file = file.path(tempFolder3, 'c_case_settings.csv')
-  )
 
 exportAttrition(
     executionPath = tempFolder3,
@@ -799,11 +770,11 @@ exportAttrition(
 )
 
 # load attrition
-testthat::expect_true(file.exists(file.path(tempFolder3, 'c_attrition.csv')))
+testthat::expect_true(file.exists(file.path(tempFolder3, 'c_target_attrition.csv')))
 
-attrition <- utils::read.csv(file.path(tempFolder3, 'c_attrition.csv'))
-testthat::expect_true(nrow(attrition) == 16)
-testthat::expect_true(sum(colnames(attrition) %in% c('cohort_definition_id', 'attr_reason', 'n', 'database_id', 'setting_id')) == 5)
+target_attrition <- utils::read.csv(file.path(tempFolder3, 'c_target_attrition.csv'))
+testthat::expect_true(nrow(target_attrition) == 10)
+testthat::expect_true(sum(colnames(target_attrition) %in% c('characterization_cohort_id','attr_order', 'attr_reason', 'n_people','n_events', 'database_id', 'setting_id')) == 7)
 
 
 # now test the minCellCount
@@ -813,55 +784,23 @@ exportAttrition(
   csvFilePrefix = 'c_',
   minCellCount = 50
 )
-attrition <- utils::read.csv(file.path(tempFolder3, 'c_attrition.csv'))
-testthat::expect_true(sum(attrition$n < 50 & attrition$n != -50) == 0)
-testthat::expect_true(sum(colnames(attrition) %in% c('cohort_definition_id', 'attr_reason', 'n', 'database_id', 'setting_id')) == 5)
+target_attrition <- utils::read.csv(file.path(tempFolder3, 'c_target_attrition.csv'))
+testthat::expect_true(sum(target_attrition$n_people < 50 & target_attrition$n_people != -50) == 0)
+testthat::expect_true(sum(colnames(target_attrition) %in% c('characterization_cohort_id','attr_order', 'attr_reason', 'n_people','n_events', 'database_id', 'setting_id')) == 7)
 
-# now test csvFilePrefix
-utils::write.csv(
-  x = target_settings,
-  file = file.path(tempFolder3, 'cccd_target_settings.csv')
-)
 
-utils::write.csv(
-  x = case_settings,
-  file = file.path(tempFolder3, 'cccd_case_settings.csv')
-)
 exportAttrition(
   executionPath = tempFolder3,
   outputFolder = tempFolder3,
   csvFilePrefix = 'cccd_',
   minCellCount = 12
 )
-attrition <- utils::read.csv(file.path(tempFolder3, 'cccd_attrition.csv'))
-testthat::expect_true(sum(attrition$n < 12 & attrition$n != -12) == 0)
-testthat::expect_true(sum(colnames(attrition) %in% c('cohort_definition_id', 'attr_reason', 'n', 'database_id', 'setting_id')) == 5)
+target_attrition <- utils::read.csv(file.path(tempFolder3, 'cccd_target_attrition.csv'))
+testthat::expect_true(sum(target_attrition$n_people < 12 & target_attrition$n_people != -12) == 0)
+testthat::expect_true(sum(colnames(target_attrition) %in% c('characterization_cohort_id','attr_order', 'attr_reason', 'n_people','n_events', 'database_id', 'setting_id')) == 7)
 
 
-# test when no case_settings
-utils::write.csv(
-  x = target_settings,
-  file = file.path(tempFolder3, 'c2_target_settings.csv')
-)
-return <- exportAttrition(
-  executionPath = tempFolder3,
-  outputFolder = tempFolder3,
-  csvFilePrefix = 'c2_',
-  minCellCount = 12
-)
-attrition <- utils::read.csv(file.path(tempFolder3, 'c2_attrition.csv'))
-testthat::expect_true(sum(attrition$n < 12 & attrition$n != -12) == 0)
-testthat::expect_true(sum(colnames(attrition) %in% c('cohort_definition_id', 'attr_reason', 'n', 'database_id', 'setting_id')) == 5)
-testthat::expect_true(nrow(attrition) == 4)
+# TODO test case_attrition
 
-# test no target or case settings
-return <- exportAttrition(
-  executionPath = tempFolder3,
-  outputFolder = tempFolder3,
-  csvFilePrefix = 'c3_',
-  minCellCount = 12
-)
-testthat::expect_false(return)
-testthat::expect_true(!file.exists(file.path(tempFolder3, 'c3_attrition.csv')))
 
 })

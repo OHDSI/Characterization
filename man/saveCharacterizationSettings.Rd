@@ -22,7 +22,11 @@ Input the characterization settings and output a json file to a file named 'char
 }
 \examples{
 drSet <- createDechallengeRechallengeSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 
@@ -37,9 +41,9 @@ saveCharacterizationSettings(
 
 }
 \seealso{
-Other LargeScale: 
-\code{\link{createCharacterizationSettings}()},
-\code{\link{loadCharacterizationSettings}()},
-\code{\link{runCharacterizationAnalyses}()}
+Other LargeScale:
+\code{\link[=createCharacterizationSettings]{createCharacterizationSettings()}},
+\code{\link[=loadCharacterizationSettings]{loadCharacterizationSettings()}},
+\code{\link[=runCharacterizationAnalyses]{runCharacterizationAnalyses()}}
 }
 \concept{LargeScale}

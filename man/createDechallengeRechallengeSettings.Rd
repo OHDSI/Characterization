@@ -5,14 +5,14 @@
 \title{Create dechallenge rechallenge study settings}
 \usage{
 createDechallengeRechallengeSettings(
-  targetIds,
+  studyPopulationSettings,
   outcomeIds,
   dechallengeStopInterval = 30,
   dechallengeEvaluationWindow = 30
 )
 }
 \arguments{
-\item{targetIds}{A list of cohortIds for the target cohorts}
+\item{studyPopulationSettings}{An object created using \code{createStudyPopulationSettings} of a list of \code{createStudyPopulationSettings} that specifies cohort inclusion criteria}
 
 \item{outcomeIds}{A list of cohortIds for the outcome cohorts}
 
@@ -28,15 +28,14 @@ Create dechallenge rechallenge study settings
 }
 \examples{
 drSet <- createDechallengeRechallengeSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 
 
-}
-\seealso{
-Other DechallengeRechallenge: 
-\code{\link{computeDechallengeRechallengeAnalyses}()},
-\code{\link{computeRechallengeFailCaseSeriesAnalyses}()}
 }
 \concept{DechallengeRechallenge}

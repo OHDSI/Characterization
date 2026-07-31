@@ -16,7 +16,9 @@
 #' conDet <- exampleOmopConnectionDetails()
 #'
 #' tteSet <- createTimeToEventSettings(
-#'   targetIds = c(1,2),
+#' studyPopulationSettings = createStudyPopulationSettings(
+#'   targetIds = c(1,2)
+#'   ),
 #'   outcomeIds = 3
 #' )
 #'
@@ -139,7 +141,18 @@ prepareCharacterizationShiny <- function(
       tableName = "DATABASE_META_DATA",
       data = data.frame(
         databaseId = dbIds,
-        cdmSourceAbbreviation = paste0("database ", dbIds)
+        cdmSourceName = paste0("database ", dbIds),
+        cdmSourceAbbreviation = paste0("database ", dbIds),
+        cdmHolder = 'NA',
+        sourceDescription = 'NA',
+        sourceDocumentationReference = 'NA',
+        cdmEtlReference = 'NA',
+        sourceReleaseDate = 'NA',
+        cdmReleaseDate = 'NA',
+        cdmVersion = 'NA',
+        cdmVersionConceptId = 'NA',
+        vocabularyVersion = 'NA',
+        maxObsPeriodEndDate = 'NA'
       ),
       camelCaseToSnakeCase = TRUE
     )
@@ -153,33 +166,13 @@ prepareCharacterizationShiny <- function(
           connection = con,
           sql = paste0("select distinct TARGET_ID from ", tablePrefix, csvTablePrefix, "target_settings;"),
           snakeCaseToCamelCase = TRUE
-          )$targetCohortId,
+          )$targetId,
         DatabaseConnector::querySql(
           connection = con,
           sql = paste0("select distinct OUTCOME_ID from ", tablePrefix, csvTablePrefix, "case_settings;"),
           snakeCaseToCamelCase = TRUE
-          )$outcomeCohortId,
-        DatabaseConnector::querySql(
-          connection = con,
-          sql = paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
-          snakeCaseToCamelCase = TRUE
-            )$targetCohortDefinitionId,
-        DatabaseConnector::querySql(
-          connection = con,
-          sql = paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
-          snakeCaseToCamelCase = TRUE
-          )$outcomeCohortDefinitionId,
-        DatabaseConnector::querySql(
-          connection = con,
-          sql = paste0("select distinct TARGET_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"),
-          snakeCaseToCamelCase = TRUE
-          )$targetCohortDefinitionId,
-        DatabaseConnector::querySql(
-          connection = con,
-          sql = paste0("select distinct OUTCOME_COHORT_DEFINITION_ID from ", tablePrefix, csvTablePrefix, "rechallenge_fail_case_series;"),
-          snakeCaseToCamelCase = TRUE
-            )$outcomeCohortDefinitionId
-      )
+          )$outcomeId
+    )
     )
 
 
@@ -202,12 +195,74 @@ prepareCharacterizationShiny <- function(
       camelCaseToSnakeCase = TRUE
     )
 
-    databaseIds <- DatabaseConnector::querySql(
-      connection = con,
-      sql = paste0("select distinct DATABASE_ID from main.DATABASE_META_DATA;"),
-      snakeCaseToCamelCase = TRUE
-    )$databaseId
+  }
 
+
+  # add the new subset table
+  if (!"cg_cohort_subset_definition" %in% tables) {
+    DatabaseConnector::insertTable(
+      connection = con,
+      databaseSchema = "main",
+      tableName = "cg_cohort_subset_definition",
+      data = data.frame(
+        subsetDefinitionId = 1,
+        json = '{}'
+      ),
+      camelCaseToSnakeCase = TRUE
+    )
+  }
+
+  # add the new cohort count
+  if (!"cg_cohort_count" %in% tables) {
+
+    dbIds <- unique(
+      c(
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "analysis_ref;"),
+          snakeCaseToCamelCase = TRUE
+        )$databaseId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "dechallenge_rechallenge;"),
+          snakeCaseToCamelCase = TRUE
+        )$databaseId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct DATABASE_ID from ", tablePrefix, csvTablePrefix, "time_to_event;"),
+          snakeCaseToCamelCase = TRUE
+        )$databaseId
+      )
+    )
+
+    cohortIds <- unique(
+      c(
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct TARGET_ID from ", tablePrefix, csvTablePrefix, "target_settings;"),
+          snakeCaseToCamelCase = TRUE
+        )$targetId,
+        DatabaseConnector::querySql(
+          connection = con,
+          sql = paste0("select distinct OUTCOME_ID from ", tablePrefix, csvTablePrefix, "case_settings;"),
+          snakeCaseToCamelCase = TRUE
+        )$outcomeId
+      )
+    )
+
+    DatabaseConnector::insertTable(
+      connection = con,
+      databaseSchema = "main",
+      tableName = "cg_cohort_count",
+      data = data.frame(
+        cohortDefinitionId = cohortIds,
+        cohortId = cohortIds,
+        cohortEntries = rep(1000, length(cohortIds)), # fake
+        cohortSubjects = rep(1000, length(cohortIds)), # fake
+        databaseId = dbIds
+      ),
+      camelCaseToSnakeCase = TRUE
+    )
   }
 
 
