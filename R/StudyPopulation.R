@@ -11,7 +11,7 @@
 #' @param studyStartDate               The earliest date to be included into the target. Date format is 'yyyymmdd'.
 #' @param studyEndDate                 The latest date to be included into the target. Date format is 'yyyymmdd'.
 #' @param genderConceptIds              A target cohort subject's gender concept to restrict to
-#'
+#' @family helper
 #'
 #' @return
 #' A data.frame containing all the settings required

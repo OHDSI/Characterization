@@ -54,3 +54,8 @@ populationSettings <- createStudyPopulationSettings(
    minAge = 18
    )
 }
+\seealso{
+Other helper:
+\code{\link[=exampleOmopConnectionDetails]{exampleOmopConnectionDetails()}}
+}
+\concept{helper}

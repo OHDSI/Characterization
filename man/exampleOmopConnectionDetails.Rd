@@ -24,4 +24,8 @@ conDet <- exampleOmopConnectionDetails()
 connectionHandler <- ResultModelManager::ConnectionHandler$new(conDet)
 
 }
+\seealso{
+Other helper:
+\code{\link[=createStudyPopulationSettings]{createStudyPopulationSettings()}}
+}
 \concept{helper}
