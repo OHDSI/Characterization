@@ -10,7 +10,6 @@
 #' @param targetBaselineSettings A list of targetBaselineSettings settings
 #' @param riskFactorSettings A list of riskFactorSettings settings
 #' @param caseSeriesSettings A list of caseSeriesSettings settings
-#' @param restrictWashoutToObs Whether to restrict to outcomes in observation period for washout in risk factors
 #' @family LargeScale
 #'
 #' @return
@@ -38,8 +37,7 @@ createCharacterizationSettings <- function(
     dechallengeRechallengeSettings = NULL,
     targetBaselineSettings = NULL,
     riskFactorSettings = NULL,
-    caseSeriesSettings = NULL,
-    restrictWashoutToObs = TRUE
+    caseSeriesSettings = NULL
     ) {
 
   errorMessages <- checkmate::makeAssertCollection()
@@ -92,8 +90,7 @@ createCharacterizationSettings <- function(
     dechallengeRechallengeSettings = dechallengeRechallengeSettings,
     targetBaselineSettings = targetBaselineSettings,
     riskFactorSettings = riskFactorSettings,
-    caseSeriesSettings = caseSeriesSettings,
-    restrictWashoutToObs = restrictWashoutToObs
+    caseSeriesSettings = caseSeriesSettings
   )
 
   # update the settings replace the popSet with the characterizationTargetIds

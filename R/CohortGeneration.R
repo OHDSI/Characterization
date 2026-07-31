@@ -204,7 +204,7 @@ generateCohorts <- function(
 
               settings = ParallelLogger::convertJsonToSettings(cohortJobs$jobs[i,"settings"]),
               jobId = cohortJobs$jobs[i, "jobId"],
-              
+
               outcomeEraTable = outcomeEraTableWithHash
 
             )
@@ -744,7 +744,6 @@ generateNonCases <- function(
     jobId,
     mode,
     incremental,
-    restrictWashoutToObs,
     ...
 ){
 
@@ -780,9 +779,7 @@ generateNonCases <- function(
     cohort_table = outcomeTable,
 
     use_plp = mode == 'PatientLevelPrediction',
-    use_ci = mode == 'CohortIncidence',
-
-    restrict_washout_to_obs = restrictWashoutToObs
+    use_ci = mode == 'CohortIncidence'
   )
 
   DatabaseConnector::executeSql(
