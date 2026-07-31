@@ -141,7 +141,18 @@ prepareCharacterizationShiny <- function(
       tableName = "DATABASE_META_DATA",
       data = data.frame(
         databaseId = dbIds,
-        cdmSourceAbbreviation = paste0("database ", dbIds)
+        cdmSourceName = paste0("database ", dbIds),
+        cdmSourceAbbreviation = paste0("database ", dbIds),
+        cdmHolder = 'NA',
+        sourceDescription = 'NA',
+        sourceDocumentationReference = 'NA',
+        cdmEtlReference = 'NA',
+        sourceReleaseDate = 'NA',
+        cdmReleaseDate = 'NA',
+        cdmVersion = 'NA',
+        cdmVersionConceptId = 'NA',
+        vocabularyVersion = 'NA',
+        maxObsPeriodEndDate = 'NA'
       ),
       camelCaseToSnakeCase = TRUE
     )
