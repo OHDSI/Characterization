@@ -16,8 +16,9 @@
 
 #' Create time to event study settings
 #'
-#' @param targetIds   A list of cohortIds for the target cohorts
+#' @param studyPopulationSettings An object created using \code{createStudyPopulationSettings} or a list of \code{createStudyPopulationSettings} that specifies cohort inclusion criteria
 #' @param outcomeIds   A list of cohortIds for the outcome cohorts
+#'
 #' @family TimeToEvent
 #'
 #' @return
@@ -27,23 +28,28 @@
 #' # example code
 #'
 #' tteSet <- createTimeToEventSettings(
-#'   targetIds = c(1,2),
+#'   studyPopulationSettings = createStudyPopulationSettings(
+#'     targetIds = c(1,2),
+#'     limitToFirstInNDays = 0,
+#'     minPriorObservation = 0
+#'     ),
 #'   outcomeIds = 3
 #' )
 #'
 #'
 #' @export
 createTimeToEventSettings <- function(
-    targetIds,
-    outcomeIds) {
+    studyPopulationSettings,
+    outcomeIds
+) {
   # check indicationIds
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
-  .checkCohortIds(
-    cohortIds = targetIds,
-    type = "target",
-    errorMessages = errorMessages
-  )
+  #.checkCohortIds(
+  #  cohortIds = targetIds,
+  #  type = "target",
+  #  errorMessages = errorMessages
+  #)
   # check outcomeIds is a vector of int/double
   .checkCohortIds(
     cohortIds = outcomeIds,
@@ -55,7 +61,7 @@ createTimeToEventSettings <- function(
 
   # create data.frame with all combinations
   result <- list(
-    targetIds = targetIds,
+    studyPopulationSettings = combineStudyPopulationSettings(studyPopulationSettings),
     outcomeIds = outcomeIds
   )
 
@@ -63,52 +69,15 @@ createTimeToEventSettings <- function(
   return(result)
 }
 
-#' Compute time to event study
-#'
-#' @template ConnectionDetails
-#' @template TargetOutcomeTables
-#' @template TempEmulationSchema
-#' @param cdmDatabaseSchema The database schema containing the OMOP CDM data
-#' @param settings   The settings for the timeToEvent study
-#' @param databaseId An identifier for the database (string)
-#' @param outputFolder A directory to save the results as csv files
-#' @param minCellCount The minimum cell value to display, values less than this will be replaced by -1
-#' @param progressBar Whether to display a progress bar while the analysis is running
-#' @param executionId a unique id for the run
-#' @param ... extra inputs
-#' @family TimeToEvent
-#'
-#' @return
-#' An \code{Andromeda::andromeda()} object containing the time to event results.
-#'
-#' @examples
-#' # example code
-#'
-#' conDet <- exampleOmopConnectionDetails()
-#'
-#' tteSet <- createTimeToEventSettings(
-#'   targetIds = c(1,2),
-#'   outcomeIds = 3
-#' )
-#'
-#' result <- computeTimeToEventAnalyses(
-#'   connectionDetails = conDet,
-#'   targetDatabaseSchema = 'main',
-#'   targetTable = 'cohort',
-#'   cdmDatabaseSchema = 'main',
-#'   settings = tteSet,
-#'   outputFolder = file.path(tempdir(), 'tte')
-#' )
-#'
-#'
-#'
-#' @export
+
 computeTimeToEventAnalyses <- function(
     connectionDetails = NULL,
     targetDatabaseSchema,
     targetTable,
     outcomeDatabaseSchema = targetDatabaseSchema,
     outcomeTable = targetTable,
+    characterizationDatabaseSchema,
+    characterizationTable,
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     cdmDatabaseSchema,
     settings,
@@ -142,10 +111,10 @@ computeTimeToEventAnalyses <- function(
     tempEmulationSchema = tempEmulationSchema,
     errorMessages = errorMessages
   )
-  .checkTimeToEventSettings(
-    settings = settings,
-    errorMessages = errorMessages
-  )
+  #.checkTimeToEventSettings(
+  #  settings = settings,
+  #  errorMessages = errorMessages
+  #)
 
   valid <- checkmate::reportAssertions(errorMessages)
 
@@ -163,7 +132,7 @@ computeTimeToEventAnalyses <- function(
     message("Uploading #cohort_settings")
 
     pairs <- expand.grid(
-      targetCohortDefinitionId = settings$targetIds,
+      characterizationTargetId = settings$characterizationTargetIds,
       outcomeCohortDefinitionId = settings$outcomeIds
     )
 
@@ -187,8 +156,8 @@ computeTimeToEventAnalyses <- function(
       tempEmulationSchema = tempEmulationSchema,
       database_id = databaseId,
       cdm_database_schema = cdmDatabaseSchema,
-      target_database_schema = targetDatabaseSchema,
-      target_table = targetTable,
+      characterization_schema = characterizationDatabaseSchema,
+      characterization_table = characterizationTable,
       outcome_database_schema = outcomeDatabaseSchema,
       outcome_table = outcomeTable
     )
@@ -263,8 +232,8 @@ getTimeToEventJobs <- function(
     return(NULL)
   }
   ind <- 1:length(characterizationSettings)
-  targetIds <- lapply(ind, function(i) {
-    characterizationSettings[[i]]$targetIds
+  characterizationTargetIds <- lapply(ind, function(i) {
+    characterizationSettings[[i]]$characterizationTargetIds
   })
   outcomeIds <- lapply(ind, function(i) {
     characterizationSettings[[i]]$outcomeIds
@@ -276,17 +245,17 @@ getTimeToEventJobs <- function(
     what = "rbind",
     args =
       lapply(
-        1:length(targetIds),
+        1:length(characterizationTargetIds),
         function(i) {
           expand.grid(
-            targetId = targetIds[[i]],
+            characterizationTargetIds = characterizationTargetIds[[i]],
             outcomeId = outcomeIds[[i]]
           )
         }
       )
   )
   # find out whether more Ts or more Os
-  tcount <- length(unique(tnos$targetId))
+  tcount <- length(unique(tnos$characterizationTargetIds))
   ocount <- length(unique(tnos$outcomeId))
 
   if (nTargetJobs > max(tcount, ocount)) {
@@ -296,10 +265,10 @@ getTimeToEventJobs <- function(
 
   if (tcount >= ocount) {
     threadDf <- data.frame(
-      targetId = unique(tnos$targetId),
+      characterizationTargetIds = unique(tnos$characterizationTargetIds),
       nTargetJobs = rep(1:nTargetJobs, ceiling(tcount / nTargetJobs))[1:tcount]
     )
-    mergeColumn <- "targetId"
+    mergeColumn <- "characterizationTargetIds"
   } else {
     threadDf <- data.frame(
       outcomeId = unique(tnos$outcomeId),
@@ -312,8 +281,8 @@ getTimeToEventJobs <- function(
   sets <- lapply(
     X = 1:max(threadDf$nTargetJobs),
     FUN = function(i) {
-      createTimeToEventSettings(
-        targetIds = unique(tnos$targetId[tnos$nTargetJobs == i]),
+      list(
+        characterizationTargetIds = unique(tnos$characterizationTargetIds[tnos$nTargetJobs == i]),
         outcomeIds = unique(tnos$outcomeId[tnos$nTargetJobs == i])
       )
     }

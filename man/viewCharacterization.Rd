@@ -25,7 +25,9 @@ Input is the output of ...
 conDet <- exampleOmopConnectionDetails()
 
 tteSet <- createTimeToEventSettings(
-  targetIds = c(1,2),
+studyPopulationSettings = createStudyPopulationSettings(
+  targetIds = c(1,2)
+  ),
   outcomeIds = 3
 )
 

@@ -16,34 +16,40 @@ test_that("ensure_installed", {
 })
 
 test_that("prepareCharacterizationShiny works", {
+  skipIfCreateTargetCohortSqlUnavailable()
+
   targetIds <- c(1, 2, 4)
   outcomeIds <- c(3)
 
+  studyPop1 <- createStudyPopulationSettings(targetIds = 1)
+  studyPop2 <- createStudyPopulationSettings(targetIds = 2)
+  studyPopAll <- createStudyPopulationSettings(targetIds = targetIds)
+
   timeToEventSettings1 <- createTimeToEventSettings(
-    targetIds = 1,
+    studyPopulationSettings = studyPop1,
     outcomeIds = c(3, 4)
   )
   timeToEventSettings2 <- createTimeToEventSettings(
-    targetIds = 2,
+    studyPopulationSettings = studyPop2,
     outcomeIds = c(3, 4)
   )
 
   dechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = studyPopAll,
     outcomeIds = outcomeIds,
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 31
   )
 
   targetSettings1 <- createTargetBaselineSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = studyPopAll,
     covariateSettings = FeatureExtraction::createCovariateSettings(
       useDemographicsGender = TRUE
     )
   )
 
   targetSettings2 <- createTargetBaselineSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = studyPopAll,
     covariateSettings = FeatureExtraction::createCovariateSettings(
       useDemographicsAge = TRUE,
       useDemographicsRace = TRUE
@@ -71,6 +77,8 @@ test_that("prepareCharacterizationShiny works", {
     targetTable = "cohort",
     outcomeDatabaseSchema = "main",
     outcomeTable = "cohort",
+    nestingCohortDatabaseSchema = 'main',
+    nestingCohortTable = "cohort",
 
     outputDatabaseSchema = 'main',
     outputTable = 'char_cohort',

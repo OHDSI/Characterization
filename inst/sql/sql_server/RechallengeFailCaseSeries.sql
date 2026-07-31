@@ -1,8 +1,27 @@
+-- here we join the original target table to the subset target table via
+-- the target_settings table to class each era as included in the subset or not
+-- this ensures to target era id in the final results accounts for all exposures
+-- not just those that occur in the subset but we know which exposures occured in
+-- the subset (included = 1)
 IF OBJECT_ID('tempdb..#target_cohort', 'U') IS NOT NULL DROP TABLE #target_cohort;
-select * into #target_cohort
-from @target_database_schema.@target_table
-where cohort_definition_id in (@target_ids)
+
+SELECT
+ts.characterization_target_id as cohort_definition_id,
+tc.subject_id,
+tc.cohort_start_date,
+tc.cohort_end_date,
+CASE WHEN sc.subject_id is NULL THEN 0 ELSE 1 END included
+INTO #target_cohort
+FROM @target_database_schema.@target_table tc
+INNER JOIN @characterization_database_schema.@target_settings ts
+ON tc.cohort_definition_id = ts.target_id
+LEFT JOIN @characterization_database_schema.@characterization_table sc
+ON sc.subject_id = tc.subject_id
+AND sc.cohort_start_date = tc.cohort_start_date
+AND sc.cohort_definition_id = ts.characterization_target_id
+WHERE sc.cohort_definition_id in (@characterization_target_ids)
 ;
+
 IF OBJECT_ID('tempdb..#outcome_cohort', 'U') IS NOT NULL DROP TABLE #outcome_cohort;
 select * into #outcome_cohort
 from @outcome_database_schema.@outcome_table
@@ -16,7 +35,8 @@ select
   '@database_id' as database_id,
   @dechallenge_stop_interval as dechallenge_stop_interval,
   @dechallenge_evaluation_window as dechallenge_evaluation_window,
-  dc1.cohort_definition_id as target_cohort_definition_id,
+  dc1.cohort_definition_id as characterization_target_id, -- renamed this
+  dc1.included, -- new: whether the target era is in the target eras subset of interest
   io1.cohort_definition_id as outcome_cohort_definition_id,
   dense_rank() over (partition by dc1.cohort_definition_id, io1.cohort_definition_id order by datediff(day, dc0.cohort_start_date, dc1.cohort_start_date), dc1.subject_id) as person_key,
   {@show_subject_id}?{dc1.subject_id}:{CAST(NULL AS BIGINT) as subject_id},  --this is the field that we would want to allow parameter to make nullable or not export
@@ -33,29 +53,53 @@ select
 
 into #fail_case_series
 
-from (select *, row_number() over (partition by cohort_definition_id, subject_id order by cohort_start_date) as era_number from #target_cohort)  dc0
+from
+  (select *,
+  cohort_start_date as dc0_start_date,
+  cohort_end_date as dc0_end_date,
+  row_number() over (partition by cohort_definition_id, subject_id order by cohort_start_date) as era_number from #target_cohort
+  ) dc0
   inner join
-  (select *, row_number() over (partition by cohort_definition_id, subject_id order by cohort_start_date) as era_number from #target_cohort)  dc1
+  (select *,
+  cohort_start_date as dc1_start_date,
+  cohort_end_date as dc1_end_date,
+  row_number() over (partition by cohort_definition_id, subject_id order by cohort_start_date) as era_number from #target_cohort
+  )  dc1
   on dc0.subject_id = dc1.subject_id
   and dc0.cohort_definition_id = dc1.cohort_definition_id
   and dc0.era_number = 1
-	inner join (select *, row_number() over (partition by cohort_definition_id, subject_id order by cohort_start_date) as era_number from #outcome_cohort) io1
+	inner join
+	(select *,
+	cohort_start_date as io1_start_date,
+  cohort_end_date as io1_end_date,
+	row_number() over (partition by cohort_definition_id, subject_id order by cohort_start_date) as era_number from #outcome_cohort
+	) io1
 	on dc1.subject_id = io1.subject_id
-	and io1.cohort_start_date > dc1.cohort_start_date and io1.cohort_start_date <= dc1.cohort_end_date
-	and dc1.cohort_end_date <= dateadd(day,@dechallenge_stop_interval,io1.cohort_start_date) -- exposure ends shortly after outcome starts
+	and io1.io1_start_date > dc1.dc1_start_date and io1.io1_start_date <= dc1.dc1_end_date
+	and dc1.dc1_end_date <= dateadd(day,@dechallenge_stop_interval,io1.io1_start_date) -- exposure ends shortly after outcome starts
 	left join #outcome_cohort ro0 -- used to exclude people who have the outcome between exposure or next eligible time
 	on dc1.subject_id = ro0.subject_id
 	and io1.cohort_definition_id = ro0.cohort_definition_id
-	and ro0.cohort_start_date > dc1.cohort_end_date
-	and ro0.cohort_start_date <= dateadd(day,@dechallenge_evaluation_window,dc1.cohort_end_date)   --this should be parameterized to be the dechallenge window required for success/failure
-	inner join (select *, row_number() over (partition by cohort_definition_id, subject_id order by cohort_start_date) as era_number from #target_cohort) de1
+	and ro0.cohort_start_date > dc1.dc1_end_date
+	and ro0.cohort_start_date <= dateadd(day,@dechallenge_evaluation_window,dc1.dc1_end_date)   --this should be parameterized to be the dechallenge window required for success/failure
+	inner join
+	(select *,
+	cohort_start_date as de1_start_date,
+  cohort_end_date as de1_end_date,
+	row_number() over (partition by cohort_definition_id, subject_id order by cohort_start_date) as era_number from #target_cohort
+	) de1
 	on dc1.subject_id = de1.subject_id
 	and dc1.cohort_definition_id = de1.cohort_definition_id
-	and de1.cohort_start_date > dateadd(day,@dechallenge_evaluation_window,dc1.cohort_end_date)   --using same dechallenge window to detrmine when rechallenge attempt can start
-	inner join (select *, row_number() over (partition by cohort_definition_id, subject_id order by cohort_start_date) as era_number from #outcome_cohort) ro1
+	and de1.de1_start_date > dateadd(day,@dechallenge_evaluation_window,dc1.dc1_end_date)   --using same dechallenge window to detrmine when rechallenge attempt can start
+	inner join
+	(select *,
+	cohort_start_date as ro1_start_date,
+  cohort_end_date as ro1_end_date,
+	row_number() over (partition by cohort_definition_id, subject_id order by cohort_start_date) as era_number from #outcome_cohort
+	) ro1
 	on de1.subject_id = ro1.subject_id
 	and io1.cohort_definition_id = ro1.cohort_definition_id
-	and ro1.cohort_start_date > de1.cohort_start_date
-	and ro1.cohort_start_date <= de1.cohort_end_date
+	and ro1.ro1_start_date > de1.de1_start_date
+	and ro1.ro1_start_date <= de1.de1_end_date
 	where ro0.subject_id is null
 ;

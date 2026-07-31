@@ -53,8 +53,8 @@ non_case_p90_value,
 case_p90_value,
 non_case_standard_deviation,
 case_standard_deviation,
-CASE WHEN st_dev = 0 THEN mean_diff ELSE mean_diff/st_dev END as standardized_mean_difference
 
+CASE WHEN st_dev = 0 THEN mean_diff ELSE mean_diff/st_dev END as standardized_mean_difference
 
 FROM
 (

@@ -52,8 +52,8 @@ createCharacterizationTables(
 
 }
 \seealso{
-Other Database: 
-\code{\link{createSqliteDatabase}()},
-\code{\link{insertResultsToDatabase}()}
+Other Database:
+\code{\link[=createSqliteDatabase]{createSqliteDatabase()}},
+\code{\link[=insertResultsToDatabase]{insertResultsToDatabase()}}
 }
 \concept{Database}

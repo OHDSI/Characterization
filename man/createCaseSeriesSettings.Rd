@@ -5,10 +5,8 @@
 \title{Create aggregate covariate study settings}
 \usage{
 createCaseSeriesSettings(
-  targetIds,
+  studyPopulationSettings,
   outcomeIds,
-  limitToFirstInNDays = 99999,
-  minPriorObservation = 0,
   outcomeWashoutDays = 0,
   riskWindowStart = 1,
   startAnchor = "cohort start",
@@ -23,15 +21,11 @@ createCaseSeriesSettings(
 )
 }
 \arguments{
-\item{targetIds}{A list of cohortIds for the target cohorts}
+\item{studyPopulationSettings}{A List of object created using \code{createStudyPopulationSettings} that specifies target cohorts and inclusion criteria}
 
 \item{outcomeIds}{A list of cohortIds for the outcome cohorts}
 
-\item{limitToFirstInNDays}{whether to limit each target cohort to the first entry into the cohort per N days per subject}
-
-\item{minPriorObservation}{The minimum time (in days) in the database a patient in the target cohorts must be observed prior to index}
-
-\item{outcomeWashoutDays}{Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis}
+\item{outcomeWashoutDays}{A single integer value. Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis}
 
 \item{riskWindowStart}{The start of the risk window (in days) relative to the `startAnchor`.}
 
@@ -45,9 +39,9 @@ or `"cohort end"`.}
 
 \item{caseCovariateSettings}{An object created using \code{createDuringCovariateSettings}}
 
-\item{casePreTargetDuration}{The number of days prior to case index we use for FeatureExtraction}
+\item{casePreTargetDuration}{A single integer value. The number of days prior to case index we use for FeatureExtraction}
 
-\item{casePostOutcomeDuration}{The number of days prior to case index we use for FeatureExtraction}
+\item{casePostOutcomeDuration}{A single integer value. The number of days prior to case index we use for FeatureExtraction}
 }
 \value{
 A list with the settings
@@ -58,10 +52,12 @@ Create aggregate covariate study settings
 \examples{
 
 caseSeriesSetting <- createCaseSeriesSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    minPriorObservation = 365,
+    limitToFirstInNDays = 365
+  ),
   outcomeIds = c(3),
-  limitToFirstInNDays = 365,
-  minPriorObservation = 365,
   outcomeWashoutDays = 90,
   riskWindowStart = 1,
   startAnchor = "cohort start",
@@ -73,8 +69,8 @@ caseSeriesSetting <- createCaseSeriesSettings(
 
 }
 \seealso{
-Other Aggregate: 
-\code{\link{createRiskFactorSettings}()},
-\code{\link{createTargetBaselineSettings}()}
+Other Aggregate:
+\code{\link[=createRiskFactorSettings]{createRiskFactorSettings()}},
+\code{\link[=createTargetBaselineSettings]{createTargetBaselineSettings()}}
 }
 \concept{Aggregate}

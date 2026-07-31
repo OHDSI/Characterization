@@ -181,38 +181,42 @@ for (dbmsPlatform in dbmsPlatforms) {
       targetIds <- c(1, 2, 4)
       outcomeIds <- c(3)
 
+      studyPop1 <- createStudyPopulationSettings(targetIds = 1)
+      studyPop2 <- createStudyPopulationSettings(targetIds = 2)
+      studyPopAll <- createStudyPopulationSettings(targetIds = targetIds)
+
       timeToEventSettings1 <- createTimeToEventSettings(
-        targetIds = 1,
+        studyPopulationSettings = studyPop1,
         outcomeIds = c(3, 4)
       )
       timeToEventSettings2 <- createTimeToEventSettings(
-        targetIds = 2,
+        studyPopulationSettings = studyPop2,
         outcomeIds = c(3, 4)
       )
 
       dechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
-        targetIds = targetIds,
+        studyPopulationSettings = studyPopAll,
         outcomeIds = outcomeIds,
         dechallengeStopInterval = 30,
         dechallengeEvaluationWindow = 31
       )
 
       targetBaselineSettings1 <- createTargetBaselineSettings(
-        targetIds = targetIds,
+        studyPopulationSettings = studyPopAll,
         covariateSettings = FeatureExtraction::createCovariateSettings(
           useDemographicsGender = TRUE,
           useDemographicsAge = TRUE
         )
       )
       targetBaselineSettings2 <- createTargetBaselineSettings(
-        targetIds = targetIds,
+        studyPopulationSettings = studyPopAll,
         covariateSettings = FeatureExtraction::createCovariateSettings(
           useConditionOccurrenceLongTerm = TRUE
         )
       )
 
       riskFactorSettings <- createRiskFactorSettings(
-        targetIds = targetIds,
+        studyPopulationSettings = studyPopAll,
         outcomeIds = outcomeIds,
         riskWindowStart = 1,
         startAnchor = "cohort start",
@@ -224,7 +228,7 @@ for (dbmsPlatform in dbmsPlatforms) {
       )
 
       caseSeriesSettings <- createCaseSeriesSettings(
-        targetIds = targetIds,
+        studyPopulationSettings = studyPopAll,
         outcomeIds = outcomeIds,
         riskWindowStart = 1,
         startAnchor = "cohort start",
@@ -258,6 +262,8 @@ for (dbmsPlatform in dbmsPlatforms) {
         targetTable = dbmsDetails$cohortTable,
         outcomeDatabaseSchema = dbmsDetails$cohortDatabaseSchema,
         outcomeTable = dbmsDetails$cohortTable,
+        nestingCohortTable = dbmsDetails$cohortTable,
+        nestingCohortDatabaseSchema = dbmsDetails$cohortDatabaseSchema,
         characterizationSettings = characterizationSettings,
         outputDirectory = file.path(tempFolder, "csv"),
         outputDatabaseSchema = dbmsDetails$cohortDatabaseSchema,

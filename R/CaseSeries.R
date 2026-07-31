@@ -16,15 +16,13 @@
 
 #' Create aggregate covariate study settings
 #'
-#' @param targetIds   A list of cohortIds for the target cohorts
+#' @param studyPopulationSettings A List of object created using \code{createStudyPopulationSettings} that specifies target cohorts and inclusion criteria
 #' @param outcomeIds  A list of cohortIds for the outcome cohorts
-#' @param limitToFirstInNDays whether to limit each target cohort to the first entry into the cohort per N days per subject
-#' @param minPriorObservation The minimum time (in days) in the database a patient in the target cohorts must be observed prior to index
-#' @param outcomeWashoutDays Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
+#' @param outcomeWashoutDays A single integer value. Patients with the outcome within outcomeWashout days prior to index are excluded from the risk factor analysis
 #' @template timeAtRisk
 #' @param caseCovariateSettings An object created using \code{createDuringCovariateSettings}
-#' @param casePreTargetDuration    The number of days prior to case index we use for FeatureExtraction
-#' @param casePostOutcomeDuration    The number of days prior to case index we use for FeatureExtraction
+#' @param casePreTargetDuration    A single integer value. The number of days prior to case index we use for FeatureExtraction
+#' @param casePostOutcomeDuration    A single integer value. The number of days prior to case index we use for FeatureExtraction
 #' @family Aggregate
 #' @return
 #' A list with the settings
@@ -32,10 +30,12 @@
 #' @examples
 #'
 #' caseSeriesSetting <- createCaseSeriesSettings(
-#'   targetIds = c(1,2),
+#'   studyPopulationSettings = createStudyPopulationSettings(
+#'     targetIds = c(1,2),
+#'     minPriorObservation = 365,
+#'     limitToFirstInNDays = 365
+#'   ),
 #'   outcomeIds = c(3),
-#'   limitToFirstInNDays = 365,
-#'   minPriorObservation = 365,
 #'   outcomeWashoutDays = 90,
 #'   riskWindowStart = 1,
 #'   startAnchor = "cohort start",
@@ -47,10 +47,8 @@
 #'
 #' @export
 createCaseSeriesSettings <- function(
-    targetIds,
+    studyPopulationSettings,
     outcomeIds,
-    limitToFirstInNDays = 99999,
-    minPriorObservation = 0,
     outcomeWashoutDays = 0,
     riskWindowStart = 1,
     startAnchor = "cohort start",
@@ -70,17 +68,22 @@ createCaseSeriesSettings <- function(
     ) {
   errorMessages <- checkmate::makeAssertCollection()
   # check targetIds is a vector of int/double
-  .checkCohortIds(
-    cohortIds = targetIds,
-    type = "target",
-    errorMessages = errorMessages
-  )
+  #.checkCohortIds(
+  #  cohortIds = targetIds,
+  #  type = "target",
+  #  errorMessages = errorMessages
+  #)
   # check outcomeIds is a vector of int/double
   .checkCohortIds(
     cohortIds = outcomeIds,
     type = "outcome",
     errorMessages = errorMessages
   )
+
+  # check outcomeWashoutDays is length 1
+  if (length(outcomeWashoutDays) > 1) {
+    stop("Please add one outcomeWashoutDays per setting")
+  }
 
   # check TAR - EFF edit
   if (length(riskWindowStart) > 1) {
@@ -95,10 +98,10 @@ createCaseSeriesSettings <- function(
   )
 
   # check minPriorObservation
-  .checkMinPriorObservation(
-    minPriorObservation = minPriorObservation,
-    errorMessages = errorMessages
-  )
+  #.checkMinPriorObservation(
+  #  minPriorObservation = minPriorObservation,
+  #  errorMessages = errorMessages
+  #)
 
   # add check for outcomeWashoutDays and nlimitToFirstInNDays
 
@@ -125,10 +128,10 @@ createCaseSeriesSettings <- function(
   checkmate::reportAssertions(errorMessages)
 
   # check unique Ts and Os
-  if (length(targetIds) != length(unique(targetIds))) {
-    message("targetIds have duplicates - making unique")
-    targetIds <- unique(targetIds)
-  }
+  #if (length(targetIds) != length(unique(targetIds))) {
+  #  message("targetIds have duplicates - making unique")
+  #  targetIds <- unique(targetIds)
+  #}
   if (length(outcomeIds) != length(unique(outcomeIds))) {
     message("outcomeIds have duplicates - making unique")
     outcomeIds <- unique(outcomeIds)
@@ -137,9 +140,7 @@ createCaseSeriesSettings <- function(
 
   # create list
   result <- list(
-    targetIds = targetIds,
-    limitToFirstInNDays = limitToFirstInNDays,
-    minPriorObservation = minPriorObservation,
+    studyPopulationSettings = combineStudyPopulationSettings(studyPopulationSettings),
     outcomeIds = outcomeIds,
     outcomeWashoutDays = outcomeWashoutDays,
     riskWindowStart = riskWindowStart,
@@ -168,8 +169,8 @@ computeCaseSeriesAnalyses <- function(
 
     characterizationDatabaseSchema,
     characterizationTable, # contains char cohorts
-    targetSettingsTable, # contains map between settings and char cohort id
     caseSettingsTable, # contains map between settings and case id
+    caseCountTable, # new
 
     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
     settings,
@@ -180,6 +181,7 @@ computeCaseSeriesAnalyses <- function(
     minCellCount = 0,
     progressBar = interactive(),
     executionId,
+    minCaseSize = minCaseSize,
     ...) {
 
   if(missing(outputFolder)){
@@ -199,33 +201,31 @@ computeCaseSeriesAnalyses <- function(
   start <- Sys.time()
   message("Case series analysis: Finding temp Ids")
 
-  targetIds <- lookupTargets(
-    connection = connection,
-    lookupDatabaseSchema = characterizationDatabaseSchema,
-    lookupTableName = targetSettingsTable,
-    tempEmulationSchema = tempEmulationSchema,
-    targetIds = paste0(unique(settings$targetIds), collapse = ','),
-    limitToFirstInNDays = settings$limitToFirstInNDays,
-    minPriorObservation = settings$minPriorObservation
-  )
-
   caseIds <- lookupCases(
     connection = connection,
     lookupDatabaseSchema = characterizationDatabaseSchema,
     lookupTableName = caseSettingsTable,
+    countTable = caseCountTable,
     tempEmulationSchema = tempEmulationSchema,
-    characterizationTargetIds = paste0(unique(targetIds$characterizationTargetId), collapse = ','),
+    characterizationTargetIds = paste0(unique(settings$characterizationTargetId), collapse = ','),
     outcomeIds = paste0(unique(settings$outcomeIds), collapse = ','),
     outcomeWashoutDays = settings$outcomeWashoutDays,
     startAnchor = settings$startAnchor,
     riskWindowStart = settings$riskWindowStart,
     endAnchor = settings$endAnchor,
-    riskWindowEnd = settings$riskWindowEnd
+    riskWindowEnd = settings$riskWindowEnd,
+    minCaseSize = minCaseSize,
+    applyMinSizeToNonCases = FALSE
   )
 
   completionTime <- Sys.time() - start
   message(paste0("Case series analysis: Finding temp Ids took ", round(completionTime, digits = 1), " ", units(completionTime)))
 
+
+  if(nrow(caseIds) == 0){
+    message('No case cohorts of minCaseSize')
+    return(invisible(TRUE))
+  }
 
   ## 4) run FE with all the cohorts of interest - ideally inserting the aggregate features into a new table
   start <- Sys.time()
@@ -239,10 +239,10 @@ computeCaseSeriesAnalyses <- function(
     cohortIds = c(caseIds$characterizationCaseId*10+3,
                   caseIds$characterizationCaseId*10+4,
                   caseIds$characterizationCaseId*10+5),
-    rowIdField = 'row_number',
+    rowIdField = 'row_id',
     covariateSettings = ParallelLogger::convertJsonToSettings(settings$covariateSettings),
     aggregated = TRUE,
-    minCharacterizationMean = minCharacterizationMean,
+    minCharacterizationMean = 0, #minCharacterizationMean,
 
     exportToTable = TRUE,
     targetDatabaseSchema = NULL,
@@ -275,7 +275,8 @@ computeCaseSeriesAnalyses <- function(
                                      caseIds$characterizationCaseId*10+4,
                                      caseIds$characterizationCaseId*10+5),
                                    collapse = ','),
-    min_count = minCovariateCount
+    min_count = minCovariateCount,
+    min_characterization_mean = minCharacterizationMean
   )
 
   tryCatch(
@@ -342,8 +343,9 @@ computeCaseSeriesAnalyses <- function(
     snakeCaseToCamelCase = TRUE
   )
 
-  result$targetSettings <- targetIds
-  result$caseSettings <- caseIds
+  # TODO Removed
+  ##result$targetSettings <- targetIds
+  ##result$caseSettings <- caseIds
 
   completionTime <- Sys.time() - start
   message(paste0("Case series analysis: Downloading took ", round(completionTime, digits = 1), " ", units(completionTime)))
@@ -403,9 +405,7 @@ getCaseSeriesJobs <- function(
               FUN = function(outcomeId){
 
                 data.frame(
-                  targetId = unique(characterizationSettings[[i]]$targetIds),
-                  limitToFirstInNDays = characterizationSettings[[i]]$limitToFirstInNDays,
-                  minPriorObservation = characterizationSettings[[i]]$minPriorObservation,
+                  characterizationTargetId = unique(characterizationSettings[[i]]$characterizationTargetIds),
 
                   outcomeId = outcomeId,
                   outcomeWashoutDays = unique(characterizationSettings[[i]]$outcomeWashoutDays),
@@ -428,10 +428,9 @@ getCaseSeriesJobs <- function(
 
   settings <- c()
   if(nrow(caseSeriesCombinations) > 0 ){
-    jobCols <- c("targetId")
+    jobCols <- c("characterizationTargetId")
 
     settingCols <- c(
-      "limitToFirstInNDays", "minPriorObservation",
       "outcomeWashoutDays",
       "riskWindowStart", "startAnchor",
       "riskWindowEnd", "endAnchor",
@@ -469,10 +468,8 @@ getCaseSeriesJobs <- function(
             functionName = "computeCaseSeriesAnalyses",
             settings = as.character(ParallelLogger::convertSettingsToJson(
               list(
-                targetIds = unique(restrictedData$targetId[ind]),
+                characterizationTargetIds = unique(restrictedData$characterizationTargetId[ind]),
                 outcomeIds = unique(restrictedData$outcomeId[ind]),
-                minPriorObservation = unique(restrictedData$minPriorObservation[ind]),
-                limitToFirstInNDays = unique(restrictedData$limitToFirstInNDays[ind]),
 
                 outcomeWashoutDays = unique(restrictedData$outcomeWashoutDays[ind]),
                 riskWindowStart = unique(restrictedData$riskWindowStart[ind]),

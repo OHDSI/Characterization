@@ -99,5 +99,8 @@ AND non_cases.covariate_id = cases.covariate_id
 
 WHERE  abs(CASE WHEN st_dev = 0 THEN mean_diff ELSE mean_diff/st_dev END) >= @smd_min
 AND (ISNULL(non_case_sum_value, 0) + ISNULL(case_sum_value, 0) ) >= @min_count
+AND (ISNULL(non_case_average_value, 0) >= @min_characterization_mean
+     OR
+     ISNULL(case_average_value, 0) >= @min_characterization_mean )
 ;
 

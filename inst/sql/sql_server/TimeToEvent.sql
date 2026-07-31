@@ -2,9 +2,9 @@
 drop table if exists #targets;
 select *, row_number() over (partition by cohort_definition_id, subject_id order by cohort_start_date asc) as era_number
 into #targets
-from @target_database_schema.@target_table
+from @characterization_schema.@characterization_table
 where cohort_definition_id in
-(select distinct target_cohort_definition_id from #cohort_settings)
+(select distinct characterization_target_id from #cohort_settings)
 ;
 
 drop table if exists #outcomes;
@@ -49,7 +49,7 @@ inner join (
   ) o1
 on t1.subject_id = o1.subject_id
 inner join #cohort_settings ito1
-on t1.cohort_definition_id = ito1.target_cohort_definition_id
+on t1.cohort_definition_id = ito1.characterization_target_id
 and o1.cohort_definition_id = ito1.outcome_cohort_definition_id
 ;
 
@@ -75,50 +75,6 @@ group by
 ;
 
 --select * from #two_fu_bounds;
-
-
-drop table if exists #t_prior_obs;
-select
-  t1.cohort_definition_id,
-  'Before target start' as observation_time_type,
-  datediff(day, t1.first_date, op1.observation_period_start_date) as time_to_event,
-  count(t1.subject_id) as num_persons
-into #t_prior_obs
-from (
-  select cohort_definition_id, subject_id, min(cohort_start_date) as first_date
-  from #targets
-  group by cohort_definition_id, subject_id
-  ) t1
-inner join @cdm_database_schema.observation_period op1
-on t1.subject_id = op1.person_id
-and t1.first_date >= op1.observation_period_start_date
-and t1.first_date <= op1.observation_period_end_date
-group by
-  t1.cohort_definition_id,
-  datediff(day, t1.first_date, op1.observation_period_start_date)
-;
-
-
-drop table if exists #t_post_obs;
-select
-  t1.cohort_definition_id,
-  'After target start' as observation_time_type,
-  datediff(day, t1.first_date, op1.observation_period_end_date) as time_to_event,
-  count(t1.subject_id) as num_persons
-into #t_post_obs
-from (
-  select cohort_definition_id, subject_id, min(cohort_start_date) as first_date
-  from #targets
-  group by cohort_definition_id, subject_id
-  ) t1
-inner join @cdm_database_schema.observation_period op1
-on t1.subject_id = op1.person_id
-and t1.first_date >= op1.observation_period_start_date
-and t1.first_date <= op1.observation_period_end_date
-group by
-  t1.cohort_definition_id,
-  datediff(day, t1.first_date, op1.observation_period_end_date)
-;
 
 
 /*time-to-event distribution*/
@@ -262,7 +218,7 @@ from
 (
 --daily counting for +/- 100 days, jenna comment why 100
 select
-target_cohort_definition_id,
+target_cohort_definition_id as characterization_target_id, -- renamed
 outcome_cohort_definition_id,
 outcome_type,
 target_outcome_type,
@@ -276,7 +232,7 @@ union all
 
 --30-day counting for +/- 1080 days (~ 3 years)
 select
-target_cohort_definition_id,
+target_cohort_definition_id as characterization_target_id, -- renamed
 outcome_cohort_definition_id,
 outcome_type,
 target_outcome_type,
@@ -297,7 +253,7 @@ union all
 
 --365-day counting for +/- all days
 select
-target_cohort_definition_id,
+target_cohort_definition_id as characterization_target_id, -- renamed
 outcome_cohort_definition_id,
 outcome_type,
 target_outcome_type,
@@ -314,9 +270,6 @@ group by target_cohort_definition_id, outcome_cohort_definition_id, outcome_type
 
 ) temp
 ;
-
--- select * from #two_tte_summary;
-
 
 
 

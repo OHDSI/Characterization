@@ -9,8 +9,7 @@ createCharacterizationSettings(
   dechallengeRechallengeSettings = NULL,
   targetBaselineSettings = NULL,
   riskFactorSettings = NULL,
-  caseSeriesSettings = NULL,
-  restrictWashoutToObs = TRUE
+  caseSeriesSettings = NULL
 )
 }
 \arguments{
@@ -23,8 +22,6 @@ createCharacterizationSettings(
 \item{riskFactorSettings}{A list of riskFactorSettings settings}
 
 \item{caseSeriesSettings}{A list of caseSeriesSettings settings}
-
-\item{restrictWashoutToObs}{Whether to restrict to outcomes in observation period for washout in risk factors}
 }
 \value{
 Returns the connection to the sqlite database
@@ -39,7 +36,11 @@ Specify one or more timeToEvent, dechallengeRechallenge and aggregateCovariate s
 # example code
 
 drSet <- createDechallengeRechallengeSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 
@@ -49,9 +50,9 @@ cSet <- createCharacterizationSettings(
 
 }
 \seealso{
-Other LargeScale: 
-\code{\link{loadCharacterizationSettings}()},
-\code{\link{runCharacterizationAnalyses}()},
-\code{\link{saveCharacterizationSettings}()}
+Other LargeScale:
+\code{\link[=loadCharacterizationSettings]{loadCharacterizationSettings()}},
+\code{\link[=runCharacterizationAnalyses]{runCharacterizationAnalyses()}},
+\code{\link[=saveCharacterizationSettings]{saveCharacterizationSettings()}}
 }
 \concept{LargeScale}

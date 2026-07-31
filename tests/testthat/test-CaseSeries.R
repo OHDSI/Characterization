@@ -15,10 +15,12 @@ test_that("createCaseSeriesSettings", {
     )
 
   res <- createCaseSeriesSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds,
+      limitToFirstInNDays = 9,
+      minPriorObservation = 10
+    ),
     outcomeIds = outcomeIds,
-    limitToFirstInNDays = 9,
-    minPriorObservation = 10,
     outcomeWashoutDays = 365,
     riskWindowStart = 1,
     startAnchor = 'cohort start',
@@ -30,7 +32,7 @@ test_that("createCaseSeriesSettings", {
   )
 
   testthat::expect_equal(
-    res$targetIds,
+    res$studyPopulationSettings$targetId,
     targetIds
   )
   testthat::expect_equal(
@@ -39,12 +41,12 @@ test_that("createCaseSeriesSettings", {
   )
 
   testthat::expect_equal(
-    res$minPriorObservation,
+    unique(res$studyPopulationSettings$minPriorObservation),
     10
   )
 
   testthat::expect_equal(
-    res$limitToFirstInNDays,
+    unique(res$studyPopulationSettings$limitToFirstInNDays),
     9
   )
 
@@ -91,10 +93,12 @@ test_that("error when using temporal features - risk factors", {
 
   testthat::expect_error(
     res <- createCaseSeriesSettings(
-      targetIds = targetIds,
+      studyPopulationSettings = createStudyPopulationSettings(
+        targetIds = targetIds,
+        limitToFirstInNDays = 9,
+        minPriorObservation = 10
+      ),
       outcomeIds = outcomeIds,
-      limitToFirstInNDays = 9,
-      minPriorObservation = 10,
       outcomeWashoutDays = 365,
       riskWindowStart = 1,
       startAnchor = 'cohort start',
@@ -111,10 +115,12 @@ test_that("error when using temporal features - risk factors", {
 
   testthat::expect_error(
     res <- createCaseSeriesSettings(
-      targetIds = targetIds,
+      studyPopulationSettings = createStudyPopulationSettings(
+        targetIds = targetIds,
+        limitToFirstInNDays = 9,
+        minPriorObservation = 10
+      ),
       outcomeIds = outcomeIds,
-      limitToFirstInNDays = 9,
-      minPriorObservation = 10,
       outcomeWashoutDays = 365,
       riskWindowStart = 1,
       startAnchor = 'cohort start',
@@ -137,10 +143,12 @@ test_that("createCaseSeriesSettings covariateList", {
   covariateSettings <- list(covariateSettings1, covariateSettings2)
 
   res <- createCaseSeriesSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds,
+      limitToFirstInNDays = 9,
+      minPriorObservation = 10
+    ),
     outcomeIds = outcomeIds,
-    limitToFirstInNDays = 9,
-    minPriorObservation = 10,
     outcomeWashoutDays = 365,
     riskWindowStart = 1,
     startAnchor = 'cohort start',
@@ -150,7 +158,7 @@ test_that("createCaseSeriesSettings covariateList", {
   )
 
   testthat::expect_equal(
-    res$targetIds,
+    res$studyPopulationSettings$targetId,
     targetIds
   )
   testthat::expect_equal(
@@ -172,10 +180,12 @@ test_that("getCaseSeriesJobs", {
   limitToFirstInNDays <- sample(300, 1)
 
   res <- createCaseSeriesSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds,
+      minPriorObservation = minPriorObservation,
+      limitToFirstInNDays = limitToFirstInNDays
+    ),
     outcomeIds = outcomeIds,
-    minPriorObservation = minPriorObservation,
-    limitToFirstInNDays = limitToFirstInNDays,
     outcomeWashoutDays = 365,
     riskWindowStart = 1,
     startAnchor = 'cohort start',
@@ -216,18 +226,28 @@ test_that("getCaseSeriesJobs", {
   testthat::expect_true(nrow(jobDf) == 2)
 
   # now check nTargetJobs = 3
+  charSettings <- createCharacterizationSettings(
+    caseSeriesSettings = res
+  )
   jobDf <-  getCaseSeriesJobs(
-    characterizationSettings = createCharacterizationSettings(
-      caseSeriesSettings = res
-    ),
+    characterizationSettings = charSettings,
     nTargetJobs = 3
   )
   testthat::expect_true(nrow(jobDf) == 3)
 
   # check the target ids
-  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[1])$targetIds == targetIds[1])
-  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[2])$targetIds == targetIds[2])
-  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[3])$targetIds == targetIds[3])
+  tId1 <- charSettings$characterizationTargetLookup$characterizationTargetId[
+    charSettings$characterizationTargetLookup$targetId == res$studyPopulationSettings$targetId[1]
+  ]
+  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[1])$characterizationTargetIds == tId1)
+  tId2 <- charSettings$characterizationTargetLookup$characterizationTargetId[
+    charSettings$characterizationTargetLookup$targetId == res$studyPopulationSettings$targetId[2]
+  ]
+  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[2])$characterizationTargetIds == tId2)
+  tId3 <- charSettings$characterizationTargetLookup$characterizationTargetId[
+    charSettings$characterizationTargetLookup$targetId == res$studyPopulationSettings$targetId[3]
+  ]
+  testthat::expect_true(ParallelLogger::convertJsonToSettings(jobDf$settings[3])$characterizationTargetIds == tId3)
 
   # now check nTargetJobs = 4
   jobDf <-  getCaseSeriesJobs(
@@ -250,6 +270,8 @@ test_that("getCaseSeriesJobs", {
 })
 
 test_that("computeCaseSeriesAnalyses", {
+  skipIfCreateTargetCohortSqlUnavailable()
+
   targetIds <- c(1, 2, 4)
   outcomeIds <- c(3)
   covariateSettings <- createDuringCovariateSettings(
@@ -258,10 +280,12 @@ test_that("computeCaseSeriesAnalyses", {
   )
 
   res <- createCaseSeriesSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds,
+      limitToFirstInNDays = 365,
+      minPriorObservation = 30
+    ),
     outcomeIds = outcomeIds,
-    limitToFirstInNDays = 365,
-    minPriorObservation = 30,
     outcomeWashoutDays = 365,
     riskWindowStart = 1,
     startAnchor = 'cohort start',
@@ -312,6 +336,8 @@ test_that("computeCaseSeriesAnalyses", {
     characterizationTable = tables$characterizationTable, # contains char cohorts
     targetSettingsTable = tables$targetSettingsTable, # contains map between settings and char cohort id
     caseSettingsTable = tables$caseSettingsTable,
+    caseCountTable = tables$caseCountTable,
+    minCaseSize = 0,
     tempEmulationSchema = 'main',
     settings = ParallelLogger::convertJsonToSettings(jobDf$settings[1]),
     databaseId = "madeup",
@@ -376,14 +402,18 @@ test_that("computeCaseSeriesAnalyses", {
 
 # testing case series include/exclude covs
 test_that("testing during covs", {
+skipIfCreateTargetCohortSqlUnavailable()
+
 targetIds <- c(1, 2, 4)
 outcomeIds <- c(3)
 
 res <- createCaseSeriesSettings(
-  targetIds = targetIds,
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = targetIds,
+    limitToFirstInNDays = 365,
+    minPriorObservation = 30
+  ),
   outcomeIds = outcomeIds,
-  limitToFirstInNDays = 365,
-  minPriorObservation = 30,
   outcomeWashoutDays = 365,
   riskWindowStart = 1,
   startAnchor = 'cohort start',
@@ -427,7 +457,7 @@ data1 <- FeatureExtraction::getDbCovariateData(
   cohortTable = 'char_cohort_set1_db1',
   cohortDatabaseSchema = "main",
   cohortIds = c(10,20,40), # the targets
-  rowIdField = 'row_number',
+  rowIdField = 'row_id',
   exportToTable = FALSE,
   aggregated = TRUE,
   minCharacterizationMean = 0.01,
@@ -453,7 +483,7 @@ data2 <- FeatureExtraction::getDbCovariateData(
   cohortTable = 'char_cohort_set1_db1',
   cohortDatabaseSchema = "main",
   cohortIds = c(10,20,40), # the targets
-  rowIdField = 'row_number',
+  rowIdField = 'row_id',
   exportToTable = FALSE,
   aggregated = TRUE,
   minCharacterizationMean = 0.01,
@@ -476,7 +506,7 @@ data3 <- FeatureExtraction::getDbCovariateData(
   cohortTable = 'char_cohort_set1_db1',
   cohortDatabaseSchema = "main",
   cohortIds = c(10,20,40), # the targets
-  rowIdField = 'row_number',
+  rowIdField = 'row_id',
   exportToTable = FALSE,
   aggregated = TRUE,
   minCharacterizationMean = 0.01,
