@@ -20,11 +20,6 @@ occurrances of a dechallenge (when the T cohort stops close to when O
 started) and a rechallenge (when T restarts and O starts again) This is
 useful for investigating causality between drugs and events.
 
-- [`computeDechallengeRechallengeAnalyses()`](computeDechallengeRechallengeAnalyses.md)
-  : Compute dechallenge rechallenge study
-- [`computeRechallengeFailCaseSeriesAnalyses()`](computeRechallengeFailCaseSeriesAnalyses.md)
-  : Compute fine the subjects that fail the dechallenge rechallenge
-  study
 - [`createDechallengeRechallengeSettings()`](createDechallengeRechallengeSettings.md)
   : Create dechallenge rechallenge study settings
 
@@ -33,8 +28,6 @@ useful for investigating causality between drugs and events.
 This analysis calculates the timing between the Target cohort (T) and an
 Outcome cohort (O).
 
-- [`computeTimeToEventAnalyses()`](computeTimeToEventAnalyses.md) :
-  Compute time to event study
 - [`createTimeToEventSettings()`](createTimeToEventSettings.md) : Create
   time to event study settings
 
@@ -101,6 +94,8 @@ Code to run incremetal model
 
 Helper functions such as example data for users
 
+- [`createStudyPopulationSettings()`](createStudyPopulationSettings.md)
+  : create the study population settings
 - [`exampleOmopConnectionDetails()`](exampleOmopConnectionDetails.md) :
   create a connection detail for an example GI Bleed dataset from
   Eunomia

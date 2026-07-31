@@ -6,10 +6,8 @@ Create risk factor study settings
 
 ``` r
 createRiskFactorSettings(
-  targetIds,
+  studyPopulationSettings,
   outcomeIds,
-  limitToFirstInNDays = 99999,
-  minPriorObservation = 0,
   outcomeWashoutDays = 0,
   riskWindowStart = 1,
   startAnchor = "cohort start",
@@ -29,36 +27,26 @@ createRiskFactorSettings(
     useProcedureOccurrenceShortTerm = TRUE, useMeasurementShortTerm = TRUE,
     useObservationShortTerm = TRUE, useDeviceExposureShortTerm = TRUE,
     useVisitConceptCountShortTerm = TRUE, endDays = 0, longTermStartDays = -365,
-    shortTermStartDays = -30),
-  minTargetSize = 0,
-  minTwithOSize = 0
+    shortTermStartDays = -30)
 )
 ```
 
 ## Arguments
 
-- targetIds:
+- studyPopulationSettings:
 
-  A list of cohortIds for the target cohorts
+  A list of objects created using `createStudyPopulationSettings` that
+  specifies target cohorts and inclusion criteria
 
 - outcomeIds:
 
   A list of cohortIds for the outcome cohorts
 
-- limitToFirstInNDays:
-
-  whether to limit each target cohort to the first entry into the cohort
-  per N days per subject
-
-- minPriorObservation:
-
-  The minimum time (in days) in the database a patient in the target
-  cohorts must be observed prior to index
-
 - outcomeWashoutDays:
 
-  Patients with the outcome within outcomeWashout days prior to index
-  are excluded from the risk factor analysis
+  A single integer value. Patients with the outcome within
+  outcomeWashout days prior to index are excluded from the risk factor
+  analysis
 
 - riskWindowStart:
 
@@ -84,17 +72,6 @@ createRiskFactorSettings(
   An object created using
   [`FeatureExtraction::createCovariateSettings`](https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html)
 
-- minTargetSize:
-
-  The minimum size of the target cohorts for them to have aggregate
-  covariates calculated
-
-- minTwithOSize:
-
-  The minimum size of the cohorts corresponding to patients in the
-  target with the outcome during time-at-risk for them to have aggregate
-  covariates calculated
-
 ## Value
 
 A list with the settings
@@ -110,9 +87,12 @@ Other Aggregate:
 ``` r
 
 riskFactorSetting <- createRiskFactorSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    minPriorObservation = 365,
+    limitToFirstInNDays = 99999
+  ),
   outcomeIds = c(3),
-  minPriorObservation = 365,
   outcomeWashoutDays = 90,
   riskWindowStart = 1,
   startAnchor = "cohort start",

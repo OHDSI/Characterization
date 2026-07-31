@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Characterization</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">3.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">4.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,7 +104,11 @@
 <span class="r-in"><span><span class="co">#conDet &lt;- exampleOmopConnectionDetails()</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#tteSet &lt;- createTimeToEventSettings(</span></span></span>
-<span class="r-in"><span><span class="co">#targetIds = c(1,2),</span></span></span>
+<span class="r-in"><span><span class="co">#  studyPopulationSettings = createStudyPopulationSettings(</span></span></span>
+<span class="r-in"><span><span class="co">#    targetIds = c(1,2),</span></span></span>
+<span class="r-in"><span><span class="co">#    limitToFirstInNDays = 0,</span></span></span>
+<span class="r-in"><span><span class="co">#    minPriorObservation = 0</span></span></span>
+<span class="r-in"><span><span class="co">#    ),</span></span></span>
 <span class="r-in"><span><span class="co">#  outcomeIds = 3</span></span></span>
 <span class="r-in"><span><span class="co">#  )</span></span></span>
 <span class="r-in"><span></span></span>

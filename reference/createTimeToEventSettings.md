@@ -5,14 +5,16 @@ Create time to event study settings
 ## Usage
 
 ``` r
-createTimeToEventSettings(targetIds, outcomeIds)
+createTimeToEventSettings(studyPopulationSettings, outcomeIds)
 ```
 
 ## Arguments
 
-- targetIds:
+- studyPopulationSettings:
 
-  A list of cohortIds for the target cohorts
+  An object created using `createStudyPopulationSettings` or a list of
+  `createStudyPopulationSettings` that specifies cohort inclusion
+  criteria
 
 - outcomeIds:
 
@@ -22,18 +24,17 @@ createTimeToEventSettings(targetIds, outcomeIds)
 
 An list with the time to event settings
 
-## See also
-
-Other TimeToEvent:
-[`computeTimeToEventAnalyses()`](computeTimeToEventAnalyses.md)
-
 ## Examples
 
 ``` r
 # example code
 
 tteSet <- createTimeToEventSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 

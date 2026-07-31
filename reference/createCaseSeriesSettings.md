@@ -6,10 +6,8 @@ Create aggregate covariate study settings
 
 ``` r
 createCaseSeriesSettings(
-  targetIds,
+  studyPopulationSettings,
   outcomeIds,
-  limitToFirstInNDays = 99999,
-  minPriorObservation = 0,
   outcomeWashoutDays = 0,
   riskWindowStart = 1,
   startAnchor = "cohort start",
@@ -26,28 +24,20 @@ createCaseSeriesSettings(
 
 ## Arguments
 
-- targetIds:
+- studyPopulationSettings:
 
-  A list of cohortIds for the target cohorts
+  A List of object created using `createStudyPopulationSettings` that
+  specifies target cohorts and inclusion criteria
 
 - outcomeIds:
 
   A list of cohortIds for the outcome cohorts
 
-- limitToFirstInNDays:
-
-  whether to limit each target cohort to the first entry into the cohort
-  per N days per subject
-
-- minPriorObservation:
-
-  The minimum time (in days) in the database a patient in the target
-  cohorts must be observed prior to index
-
 - outcomeWashoutDays:
 
-  Patients with the outcome within outcomeWashout days prior to index
-  are excluded from the risk factor analysis
+  A single integer value. Patients with the outcome within
+  outcomeWashout days prior to index are excluded from the risk factor
+  analysis
 
 - riskWindowStart:
 
@@ -74,11 +64,13 @@ createCaseSeriesSettings(
 
 - casePreTargetDuration:
 
-  The number of days prior to case index we use for FeatureExtraction
+  A single integer value. The number of days prior to case index we use
+  for FeatureExtraction
 
 - casePostOutcomeDuration:
 
-  The number of days prior to case index we use for FeatureExtraction
+  A single integer value. The number of days prior to case index we use
+  for FeatureExtraction
 
 ## Value
 
@@ -95,10 +87,12 @@ Other Aggregate:
 ``` r
 
 caseSeriesSetting <- createCaseSeriesSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    minPriorObservation = 365,
+    limitToFirstInNDays = 365
+  ),
   outcomeIds = c(3),
-  limitToFirstInNDays = 365,
-  minPriorObservation = 365,
   outcomeWashoutDays = 90,
   riskWindowStart = 1,
   startAnchor = "cohort start",

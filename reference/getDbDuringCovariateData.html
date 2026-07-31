@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Characterization</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">3.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">4.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -189,14 +189,22 @@ it is a temp table, do not specify <code>targetDatabaseSchema</code>.</p></dd>
 <span class="r-in"><span>  cohortTable <span class="op">=</span> <span class="st">'cohort'</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Constructing during cohort covariates</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00379 secs</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00333 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00525 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.00311 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> duckdb keeps downloaded extensions and secrets in a temporary directory:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">ℹ</span> /tmp/RtmpbSCf3c/duckdb</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> This is removed when the R session ends.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Secrets are lost.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Executing during sql code for ConditionOccurrenceDuring</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.0196 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Executing SQL took 0.0177 secs</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Execution took 0.02 secs</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Extracting covariates</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Downloading covariates</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Extracting covariates took 0.22 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Extracting covariates took 0.24 secs</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Removing temp covariate tables</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">DatabaseConnector</span><span class="fu">::</span><span class="fu"><a href="https://ohdsi.github.io/DatabaseConnector/reference/disconnect.html" class="external-link">disconnect</a></span><span class="op">(</span><span class="va">connection</span><span class="op">)</span></span></span>

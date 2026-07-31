@@ -6,9 +6,7 @@ Create target baseline aggregate covariate study settings
 
 ``` r
 createTargetBaselineSettings(
-  targetIds,
-  limitToFirstInNDays = 99999,
-  minPriorObservation = 0,
+  studyPopulationSettings,
   covariateSettings = FeatureExtraction::createCovariateSettings(useDemographicsGender =
     TRUE, useDemographicsAge = TRUE, useDemographicsAgeGroup = TRUE, useDemographicsRace
     = TRUE, useDemographicsEthnicity = TRUE, useDemographicsIndexYear = TRUE,
@@ -29,20 +27,11 @@ createTargetBaselineSettings(
 
 ## Arguments
 
-- targetIds:
+- studyPopulationSettings:
 
-  A list of cohortIds for the target cohorts
-
-- limitToFirstInNDays:
-
-  Whether to remove target cohort entries that occur within
-  limitToFirstInNDays of a prior entry. limitToFirstInNDays = 99999
-  means limit to first entry.
-
-- minPriorObservation:
-
-  The minimum time (in days) in the database a patient in the target
-  cohorts must be observed prior to index
+  An object created using `createStudyPopulationSettings` or a list of
+  `createStudyPopulationSettings` that specifies specific populations of
+  interest
 
 - covariateSettings:
 
@@ -64,8 +53,10 @@ Other Aggregate:
 ``` r
 
 aggregateSetting <- createTargetBaselineSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+  targetIds = 1:2,
   limitToFirstInNDays = 99999,
   minPriorObservation = 365
+  )
 )
 ```

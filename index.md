@@ -35,24 +35,32 @@ connectionDetails <- Characterization::exampleOmopConnectionDetails()
 targetIds <- c(1,2,4)
   outcomeIds <- c(3)
 
-  timeToEventSettings1 <- createTimeToEventSettings(
-    targetIds = 1,
-    outcomeIds = c(3,4)
-  )
-  timeToEventSettings2 <- createTimeToEventSettings(
-    targetIds = 2,
+  timeToEventSettings <- createTimeToEventSettings(
+    studyPopulationSettings = createStudyPopulationSettings(
+     targetIds = c(1,2),
+     limitToFirstInNDays = 0,
+     minPriorObservation = 0
+     ),
     outcomeIds = c(3,4)
   )
 
   dechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+     targetIds = c(1,2),
+     limitToFirstInNDays = 0,
+     minPriorObservation = 0
+     ),
     outcomeIds = outcomeIds,
     dechallengeStopInterval = 30,
     dechallengeEvaluationWindow = 31
   )
 
   riskFactorSettings1 <- createRiskFactorSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds,
+      limitToFirstInNDays = 99999, # first exposure
+      minPriorObservation = 365 # requiring 365 days prior obs
+     ),
     outcomeIds = outcomeIds,
     riskWindowStart = 1,
     startAnchor = 'cohort start',
@@ -66,7 +74,11 @@ targetIds <- c(1,2,4)
   )
 
   riskFactorSettings2 <- createRiskFactorSettings(
-    targetIds = targetIds,
+    studyPopulationSettings = createStudyPopulationSettings(
+      targetIds = targetIds,
+      limitToFirstInNDays = 99999, # first exposure
+      minPriorObservation = 365 # requiring 365 days prior obs
+     ),
     outcomeIds = outcomeIds,
     riskWindowStart = 1,
     startAnchor = 'cohort start',
@@ -79,8 +91,7 @@ targetIds <- c(1,2,4)
 
   characterizationSettings <- createCharacterizationSettings(
     timeToEventSettings = list(
-      timeToEventSettings1,
-      timeToEventSettings2
+      timeToEventSettings
       ),
     dechallengeRechallengeSettings = list(
       dechallengeRechallengeSettings
@@ -129,6 +140,10 @@ require Java.
 
 ``` r
 
+# CRAN
+install.packages('Characterization')
+
+# GitHub
 install.packages("remotes")
 remotes::install_github("ohdsi/Characterization")
 ```

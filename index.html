@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">Characterization</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">3.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">4.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,24 +87,32 @@
 <span><span class="va">targetIds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span>,<span class="fl">4</span><span class="op">)</span></span>
 <span>  <span class="va">outcomeIds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="va">timeToEventSettings1</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/createTimeToEventSettings.html">createTimeToEventSettings</a></span><span class="op">(</span></span>
-<span>    targetIds <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>    outcomeIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">4</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span>  <span class="va">timeToEventSettings2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/createTimeToEventSettings.html">createTimeToEventSettings</a></span><span class="op">(</span></span>
-<span>    targetIds <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  <span class="va">timeToEventSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/createTimeToEventSettings.html">createTimeToEventSettings</a></span><span class="op">(</span></span>
+<span>    studyPopulationSettings <span class="op">=</span> <span class="fu"><a href="reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>     targetIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
+<span>     limitToFirstInNDays <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>     minPriorObservation <span class="op">=</span> <span class="fl">0</span></span>
+<span>     <span class="op">)</span>,</span>
 <span>    outcomeIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">4</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">dechallengeRechallengeSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/createDechallengeRechallengeSettings.html">createDechallengeRechallengeSettings</a></span><span class="op">(</span></span>
-<span>    targetIds <span class="op">=</span> <span class="va">targetIds</span>,</span>
+<span>    studyPopulationSettings <span class="op">=</span> <span class="fu"><a href="reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>     targetIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>,</span>
+<span>     limitToFirstInNDays <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>     minPriorObservation <span class="op">=</span> <span class="fl">0</span></span>
+<span>     <span class="op">)</span>,</span>
 <span>    outcomeIds <span class="op">=</span> <span class="va">outcomeIds</span>,</span>
 <span>    dechallengeStopInterval <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>    dechallengeEvaluationWindow <span class="op">=</span> <span class="fl">31</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">riskFactorSettings1</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/createRiskFactorSettings.html">createRiskFactorSettings</a></span><span class="op">(</span></span>
-<span>    targetIds <span class="op">=</span> <span class="va">targetIds</span>,</span>
+<span>    studyPopulationSettings <span class="op">=</span> <span class="fu"><a href="reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>      targetIds <span class="op">=</span> <span class="va">targetIds</span>,</span>
+<span>      limitToFirstInNDays <span class="op">=</span> <span class="fl">99999</span>, <span class="co"># first exposure</span></span>
+<span>      minPriorObservation <span class="op">=</span> <span class="fl">365</span> <span class="co"># requiring 365 days prior obs</span></span>
+<span>     <span class="op">)</span>,</span>
 <span>    outcomeIds <span class="op">=</span> <span class="va">outcomeIds</span>,</span>
 <span>    riskWindowStart <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>    startAnchor <span class="op">=</span> <span class="st">'cohort start'</span>,</span>
@@ -118,7 +126,11 @@
 <span>  <span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">riskFactorSettings2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/createRiskFactorSettings.html">createRiskFactorSettings</a></span><span class="op">(</span></span>
-<span>    targetIds <span class="op">=</span> <span class="va">targetIds</span>,</span>
+<span>    studyPopulationSettings <span class="op">=</span> <span class="fu"><a href="reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>      targetIds <span class="op">=</span> <span class="va">targetIds</span>,</span>
+<span>      limitToFirstInNDays <span class="op">=</span> <span class="fl">99999</span>, <span class="co"># first exposure</span></span>
+<span>      minPriorObservation <span class="op">=</span> <span class="fl">365</span> <span class="co"># requiring 365 days prior obs</span></span>
+<span>     <span class="op">)</span>,</span>
 <span>    outcomeIds <span class="op">=</span> <span class="va">outcomeIds</span>,</span>
 <span>    riskWindowStart <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>    startAnchor <span class="op">=</span> <span class="st">'cohort start'</span>,</span>
@@ -131,8 +143,7 @@
 <span></span>
 <span>  <span class="va">characterizationSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/createCharacterizationSettings.html">createCharacterizationSettings</a></span><span class="op">(</span></span>
 <span>    timeToEventSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      <span class="va">timeToEventSettings1</span>,</span>
-<span>      <span class="va">timeToEventSettings2</span></span>
+<span>      <span class="va">timeToEventSettings</span></span>
 <span>      <span class="op">)</span>,</span>
 <span>    dechallengeRechallengeSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>      <span class="va">dechallengeRechallengeSettings</span></span>
@@ -178,7 +189,11 @@
 <li><p>In R, use the following commands to download and install Characterization:</p></li>
 </ol>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># CRAN</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'Characterization'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># GitHub</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"ohdsi/Characterization"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level1">

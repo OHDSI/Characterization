@@ -4,7 +4,8 @@
 
 ### Inputs
 
-A vector of targetIds and a vector of outcomeIds
+A studyPopulationSettings object (containing targetIds and any target
+population restrictions) and a vector of outcomeIds.
 
 ### Output
 
@@ -159,7 +160,8 @@ Table 4: Time-to-event output. {.table}
 
 ### Inputs
 
-A vector of targetIds, a vector of outcomeIds, an integer
+A studyPopulationSettings object (containing targetIds and any target
+population restrictions), a vector of outcomeIds, an integer
 dechallengeStopInterval and an integer dechallengeEvaluationWindow.
 
 ### Output
@@ -305,9 +307,10 @@ the dechallenge outcome, which is impossible with a 365 washout window.
 
 ### Inputs
 
-A vector of targetIds plus the minimum prior observation required for
-the target cohorts and minimum time before target exposures and
-specifying which features to extract (covariateSettings).
+A studyPopulationSettings object (containing targetIds plus target
+population restrictions such as minimum prior observation and
+first-exposure limits) and covariateSettings specifying which features
+to extract.
 
 ### Outputs
 
@@ -340,9 +343,11 @@ covariateSettings <- FeatureExtraction::createCovariateSettings(
   )
 
 targetSettings <- Characterization::createTargetBaselineSettings(
-  targetIds = c(1,2), 
-  limitToFirstInNDays = limitToFirstInNDays, 
-  minPriorObservation = minPriorObservation, 
+  studyPopulationSettings = Characterization::createStudyPopulationSettings(
+    targetIds = c(1,2), 
+    limitToFirstInNDays = limitToFirstInNDays, 
+    minPriorObservation = minPriorObservation
+  ),
   covariateSettings = covariateSettings
     )
 ```
@@ -414,10 +419,9 @@ squared)/2).
 
 ### Inputs
 
-A vector of targetIds and outcomeIds plus the minimum prior observation
-required for the target cohorts, the outcome washout days for the
-outcomes, settings for the time-at-risk and covariate settings
-specifying which features to extract.
+A studyPopulationSettings object (containing targetIds plus target
+population restrictions), outcomeIds, outcome washout days, time-at-risk
+settings, and covariate settings specifying which features to extract.
 
 ### Outputs
 
@@ -456,10 +460,12 @@ covariateSettings <- FeatureExtraction::createCovariateSettings(
   )
 
 rfSettings <- Characterization::createRiskFactorSettings(
-  targetIds = targetId, 
+  studyPopulationSettings = Characterization::createStudyPopulationSettings(
+    targetIds = targetId, 
+    limitToFirstInNDays = limitToFirstInNDays, 
+    minPriorObservation = minPriorObservation
+  ),
   outcomeIds = outcomeId, 
-  limitToFirstInNDays = limitToFirstInNDays, 
-  minPriorObservation = minPriorObservation, 
   outcomeWashoutDays = outcomeWashoutDays, 
   riskWindowStart = riskWindowStart, 
   startAnchor = startAnchor, 
@@ -580,10 +586,9 @@ between target index and outcome index and shortly after outcome index.
 
 ### Inputs
 
-A vector of targetIds and outcomeIds plus the minimum prior observation
-required for the target cohorts, the outcome washout days for the
-outcomes, settings for the time-at-risk and covariate settings
-specifying which features to extract.
+A studyPopulationSettings object (containing targetIds plus target
+population restrictions), outcomeIds, outcome washout days, time-at-risk
+settings, and covariate settings specifying which features to extract.
 
 In addition you need to specify how long before target index to extract
 before index features (preTargetIndexDays) and how long after outcome
@@ -632,10 +637,12 @@ caseCovariateSettings <- Characterization::createDuringCovariateSettings(
   )
 
 caseSeriesSettings <- Characterization::createCaseSeriesSettings(
-  targetIds = targetId, 
+  studyPopulationSettings = Characterization::createStudyPopulationSettings(
+    targetIds = targetId, 
+    limitToFirstInNDays = limitToFirstInNDays, 
+    minPriorObservation = minPriorObservation
+  ),
   outcomeIds = outcomeId, 
-  limitToFirstInNDays = limitToFirstInNDays, 
-  minPriorObservation = minPriorObservation, 
   outcomeWashoutDays = outcomeWashoutDays, 
   riskWindowStart = riskWindowStart, 
   startAnchor = startAnchor, 

@@ -27,6 +27,11 @@ Finds the location of the example database in the package and calls
 \`DatabaseConnector::createConnectionDetails\` to create a
 \`ConnectionDetails\` object for connecting to the database.
 
+## See also
+
+Other helper:
+[`createStudyPopulationSettings()`](createStudyPopulationSettings.md)
+
 ## Examples
 
 ``` r

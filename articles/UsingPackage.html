@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Characterization</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">3.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">4.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,7 @@
       <h1>Using Characterization Package</h1>
                         <h4 data-toc-skip class="author">Jenna Reps</h4>
             
-            <h4 data-toc-skip class="date">2026-07-10</h4>
+            <h4 data-toc-skip class="date">2026-07-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/develop/vignettes/UsingPackage.Rmd" class="external-link"><code>vignettes/UsingPackage.Rmd</code></a></small>
       <div class="d-none name"><code>UsingPackage.Rmd</code></div>
@@ -113,7 +113,7 @@ comes after.</li>
 <p>First we need to install the <code>Characterization</code>
 package:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"ohdsi/Characterization"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"Characterization"</span><span class="op">)</span></span></code></pre></div>
 <p>and then load it:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ohdsi.github.io/Characterization/" class="external-link">Characterization</a></span><span class="op">)</span></span>
@@ -145,13 +145,9 @@ location.</p>
 setting object using <code>createTargetBaselineSettings</code>. This
 requires specifying:</p>
 <ul>
-<li>one or more targetIds (these must be pre-generated in a cohort
-table)</li>
-<li>a limitToFirstInNDays that removes target exposures that occur
-within this number of days of a prior exposure. Use 99999 to restrict to
-first target exposure.</li>
-<li>a minPriorObservation that specifies the minimum number of days in
-the database a person needs to have at target index to be included.</li>
+<li>studyPopulationSettings created using
+<code>createStudyPopulationSettings</code> to define targetIds and
+population restrictions.</li>
 <li>the covariate settings using
 <code><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">FeatureExtraction::createCovariateSettings</a></code> or by creating
 your own custom feature extraction code.</li>
@@ -174,9 +170,11 @@ restricted to the first ever target index and those where the patient
 was observed for 365 days or more prior to index, we can run:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exampleTargetBaselineSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createTargetBaselineSettings.html">createTargetBaselineSettings</a></span><span class="op">(</span></span>
-<span>  targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
-<span>  limitToFirstInNDays <span class="op">=</span> <span class="fl">99999</span>,</span>
-<span>  minPriorObservation <span class="op">=</span> <span class="fl">365</span>,</span>
+<span>  studyPopulationSettings <span class="op">=</span> <span class="fu"><a href="../reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>    targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
+<span>    limitToFirstInNDays <span class="op">=</span> <span class="fl">99999</span>,</span>
+<span>    minPriorObservation <span class="op">=</span> <span class="fl">365</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  covariateSettings <span class="op">=</span> <span class="va">exampleCovariateSettings</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Next we need to use the <code>exampleTargetBaselineSettings</code> as
@@ -222,15 +220,11 @@ will find csv files.</p>
 setting object using <code>createRiskFactorSettings</code>. This
 requires specifying:</p>
 <ul>
-<li>one or more targetIds (these must be pre-generated in a cohort
-table)</li>
+<li>studyPopulationSettings created using
+<code>createStudyPopulationSettings</code> to define targetIds and
+population restrictions.</li>
 <li>one or more outcomeIds (these must be pre-generated in a cohort
 table)</li>
-<li>a limitToFirstInNDays that removes target exposures that occur
-within this number of days of a prior exposure. Use 99999 to restrict to
-first target exposure.</li>
-<li>a minPriorObservation that specifies the minimum number of days in
-the database a person needs to have at target index to be included.</li>
 <li>the covariate settings using
 <code><a href="https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html" class="external-link">FeatureExtraction::createCovariateSettings</a></code> or by creating
 your own custom feature extraction code.</li>
@@ -264,13 +258,15 @@ in the past 9999 days) and only include targets where the patient was
 observed for 365 days or more prior, we can run:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exampleRiskFactorSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createRiskFactorSettings.html">createRiskFactorSettings</a></span><span class="op">(</span></span>
-<span>  targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
+<span>  studyPopulationSettings <span class="op">=</span> <span class="fu"><a href="../reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>    targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
+<span>    limitToFirstInNDays <span class="op">=</span> <span class="fl">99999</span>, <span class="co"># limit to first target exposure</span></span>
+<span>    minPriorObservation <span class="op">=</span> <span class="fl">365</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span>,</span>
-<span>  limitToFirstInNDays <span class="op">=</span> <span class="fl">99999</span>, <span class="co"># limit to first target exposure</span></span>
 <span>  riskWindowStart <span class="op">=</span> <span class="fl">1</span>, startAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
 <span>  riskWindowEnd <span class="op">=</span> <span class="fl">365</span>, endAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
 <span>  outcomeWashoutDays <span class="op">=</span> <span class="fl">9999</span>,</span>
-<span>  minPriorObservation <span class="op">=</span> <span class="fl">365</span>,</span>
 <span>  covariateSettings <span class="op">=</span> <span class="va">exampleCovariateSettings</span> </span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Next we need to use the <code>exampleRiskFactorSettings</code> as the
@@ -330,15 +326,11 @@ will find csv files.</p>
 setting object using <code>createCaseSeriesSettings</code>. This
 requires specifying:</p>
 <ul>
-<li>one or more targetIds (these must be pre-generated in a cohort
-table)</li>
+<li>studyPopulationSettings created using
+<code>createStudyPopulationSettings</code> to define targetIds and
+population restrictions.</li>
 <li>one or more outcomeIds (these must be pre-generated in a cohort
 table)</li>
-<li>a limitToFirstInNDays that removes target exposures that occur
-within this number of days of a prior exposure. Use 99999 to restrict to
-first target exposure.</li>
-<li>a minPriorObservation that specifies the minimum number of days in
-the database a person needs to have at target index to be included.</li>
 <li>the case covariate settings using
 <code><a href="../reference/createDuringCovariateSettings.html">Characterization::createDuringCovariateSettings</a></code> or by
 creating your own custom feature extraction code.</li>
@@ -375,13 +367,15 @@ target index and outcome (answers the question what happens during
 target exposure).</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exampleCaseSeriesSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCaseSeriesSettings.html">createCaseSeriesSettings</a></span><span class="op">(</span></span>
-<span>  targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
+<span>  studyPopulationSettings <span class="op">=</span> <span class="fu"><a href="../reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>    targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
+<span>    limitToFirstInNDays <span class="op">=</span> <span class="fl">99999</span>, <span class="co"># limit to first target index</span></span>
+<span>    minPriorObservation <span class="op">=</span> <span class="fl">365</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span>,</span>
-<span>  limitToFirstInNDays <span class="op">=</span> <span class="fl">99999</span>, <span class="co"># limit to first target index</span></span>
 <span>  riskWindowStart <span class="op">=</span> <span class="fl">1</span>, startAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
 <span>  riskWindowEnd <span class="op">=</span> <span class="fl">365</span>, endAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
 <span>  outcomeWashoutDays <span class="op">=</span> <span class="fl">9999</span>,</span>
-<span>  minPriorObservation <span class="op">=</span> <span class="fl">365</span>,</span>
 <span>  caseCovariateSettings <span class="op">=</span> <span class="va">exampleCaseCovariateSettings</span>,</span>
 <span>  casePreTargetDuration <span class="op">=</span> <span class="fl">90</span>,</span>
 <span>  casePostOutcomeDuration <span class="op">=</span> <span class="fl">90</span></span>
@@ -430,8 +424,9 @@ will find csv files.</p>
 setting object using <code>createDechallengeRechallengeSettings</code>.
 This requires specifying:</p>
 <ul>
-<li>one or more targetIds (these must be pre-generated in a cohort
-table)</li>
+<li>studyPopulationSettings created using
+<code>createStudyPopulationSettings</code> to define targetIds and
+population restrictions.</li>
 <li>one or more outcomeIds (these must be pre-generated in a cohort
 table)</li>
 <li>dechallengeStopInterval</li>
@@ -448,7 +443,9 @@ cohorts and our outcome cohort with a 30 day dechallengeStopInterval and
 31 day dechallengeEvaluationWindow:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exampleDechallengeRechallengeSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createDechallengeRechallengeSettings.html">createDechallengeRechallengeSettings</a></span><span class="op">(</span></span>
-<span>  targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
+<span>  studyPopulationSettings <span class="op">=</span> <span class="fu"><a href="../reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>    targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span>,</span>
 <span>  dechallengeStopInterval <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  dechallengeEvaluationWindow <span class="op">=</span> <span class="fl">31</span></span>
@@ -458,7 +455,7 @@ cohorts and our outcome cohort with a 30 day dechallengeStopInterval and
 previously specified, with <code>minCellCount</code> removing values
 less than the specified value:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeDechallengeRechallengeAnalyses.html">computeDechallengeRechallengeAnalyses</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">dc</span> <span class="op">&lt;-</span> <span class="fu">computeDechallengeRechallengeAnalyses</span><span class="op">(</span></span>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
 <span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
 <span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
@@ -469,7 +466,7 @@ less than the specified value:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Next it is possible to compute the failed rechallenge cases</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">failed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeRechallengeFailCaseSeriesAnalyses.html">computeRechallengeFailCaseSeriesAnalyses</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">failed</span> <span class="op">&lt;-</span> <span class="fu">computeRechallengeFailCaseSeriesAnalyses</span><span class="op">(</span></span>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
 <span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
 <span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
@@ -488,21 +485,24 @@ less than the specified value:</p>
 using <code>createTimeToEventSettings</code>. This requires
 specifying:</p>
 <ul>
-<li>one or more targetIds (these must be pre-generated in a cohort
-table)</li>
+<li>studyPopulationSettings created using
+<code>createStudyPopulationSettings</code> to define targetIds and
+population restrictions.</li>
 <li>one or more outcomeIds (these must be pre-generated in a cohort
 table)</li>
 </ul>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">exampleTimeToEventSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createTimeToEventSettings.html">createTimeToEventSettings</a></span><span class="op">(</span></span>
-<span>  targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
+<span>  studyPopulationSettings <span class="op">=</span> <span class="fu"><a href="../reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>    targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>We can then run the analysis on the Eunomia data using
 <code>computeTimeToEventAnalyses</code> and the settings previously
 specified:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tte</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeTimeToEventAnalyses.html">computeTimeToEventAnalyses</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">tte</span> <span class="op">&lt;-</span> <span class="fu">computeTimeToEventAnalyses</span><span class="op">(</span></span>
 <span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
 <span>  cdmDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
 <span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>

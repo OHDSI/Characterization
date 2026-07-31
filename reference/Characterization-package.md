@@ -21,6 +21,8 @@ Useful links:
 
 Authors:
 
+- Jenna Reps <jreps@its.jnj.com>
+
 - Patrick Ryan <ryan@ohdsi.org>
 
 - Chris Knoll <knoll@ohdsi.org>

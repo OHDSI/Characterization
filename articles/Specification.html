@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Characterization</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">3.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">4.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,7 @@
       <h1>Characterization Package Specification</h1>
                         <h4 data-toc-skip class="author">Jenna Reps</h4>
             
-            <h4 data-toc-skip class="date">2026-07-10</h4>
+            <h4 data-toc-skip class="date">2026-07-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/develop/vignettes/Specification.Rmd" class="external-link"><code>vignettes/Specification.Rmd</code></a></small>
       <div class="d-none name"><code>Specification.Rmd</code></div>
@@ -73,7 +73,8 @@
 <div class="section level3">
 <h3 id="inputs">Inputs<a class="anchor" aria-label="anchor" href="#inputs"></a>
 </h3>
-<p>A vector of targetIds and a vector of outcomeIds</p>
+<p>A studyPopulationSettings object (containing targetIds and any target
+population restrictions) and a vector of outcomeIds.</p>
 </div>
 <div class="section level3">
 <h3 id="output">Output<a class="anchor" aria-label="anchor" href="#output"></a>
@@ -500,7 +501,8 @@ displayed in Table 4.</p>
 <div class="section level3">
 <h3 id="inputs-1">Inputs<a class="anchor" aria-label="anchor" href="#inputs-1"></a>
 </h3>
-<p>A vector of targetIds, a vector of outcomeIds, an integer
+<p>A studyPopulationSettings object (containing targetIds and any target
+population restrictions), a vector of outcomeIds, an integer
 dechallengeStopInterval and an integer dechallengeEvaluationWindow.</p>
 </div>
 <div class="section level3">
@@ -831,9 +833,10 @@ window.</p>
 <div class="section level3">
 <h3 id="inputs-2">Inputs<a class="anchor" aria-label="anchor" href="#inputs-2"></a>
 </h3>
-<p>A vector of targetIds plus the minimum prior observation required for
-the target cohorts and minimum time before target exposures and
-specifying which features to extract (covariateSettings).</p>
+<p>A studyPopulationSettings object (containing targetIds plus target
+population restrictions such as minimum prior observation and
+first-exposure limits) and covariateSettings specifying which features
+to extract.</p>
 </div>
 <div class="section level3">
 <h3 id="outputs">Outputs<a class="anchor" aria-label="anchor" href="#outputs"></a>
@@ -866,9 +869,11 @@ the mean value and this makes interpretation difficult.</p>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="va">targetSettings</span> <span class="op">&lt;-</span> <span class="fu">Characterization</span><span class="fu">::</span><span class="fu"><a href="../reference/createTargetBaselineSettings.html">createTargetBaselineSettings</a></span><span class="op">(</span></span>
-<span>  targetIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, </span>
-<span>  limitToFirstInNDays <span class="op">=</span> <span class="va">limitToFirstInNDays</span>, </span>
-<span>  minPriorObservation <span class="op">=</span> <span class="va">minPriorObservation</span>, </span>
+<span>  studyPopulationSettings <span class="op">=</span> <span class="fu">Characterization</span><span class="fu">::</span><span class="fu"><a href="../reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>    targetIds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span>, </span>
+<span>    limitToFirstInNDays <span class="op">=</span> <span class="va">limitToFirstInNDays</span>, </span>
+<span>    minPriorObservation <span class="op">=</span> <span class="va">minPriorObservation</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  covariateSettings <span class="op">=</span> <span class="va">covariateSettings</span></span>
 <span>    <span class="op">)</span></span></code></pre></div>
 </div>
@@ -1099,10 +1104,10 @@ squared)/2).</p>
 <div class="section level3">
 <h3 id="inputs-3">Inputs<a class="anchor" aria-label="anchor" href="#inputs-3"></a>
 </h3>
-<p>A vector of targetIds and outcomeIds plus the minimum prior
-observation required for the target cohorts, the outcome washout days
-for the outcomes, settings for the time-at-risk and covariate settings
-specifying which features to extract.</p>
+<p>A studyPopulationSettings object (containing targetIds plus target
+population restrictions), outcomeIds, outcome washout days, time-at-risk
+settings, and covariate settings specifying which features to
+extract.</p>
 </div>
 <div class="section level3">
 <h3 id="outputs-1">Outputs<a class="anchor" aria-label="anchor" href="#outputs-1"></a>
@@ -1142,10 +1147,12 @@ relative to the target cohort index).</p>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="va">rfSettings</span> <span class="op">&lt;-</span> <span class="fu">Characterization</span><span class="fu">::</span><span class="fu"><a href="../reference/createRiskFactorSettings.html">createRiskFactorSettings</a></span><span class="op">(</span></span>
-<span>  targetIds <span class="op">=</span> <span class="va">targetId</span>, </span>
+<span>  studyPopulationSettings <span class="op">=</span> <span class="fu">Characterization</span><span class="fu">::</span><span class="fu"><a href="../reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>    targetIds <span class="op">=</span> <span class="va">targetId</span>, </span>
+<span>    limitToFirstInNDays <span class="op">=</span> <span class="va">limitToFirstInNDays</span>, </span>
+<span>    minPriorObservation <span class="op">=</span> <span class="va">minPriorObservation</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  outcomeIds <span class="op">=</span> <span class="va">outcomeId</span>, </span>
-<span>  limitToFirstInNDays <span class="op">=</span> <span class="va">limitToFirstInNDays</span>, </span>
-<span>  minPriorObservation <span class="op">=</span> <span class="va">minPriorObservation</span>, </span>
 <span>  outcomeWashoutDays <span class="op">=</span> <span class="va">outcomeWashoutDays</span>, </span>
 <span>  riskWindowStart <span class="op">=</span> <span class="va">riskWindowStart</span>, </span>
 <span>  startAnchor <span class="op">=</span> <span class="va">startAnchor</span>, </span>
@@ -1538,10 +1545,10 @@ index.</p>
 <div class="section level3">
 <h3 id="inputs-4">Inputs<a class="anchor" aria-label="anchor" href="#inputs-4"></a>
 </h3>
-<p>A vector of targetIds and outcomeIds plus the minimum prior
-observation required for the target cohorts, the outcome washout days
-for the outcomes, settings for the time-at-risk and covariate settings
-specifying which features to extract.</p>
+<p>A studyPopulationSettings object (containing targetIds plus target
+population restrictions), outcomeIds, outcome washout days, time-at-risk
+settings, and covariate settings specifying which features to
+extract.</p>
 <p>In addition you need to specify how long before target index to
 extract before index features (preTargetIndexDays) and how long after
 outcome index to extract after index features
@@ -1592,10 +1599,12 @@ index and outcome index and the 1 year after outcome index.</p>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="va">caseSeriesSettings</span> <span class="op">&lt;-</span> <span class="fu">Characterization</span><span class="fu">::</span><span class="fu"><a href="../reference/createCaseSeriesSettings.html">createCaseSeriesSettings</a></span><span class="op">(</span></span>
-<span>  targetIds <span class="op">=</span> <span class="va">targetId</span>, </span>
+<span>  studyPopulationSettings <span class="op">=</span> <span class="fu">Characterization</span><span class="fu">::</span><span class="fu"><a href="../reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>    targetIds <span class="op">=</span> <span class="va">targetId</span>, </span>
+<span>    limitToFirstInNDays <span class="op">=</span> <span class="va">limitToFirstInNDays</span>, </span>
+<span>    minPriorObservation <span class="op">=</span> <span class="va">minPriorObservation</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  outcomeIds <span class="op">=</span> <span class="va">outcomeId</span>, </span>
-<span>  limitToFirstInNDays <span class="op">=</span> <span class="va">limitToFirstInNDays</span>, </span>
-<span>  minPriorObservation <span class="op">=</span> <span class="va">minPriorObservation</span>, </span>
 <span>  outcomeWashoutDays <span class="op">=</span> <span class="va">outcomeWashoutDays</span>, </span>
 <span>  riskWindowStart <span class="op">=</span> <span class="va">riskWindowStart</span>, </span>
 <span>  startAnchor <span class="op">=</span> <span class="va">startAnchor</span>, </span>

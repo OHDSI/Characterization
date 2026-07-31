@@ -43,7 +43,7 @@ First we need to install the `Characterization` package:
 
 ``` r
 
-remotes::install_github("ohdsi/Characterization")
+install.packages("Characterization")
 ```
 
 and then load it:
@@ -84,12 +84,8 @@ To run an ‘Target Baseline Covariate’ analysis you need to create a
 setting object using `createTargetBaselineSettings`. This requires
 specifying:
 
-- one or more targetIds (these must be pre-generated in a cohort table)
-- a limitToFirstInNDays that removes target exposures that occur within
-  this number of days of a prior exposure. Use 99999 to restrict to
-  first target exposure.
-- a minPriorObservation that specifies the minimum number of days in the
-  database a person needs to have at target index to be included.
+- studyPopulationSettings created using `createStudyPopulationSettings`
+  to define targetIds and population restrictions.
 - the covariate settings using
   [`FeatureExtraction::createCovariateSettings`](https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html)
   or by creating your own custom feature extraction code.
@@ -122,9 +118,11 @@ was observed for 365 days or more prior to index, we can run:
 ``` r
 
 exampleTargetBaselineSettings <- createTargetBaselineSettings(
-  targetIds = exampleTargetIds,
-  limitToFirstInNDays = 99999,
-  minPriorObservation = 365,
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds,
+    limitToFirstInNDays = 99999,
+    minPriorObservation = 365
+  ),
   covariateSettings = exampleCovariateSettings
 )
 ```
@@ -173,13 +171,9 @@ csv files.
 To run an ‘Risk Factor Covariate’ analysis you need to create a setting
 object using `createRiskFactorSettings`. This requires specifying:
 
-- one or more targetIds (these must be pre-generated in a cohort table)
+- studyPopulationSettings created using `createStudyPopulationSettings`
+  to define targetIds and population restrictions.
 - one or more outcomeIds (these must be pre-generated in a cohort table)
-- a limitToFirstInNDays that removes target exposures that occur within
-  this number of days of a prior exposure. Use 99999 to restrict to
-  first target exposure.
-- a minPriorObservation that specifies the minimum number of days in the
-  database a person needs to have at target index to be included.
 - the covariate settings using
   [`FeatureExtraction::createCovariateSettings`](https://rdrr.io/pkg/FeatureExtraction/man/createCovariateSettings.html)
   or by creating your own custom feature extraction code.
@@ -223,13 +217,15 @@ more prior, we can run:
 ``` r
 
 exampleRiskFactorSettings <- createRiskFactorSettings(
-  targetIds = exampleTargetIds,
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds,
+    limitToFirstInNDays = 99999, # limit to first target exposure
+    minPriorObservation = 365
+  ),
   outcomeIds = exampleOutcomeIds,
-  limitToFirstInNDays = 99999, # limit to first target exposure
   riskWindowStart = 1, startAnchor = "cohort start",
   riskWindowEnd = 365, endAnchor = "cohort start",
   outcomeWashoutDays = 9999,
-  minPriorObservation = 365,
   covariateSettings = exampleCovariateSettings 
 )
 ```
@@ -291,13 +287,9 @@ csv files.
 To run an ‘Case Series Covariate’ analysis you need to create a setting
 object using `createCaseSeriesSettings`. This requires specifying:
 
-- one or more targetIds (these must be pre-generated in a cohort table)
+- studyPopulationSettings created using `createStudyPopulationSettings`
+  to define targetIds and population restrictions.
 - one or more outcomeIds (these must be pre-generated in a cohort table)
-- a limitToFirstInNDays that removes target exposures that occur within
-  this number of days of a prior exposure. Use 99999 to restrict to
-  first target exposure.
-- a minPriorObservation that specifies the minimum number of days in the
-  database a person needs to have at target index to be included.
 - the case covariate settings using
   [`Characterization::createDuringCovariateSettings`](../reference/createDuringCovariateSettings.md)
   or by creating your own custom feature extraction code.
@@ -342,13 +334,15 @@ and outcome (answers the question what happens during target exposure).
 ``` r
 
 exampleCaseSeriesSettings <- createCaseSeriesSettings(
-  targetIds = exampleTargetIds,
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds,
+    limitToFirstInNDays = 99999, # limit to first target index
+    minPriorObservation = 365
+  ),
   outcomeIds = exampleOutcomeIds,
-  limitToFirstInNDays = 99999, # limit to first target index
   riskWindowStart = 1, startAnchor = "cohort start",
   riskWindowEnd = 365, endAnchor = "cohort start",
   outcomeWashoutDays = 9999,
-  minPriorObservation = 365,
   caseCovariateSettings = exampleCaseCovariateSettings,
   casePreTargetDuration = 90,
   casePostOutcomeDuration = 90
@@ -402,7 +396,8 @@ To run a ‘Dechallenge Rechallenge’ analysis you need to create a setting
 object using `createDechallengeRechallengeSettings`. This requires
 specifying:
 
-- one or more targetIds (these must be pre-generated in a cohort table)
+- studyPopulationSettings created using `createStudyPopulationSettings`
+  to define targetIds and population restrictions.
 - one or more outcomeIds (these must be pre-generated in a cohort table)
 - dechallengeStopInterval
 - dechallengeEvaluationWindow
@@ -424,7 +419,9 @@ cohorts and our outcome cohort with a 30 day dechallengeStopInterval and
 ``` r
 
 exampleDechallengeRechallengeSettings <- createDechallengeRechallengeSettings(
-  targetIds = exampleTargetIds,
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds
+  ),
   outcomeIds = exampleOutcomeIds,
   dechallengeStopInterval = 30,
   dechallengeEvaluationWindow = 31
@@ -471,13 +468,16 @@ failed <- computeRechallengeFailCaseSeriesAnalyses(
 To run a ‘Time-to-event’ analysis you need to create a setting object
 using `createTimeToEventSettings`. This requires specifying:
 
-- one or more targetIds (these must be pre-generated in a cohort table)
+- studyPopulationSettings created using `createStudyPopulationSettings`
+  to define targetIds and population restrictions.
 - one or more outcomeIds (these must be pre-generated in a cohort table)
 
 ``` r
 
 exampleTimeToEventSettings <- createTimeToEventSettings(
-  targetIds = exampleTargetIds,
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds
+  ),
   outcomeIds = exampleOutcomeIds
 )
 ```

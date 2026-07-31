@@ -11,8 +11,7 @@ createCharacterizationSettings(
   dechallengeRechallengeSettings = NULL,
   targetBaselineSettings = NULL,
   riskFactorSettings = NULL,
-  caseSeriesSettings = NULL,
-  restrictWashoutToObs = TRUE
+  caseSeriesSettings = NULL
 )
 ```
 
@@ -38,11 +37,6 @@ createCharacterizationSettings(
 
   A list of caseSeriesSettings settings
 
-- restrictWashoutToObs:
-
-  Whether to restrict to outcomes in observation period for washout in
-  risk factors
-
 ## Value
 
 Returns the connection to the sqlite database
@@ -65,7 +59,11 @@ Other LargeScale:
 # example code
 
 drSet <- createDechallengeRechallengeSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 

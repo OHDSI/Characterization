@@ -6,7 +6,7 @@ Create dechallenge rechallenge study settings
 
 ``` r
 createDechallengeRechallengeSettings(
-  targetIds,
+  studyPopulationSettings,
   outcomeIds,
   dechallengeStopInterval = 30,
   dechallengeEvaluationWindow = 30
@@ -15,9 +15,11 @@ createDechallengeRechallengeSettings(
 
 ## Arguments
 
-- targetIds:
+- studyPopulationSettings:
 
-  A list of cohortIds for the target cohorts
+  An object created using `createStudyPopulationSettings` of a list of
+  `createStudyPopulationSettings` that specifies cohort inclusion
+  criteria
 
 - outcomeIds:
 
@@ -37,17 +39,15 @@ createDechallengeRechallengeSettings(
 
 A list with the settings
 
-## See also
-
-Other DechallengeRechallenge:
-[`computeDechallengeRechallengeAnalyses()`](computeDechallengeRechallengeAnalyses.md),
-[`computeRechallengeFailCaseSeriesAnalyses()`](computeRechallengeFailCaseSeriesAnalyses.md)
-
 ## Examples
 
 ``` r
 drSet <- createDechallengeRechallengeSettings(
-  targetIds = c(1,2),
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = c(1,2),
+    limitToFirstInNDays = 0,
+    minPriorObservation = 0
+    ),
   outcomeIds = 3
 )
 

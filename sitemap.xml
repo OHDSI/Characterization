@@ -10,9 +10,6 @@
 <url><loc>/reference/Characterization-package.html</loc></url>
 <url><loc>/reference/cleanIncremental.html</loc></url>
 <url><loc>/reference/cleanNonIncremental.html</loc></url>
-<url><loc>/reference/computeDechallengeRechallengeAnalyses.html</loc></url>
-<url><loc>/reference/computeRechallengeFailCaseSeriesAnalyses.html</loc></url>
-<url><loc>/reference/computeTimeToEventAnalyses.html</loc></url>
 <url><loc>/reference/createCaseSeriesSettings.html</loc></url>
 <url><loc>/reference/createCharacterizationSettings.html</loc></url>
 <url><loc>/reference/createCharacterizationTables.html</loc></url>
@@ -20,6 +17,7 @@
 <url><loc>/reference/createDuringCovariateSettings.html</loc></url>
 <url><loc>/reference/createRiskFactorSettings.html</loc></url>
 <url><loc>/reference/createSqliteDatabase.html</loc></url>
+<url><loc>/reference/createStudyPopulationSettings.html</loc></url>
 <url><loc>/reference/createTargetBaselineSettings.html</loc></url>
 <url><loc>/reference/createTimeToEventSettings.html</loc></url>
 <url><loc>/reference/exampleOmopConnectionDetails.html</loc></url>
