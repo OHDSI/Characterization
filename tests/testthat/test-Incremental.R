@@ -1,20 +1,20 @@
 context("Incremental")
 
 logFolder <- file.path(tempdir(), "log1")
-on.exit(unlink(logFolder))
+withr::defer(unlink(logFolder, recursive = TRUE, force = TRUE), testthat::teardown_env())
 logFolder2 <- file.path(tempdir(), "log2")
-on.exit(unlink(logFolder2))
+withr::defer(unlink(logFolder2, recursive = TRUE, force = TRUE), testthat::teardown_env())
 logFolder3 <- file.path(tempdir(), "log3")
-on.exit(unlink(logFolder3))
+withr::defer(unlink(logFolder3, recursive = TRUE, force = TRUE), testthat::teardown_env())
 logFolder4 <- file.path(tempdir(), "log4")
-on.exit(unlink(logFolder4))
+withr::defer(unlink(logFolder4, recursive = TRUE, force = TRUE), testthat::teardown_env())
 logFolder5 <- file.path(tempdir(), "log5")
-on.exit(unlink(logFolder5))
+withr::defer(unlink(logFolder5, recursive = TRUE, force = TRUE), testthat::teardown_env())
 logFolder6 <- file.path(tempdir(), "log6")
-on.exit(unlink(logFolder6))
+withr::defer(unlink(logFolder6, recursive = TRUE, force = TRUE), testthat::teardown_env())
 
 logFolder7 <- file.path(tempdir(), "log7")
-on.exit(unlink(logFolder7))
+withr::defer(unlink(logFolder7, recursive = TRUE, force = TRUE), testthat::teardown_env())
 
 for (folder in c(
   logFolder, logFolder2, logFolder3,
@@ -322,7 +322,6 @@ test_that("No Incremental works", {
     path = file.path(logFolder5, "job_1"),
     recursive = TRUE
   )
-  on.exit(unlink(file.path(logFolder5, "job_1")))
 
   andromeda <- Andromeda::andromeda()
   Andromeda::saveAndromeda(

@@ -1,5 +1,8 @@
 context("TimeToEvent")
 
+tteFolder <- tempfile("tte")
+withr::defer(unlink(tteFolder, recursive = TRUE, force = TRUE), testthat::teardown_env())
+
 test_that("createTimeToEventSettings", {
   targetIds <- sample(x = 100, size = sample(10, 1))
   outcomeIds <- sample(x = 100, size = sample(10, 1))
@@ -41,8 +44,6 @@ test_that("computeTimeToEventSettings", {
     characterizationSettings = characterizationSettings,
     nTargetJobs = 1
   )
-
-  tteFolder <- tempfile("tte")
 
   tables <- generateCohorts(
     characterizationSettings = characterizationSettings,

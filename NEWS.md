@@ -1,3 +1,8 @@
+Characterization 4.0.1
+======================
+- added check to createCharacterizationSettings() to error if no settings were entered
+- updated test file cleanup
+
 Characterization 4.0.0
 ======================
 - [enhancement] replaced targetId inputs to the settings with studyPopulationSettings that lets you specify 

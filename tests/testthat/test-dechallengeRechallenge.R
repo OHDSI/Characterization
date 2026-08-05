@@ -4,11 +4,20 @@
 context("DechallengeRechallenge")
 
 tempDbLoc <- tempfile(fileext = ".sqlite")
-on.exit(unlink(tempDbLoc))
+withr::defer(unlink(tempDbLoc, force = TRUE), testthat::teardown_env())
 connectionDetailsReal <- DatabaseConnector::createConnectionDetails(
   dbms = "sqlite",
   server = tempDbLoc
 )
+
+dcLoc1 <- tempfile("runADechal")
+dcLoc2 <- tempfile("runADechal2")
+dcLoc3 <- tempfile("runADechal3")
+dcLoc4 <- tempfile("runADechal4")
+withr::defer(unlink(dcLoc1, recursive = TRUE, force = TRUE), testthat::teardown_env())
+withr::defer(unlink(dcLoc2, recursive = TRUE, force = TRUE), testthat::teardown_env())
+withr::defer(unlink(dcLoc3, recursive = TRUE, force = TRUE), testthat::teardown_env())
+withr::defer(unlink(dcLoc4, recursive = TRUE, force = TRUE), testthat::teardown_env())
 
 test_that("createDechallengeRechallengeSettings", {
   targetIds <- sample(x = 100, size = sample(10, 1))
@@ -76,12 +85,11 @@ test_that("computeDechallengeRechallengeAnalyses", {
     nTargetJobs = 1
   )
 
-  dcLoc <- tempfile("runADechal")
   tables <- generateCohorts(
     characterizationSettings = charSet,
     mode = 'PatientLevelPrediction',
     incremental = FALSE,
-    executionPath = dcLoc,
+    executionPath = dcLoc1,
     connectionDetails = connectionDetails,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
@@ -108,7 +116,7 @@ test_that("computeDechallengeRechallengeAnalyses", {
     characterizationTable = tables$characterizationTable,
     settings = charSet$dechallengeRechallengeSettings[[1]],
     databaseId = "testing",
-    outputFolder = dcLoc
+    outputFolder = dcLoc1
   )
   testthat::expect_true(dc)
 
@@ -214,13 +222,11 @@ test_that("computeDechallengeRechallengeAnalyses", {
     nTargetJobs = 1
   )
 
-  dcLoc <- tempfile("runADechal2")
-
   tables <- generateCohorts(
     characterizationSettings = charSet,
     mode = 'PatientLevelPrediction',
     incremental = FALSE,
-    executionPath = dcLoc,
+    executionPath = dcLoc2,
     connectionDetails = connectionDetailsReal,
     targetDatabaseSchema = "main",
     targetTable = "cohort_dechal",
@@ -245,10 +251,10 @@ test_that("computeDechallengeRechallengeAnalyses", {
     characterizationTable = tables$characterizationTable,
     settings = charSet$dechallengeRechallengeSettings[[1]],
     databaseId = "testing",
-    outputFolder = dcLoc
+    outputFolder = dcLoc2
   )
 
-  res <- Andromeda::loadAndromeda(file.path(dcLoc, "result"))
+  res <- Andromeda::loadAndromeda(file.path(dcLoc2, "result"))
 
   dc <- as.data.frame(res$dechallengeRechallenge)
   # one T and 2 Os, so should have 2 rows
@@ -256,8 +262,6 @@ test_that("computeDechallengeRechallengeAnalyses", {
   testthat::expect_true(dc$numPersonsExposed == 4)
   testthat::expect_true(dc$numExposureEras == 10)
 
-  # clean up
-  file.remove(file.path(dcLoc,"result"))
 })
 
 test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
@@ -362,13 +366,11 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
     nTargetJobs = 1
   )
 
-  dcLoc <- tempfile("runADechal2")
-
   tables <- generateCohorts(
     characterizationSettings = charSet,
     mode = 'PatientLevelPrediction',
     incremental = FALSE,
-    executionPath = dcLoc,
+    executionPath = dcLoc3,
     connectionDetails = connectionDetailsReal,
     targetDatabaseSchema = "main",
     targetTable = "cohort",
@@ -394,10 +396,10 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
     characterizationDatabaseSchema = "main",
     characterizationTable = tables$characterizationTable,
     databaseId = "testing",
-    outputFolder = dcLoc
+    outputFolder = dcLoc3
   )
 
-  res <- Andromeda::loadAndromeda(file.path(dcLoc, "result"))
+  res <- Andromeda::loadAndromeda(file.path(dcLoc3, "result"))
 
   # person 2 should be in results
   dc <- as.data.frame(res$rechallengeFailCaseSeries)
@@ -405,7 +407,6 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
 
   testthat::expect_true(is.na(dc$subjectId))
 
-  dcLoc <- tempfile("runADechal3")
   dc <- computeRechallengeFailCaseSeriesAnalyses(
     connectionDetails = connectionDetailsReal,
     targetDatabaseSchema = "main",
@@ -418,18 +419,16 @@ test_that("computeRechallengeFailCaseSeriesAnalyses with known data", {
     outcomeTable = "cohort",
     databaseId = "testing",
     showSubjectId = TRUE,
-    outputFolder = dcLoc
+    outputFolder = dcLoc4
   )
 
   # person 2 should be in results
-  res <- Andromeda::loadAndromeda(file.path(dcLoc, "result"))
+  res <- Andromeda::loadAndromeda(file.path(dcLoc4, "result"))
   dc <- as.data.frame(res$rechallengeFailCaseSeries)
 
   testthat::expect_equal(nrow(dc), 1)
   testthat::expect_equal(dc$subjectId, 2)
 
-  # clean up
-  file.remove(file.path(dcLoc, "result"))
 
 })
 
