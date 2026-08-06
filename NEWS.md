@@ -2,6 +2,7 @@ Characterization 4.0.1
 ======================
 - added check to createCharacterizationSettings() to error if no settings were entered
 - updated test file cleanup
+- fixed bug in mode 'Efficient' where risk factor was filtering non-cases that did not exist
 
 Characterization 4.0.0
 ======================
