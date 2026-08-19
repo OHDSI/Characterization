@@ -94,7 +94,7 @@ getPlatformConnectionDetails <- function(dbmsPlatform) {
         dbms = dbmsPlatform,
         user = Sys.getenv("CDM_SNOWFLAKE_USER"),
         password = URLdecode(Sys.getenv("CDM_SNOWFLAKE_PASSWORD")),
-        connectionString = Sys.getenv("CDM_SNOWFLAKE_CONNECTION_STRING"),
+        connectionString = paste0(Sys.getenv("CDM_SNOWFLAKE_CONNECTION_STRING"), "&JDBC_QUERY_RESULT_FORMAT=JSON"),
         pathToDriver = jdbcDriverFolder
       )
       cdmDatabaseSchema <- Sys.getenv("CDM_SNOWFLAKE_CDM53_SCHEMA")
