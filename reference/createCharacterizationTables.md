@@ -79,29 +79,29 @@ createCharacterizationTables(
 #> Connecting using SQLite driver
 #> Deleting existing tables
 #> Creating characterization results tables
-#> Executing SQL took 0.012 secs
+#> Executing SQL took 0.0128 secs
 #> Migrating data set
 #> Migrator using SQL files in Characterization
 #> Connecting using SQLite driver
 #> Creating migrations table
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00352 secs
+#> Executing SQL took 0.00433 secs
 #> Migrations table created
 #> Executing migration: Migration_1-v3_0_0_store_version.sql
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00337 secs
+#> Executing SQL took 0.00596 secs
 #> Saving migration: Migration_1-v3_0_0_store_version.sql
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0029 secs
+#> Executing SQL took 0.00511 secs
 #> Migration complete Migration_1-v3_0_0_store_version.sql
 #> Executing migration: Migration_2-v4_0_0_table_change.sql
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   4%  |                                                                              |=====                                                                 |   7%  |                                                                              |========                                                              |  11%  |                                                                              |==========                                                            |  14%  |                                                                              |============                                                          |  18%  |                                                                              |===============                                                       |  21%  |                                                                              |==================                                                    |  25%  |                                                                              |====================                                                  |  29%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |============================                                          |  39%  |                                                                              |==============================                                        |  43%  |                                                                              |================================                                      |  46%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  54%  |                                                                              |========================================                              |  57%  |                                                                              |==========================================                            |  61%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |==================================================                    |  71%  |                                                                              |====================================================                  |  75%  |                                                                              |=======================================================               |  79%  |                                                                              |==========================================================            |  82%  |                                                                              |============================================================          |  86%  |                                                                              |==============================================================        |  89%  |                                                                              |=================================================================     |  93%  |                                                                              |====================================================================  |  96%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0242 secs
+#> Executing SQL took 0.0291 secs
 #> Saving migration: Migration_2-v4_0_0_table_change.sql
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00474 secs
+#> Executing SQL took 0.00332 secs
 #> Migration complete Migration_2-v4_0_0_table_change.sql
 #> Closing database connection
 #> Updating version number to 4.0.1
-#> Executing SQL took 0.00337 secs
+#> Executing SQL took 0.00371 secs
 ```

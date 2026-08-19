@@ -216,21 +216,21 @@ runCharacterizationAnalyses(
   characterizationSettings = cSet,
   outputDirectory = file.path(tempdir(),'runChar')
 )
-#> Creating directory /tmp/RtmprMs2gk/runChar
-#> Creating directory /tmp/RtmprMs2gk/runChar/execution
+#> Creating directory /tmp/RtmpfmzQO3/runChar
+#> Creating directory /tmp/RtmpfmzQO3/runChar/execution
 #> Currently in a tryCatch or withCallingHandlers block, so unable to add global calling handlers. ParallelLogger will not capture R messages, errors, and warnings, only explicit calls to ParallelLogger. (This message will not be shown again this R session)
 #> Connecting using SQLite driver
 #> Extracting cohort jobs
 #> Adding 1 Target Cohort Jobs containing 2 targets
-#> Inserting data took 0.0162 secs
-#> Executing SQL took 0.0121 secs
+#> Inserting data took 0.0171 secs
+#> Executing SQL took 0.0141 secs
 #> Creating new cluster
 #> Creating Target Cohorts
 #> Connecting using SQLite driver
 #> Creating Targets: took 0.1 secs
 #> Connecting using SQLite driver
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -238,7 +238,7 @@ runCharacterizationAnalyses(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -246,7 +246,7 @@ runCharacterizationAnalyses(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -255,7 +255,7 @@ runCharacterizationAnalyses(
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> Disconnected Andromeda. This data object can no longer be used
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -263,7 +263,7 @@ runCharacterizationAnalyses(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -271,7 +271,7 @@ runCharacterizationAnalyses(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -282,50 +282,42 @@ runCharacterizationAnalyses(
 #> Creating new cluster
 #> Connecting using SQLite driver
 #> Uploading #cohort_settings
-#> Inserting data took 0.0317 secs
+#> Inserting data took 0.0335 secs
 #> Computing time to event results
-#> Executing SQL took 0.0174 secs
+#> Executing SQL took 0.0178 secs
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> Computing time-to-event for 2 T-O pairs took 0.28 secs
+#> Computing time-to-event for 2 T-O pairs took 0.3 secs
 #> exporting to andromeda
 #> Disconnected Andromeda. This data object can no longer be used
 #> Removing any existing results in outputFolder directory
-#> Loading andromeda result at /tmp/RtmprMs2gk/runChar/execution/target_attrition
+#> Loading andromeda result at /tmp/RtmpfmzQO3/runChar/execution/target_attrition
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> Loading andromeda result at /tmp/RtmprMs2gk/runChar/execution/target_counts
+#> Loading andromeda result at /tmp/RtmpfmzQO3/runChar/execution/target_counts
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> Loading andromeda result at /tmp/RtmprMs2gk/runChar/execution/tte_1
+#> Loading andromeda result at /tmp/RtmpfmzQO3/runChar/execution/tte_1
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
-#> This is removed when the R session ends.
-#> • Extensions are re-downloaded each session.
-#> • Secrets are lost.
-#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
-#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
-#> ℹ See ?duckdb_storage for details and alternatives.
-#> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -333,7 +325,7 @@ runCharacterizationAnalyses(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -341,7 +333,7 @@ runCharacterizationAnalyses(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -349,7 +341,15 @@ runCharacterizationAnalyses(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprMs2gk/duckdb
+#> ℹ /tmp/RtmpfmzQO3/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpfmzQO3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
