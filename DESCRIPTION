@@ -1,8 +1,8 @@
 Package: Characterization
 Type: Package
 Title: Implement Descriptive Studies Using the Common Data Model
-Version: 4.0.1
-Date: 2026-8-01
+Version: 4.1.0
+Date: 2026-9-01
 Authors@R: c(
   person("Jenna", "Reps", , "jreps@its.jnj.com", role = c("aut", "cre")),
   person("Patrick", "Ryan", , "ryan@ohdsi.org", role = c("aut")),
@@ -28,6 +28,7 @@ Imports:
   readr, 
   rlang
 Suggests:
+  CohortIncidence (>= 4.1.1),
   devtools,
   formatR,
   testthat,

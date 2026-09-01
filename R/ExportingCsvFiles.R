@@ -68,7 +68,7 @@ exportAndromedaSubfilesToCsv <- function(
                        "targetCovariatesContinuous", "targetCovariates",
                        "riskFactorCovariatesContinuous", "riskFactorCovariates",
                        "caseSeriesCovariatesContinuous", "caseSeriesCovariates",
-                       "timeToEvent",
+                       "timeToEvent", "incidenceSummary", "targetDef", "targetOutcomeRef",
                        "rechallengeFailCaseSeries", "dechallengeRechallenge")
 ){
 
@@ -369,6 +369,15 @@ censorResults <- function(
       ParallelLogger::logInfo(paste0("Removing numEvents less than ", minCellCount))
       newData$numEvents[removeInd] <- -minCellCount
     }
+  } else if(tableName == 'incidenceSummary'){
+    newData <- enforceMinCellValue(newData, "personsAtRiskPe", minCellCount, silent = TRUE)
+    newData <- enforceMinCellValue(newData, "personsAtRisk", minCellCount, silent = TRUE)
+    newData <- enforceMinCellValue(newData, "personOutcomesPe", minCellCount, silent = TRUE)
+    newData <- enforceMinCellValue(newData, "personOutcomes", minCellCount, silent = TRUE)
+    newData <- enforceMinCellValue(newData, "outcomesPe", minCellCount, silent = TRUE)
+    newData <- enforceMinCellValue(newData, "outcomes", minCellCount, silent = TRUE)
+    newData$incidenceRateP100py[newData$outcomes < 0] <- NA
+    newData$incidenceProportionP100p[newData$personOutcomes < 0] <- NA
   } else if(tableName == 'dechallengeRechallenge'){
     # DECHALLENDGE RECHALLENGE
     removeInd <- newData$numExposureEras < minCellCount & newData$numExposureEras != 0
