@@ -68,7 +68,8 @@ exportAndromedaSubfilesToCsv <- function(
                        "targetCovariatesContinuous", "targetCovariates",
                        "riskFactorCovariatesContinuous", "riskFactorCovariates",
                        "caseSeriesCovariatesContinuous", "caseSeriesCovariates",
-                       "timeToEvent", "incidenceSummary", "targetDef", "targetOutcomeRef",
+                       "timeToEvent", "incidenceSummary", "targetDef", "outcomeDef",
+                       "tarDef", "ageGroupDef", "subgroupDef", "targetOutcomeRef",
                        "rechallengeFailCaseSeries", "dechallengeRechallenge")
 ){
 

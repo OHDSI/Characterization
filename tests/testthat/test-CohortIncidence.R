@@ -95,6 +95,7 @@ test_that("createCohortIncidenceDesign uses CohortIncidence inputs", {
   testthat::expect_s3_class(design, "IncidenceDesign")
   testthat::expect_equal(design$timeAtRiskDefs[[1]]$startWith, "start")
   testthat::expect_equal(design$timeAtRiskDefs[[1]]$endWith, "end")
+  testthat::expect_equal(design$outcomeDefs[[1]]$name, "cohort 2")
   testthat::expect_length(design$timeAtRiskDefs, 1)
   testthat::expect_length(design$analysisList, 1)
   testthat::expect_silent(design$asJSON())

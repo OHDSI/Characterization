@@ -186,6 +186,7 @@ createCohortIncidenceDesign <- function(settings) {
   outcomeDefs <- lapply(seq_along(outcomeIds), function(index) {
     CohortIncidence::createOutcomeDef(
       id = index * 10 + 7,
+      name = paste0("cohort ", outcomeIds[index]),
       cleanWindow = outcomeWashoutDays[index],
       cohortId = outcomeIds[index]
     )
@@ -293,10 +294,10 @@ computeCohortIncidenceAnalyses <- function(
   # run CI
   executeResults <- CohortIncidence::executeAnalysis(
     connectionDetails = connectionDetails,
-    sourceName = databaseId,
 
     buildOptions = CohortIncidence::buildOptions(
       refId = settings$refId,
+      sourceName = as.character(databaseId),
 
       #resultsDatabaseSchema = ,
       useTempTables = TRUE,
