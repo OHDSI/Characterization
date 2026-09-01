@@ -1,9 +1,10 @@
 context("ViewShiny")
 
 # create a folder with results for the shiny app
-resultLocation <- file.path(tempdir(), paste0("d_", paste0(sample(100, 3), collapse = "_"), sep = ""), "shinyResults")
-if (!dir.exists(resultLocation)) {
-  dir.create(resultLocation, recursive = TRUE)
+shinyLocation <- file.path(tempdir(), paste0("d_", paste0(sample(100, 3), collapse = "_"), sep = ""), "shinyResults")
+withr::defer(unlink(shinyLocation, recursive = TRUE, force = TRUE), testthat::teardown_env())
+if (!dir.exists(shinyLocation)) {
+  dir.create(shinyLocation, recursive = TRUE)
 }
 
 test_that("is_installed", {
@@ -85,8 +86,8 @@ test_that("prepareCharacterizationShiny works", {
     tempEmulationSchema = 'main',
 
     characterizationSettings = characterizationSettings,
-    outputDirectory = file.path(resultLocation, "result"),
-    executionPath = file.path(resultLocation, "execution"),
+    outputDirectory = file.path(shinyLocation, "result"),
+    executionPath = file.path(shinyLocation, "execution"),
     csvFilePrefix = "c_",
     databaseId = "1",
     nTargetJobs = 1,
@@ -100,9 +101,9 @@ test_that("prepareCharacterizationShiny works", {
   )
 
   settings <- prepareCharacterizationShiny(
-    resultFolder = file.path(resultLocation, "result"),
+    resultFolder = file.path(shinyLocation, "result"),
     cohortDefinitionSet = NULL,
-    sqliteLocation = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
+    sqliteLocation = file.path(shinyLocation, "sqliteCharacterization", "sqlite.sqlite")
   )
 
   testthat::expect_true(settings$schema == "main")
@@ -114,7 +115,7 @@ test_that("prepareCharacterizationShiny works", {
     what = DatabaseConnector::createConnectionDetails,
     args = list(
       dbms = "sqlite",
-      server = file.path(resultLocation, "sqliteCharacterization", "sqlite.sqlite")
+      server = file.path(shinyLocation, "sqliteCharacterization", "sqlite.sqlite")
     )
   )
   conTest <- DatabaseConnector::connect(connectionDetailsTest)

@@ -3,10 +3,8 @@
 
 context("RiskFactor")
 
-tempFolder1 <- tempfile("runRf1")
-on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
-tempFolder2 <- tempfile("runRf2")
-on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
+tempFolderRf <- tempfile("runRf1")
+withr::defer(unlink(tempFolderRf, recursive = TRUE, force = TRUE), testthat::teardown_env())
 
 
 test_that("createRiskFactorSettings", {
@@ -307,7 +305,7 @@ test_that("computeRiskFactorAnalyses", {
     ),
     mode = 'PatientLevelPrediction',
     incremental = FALSE,
-    executionPath = tempFolder1, # used for incremental logging
+    executionPath = tempFolderRf, # used for incremental logging
     connectionDetails = connectionDetails,
 
     targetDatabaseSchema = "main",
@@ -341,7 +339,7 @@ test_that("computeRiskFactorAnalyses", {
     tempEmulationSchema = 'main',
     settings = ParallelLogger::convertJsonToSettings(jobDf$settings[1]),
     databaseId = "madeup",
-    outputFolder = tempFolder1,
+    outputFolder = tempFolderRf,
     progressBar = FALSE,
     minCharacterizationMean = 0,
     minCovariateCount = 0,
@@ -350,7 +348,7 @@ test_that("computeRiskFactorAnalyses", {
     mode = 'PatientLevelPrediction'
   )
 
-  result <- Andromeda::loadAndromeda(file.path(tempFolder1, "result"))
+  result <- Andromeda::loadAndromeda(file.path(tempFolderRf, "result"))
 
   # check incremental does not run
   testthat::expect_true(

@@ -234,7 +234,7 @@ computeRiskFactorAnalyses <- function(
     endAnchor = settings$endAnchor,
     riskWindowEnd = settings$riskWindowEnd,
     minCaseSize = minCaseSize,
-    applyMinSizeToNonCases = TRUE
+    applyMinSizeToNonCases = mode != 'Efficient' # only apply if we have non-cases
   )
 
   # generate the targets, cases and non-cases ids

@@ -42,6 +42,18 @@ createCharacterizationSettings <- function(
 
   errorMessages <- checkmate::makeAssertCollection()
 
+  # add check to make sure not all are NULL
+  .checkNotAllNull(
+    settings = list(
+      timeToEventSettings = timeToEventSettings,
+      dechallengeRechallengeSettings = dechallengeRechallengeSettings,
+      targetBaselineSettings = targetBaselineSettings,
+      riskFactorSettings = riskFactorSettings,
+      caseSeriesSettings = caseSeriesSettings
+    ),
+    errorMessages = errorMessages
+  )
+
   .checkTimeToEventSettingsList(
     settings = timeToEventSettings,
     errorMessages =  errorMessages
