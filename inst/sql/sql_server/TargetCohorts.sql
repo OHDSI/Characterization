@@ -81,6 +81,7 @@ CASE WHEN t.cohort_end_date <= n.cohort_end_date THEN t.cohort_end_date
 ELSE n.cohort_end_date END cohort_end_date,
 t.observation_period_start_date,
 t.observation_period_end_date,
+t.time_between,
 t.char_type
 INTO #temp_target_nest
 FROM #temp_target_prior t
