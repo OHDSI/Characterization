@@ -108,6 +108,7 @@
 "target_settings","target_baseline_settings","char(1)","No","No","No","No","Whether used in target baseline"
 "target_settings","risk_factor_settings","char(1)","No","No","No","No","Whether used in risk factor"
 "target_settings","case_series_settings","char(1)","No","No","No","No","Whether used in case series"
+"target_settings","cohort_incidence_settings","char(1)","No","No","No","No","Whether used in cohort incidence"
 "case_settings","setting_id","varchar(50)","Yes","Yes","No","No","The run identifier"
 "case_settings","database_id","varchar(100)","Yes","Yes","No","No","The database identifier"
 "case_settings","characterization_case_id","bigint","Yes","Yes","No","No","The case cohort id that is unique per characterization_target_id, outcome_id, outcome_washout_days and time-at-risk settings"
