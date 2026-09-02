@@ -320,7 +320,7 @@ computeCohortIncidenceAnalyses <- function(
     databaseId = databaseId,
     exportFolder = file.path(outputFolder),
     irDesign = ciDesign,
-    refId = settings$refId
+    executionId = executionId
   )
 
 
@@ -347,7 +347,7 @@ exportCohortIncidence <- function(
     databaseId,
     exportFolder,
     irDesign,
-    refId
+    executionId
     ){
   result <- Andromeda::andromeda()
   for (tableName in names(executeResults)) {
