@@ -140,6 +140,9 @@ test_that("exportCohortIncidence uses characterization target IDs", {
   testthat::expect_true("characterizationTargetId" %in% names(result$incidenceSummary))
   testthat::expect_true("characterizationTargetId" %in% names(result$targetDef))
   testthat::expect_true("characterizationTargetId" %in% names(result$targetOutcomeRef))
+  testthat::expect_true("databaseId" %in% names(result$incidenceSummary))
+  testthat::expect_false("databaseId" %in% names(result$targetDef))
+  testthat::expect_false("databaseId" %in% names(result$targetOutcomeRef))
 })
 
 test_that("runCharacterizationAnalyses executes cohort incidence", {

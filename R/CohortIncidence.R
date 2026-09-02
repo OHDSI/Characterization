@@ -374,8 +374,13 @@ exportCohortIncidence <- function(
   result <- addDbAndSettings(
     andromeda = result,
     databaseId = databaseId,
-    settingId = refId
+    settingId = executionId
   )
+  for (tableName in setdiff(names(result), "incidenceSummary")) {
+    tableData <- as.data.frame(result[[tableName]])
+    tableData$databaseId <- NULL
+    result[[tableName]] <- tableData
+  }
   saveCharacterizationAndromeda(
     andromeda = result,
     outputFolder = exportFolder
