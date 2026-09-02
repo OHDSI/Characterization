@@ -132,7 +132,8 @@ test_that("exportCohortIncidence uses characterization target IDs", {
     databaseId = "test_database",
     exportFolder = outputFolder,
     irDesign = design,
-    refId = 1
+    refId = 1,
+    executionId = 1
   )
 
   result <- Andromeda::loadAndromeda(file.path(outputFolder, "result"))
