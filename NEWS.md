@@ -1,3 +1,7 @@
+Characterization 4.1.0
+======================
+- Added call to CohortIncidence (as it in now in CRAN)
+
 Characterization 4.0.1
 ======================
 - added check to createCharacterizationSettings() to error if no settings were entered
