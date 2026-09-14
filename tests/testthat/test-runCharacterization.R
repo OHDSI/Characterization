@@ -3,6 +3,14 @@
 
 context("runCharacterizationAnalyses")
 
+tempFolderRun <- tempfile("CharacterizationMin1")
+withr::defer(unlink(tempFolderRun, recursive = TRUE, force = TRUE), testthat::teardown_env())
+manualDataMin <- file.path(tempdir(), "manual_min.sqlite")
+withr::defer(unlink(manualDataMin, force = TRUE), testthat::teardown_env())
+tempFolderRun2 <- tempfile("CharacterizationMin2")
+withr::defer(unlink(tempFolderRun2, recursive = TRUE, force = TRUE), testthat::teardown_env())
+
+
 test_that("runCharacterizationAnalyses", {
   targetIds <- c(1, 2, 4)
   outcomeIds <- c(3)
@@ -131,9 +139,6 @@ test_that("runCharacterizationAnalyses", {
 
   skipIfCreateTargetCohortSqlUnavailable()
 
-  tempFolder <- tempfile("Characterization")
-  on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
-
   runCharacterizationAnalyses(
     connectionDetails = connectionDetails,
     cdmDatabaseSchema = "main",
@@ -148,8 +153,8 @@ test_that("runCharacterizationAnalyses", {
     outputDatabaseSchema = 'main',
     outputTable = 'char_test_cohort',
     tempEmulationSchema = 'main',
-    outputDirectory = file.path(tempFolder, "result"),
-    executionPath = file.path(tempFolder, "execution"),
+    outputDirectory = file.path(tempFolderRun, "result"),
+    executionPath = file.path(tempFolderRun, "execution"),
     csvFilePrefix = "c_",
     databaseId = "1",
     incremental = TRUE,
@@ -162,53 +167,53 @@ test_that("runCharacterizationAnalyses", {
   )
 
   testthat::expect_true(
-    dir.exists(file.path(tempFolder, "result"))
+    dir.exists(file.path(tempFolderRun, "result"))
   )
 
   # check csv files
   testthat::expect_true(
-    length(dir(file.path(tempFolder, "result"))) > 0
+    length(dir(file.path(tempFolderRun, "result"))) > 0
   )
 
   # check cohort details is saved
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_case_settings.csv"))
+    file.exists(file.path(tempFolderRun, "result", "c_case_settings.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_target_settings.csv"))
+    file.exists(file.path(tempFolderRun, "result", "c_target_settings.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_analysis_ref.csv"))
+    file.exists(file.path(tempFolderRun, "result", "c_analysis_ref.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_covariate_ref.csv"))
+    file.exists(file.path(tempFolderRun, "result", "c_covariate_ref.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_target_covariates.csv"))
+    file.exists(file.path(tempFolderRun, "result", "c_target_covariates.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_risk_factor_covariates.csv"))
+    file.exists(file.path(tempFolderRun, "result", "c_risk_factor_covariates.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_case_series_covariates.csv"))
+    file.exists(file.path(tempFolderRun, "result", "c_case_series_covariates.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_target_covariates_continuous.csv"))
+    file.exists(file.path(tempFolderRun, "result", "c_target_covariates_continuous.csv"))
   )
 
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_dechallenge_rechallenge.csv"))
+    file.exists(file.path(tempFolderRun, "result", "c_dechallenge_rechallenge.csv"))
   )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_rechallenge_fail_case_series.csv"))
+    file.exists(file.path(tempFolderRun, "result", "c_rechallenge_fail_case_series.csv"))
    )
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result", "c_time_to_event.csv"))
+    file.exists(file.path(tempFolderRun, "result", "c_time_to_event.csv"))
   )
 
   # make sure both tte runs are in the csv
   tte <- readr::read_csv(
-    file = file.path(tempFolder, "result", "c_time_to_event.csv"),
+    file = file.path(tempFolderRun, "result", "c_time_to_event.csv"),
     show_col_types = FALSE
   )
 
@@ -224,15 +229,8 @@ test_that("runCharacterizationAnalyses", {
 })
 
 
-
-manualDataMin <- file.path(tempdir(), "manual_min.sqlite")
-on.exit(unlink(manualDataMin, force = TRUE), add = TRUE)
-
 test_that("min cell count works", {
   skipIfCreateTargetCohortSqlUnavailable()
-
-  tempFolder <- tempfile("CharacterizationMin")
-  on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
 
   connectionDetails <- DatabaseConnector::createConnectionDetails(
     dbms = "sqlite",
@@ -403,8 +401,8 @@ test_that("min cell count works", {
     nestingCohortDatabaseSchema = 'main',
     nestingCohortTable = "cohort",
     characterizationSettings = characterizationSettings,
-    outputDirectory = file.path(tempFolder, "result_mincell"),
-    executionPath = file.path(tempFolder, "execution_mincell"),
+    outputDirectory = file.path(tempFolderRun2, "result_mincell"),
+    executionPath = file.path(tempFolderRun2, "execution_mincell"),
     outputDatabaseSchema = 'main',
     outputTable = 'char_test_cohort2',
     tempEmulationSchema = 'main',
@@ -421,16 +419,16 @@ test_that("min cell count works", {
   )
 
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result_mincell", "c_time_to_event.csv"))
+    file.exists(file.path(tempFolderRun2, "result_mincell", "c_time_to_event.csv"))
   )
-  res <- readr::read_csv(file.path(tempFolder, "result_mincell", "c_time_to_event.csv"))
+  res <- readr::read_csv(file.path(tempFolderRun2, "result_mincell", "c_time_to_event.csv"))
   # all values will be censored to -1 times the minCellCount of 10000000
   testthat::expect_true(sum(res$num_events == -1000000) == length(res$num_events))
 
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result_mincell", "c_dechallenge_rechallenge.csv"))
+    file.exists(file.path(tempFolderRun2, "result_mincell", "c_dechallenge_rechallenge.csv"))
   )
-  res <- readr::read_csv(file.path(tempFolder, "result_mincell", "c_dechallenge_rechallenge.csv"))
+  res <- readr::read_csv(file.path(tempFolderRun2, "result_mincell", "c_dechallenge_rechallenge.csv"))
   # all values will be censored to -1 times the minCellCount of 10000000
   testthat::expect_true(sum(res$num_exposure_eras == -1000000) == length(res$num_exposure_eras))
   testthat::expect_true(sum(res$num_cases == -1000000) == length(res$num_cases))
@@ -453,16 +451,16 @@ test_that("min cell count works", {
   # add mincellcount filter for attrition
 
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result_mincell", "c_target_covariates.csv"))
+    file.exists(file.path(tempFolderRun2, "result_mincell", "c_target_covariates.csv"))
   )
-  res <- readr::read_csv(file.path(tempFolder, "result_mincell", "c_target_covariates.csv"))
+  res <- readr::read_csv(file.path(tempFolderRun2, "result_mincell", "c_target_covariates.csv"))
   testthat::expect_true(sum(res$sum_value == -1000000) == length(res$sum_value))
   testthat::expect_true(sum(is.na(res$average_value)) == length(res$average_value))
 
   testthat::expect_true(
-    file.exists(file.path(tempFolder, "result_mincell", "c_target_covariates_continuous.csv"))
+    file.exists(file.path(tempFolderRun2, "result_mincell", "c_target_covariates_continuous.csv"))
   )
-  res <- readr::read_csv(file.path(tempFolder, "result_mincell", "c_target_covariates_continuous.csv"))
+  res <- readr::read_csv(file.path(tempFolderRun2, "result_mincell", "c_target_covariates_continuous.csv"))
   testthat::expect_true(sum(res$count_value == -1000000) == length(res$count_value))
   testthat::expect_true(sum(is.na(res$average_value)) == length(res$average_value))
   testthat::expect_true(sum(is.na(res$p_10_value)) == length(res$p_10_value))

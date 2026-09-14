@@ -1,10 +1,13 @@
 context("manual data")
 
 manualData <- file.path(tempdir(), "manual.sqlite")
-on.exit(unlink(manualData, force = TRUE), add = TRUE)
+withr::defer(unlink(manualData, force = TRUE), testthat::teardown_env())
 
 manualData2 <- file.path(tempdir(), "manual2.sqlite")
-on.exit(unlink(manualData2, force = TRUE), add = TRUE)
+withr::defer(unlink(manualData2, force = TRUE), testthat::teardown_env())
+
+tempTestDir <- tempfile('manual')
+withr::defer(unlink(tempTestDir, recursive = TRUE, force = TRUE), testthat::teardown_env())
 
 test_that("manual data runCharacterizationAnalyses", {
   skipIfCreateTargetCohortSqlUnavailable()
@@ -214,10 +217,10 @@ test_that("manual data runCharacterizationAnalyses", {
     nestingCohortDatabaseSchema = schema,
     cdmDatabaseSchema = schema,
     characterizationSettings = characterizationSettings,
-    outputDirectory = file.path(tempdir(), "result"),
+    outputDirectory = file.path(tempTestDir, "result"),
     outputDatabaseSchema = schema,
     outputTable = 'test_char_manual_cohort',
-    executionPath = file.path(tempdir(), "execution"),
+    executionPath = file.path(tempTestDir, "execution"),
     csvFilePrefix = "c_",
     databaseId = "1",
     incremental = TRUE,
@@ -233,7 +236,7 @@ test_that("manual data runCharacterizationAnalyses", {
 
   # check csv results are as expected
 
-  tte <- utils::read.csv(file.path(tempdir(), "result", "c_time_to_event.csv"))
+  tte <- utils::read.csv(file.path(tempTestDir, "result", "c_time_to_event.csv"))
 
   # check counts - 1-day subsequent missing?
   testthat::expect_true(5 == sum(tte$num_events[tte$outcome_type == "first" & tte$time_scale == "per 1-day"]))
@@ -249,7 +252,7 @@ test_that("manual data runCharacterizationAnalyses", {
 
   # TODO: check in code whether minCellCount < or <=
 
-  dechal <- utils::read.csv(file.path(tempdir(), "result", "c_dechallenge_rechallenge.csv"))
+  dechal <- utils::read.csv(file.path(tempTestDir, "result", "c_dechallenge_rechallenge.csv"))
 
   # person 1 not included since target exposure is outside obs
   # so 13 exposures less 1 = 12 eras and 10 people less 1 is 9 people
@@ -266,7 +269,7 @@ test_that("manual data runCharacterizationAnalyses", {
   testthat::expect_true(dechal$rechallenge_success == 2)
   testthat::expect_true(dechal$pct_rechallenge_fail == 0.3333333)
 
-  failed <- utils::read.csv(file.path(tempdir(), "result", "c_rechallenge_fail_case_series.csv"))
+  failed <- utils::read.csv(file.path(tempTestDir, "result", "c_rechallenge_fail_case_series.csv"))
   testthat::expect_true(nrow(failed) == 1)
   testthat::expect_true(failed$subject_id == 7)
   testthat::expect_true(failed$dechallenge_exposure_end_date_offset == 31)
@@ -277,23 +280,23 @@ test_that("manual data runCharacterizationAnalyses", {
   # Target baseline covs
   # =======
 
-  eset <- utils::read.csv(file.path(tempdir(), "result", "c_execution_settings.csv"))
+  eset <- utils::read.csv(file.path(tempTestDir, "result", "c_execution_settings.csv"))
   testthat::expect_true(nrow(eset) == 1)
 
 
   # targetId = 1, limitToFirstInNDays = 99999,minPriorObservation = 365,
-  tset <- utils::read.csv(file.path(tempdir(), "result", "c_target_settings.csv"))
+  tset <- utils::read.csv(file.path(tempTestDir, "result", "c_target_settings.csv"))
   testthat::expect_true(tset$target_id[2] == 1)
   testthat::expect_true(tset$limit_to_first_in_n_days[2] == 99999)
   testthat::expect_true(tset$min_prior_observation[2] == 365)
   testthat::expect_true(tset$characterization_target_id[2] == 2*10)
 
-  attrition <- utils::read.csv(file.path(tempdir(), "result", "c_target_attrition.csv"))
+  attrition <- utils::read.csv(file.path(tempTestDir, "result", "c_target_attrition.csv"))
   # there should be 9 people as the first subject has cohort date outside observation
   testthat::expect_true(max(attrition$n_people[attrition$characterization_target_id==10]) == 9)
 
   # useDemographicsAge = TRUE, useDemographicsGender = TRUE, useConditionEraAnyTimePrior = TRUE
-  covs <- utils::read.csv(file.path(tempdir(), "result", "c_target_covariates.csv"))
+  covs <- utils::read.csv(file.path(tempTestDir, "result", "c_target_covariates.csv"))
   # gender 8532001
   testthat::expect_true(8532001 %in% covs$covariate_id)
 
@@ -304,13 +307,13 @@ test_that("manual data runCharacterizationAnalyses", {
   testthat::expect_true(covs$average_value[covs$covariate_id == 8532001] == 1)
   testthat::expect_true(covs$sum_value[covs$covariate_id == 8532001] == max(attrition$n_people[attrition$characterization_target_id==10]))
 
-  covs_cont <- utils::read.csv(file.path(tempdir(), "result", "c_target_covariates_continuous.csv"))
+  covs_cont <- utils::read.csv(file.path(tempTestDir, "result", "c_target_covariates_continuous.csv"))
   testthat::expect_true(1002 %in% covs_cont$covariate_id)
   testthat::expect_true(covs_cont$count_value == 9)
 
 
   # risk factor - check SMD
-  rf_covs <- utils::read.csv(file.path(tempdir(), "result", "c_risk_factor_covariates.csv"))
+  rf_covs <- utils::read.csv(file.path(tempTestDir, "result", "c_risk_factor_covariates.csv"))
   # 378253 - 7 : 2013-04-03, 9 : 2006-01-04/2014-08-02/2014-08-04
   # 7 had outcome 5 days after index and ~5 months after index
   # 9 does not have outcome
@@ -366,7 +369,7 @@ test_that("manual data runCharacterizationAnalyses", {
   )
 
 
-  rf_cont <- utils::read.csv(file.path(tempdir(), "result", "c_risk_factor_covariates_continuous.csv"))
+  rf_cont <- utils::read.csv(file.path(tempTestDir, "result", "c_risk_factor_covariates_continuous.csv"))
 
   nonCases <- 4
   nonCaseMean <- rf_cont$non_case_average_value[rf_cont$covariate_id == 1002]

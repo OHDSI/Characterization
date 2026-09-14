@@ -1,9 +1,9 @@
 context("CaseSeries")
 
-tempFolder1 <- tempfile("runCs1")
-on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
-tempFolder2 <- tempfile("runCs2")
-on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
+tempFolderCs1 <- tempfile("runCs1")
+withr::defer(unlink(tempFolderCs1, recursive = TRUE, force = TRUE), testthat::teardown_env())
+tempFolderCs2 <- tempfile("runCs2")
+withr::defer(unlink(tempFolderCs2, recursive = TRUE, force = TRUE), testthat::teardown_env())
 
 
 test_that("createCaseSeriesSettings", {
@@ -307,7 +307,7 @@ test_that("computeCaseSeriesAnalyses", {
     ),
     mode = 'PatientLevelPrediction',
     incremental = FALSE,
-    executionPath = tempFolder1, # used for incremental logging
+    executionPath = tempFolderCs1, # used for incremental logging
     connectionDetails = connectionDetails,
 
     targetDatabaseSchema = "main",
@@ -341,7 +341,7 @@ test_that("computeCaseSeriesAnalyses", {
     tempEmulationSchema = 'main',
     settings = ParallelLogger::convertJsonToSettings(jobDf$settings[1]),
     databaseId = "madeup",
-    outputFolder = tempFolder1,
+    outputFolder = tempFolderCs1,
     progressBar = FALSE,
     minCharacterizationMean = 0,
     minCovariateCount = 0,
@@ -364,10 +364,10 @@ test_that("computeCaseSeriesAnalyses", {
 
   # check incremental does not run
   testthat::expect_true(
-    'result' %in% dir(tempFolder1)
+    'result' %in% dir(tempFolderCs1)
   )
 
-  res <- Andromeda::loadAndromeda(file.path(tempFolder1, 'result'))
+  res <- Andromeda::loadAndromeda(file.path(tempFolderCs1, 'result'))
 
   testthat::expect_true(
     sum(c(
@@ -427,7 +427,7 @@ tables <- generateCohorts(
   ),
   mode = 'PatientLevelPrediction',
   incremental = FALSE,
-  executionPath = tempFolder1, # used for incremental logging
+  executionPath = tempFolderCs1, # used for incremental logging
   connectionDetails = connectionDetails,
 
   targetDatabaseSchema = "main",

@@ -1,10 +1,7 @@
 context("TargetAnalysis")
 
-tempFolder1 <- tempfile("runTarget1")
-on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
-tempFolder2 <- tempfile("runTarget2")
-on.exit(unlink(tempFolder1, recursive = TRUE), add = TRUE)
-
+tempFolderTa <- tempfile("runTarget1")
+withr::defer(unlink(tempFolderTa, recursive = TRUE, force = TRUE), testthat::teardown_env())
 
 test_that("createTargetBaselineSettings", {
   targetIds <- sample(x = 100, size = sample(10, 1))
@@ -251,7 +248,7 @@ test_that("computeTargetBaselineAnalyses", {
     ),
     mode = 'PatientLevelPrediction',
     incremental = FALSE,
-    executionPath = tempFolder1, # used for incremental logging
+    executionPath = tempFolderTa, # used for incremental logging
     connectionDetails = connectionDetails,
 
     targetDatabaseSchema = "main",
@@ -282,14 +279,14 @@ test_that("computeTargetBaselineAnalyses", {
     tempEmulationSchema = 'main',
     settings = ParallelLogger::convertJsonToSettings(jobDf$settings[1]),
     databaseId = "madeup",
-    outputFolder = tempFolder1,
+    outputFolder = tempFolderTa,
     progressBar = FALSE,
     minCharacterizationMean = 0,
     minCovariateCount = 0,
     executionId = 'execution123'
   )
 
-  result <- Andromeda::loadAndromeda(file.path(tempFolder1, "result"))
+  result <- Andromeda::loadAndromeda(file.path(tempFolderTa, "result"))
 
   # check incremental does not run
   testthat::expect_true(

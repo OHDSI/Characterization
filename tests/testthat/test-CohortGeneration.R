@@ -1,11 +1,10 @@
 context("CohortGeneration")
 
+sqlitePath <- tempfile(fileext = ".sqlite")
+withr::defer(unlink(sqlitePath, force = TRUE), testthat::teardown_env())
 
 test_that("generateOutcomeEras executes on sqlite", {
   skipIfCreateTargetCohortSqlUnavailable()
-
-  sqlitePath <- tempfile(fileext = ".sqlite")
-  on.exit(unlink(sqlitePath, force = TRUE), add = TRUE)
 
   connectionDetails <- DatabaseConnector::createConnectionDetails(
     dbms = "sqlite",

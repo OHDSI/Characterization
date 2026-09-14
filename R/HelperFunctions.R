@@ -84,6 +84,25 @@ exampleOmopConnectionDetails <- function(exdir = tempdir()) {
   }
 }
 
+
+.checkNotAllNull <- function(
+  settings,
+  errorMessages
+  ){
+
+  checkmate::assertList(
+    x = settings,
+    add = errorMessages
+    )
+
+  # check that 1+ element of the list is not null
+  checkmate::assertTRUE(
+    x = any(!vapply(settings, is.null, logical(1))),
+    add = errorMessages
+    )
+
+}
+
 .checkDechallengeRechallengeSettings <- function(
     settings,
     errorMessages) {

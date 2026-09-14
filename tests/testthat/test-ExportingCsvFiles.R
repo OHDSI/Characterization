@@ -1,14 +1,27 @@
 context("ExportingCsvFiles")
 library(dplyr)
 
-tempFolder <- file.path(tempdir(),"exporting")
-on.exit(unlink(tempFolder, recursive = TRUE), add = TRUE)
+tempFolderCsv <- file.path(tempdir(),"exporting")
+withr::defer(unlink(tempFolderCsv, recursive = TRUE, force = TRUE), testthat::teardown_env())
+dir.create(tempFolderCsv, recursive = TRUE, showWarnings = FALSE)
 
-tempFolder2 <- file.path(tempdir(),"results")
-on.exit(unlink(tempFolder2, recursive = TRUE), add = TRUE)
+tempFolderCsv2 <- file.path(tempdir(),"results")
+withr::defer(unlink(tempFolderCsv2, recursive = TRUE, force = TRUE), testthat::teardown_env())
+dir.create(tempFolderCsv2, recursive = TRUE, showWarnings = FALSE)
 
-tempFolder3 <- file.path(tempdir(),"attrition")
-on.exit(unlink(tempFolder3, recursive = TRUE), add = TRUE)
+tempFolderCsv3 <- file.path(tempdir(),"attrition")
+withr::defer(unlink(tempFolderCsv3, recursive = TRUE, force = TRUE), testthat::teardown_env())
+dir.create(tempFolderCsv3, recursive = TRUE, showWarnings = FALSE)
+
+dir.create(file.path(tempFolderCsv, 'test_1'))
+withr::defer(unlink(file.path(tempFolderCsv, 'test_1'), recursive = TRUE, force = TRUE), testthat::teardown_env())
+
+dir.create(file.path(tempFolderCsv, 'test_2'))
+withr::defer(unlink(file.path(tempFolderCsv, 'test_2'), recursive = TRUE, force = TRUE), testthat::teardown_env())
+
+dir.create(file.path(tempFolderCsv, 'test_3'))
+withr::defer(unlink(file.path(tempFolderCsv, 'test_3'), recursive = TRUE, force = TRUE), testthat::teardown_env())
+
 
 test_that("addDbAndSettings works for single table", {
 
@@ -52,7 +65,7 @@ test_that("addDbAndSettings works for multiple tables including empty", {
     column6 = 'fake'
   )[-1,]
 
-  andromeda <-addDbAndSettings(
+  andromeda <- addDbAndSettings(
     andromeda = andromeda,
     databaseId = 1,
     settingId = 'madeup'
@@ -85,12 +98,12 @@ test_that("saveCharacterizationAndromeda", {
 
   saveCharacterizationAndromeda(
     andromeda = andromeda,
-    outputFolder = tempFolder
+    outputFolder = tempFolderCsv
   )
 
-  testthat::expect_true(file.exists(file.path(tempFolder, 'result')))
+  testthat::expect_true(file.exists(file.path(tempFolderCsv, 'result')))
 
-  andromeda <- Andromeda::loadAndromeda(file.path(tempFolder, 'result'))
+  andromeda <- Andromeda::loadAndromeda(file.path(tempFolderCsv, 'result'))
 
   testthat::expect_true(names(andromeda) == 'firstTable')
 
@@ -103,19 +116,10 @@ test_that("saveCharacterizationAndromeda", {
 
   )
 
-  file.remove(file.path(tempFolder, 'result'))
-
 })
 
 
 test_that("exportAndromedaSubfilesToCsv", {
-
-  # inside tempFolder create folders with Andromeda result file
-
-  dir.create(file.path(tempFolder, 'test_1'))
-  on.exit(unlink(file.path(tempFolder, 'test_1'), recursive = TRUE), add = TRUE)
-  dir.create(file.path(tempFolder, 'test_2'))
-  on.exit(unlink(file.path(tempFolder, 'test_1'), recursive = TRUE), add = TRUE)
 
   andromeda1 <- Andromeda::andromeda()
   andromeda1$analysisRef <- data.frame(
@@ -150,18 +154,18 @@ test_that("exportAndromedaSubfilesToCsv", {
 
   Andromeda::saveAndromeda(
     andromeda = andromeda1,
-    fileName = file.path(tempFolder, 'test_1', 'result')
+    fileName = file.path(tempFolderCsv, 'test_1', 'result')
       )
   Andromeda::saveAndromeda(
     andromeda = andromeda2,
-    fileName = file.path(tempFolder, 'test_2', 'result')
+    fileName = file.path(tempFolderCsv, 'test_2', 'result')
   )
 
   # 1) General test
 
   exportAndromedaSubfilesToCsv(
-    executionPath = tempFolder,
-    outputFolder = tempFolder2,
+    executionPath = tempFolderCsv,
+    outputFolder = tempFolderCsv2,
     csvFilePrefix = '',
     batchSize = 100000,
     minCellCount = 0,
@@ -169,17 +173,17 @@ test_that("exportAndromedaSubfilesToCsv", {
   )
 
   # make sure two csv files exist
-  testthat::expect_true(sum(c("analysis_ref.csv", "covariate_ref.csv") %in% dir(tempFolder2)) == 2)
+  testthat::expect_true(sum(c("analysis_ref.csv", "covariate_ref.csv") %in% dir(tempFolderCsv2)) == 2)
 
   # make sure nrows are correct
-  analysisRef <- read.csv(file.path(tempFolder2, "analysis_ref.csv"))
+  analysisRef <- read.csv(file.path(tempFolderCsv2, "analysis_ref.csv"))
   testthat::expect_true(nrow(analysisRef) == 4)
 
-  covRef <- read.csv(file.path(tempFolder2, "covariate_ref.csv"))
+  covRef <- read.csv(file.path(tempFolderCsv2, "covariate_ref.csv"))
   testthat::expect_true(nrow(covRef) == 5) # Not correct
 
   # check tracker
-  #readRDS(file.path(tempFolder2, 'tracker.rds'))
+  #readRDS(file.path(tempFolderCsv2, 'tracker.rds'))
 
   # make sure all columns are there
   testthat::expect_true(sum(colnames(analysisRef) %in% c('analysis_id', 'database_id', 'setting_id')) == 3)
@@ -188,39 +192,39 @@ test_that("exportAndromedaSubfilesToCsv", {
 
   # 2) Testing csv prefix
   exportAndromedaSubfilesToCsv(
-    executionPath = tempFolder,
-    outputFolder = tempFolder2,
+    executionPath = tempFolderCsv,
+    outputFolder = tempFolderCsv2,
     csvFilePrefix = 'c_',
     batchSize = 100000,
     minCellCount = 0,
     tablesToExport = c("analysisRef", "covariateRef")
   )
 
-  testthat::expect_true(sum(c("c_analysis_ref.csv", "c_covariate_ref.csv") %in% dir(tempFolder2)) == 2)
+  testthat::expect_true(sum(c("c_analysis_ref.csv", "c_covariate_ref.csv") %in% dir(tempFolderCsv2)) == 2)
 
 
 
   # 3) Testing batchSize
   exportAndromedaSubfilesToCsv(
-    executionPath = tempFolder,
-    outputFolder = tempFolder2,
+    executionPath = tempFolderCsv,
+    outputFolder = tempFolderCsv2,
     csvFilePrefix = 'c_',
     batchSize = 1,
     minCellCount = 0,
     tablesToExport = c("analysisRef", "covariateRef")
   )
   # make sure two csv files exist
-  testthat::expect_true(sum(c("c_analysis_ref.csv", "c_covariate_ref.csv") %in% dir(tempFolder2)) == 2)
+  testthat::expect_true(sum(c("c_analysis_ref.csv", "c_covariate_ref.csv") %in% dir(tempFolderCsv2)) == 2)
 
   # make sure nrows are correct
-  analysisRef <- read.csv(file.path(tempFolder2, "c_analysis_ref.csv"))
+  analysisRef <- read.csv(file.path(tempFolderCsv2, "c_analysis_ref.csv"))
   testthat::expect_true(nrow(analysisRef) == 4)
 
-  covRef <- read.csv(file.path(tempFolder2, "c_covariate_ref.csv"))
+  covRef <- read.csv(file.path(tempFolderCsv2, "c_covariate_ref.csv"))
   testthat::expect_true(nrow(covRef) == 5) # Not correct
 
   # check tracker
-  #readRDS(file.path(tempFolder2, 'tracker.rds'))
+  #readRDS(file.path(tempFolderCsv2, 'tracker.rds'))
 
   # make sure all columns are there
   testthat::expect_true(sum(colnames(analysisRef) %in% c('analysis_id', 'database_id', 'setting_id')) == 3)
@@ -229,17 +233,17 @@ test_that("exportAndromedaSubfilesToCsv", {
 
   # 4) Testing minCellCount - will test more extensively below in censorResults test
   exportAndromedaSubfilesToCsv(
-    executionPath = tempFolder,
-    outputFolder = tempFolder2,
+    executionPath = tempFolderCsv,
+    outputFolder = tempFolderCsv2,
     csvFilePrefix = 'c_',
     batchSize = 10,
     minCellCount = 10000,
     tablesToExport = c("analysisRef", "covariateRef", "targetCovariates")
   )
 
-  testthat::expect_true(sum(c("c_analysis_ref.csv", "c_covariate_ref.csv", "c_target_covariates.csv") %in% dir(tempFolder2)) == 3)
+  testthat::expect_true(sum(c("c_analysis_ref.csv", "c_covariate_ref.csv", "c_target_covariates.csv") %in% dir(tempFolderCsv2)) == 3)
 
-  targetCovs <- read.csv(file.path(tempFolder2, "c_target_covariates.csv"))
+  targetCovs <- read.csv(file.path(tempFolderCsv2, "c_target_covariates.csv"))
   testthat::expect_true(nrow(targetCovs) == 5)
 
   testthat::expect_true(unique(targetCovs$sum_value) == -10000)
@@ -249,8 +253,6 @@ test_that("exportAndromedaSubfilesToCsv", {
 
 
 test_that("removeRedundant", {
-  dir.create(file.path(tempFolder, 'test_3'))
-  on.exit(unlink(file.path(tempFolder, 'test_3'), recursive = TRUE), add = TRUE)
 
   andromeda1 <- Andromeda::andromeda()
   andromeda1$analysisRef <- data.frame(
@@ -290,7 +292,7 @@ test_that("removeRedundant", {
     analysisRefTracker = anIds
   )
 
-  saveRDS(tracker, file.path(tempFolder2, 'tracker.rds'))
+  saveRDS(tracker, file.path(tempFolderCsv2, 'tracker.rds'))
 
 
   # 1) covariateRef
@@ -298,11 +300,11 @@ test_that("removeRedundant", {
   covref <- removeRedundant(
     andromeda = andromeda1,
     tableName = 'covariateRef',
-    csvTrackerFile = file.path(tempFolder2, 'tracker.rds')
+    csvTrackerFile = file.path(tempFolderCsv2, 'tracker.rds')
   )
 
   # 17 new ids should be added
-  updatedTracker <- readRDS(file.path(tempFolder2, 'tracker.rds'))
+  updatedTracker <- readRDS(file.path(tempFolderCsv2, 'tracker.rds'))
   testthat::expect_true(length(updatedTracker$covariateRefTracker) == 20)
   # covariateIds c(5,6,18) should be gone
   testthat::expect_true(nrow(as.data.frame(covref)) == 17)
@@ -315,11 +317,11 @@ test_that("removeRedundant", {
   anref <- removeRedundant(
     andromeda = andromeda1,
     tableName = 'analysisRef',
-    csvTrackerFile = file.path(tempFolder2, 'tracker.rds')
+    csvTrackerFile = file.path(tempFolderCsv2, 'tracker.rds')
   )
 
   # 17 new ids should be added
-  updatedTracker <- readRDS(file.path(tempFolder2, 'tracker.rds'))
+  updatedTracker <- readRDS(file.path(tempFolderCsv2, 'tracker.rds'))
   testthat::expect_true(length(updatedTracker$analysisRefTracker) == 100)
   # analysisIds c(1,99) should be gone
   testthat::expect_true(nrow(as.data.frame(anref)) == 98)
@@ -759,43 +761,43 @@ test_that("exportAttrition", {
   # save to temp folder
   saveCharacterizationAndromeda(
     andromeda = andromeda,
-    outputFolder = file.path(tempFolder3,'target_attrition')
+    outputFolder = file.path(tempFolderCsv3,'target_attrition')
       )
 
 exportAttrition(
-    executionPath = tempFolder3,
-    outputFolder = tempFolder3,
+    executionPath = tempFolderCsv3,
+    outputFolder = tempFolderCsv3,
     csvFilePrefix = 'c_',
     minCellCount = 0
 )
 
 # load attrition
-testthat::expect_true(file.exists(file.path(tempFolder3, 'c_target_attrition.csv')))
+testthat::expect_true(file.exists(file.path(tempFolderCsv3, 'c_target_attrition.csv')))
 
-target_attrition <- utils::read.csv(file.path(tempFolder3, 'c_target_attrition.csv'))
+target_attrition <- utils::read.csv(file.path(tempFolderCsv3, 'c_target_attrition.csv'))
 testthat::expect_true(nrow(target_attrition) == 10)
 testthat::expect_true(sum(colnames(target_attrition) %in% c('characterization_cohort_id','attr_order', 'attr_reason', 'n_people','n_events', 'database_id', 'setting_id')) == 7)
 
 
 # now test the minCellCount
 exportAttrition(
-  executionPath = tempFolder3,
-  outputFolder = tempFolder3,
+  executionPath = tempFolderCsv3,
+  outputFolder = tempFolderCsv3,
   csvFilePrefix = 'c_',
   minCellCount = 50
 )
-target_attrition <- utils::read.csv(file.path(tempFolder3, 'c_target_attrition.csv'))
+target_attrition <- utils::read.csv(file.path(tempFolderCsv3, 'c_target_attrition.csv'))
 testthat::expect_true(sum(target_attrition$n_people < 50 & target_attrition$n_people != -50) == 0)
 testthat::expect_true(sum(colnames(target_attrition) %in% c('characterization_cohort_id','attr_order', 'attr_reason', 'n_people','n_events', 'database_id', 'setting_id')) == 7)
 
 
 exportAttrition(
-  executionPath = tempFolder3,
-  outputFolder = tempFolder3,
+  executionPath = tempFolderCsv3,
+  outputFolder = tempFolderCsv3,
   csvFilePrefix = 'cccd_',
   minCellCount = 12
 )
-target_attrition <- utils::read.csv(file.path(tempFolder3, 'cccd_target_attrition.csv'))
+target_attrition <- utils::read.csv(file.path(tempFolderCsv3, 'cccd_target_attrition.csv'))
 testthat::expect_true(sum(target_attrition$n_people < 12 & target_attrition$n_people != -12) == 0)
 testthat::expect_true(sum(colnames(target_attrition) %in% c('characterization_cohort_id','attr_order', 'attr_reason', 'n_people','n_events', 'database_id', 'setting_id')) == 7)
 
