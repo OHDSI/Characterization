@@ -10,6 +10,7 @@
 #' @param targetBaselineSettings A list of targetBaselineSettings settings
 #' @param riskFactorSettings A list of riskFactorSettings settings
 #' @param caseSeriesSettings A list of caseSeriesSettings settings
+#' @param cohortIncidenceSettings A lsit of cohortIncidenceSettings settings
 #' @family LargeScale
 #'
 #' @return
@@ -37,7 +38,8 @@ createCharacterizationSettings <- function(
     dechallengeRechallengeSettings = NULL,
     targetBaselineSettings = NULL,
     riskFactorSettings = NULL,
-    caseSeriesSettings = NULL
+    caseSeriesSettings = NULL,
+    cohortIncidenceSettings = NULL
     ) {
 
   errorMessages <- checkmate::makeAssertCollection()
@@ -49,7 +51,8 @@ createCharacterizationSettings <- function(
       dechallengeRechallengeSettings = dechallengeRechallengeSettings,
       targetBaselineSettings = targetBaselineSettings,
       riskFactorSettings = riskFactorSettings,
-      caseSeriesSettings = caseSeriesSettings
+      caseSeriesSettings = caseSeriesSettings,
+      cohortIncidenceSettings = cohortIncidenceSettings
     ),
     errorMessages = errorMessages
   )
@@ -79,6 +82,13 @@ createCharacterizationSettings <- function(
     errorMessages = errorMessages
   )
 
+
+  # TODO create this
+  .checkCohortIncidenceSettingsList(
+    settings = cohortIncidenceSettings,
+    errorMessages = errorMessages
+  )
+
   if (inherits(timeToEventSettings, "timeToEventSettings")) {
     timeToEventSettings <- list(timeToEventSettings)
   }
@@ -95,6 +105,10 @@ createCharacterizationSettings <- function(
     caseSeriesSettings <- list(caseSeriesSettings)
   }
 
+  if (inherits(cohortIncidenceSettings, "cohortIncidenceSettings")) {
+    cohortIncidenceSettings <- list(cohortIncidenceSettings)
+  }
+
   valid <- checkmate::reportAssertions(errorMessages)
 
   settings <- list(
@@ -102,7 +116,8 @@ createCharacterizationSettings <- function(
     dechallengeRechallengeSettings = dechallengeRechallengeSettings,
     targetBaselineSettings = targetBaselineSettings,
     riskFactorSettings = riskFactorSettings,
-    caseSeriesSettings = caseSeriesSettings
+    caseSeriesSettings = caseSeriesSettings,
+    cohortIncidenceSettings = cohortIncidenceSettings
   )
 
   # update the settings replace the popSet with the characterizationTargetIds
@@ -120,7 +135,8 @@ createCharacterizationSettings <- function(
 addCharacterizationTargetIds <- function(settings){
 
   settingTypes <- c('timeToEventSettings', 'dechallengeRechallengeSettings',
-                    'targetBaselineSettings', 'riskFactorSettings', 'caseSeriesSettings')
+                    'targetBaselineSettings', 'riskFactorSettings', 'caseSeriesSettings',
+                    'cohortIncidenceSettings')
 
   # extract out studyPopulationSettings
   studyPopulationList <- list()
@@ -137,6 +153,7 @@ addCharacterizationTargetIds <- function(settings){
               targetBaselineSettings = !!settingType == 'targetBaselineSettings',
               riskFactorSettings = !!settingType == 'riskFactorSettings',
               caseSeriesSettings = !!settingType == 'caseSeriesSettings',
+              cohortIncidenceSettings = !!settingType == 'cohortIncidenceSettings'
             )
           })
       )
@@ -152,6 +169,7 @@ addCharacterizationTargetIds <- function(settings){
       targetBaselineSettings = any(.data$targetBaselineSettings)*1,
       riskFactorSettings = any(.data$riskFactorSettings)*1,
       caseSeriesSettings = any(.data$caseSeriesSettings)*1,
+      cohortIncidenceSettings = any(.data$cohortIncidenceSettings)*1,
       .groups = "drop"
     )
   # give a new id called characterizationTargetIds per target and subset
@@ -765,6 +783,10 @@ createJobs <- function(
       nTargetJobs
     ),
     getCaseSeriesJobs(
+      characterizationSettings,
+      nTargetJobs
+    ),
+    getCohortIncidenceJobs(
       characterizationSettings,
       nTargetJobs
     )

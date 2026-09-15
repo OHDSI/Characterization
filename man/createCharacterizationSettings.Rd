@@ -9,7 +9,8 @@ createCharacterizationSettings(
   dechallengeRechallengeSettings = NULL,
   targetBaselineSettings = NULL,
   riskFactorSettings = NULL,
-  caseSeriesSettings = NULL
+  caseSeriesSettings = NULL,
+  cohortIncidenceSettings = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ createCharacterizationSettings(
 \item{riskFactorSettings}{A list of riskFactorSettings settings}
 
 \item{caseSeriesSettings}{A list of caseSeriesSettings settings}
+
+\item{cohortIncidenceSettings}{A lsit of cohortIncidenceSettings settings}
 }
 \value{
 Returns the connection to the sqlite database

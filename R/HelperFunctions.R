@@ -224,6 +224,26 @@ exampleOmopConnectionDetails <- function(exdir = tempdir()) {
   })
 }
 
+.checkCohortIncidenceSettingsList <- function(
+    settings,
+    errorMessages) {
+  if (is.null(settings)) {
+    return()
+  }
+
+  if (inherits(settings, "cohortIncidenceSettings")) {
+    settings <- list(settings)
+  }
+
+  lapply(settings, function(x) {
+    checkmate::assertClass(
+      x = x,
+      classes = "cohortIncidenceSettings",
+      add = errorMessages
+    )
+  })
+}
+
 .checkCharacterizationSettings <- function(
     settings,
     errorMessages) {

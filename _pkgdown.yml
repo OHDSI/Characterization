@@ -49,6 +49,10 @@ reference:
     desc: >
       This analysis calculates the timing between the Target cohort (T) and an Outcome cohort (O).
     contents: has_concept("TimeToEvent")
+  - title: "Cohort Incidence"
+    desc: >
+      This analysis calculates the incidence rate for a Target cohort (T), an Outcome cohort (O) and a time-at-risk.
+    contents: has_concept("CohortIncidence")
   - title: "Run Large Scale Characterization Study"
     desc: >
       Run multipe aggregate covariate analysis, time to event and dechallenge/rechallenge studies.
