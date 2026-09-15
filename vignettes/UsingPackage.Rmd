@@ -29,6 +29,7 @@ This vignette describes how you can use the Characterization package for various
 - Case Series Covariates: this returns the mean feature value for a set of features specified by the user for the cases: target population patients who had the outcome during some user specified time-at-risk.  This is done at three different time periods, before target index (before), between target index and outcome index (during) and after outcome index (after).
 - DechallengeRechallenge: this is mainly aimed at investigating whether a drug and event are causally related by seeing whether the drug is stopped close in time to the event occurrence (dechallenge) and then whether the drug is restarted (a rechallenge occurs) and if so, whether the event starts again (a failed rechallenge). In this analysis, the Target cohorts are the drug users of interest and the Outcome cohorts are the medical events you wish to see whether the drug may cause.  The user must also specify how close in time a drug must be stopped after the outcome to be considered a dechallenge and how close in time an Outcome must occur after restarting the drug to be considered a failed rechallenge).
 - Time-to-event: this returns descriptive results showing the timing between the target cohort and outcome.  This can help identify whether the outcome often precedes the target cohort or whether it generally comes after.
+- Cohort incidence: this returns incidence rate and proportion using the CohortIncidence package.
 
 # Setup
 
@@ -367,6 +368,81 @@ tte <- computeTimeToEventAnalyses(
   minCellCount = 5
 )
 ```
+
+## Cohort Incidence
+
+To run a 'Cohort Incidence' analysis you need to create a setting object using `createCohortIncidenceSettings`.  This requires specifying:
+
+- studyPopulationSettings created using `createStudyPopulationSettings` to define targetIds and population restrictions.
+- one or more outcomeIds (these must be pre-generated in a cohort table)
+- an outcomeWashoutDays (only outcomes that occur > outcomeWashoutDays days from a previous outcome are included, no restriction set this to 0 and first outcome ever set this to 99999)
+- the time-at-risk settings
++ riskWindowStart
++ startAnchor
++ riskWindowEnd
++ endAnchor
+- byAge: Whether you want to also generate the incidence per age group
+- byGender: Whether you want to also generate the incidence per gender group
+- byYear: Whether you want to also generate the incidence per index year
+- ageBreaks: a vector of age breaks 
+- ageBreakList: a list of age breaks
+- startDate: only include target population index after this date
+- endDate: only include target population index before this date and censor tar at this date.
+
+Using the Eunomia data were we previous generated four cohorts, we can use cohort ids 1,2 and 4 as the targetIds and cohort id 3 as the outcomeIds:  
+
+```{r eval=TRUE}
+exampleTargetIds <- c(1, 2, 4)
+exampleOutcomeIds <- 3
+```
+
+
+If we want to calculate the incidence rates/proportions with all stratifications using ageBreaks of 0-18, 19-65, 66-100, 101+ and no study date restrictions, we can run:
+
+```{r eval=TRUE}
+exampleCohortIncidenceSettings <- createCohortIncidenceSettings(
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds,
+    limitToFirstInNDays = 99999, # limit to first target exposure
+    minPriorObservation = 365
+  ),
+  outcomeIds = exampleOutcomeIds,
+  outcomeWashoutDays = 0,
+  riskWindowStart = 1, startAnchor = "cohort start",
+  riskWindowEnd = 365, endAnchor = "cohort start",
+  ageBreaks = c(0,18,65,100,150),
+  byAge = TRUE,
+  byGender = TRUE,
+  byYear = TRUE
+)
+```
+
+Next we need to use the `exampleCohortIncidenceSettings` as the settings to `runCharacterizationAnalyses`, we need to use the Eunomia connectionDetails and in Eunomia the OMOP CDM data and cohort table are in the 'main' schema.  The cohort table name is 'cohort'.  The following code will apply the cohort incidence using the previously specified settings on the simulated Eunomia data and we must specify the `outputFolder` where the csv results will be written to.
+
+```{r eval=FALSE,results='hide',error=FALSE,warning=FALSE,message=FALSE}
+runCharacterizationAnalyses(
+  connectionDetails = connectionDetails,
+  cdmDatabaseSchema = "main",
+  targetDatabaseSchema = "main",
+  targetTable = "cohort",
+  outcomeDatabaseSchema = "main",
+  outcomeTable = "cohort", 
+  outputDatabaseSchema = 'main', 
+  outputTable = 'example_char_cohort',
+  characterizationSettings = createCharacterizationSettings(
+    cohortIncidenceSettings = exampleCohortIncidenceSettings
+  ),
+  databaseId = "Eunomia",
+  outputDirectory = file.path(tempdir(), "example_char", "results"), 
+  executionPath = file.path(tempdir(), "example_char", "execution"),
+  minCellCount = 10,
+  incremental = FALSE,
+  nTargetJobs = 1,
+  threads = 1
+)
+```
+
+You can then see the results in the location `file.path(tempdir(), 'example_char', 'results')` where you will find csv files.
 
 ## Run Multiple 
 
