@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">Characterization</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">4.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">4.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,9 +59,9 @@
       <h1>Using Characterization Package</h1>
                         <h4 data-toc-skip class="author">Jenna Reps</h4>
             
-            <h4 data-toc-skip class="date">2026-09-14</h4>
+            <h4 data-toc-skip class="date">2026-09-15</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/v4.0.1/vignettes/UsingPackage.Rmd" class="external-link"><code>vignettes/UsingPackage.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/OHDSI/Characterization/blob/develop/vignettes/UsingPackage.Rmd" class="external-link"><code>vignettes/UsingPackage.Rmd</code></a></small>
       <div class="d-none name"><code>UsingPackage.Rmd</code></div>
     </div>
 
@@ -105,6 +105,8 @@ rechallenge).</li>
 between the target cohort and outcome. This can help identify whether
 the outcome often precedes the target cohort or whether it generally
 comes after.</li>
+<li>Cohort incidence: this returns incidence rate and proportion using
+the CohortIncidence package.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -514,6 +516,96 @@ specified:</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
+<h3 id="cohort-incidence">Cohort Incidence<a class="anchor" aria-label="anchor" href="#cohort-incidence"></a>
+</h3>
+<p>To run a ‘Cohort Incidence’ analysis you need to create a setting
+object using <code>createCohortIncidenceSettings</code>. This requires
+specifying:</p>
+<ul>
+<li>studyPopulationSettings created using
+<code>createStudyPopulationSettings</code> to define targetIds and
+population restrictions.</li>
+<li>one or more outcomeIds (these must be pre-generated in a cohort
+table)</li>
+<li>an outcomeWashoutDays (only outcomes that occur &gt;
+outcomeWashoutDays days from a previous outcome are included, no
+restriction set this to 0 and first outcome ever set this to 99999)</li>
+<li>the time-at-risk settings</li>
+<li>riskWindowStart</li>
+<li>startAnchor</li>
+<li>riskWindowEnd</li>
+<li>endAnchor</li>
+<li>byAge: Whether you want to also generate the incidence per age
+group</li>
+<li>byGender: Whether you want to also generate the incidence per gender
+group</li>
+<li>byYear: Whether you want to also generate the incidence per index
+year</li>
+<li>ageBreaks: a vector of age breaks</li>
+<li>ageBreakList: a list of age breaks</li>
+<li>startDate: only include target population index after this date</li>
+<li>endDate: only include target population index before this date and
+censor tar at this date.</li>
+</ul>
+<p>Using the Eunomia data were we previous generated four cohorts, we
+can use cohort ids 1,2 and 4 as the targetIds and cohort id 3 as the
+outcomeIds:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">exampleTargetIds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">exampleOutcomeIds</span> <span class="op">&lt;-</span> <span class="fl">3</span></span></code></pre></div>
+<p>If we want to calculate the incidence rates/proportions with all
+stratifications using ageBreaks of 0-18, 19-65, 66-100, 101+ and no
+study date restrictions, we can run:</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">exampleCohortIncidenceSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCohortIncidenceSettings.html">createCohortIncidenceSettings</a></span><span class="op">(</span></span>
+<span>  studyPopulationSettings <span class="op">=</span> <span class="fu"><a href="../reference/createStudyPopulationSettings.html">createStudyPopulationSettings</a></span><span class="op">(</span></span>
+<span>    targetIds <span class="op">=</span> <span class="va">exampleTargetIds</span>,</span>
+<span>    limitToFirstInNDays <span class="op">=</span> <span class="fl">99999</span>, <span class="co"># limit to first target exposure</span></span>
+<span>    minPriorObservation <span class="op">=</span> <span class="fl">365</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  outcomeIds <span class="op">=</span> <span class="va">exampleOutcomeIds</span>,</span>
+<span>  outcomeWashoutDays <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  riskWindowStart <span class="op">=</span> <span class="fl">1</span>, startAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
+<span>  riskWindowEnd <span class="op">=</span> <span class="fl">365</span>, endAnchor <span class="op">=</span> <span class="st">"cohort start"</span>,</span>
+<span>  ageBreaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">18</span>,<span class="fl">65</span>,<span class="fl">100</span>,<span class="fl">150</span><span class="op">)</span>,</span>
+<span>  byAge <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  byGender <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  byYear <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Next we need to use the <code>exampleCohortIncidenceSettings</code>
+as the settings to <code>runCharacterizationAnalyses</code>, we need to
+use the Eunomia connectionDetails and in Eunomia the OMOP CDM data and
+cohort table are in the ‘main’ schema. The cohort table name is
+‘cohort’. The following code will apply the cohort incidence using the
+previously specified settings on the simulated Eunomia data and we must
+specify the <code>outputFolder</code> where the csv results will be
+written to.</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/runCharacterizationAnalyses.html">runCharacterizationAnalyses</a></span><span class="op">(</span></span>
+<span>  connectionDetails <span class="op">=</span> <span class="va">connectionDetails</span>,</span>
+<span>  cdmDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  targetDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  targetTable <span class="op">=</span> <span class="st">"cohort"</span>,</span>
+<span>  outcomeDatabaseSchema <span class="op">=</span> <span class="st">"main"</span>,</span>
+<span>  outcomeTable <span class="op">=</span> <span class="st">"cohort"</span>, </span>
+<span>  outputDatabaseSchema <span class="op">=</span> <span class="st">'main'</span>, </span>
+<span>  outputTable <span class="op">=</span> <span class="st">'example_char_cohort'</span>,</span>
+<span>  characterizationSettings <span class="op">=</span> <span class="fu"><a href="../reference/createCharacterizationSettings.html">createCharacterizationSettings</a></span><span class="op">(</span></span>
+<span>    cohortIncidenceSettings <span class="op">=</span> <span class="va">exampleCohortIncidenceSettings</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  databaseId <span class="op">=</span> <span class="st">"Eunomia"</span>,</span>
+<span>  outputDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example_char"</span>, <span class="st">"results"</span><span class="op">)</span>, </span>
+<span>  executionPath <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example_char"</span>, <span class="st">"execution"</span><span class="op">)</span>,</span>
+<span>  minCellCount <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  incremental <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  nTargetJobs <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  threads <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>You can then see the results in the location
+<code>file.path(tempdir(), 'example_char', 'results')</code> where you
+will find csv files.</p>
+</div>
+<div class="section level3">
 <h3 id="run-multiple">Run Multiple<a class="anchor" aria-label="anchor" href="#run-multiple"></a>
 </h3>
 <p>If you want to run multiple analyses (of the three previously shown)
@@ -521,7 +613,7 @@ you can use <code>createCharacterizationSettings</code>. You need to
 input a list of each of the settings (or NULL if you do not want to run
 one type of analysis). To run all the analyses previously shown in one
 function:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">characterizationSettings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createCharacterizationSettings.html">createCharacterizationSettings</a></span><span class="op">(</span></span>
 <span>  timeToEventSettings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    <span class="va">exampleTimeToEventSettings</span></span>
@@ -561,7 +653,7 @@ function:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This will create csv files with the results in the saveDirectory. You
 can run the following code to view the results in a shiny app:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/viewCharacterization.html">viewCharacterization</a></span><span class="op">(</span></span>
 <span>  resultFolder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example"</span>, <span class="st">"results"</span><span class="op">)</span>,</span>
 <span>  cohortDefinitionSet <span class="op">=</span> <span class="cn">NULL</span></span>

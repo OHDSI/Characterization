@@ -31,6 +31,14 @@ Outcome cohort (O).
 - [`createTimeToEventSettings()`](createTimeToEventSettings.md) : Create
   time to event study settings
 
+## Cohort Incidence
+
+This analysis calculates the incidence rate for a Target cohort (T), an
+Outcome cohort (O) and a time-at-risk.
+
+- [`createCohortIncidenceSettings()`](createCohortIncidenceSettings.md)
+  : Create cohort incidence study settings
+
 ## Run Large Scale Characterization Study
 
 Run multipe aggregate covariate analysis, time to event and

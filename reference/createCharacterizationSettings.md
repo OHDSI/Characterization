@@ -11,7 +11,8 @@ createCharacterizationSettings(
   dechallengeRechallengeSettings = NULL,
   targetBaselineSettings = NULL,
   riskFactorSettings = NULL,
-  caseSeriesSettings = NULL
+  caseSeriesSettings = NULL,
+  cohortIncidenceSettings = NULL
 )
 ```
 
@@ -36,6 +37,10 @@ createCharacterizationSettings(
 - caseSeriesSettings:
 
   A list of caseSeriesSettings settings
+
+- cohortIncidenceSettings:
+
+  A lsit of cohortIncidenceSettings settings
 
 ## Value
 

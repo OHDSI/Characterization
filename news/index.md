@@ -1,5 +1,10 @@
 # Changelog
 
+## Characterization 4.1.0
+
+- Added call to CohortIncidence (as it in now in CRAN)
+- Updated vignette to add CohortIncidence example
+
 ## Characterization 4.0.1
 
 - added check to createCharacterizationSettings() to error if no

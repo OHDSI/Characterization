@@ -36,6 +36,8 @@ package currently contains five different types of analyses:
   between the target cohort and outcome. This can help identify whether
   the outcome often precedes the target cohort or whether it generally
   comes after.
+- Cohort incidence: this returns incidence rate and proportion using the
+  CohortIncidence package.
 
 ## Setup
 
@@ -498,6 +500,101 @@ tte <- computeTimeToEventAnalyses(
   minCellCount = 5
 )
 ```
+
+### Cohort Incidence
+
+To run a ‘Cohort Incidence’ analysis you need to create a setting object
+using `createCohortIncidenceSettings`. This requires specifying:
+
+- studyPopulationSettings created using `createStudyPopulationSettings`
+  to define targetIds and population restrictions.
+- one or more outcomeIds (these must be pre-generated in a cohort table)
+- an outcomeWashoutDays (only outcomes that occur \> outcomeWashoutDays
+  days from a previous outcome are included, no restriction set this to
+  0 and first outcome ever set this to 99999)
+- the time-at-risk settings
+- riskWindowStart
+- startAnchor
+- riskWindowEnd
+- endAnchor
+- byAge: Whether you want to also generate the incidence per age group
+- byGender: Whether you want to also generate the incidence per gender
+  group
+- byYear: Whether you want to also generate the incidence per index year
+- ageBreaks: a vector of age breaks
+- ageBreakList: a list of age breaks
+- startDate: only include target population index after this date
+- endDate: only include target population index before this date and
+  censor tar at this date.
+
+Using the Eunomia data were we previous generated four cohorts, we can
+use cohort ids 1,2 and 4 as the targetIds and cohort id 3 as the
+outcomeIds:
+
+``` r
+
+exampleTargetIds <- c(1, 2, 4)
+exampleOutcomeIds <- 3
+```
+
+If we want to calculate the incidence rates/proportions with all
+stratifications using ageBreaks of 0-18, 19-65, 66-100, 101+ and no
+study date restrictions, we can run:
+
+``` r
+
+exampleCohortIncidenceSettings <- createCohortIncidenceSettings(
+  studyPopulationSettings = createStudyPopulationSettings(
+    targetIds = exampleTargetIds,
+    limitToFirstInNDays = 99999, # limit to first target exposure
+    minPriorObservation = 365
+  ),
+  outcomeIds = exampleOutcomeIds,
+  outcomeWashoutDays = 0,
+  riskWindowStart = 1, startAnchor = "cohort start",
+  riskWindowEnd = 365, endAnchor = "cohort start",
+  ageBreaks = c(0,18,65,100,150),
+  byAge = TRUE,
+  byGender = TRUE,
+  byYear = TRUE
+)
+```
+
+Next we need to use the `exampleCohortIncidenceSettings` as the settings
+to `runCharacterizationAnalyses`, we need to use the Eunomia
+connectionDetails and in Eunomia the OMOP CDM data and cohort table are
+in the ‘main’ schema. The cohort table name is ‘cohort’. The following
+code will apply the cohort incidence using the previously specified
+settings on the simulated Eunomia data and we must specify the
+`outputFolder` where the csv results will be written to.
+
+``` r
+
+runCharacterizationAnalyses(
+  connectionDetails = connectionDetails,
+  cdmDatabaseSchema = "main",
+  targetDatabaseSchema = "main",
+  targetTable = "cohort",
+  outcomeDatabaseSchema = "main",
+  outcomeTable = "cohort", 
+  outputDatabaseSchema = 'main', 
+  outputTable = 'example_char_cohort',
+  characterizationSettings = createCharacterizationSettings(
+    cohortIncidenceSettings = exampleCohortIncidenceSettings
+  ),
+  databaseId = "Eunomia",
+  outputDirectory = file.path(tempdir(), "example_char", "results"), 
+  executionPath = file.path(tempdir(), "example_char", "execution"),
+  minCellCount = 10,
+  incremental = FALSE,
+  nTargetJobs = 1,
+  threads = 1
+)
+```
+
+You can then see the results in the location
+`file.path(tempdir(), 'example_char', 'results')` where you will find
+csv files.
 
 ### Run Multiple
 
