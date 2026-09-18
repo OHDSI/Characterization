@@ -182,6 +182,7 @@
 "case_series_covariates_continuous","before_p_25_value","float","No","No","No","No","The 25th percentile"
 "case_series_covariates_continuous","before_p_75_value","float","No","No","No","No","The 75th percentile"
 "case_series_covariates_continuous","before_p_90_value","float","No","No","No","No","The 90th percentile"
+"case_series_covariates_continuous","during_count_value","int","No","No","No","No","The count value"
 "case_series_covariates_continuous","during_min_value","float","No","No","No","No","The min value"
 "case_series_covariates_continuous","during_max_value","float","No","No","No","No","The max value"
 "case_series_covariates_continuous","during_average_value","float","No","No","No","No","The average value"
