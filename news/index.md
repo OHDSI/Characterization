@@ -2,6 +2,8 @@
 
 ## Characterization 4.1.0
 
+CRAN release: 2026-09-16
+
 - Added call to CohortIncidence (as it in now in CRAN)
 - Updated vignette to add CohortIncidence example
 
