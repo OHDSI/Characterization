@@ -134,6 +134,13 @@ computeTargetBaselineAnalyses <- function(
     targetCountTable = targetCountTable
   )
 
+
+  # skip if no cohorts remaining!
+  if(nrow(minSized) == 0){
+    message('No target cohorts of minTargetSize')
+    return(invisible(TRUE))
+  }
+
   # next run FE on cohortIds
   result <- FeatureExtraction::getDbCovariateData(
     connection = connection,
