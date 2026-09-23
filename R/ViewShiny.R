@@ -302,6 +302,7 @@ viewChars <- function(
       )
     )
     databaseSettings$cTablePrefix <- databaseSettings$tablePrefix
+    databaseSettings$incidenceTablePrefix <- databaseSettings$tablePrefix
     databaseSettings$cgTablePrefix <- databaseSettings$cohortTablePrefix
     databaseSettings$databaseTable <- "DATABASE_META_DATA"
     databaseSettings$databaseTablePrefix <- ""
