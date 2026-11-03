@@ -157,22 +157,23 @@ duringData <- getDbDuringCovariateData(
   cohortTable = 'cohort'
 )
 #> Constructing during cohort covariates
-#> Executing SQL took 0.00243 secs
-#> Executing SQL took 0.00229 secs
+#> Executing SQL took 0.00517 secs
+#> Executing SQL took 0.0031 secs
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp5LRSaL/duckdb
+#> ℹ /tmp/RtmpYIsnik/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
+#> Closing database connection
 #> Executing during sql code for ConditionOccurrenceDuring
-#> Executing SQL took 0.0142 secs
-#> Execution took 0.01 secs
+#> Executing SQL took 0.0188 secs
+#> Execution took 0.02 secs
 #> Extracting covariates
 #> Downloading covariates
-#> Extracting covariates took 0.19 secs
+#> Extracting covariates took 0.27 secs
 #> Removing temp covariate tables
 
 DatabaseConnector::disconnect(connection)

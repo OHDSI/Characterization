@@ -1,5 +1,10 @@
 # Changelog
 
+## Characterization 4.1.1
+
+- Fixed shiny viewer bug
+- Split out outcome day in case series
+
 ## Characterization 4.1.0
 
 CRAN release: 2026-09-16
