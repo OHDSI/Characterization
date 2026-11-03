@@ -135,7 +135,7 @@ test_that("createCaseSeriesSettings covariateList", {
   targetIds <- sample(x = 100, size = sample(10, 1))
   outcomeIds <- sample(x = 100, size = sample(10, 1))
   covariateSettings1 <- createDuringCovariateSettings(
-    useVisitCountDuring = T
+    useVisitCountDuring = TRUE
   )
   covariateSettings2 <- createDuringCovariateSettings(
     useConditionOccurrenceDuring = TRUE

@@ -128,7 +128,69 @@ CASE
 END
 ) AS during_p90_value,
 
+-- out day
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN count_value
+  ELSE 0
+END
+) AS out_day_count_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN average_value
+  ELSE 0
+END
+) AS out_day_average_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN min_value
+  ELSE 0
+END
+) AS out_day_min_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN max_value
+  ELSE 0
+END
+) AS out_day_max_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN median_value
+  ELSE 0
+END
+) AS out_day_median_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN standard_deviation
+  ELSE 0
+END
+) AS out_day_standard_deviation,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN p10_value
+  ELSE 0
+END
+) AS out_day_p10_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN p25_value
+  ELSE 0
+END
+) AS out_day_p25_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN p75_value
+  ELSE 0
+END
+) AS out_day_p75_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN p90_value
+  ELSE 0
+END
+) AS out_day_p90_value,
 
+--  after out
 MAX(
 CASE
   WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 5 THEN count_value
@@ -199,6 +261,6 @@ covariate_id
 
 ) main_table
 
-WHERE (before_count_value + during_count_value + after_count_value) >= @min_count
+WHERE (before_count_value + during_count_value + out_day_count_value + after_count_value) >= @min_count
 ;
 

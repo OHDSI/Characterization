@@ -28,6 +28,20 @@ CASE
   ELSE 0
 END
 ) AS during_average_value,
+
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN sum_value
+  ELSE 0
+END
+) AS out_day_sum_value,
+MAX(
+CASE
+  WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 6 THEN average_value
+  ELSE 0
+END
+) AS out_day_average_value,
+
 MAX(
 CASE
   WHEN (cohort_definition_id - FLOOR(cohort_definition_id/10)*10) = 5 THEN sum_value
@@ -51,12 +65,14 @@ covariate_id
 
 ) main_table
 
-WHERE (before_sum_value + during_sum_value + after_sum_value) >= @min_count
+WHERE (before_sum_value + during_sum_value + out_day_sum_value + after_sum_value) >= @min_count
 AND (ISNULL(before_average_value, 0) >= @min_characterization_mean
      OR
      ISNULL(during_average_value, 0) >= @min_characterization_mean
      OR
      ISNULL(after_average_value, 0) >= @min_characterization_mean
+     OR
+     ISNULL(out_day_average_value, 0) >= @min_characterization_mean
      )
 ;
 

@@ -93,6 +93,9 @@ UNION
 SELECT cohort_definition_id*10+4 FROM #characterization_cases
 UNION
 SELECT cohort_definition_id*10+5 FROM #characterization_cases
+-- adding new on outcome date
+UNION
+SELECT cohort_definition_id*10+6 FROM #characterization_cases
 );
 
 
@@ -116,7 +119,19 @@ CAST(cohort_definition_id*10+4 as BIGINT),
 row_id,
 subject_id,
 DATEADD(day, 1, cohort_start_date),
-DATEADD(day, 0, outcome_start_date),
+DATEADD(day, -1, outcome_start_date), -- modified to day before outcome
+'case-series'
+FROM #characterization_cases
+
+UNION
+
+-- add outcome day as a seperate time
+SELECT
+CAST(cohort_definition_id*10+6 as BIGINT),
+row_id,
+subject_id,
+outcome_start_date,
+outcome_start_date,
 'case-series'
 FROM #characterization_cases
 

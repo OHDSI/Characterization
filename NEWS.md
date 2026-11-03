@@ -1,3 +1,8 @@
+Characterization 4.1.1
+======================
+- Fixed shiny viewer bug 
+- Split out outcome day in case series
+
 Characterization 4.1.0
 ======================
 - Added call to CohortIncidence (as it in now in CRAN)
