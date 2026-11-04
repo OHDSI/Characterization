@@ -238,7 +238,8 @@ computeCaseSeriesAnalyses <- function(
     cohortDatabaseSchema = characterizationDatabaseSchema,
     cohortIds = c(caseIds$characterizationCaseId*10+3,
                   caseIds$characterizationCaseId*10+4,
-                  caseIds$characterizationCaseId*10+5),
+                  caseIds$characterizationCaseId*10+5,
+                  caseIds$characterizationCaseId*10+6),
     rowIdField = 'row_id',
     covariateSettings = ParallelLogger::convertJsonToSettings(settings$covariateSettings),
     aggregated = TRUE,
@@ -273,7 +274,8 @@ computeCaseSeriesAnalyses <- function(
     characterization_fe_table = '#fe_covariate_case',
     cohort_definition_ids = paste0(c(caseIds$characterizationCaseId*10+3,
                                      caseIds$characterizationCaseId*10+4,
-                                     caseIds$characterizationCaseId*10+5),
+                                     caseIds$characterizationCaseId*10+5,
+                                     caseIds$characterizationCaseId*10+6),
                                    collapse = ','),
     min_count = minCovariateCount,
     min_characterization_mean = minCharacterizationMean
@@ -299,7 +301,8 @@ computeCaseSeriesAnalyses <- function(
     characterization_fe_table = '#fe_covariate_continuous_case',
     cohort_definition_ids = paste0(c(caseIds$characterizationCaseId*10+3,
                                      caseIds$characterizationCaseId*10+4,
-                                     caseIds$characterizationCaseId*10+5),
+                                     caseIds$characterizationCaseId*10+5,
+                                     caseIds$characterizationCaseId*10+6),
                                    collapse = ','),
     min_count = minCovariateCount
   )
