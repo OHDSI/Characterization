@@ -41,22 +41,23 @@ createCohortIncidenceSettings(
 
 - riskWindowStart:
 
-  The start of the risk window (in days) relative to the
-  \`startAnchor\`.
+  A single value or vector for the start of the risk window (in days)
+  relative to the \`startAnchor\`.
 
 - startAnchor:
 
-  The anchor point for the start of the risk window. Can be \`"cohort
-  start"\` or \`"cohort end"\`.
+  A single value or vector for the anchor point for the start of the
+  risk window. Can be \`"cohort start"\` or \`"cohort end"\`.
 
 - riskWindowEnd:
 
-  The end of the risk window (in days) relative to the \`endAnchor\`.
+  A single value or vector for the end of the risk window (in days)
+  relative to the \`endAnchor\`.
 
 - endAnchor:
 
-  The anchor point for the end of the risk window. Can be \`"cohort
-  start"\` or \`"cohort end"\`.
+  A single value or vector for the anchor point for the end of the risk
+  window. Can be \`"cohort start"\` or \`"cohort end"\`.
 
 - byAge:
 

@@ -79,7 +79,7 @@ createCharacterizationTables(
 #> Connecting using SQLite driver
 #> Deleting existing tables
 #> Creating characterization results tables
-#> Executing SQL took 0.0133 secs
+#> Executing SQL took 0.0175 secs
 #> Migrating data set
 #> Migrator using SQL files in Characterization
 #> Connecting using SQLite driver
@@ -89,7 +89,7 @@ createCharacterizationTables(
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%
-#> Executing SQL took 0.0043 secs
+#> Executing SQL took 0.0038 secs
 #> Migrations table created
 #> Executing migration: Migration_1-v3_0_0_store_version.sql
 #> 
@@ -99,14 +99,14 @@ createCharacterizationTables(
   |===================================                                   |  50%
   |                                                                            
   |======================================================================| 100%
-#> Executing SQL took 0.00403 secs
+#> Executing SQL took 0.00345 secs
 #> Saving migration: Migration_1-v3_0_0_store_version.sql
 #> 
   |                                                                            
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%
-#> Executing SQL took 0.00349 secs
+#> Executing SQL took 0.00288 secs
 #> Migration complete Migration_1-v3_0_0_store_version.sql
 #> Executing migration: Migration_2-v4_0_0_table_change.sql
 #> 
@@ -168,14 +168,14 @@ createCharacterizationTables(
   |====================================================================  |  96%
   |                                                                            
   |======================================================================| 100%
-#> Executing SQL took 0.0193 secs
+#> Executing SQL took 0.0251 secs
 #> Saving migration: Migration_2-v4_0_0_table_change.sql
 #> 
   |                                                                            
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%
-#> Executing SQL took 0.00366 secs
+#> Executing SQL took 0.00292 secs
 #> Migration complete Migration_2-v4_0_0_table_change.sql
 #> Executing migration: Migration_3-v4_1_0_cohort_incidence.sql
 #> 
@@ -197,14 +197,14 @@ createCharacterizationTables(
   |=============================================================         |  88%
   |                                                                            
   |======================================================================| 100%
-#> Executing SQL took 0.00559 secs
+#> Executing SQL took 0.0074 secs
 #> Saving migration: Migration_3-v4_1_0_cohort_incidence.sql
 #> 
   |                                                                            
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%
-#> Executing SQL took 0.00239 secs
+#> Executing SQL took 0.00287 secs
 #> Migration complete Migration_3-v4_1_0_cohort_incidence.sql
 #> Executing migration: Migration_4-v4_1_1_cohort_incidence.sql
 #> 
@@ -234,16 +234,16 @@ createCharacterizationTables(
   |================================================================      |  92%
   |                                                                            
   |======================================================================| 100%
-#> Executing SQL took 0.0095 secs
+#> Executing SQL took 0.0123 secs
 #> Saving migration: Migration_4-v4_1_1_cohort_incidence.sql
 #> 
   |                                                                            
   |                                                                      |   0%
   |                                                                            
   |======================================================================| 100%
-#> Executing SQL took 0.00202 secs
+#> Executing SQL took 0.00273 secs
 #> Migration complete Migration_4-v4_1_1_cohort_incidence.sql
 #> Closing database connection
 #> Updating version number to 4.1.1
-#> Executing SQL took 0.0026 secs
+#> Executing SQL took 0.00338 secs
 ```
