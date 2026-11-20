@@ -28,14 +28,14 @@ createCohortIncidenceSettings(
 
 \item{outcomeWashoutDays}{A vector of integers specifying the washout days for the outcomeIds}
 
-\item{riskWindowStart}{The start of the risk window (in days) relative to the `startAnchor`.}
+\item{riskWindowStart}{A single value or vector for the start of the risk window (in days) relative to the `startAnchor`.}
 
-\item{startAnchor}{The anchor point for the start of the risk window. Can be `"cohort start"`
+\item{startAnchor}{A single value or vector for the anchor point for the start of the risk window. Can be `"cohort start"`
 or `"cohort end"`.}
 
-\item{riskWindowEnd}{The end of the risk window (in days) relative to the `endAnchor`.}
+\item{riskWindowEnd}{A single value or vector for the end of the risk window (in days) relative to the `endAnchor`.}
 
-\item{endAnchor}{The anchor point for the end of the risk window. Can be `"cohort start"`
+\item{endAnchor}{A single value or vector for the anchor point for the end of the risk window. Can be `"cohort start"`
 or `"cohort end"`.}
 
 \item{byAge}{Whether to stratify the incidence rates by age groups (specified via ageBreaks or ageBreakList)}

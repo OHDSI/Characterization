@@ -19,7 +19,7 @@
 #' @param studyPopulationSettings An object created using \code{createStudyPopulationSettings} or a list of \code{createStudyPopulationSettings} that specifies cohort inclusion criteria
 #' @param outcomeIds   A vector of cohortIds for the outcome cohorts
 #' @param outcomeWashoutDays A vector of integers specifying the washout days for the outcomeIds
-#' @template timeAtRisk
+#' @template timeAtRisks
 #' @param byAge Whether to stratify the incidence rates by age groups (specified via ageBreaks or ageBreakList)
 #' @param byGender Whether to stratify the incidence rates by gender
 #' @param byYear Whether to stratify the incidence rates by index year
@@ -84,13 +84,22 @@ createCohortIncidenceSettings <- function(
     x = length(outcomeWashoutDays) %in% c(1, length(outcomeIds)),
     add = errorMessages
   )
-  .checkTimeAtRisk(
-    riskWindowStart = riskWindowStart,
-    startAnchor = startAnchor,
-    riskWindowEnd = riskWindowEnd,
-    endAnchor = endAnchor,
-    errorMessages = errorMessages
-  )
+
+  # check the TARs are the same length
+  checkmate::assert_true(length(riskWindowStart) == length(startAnchor), add = errorMessages)
+  checkmate::assert_true(length(riskWindowStart) == length(riskWindowEnd), add = errorMessages)
+  checkmate::assert_true(length(riskWindowStart) == length(endAnchor), add = errorMessages)
+
+  for(i in 1:length(riskWindowStart)){
+    .checkTimeAtRisk(
+      riskWindowStart = riskWindowStart[i],
+      startAnchor = startAnchor[i],
+      riskWindowEnd = riskWindowEnd[i],
+      endAnchor = endAnchor[i],
+      errorMessages = errorMessages
+    )
+  }
+
   checkmate::assertFlag(x = byAge, add = errorMessages)
   checkmate::assertFlag(x = byGender, add = errorMessages)
   checkmate::assertFlag(x = byYear, add = errorMessages)
@@ -192,13 +201,19 @@ createCohortIncidenceDesign <- function(settings) {
     )
   })
   anchorLookup <- c("cohort start" = "start", "cohort end" = "end")
-  tar <- CohortIncidence::createTimeAtRiskDef(
-    id = 1,
-    startOffset = settings$riskWindowStart,
-    startWith = anchorLookup[[settings$startAnchor]],
-    endOffset = settings$riskWindowEnd,
-    endWith = anchorLookup[[settings$endAnchor]]
-  )
+
+  tar <- lapply(
+    X = 1:length(settings$riskWindowStart),
+    FUN = function(i){
+      CohortIncidence::createTimeAtRiskDef(
+        id = i,
+        startOffset = settings$riskWindowStart[i],
+        startWith = anchorLookup[[settings$startAnchor[i]]],
+        endOffset = settings$riskWindowEnd[i],
+        endWith = anchorLookup[[settings$endAnchor[i]]]
+      )
+    })
+
   strataArguments <- list(
     byAge = settings$byAge,
     byGender = settings$byGender,
@@ -212,11 +227,11 @@ createCohortIncidenceDesign <- function(settings) {
   }
   designArguments <- list(
     analysisList = list(CohortIncidence::createIncidenceAnalysis(
-      tars = 1,
+      tars = 1:length(tar),
       outcomes = seq_along(outcomeIds) * 10 + 7,
       targets = targetIds
     )),
-    tars = list(tar),
+    tars = tar, # removed list
     outcomeDefs = outcomeDefs,
     targetDefs = lapply(targetIds, function(targetId) {
       CohortIncidence::createCohortRef(

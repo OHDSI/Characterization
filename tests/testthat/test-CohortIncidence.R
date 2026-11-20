@@ -56,6 +56,64 @@ test_that("createCohortIncidenceSettings validates inputs", {
   )
 })
 
+test_that("createCohortIncidenceSettings with multiple TARS", {
+  studyPopulationSettings <- createStudyPopulationSettings(targetIds = 1)
+
+  settings <- createCohortIncidenceSettings(
+    studyPopulationSettings = studyPopulationSettings,
+    outcomeIds = c(2, 3),
+    outcomeWashoutDays = 30,
+    startAnchor = 'cohort start',
+    endAnchor = 'cohort start',
+    riskWindowStart = 1,
+    riskWindowEnd = 367,
+    byAge = TRUE,
+    ageBreaks = c(18, 65),
+    startDate = "2026-01-01",
+    endDate = "2026-12-31"
+  )
+
+  testthat::expect_s3_class(settings, "cohortIncidenceSettings")
+  testthat::expect_equal(settings$startAnchor, 'cohort start')
+  testthat::expect_equal(settings$endAnchor, 'cohort start')
+  testthat::expect_equal(settings$riskWindowStart, 1)
+  testthat::expect_equal(settings$riskWindowEnd, 367)
+
+
+  settings <- createCohortIncidenceSettings(
+    studyPopulationSettings = studyPopulationSettings,
+    outcomeIds = c(2, 3),
+    outcomeWashoutDays = 30,
+    startAnchor = c('cohort start', 'cohort start'),
+    endAnchor = c('cohort start', 'cohort end'),
+    riskWindowStart = c(1,1),
+    riskWindowEnd = c(367,0),
+    byAge = TRUE,
+    ageBreaks = c(18, 65),
+    startDate = "2026-01-01",
+    endDate = "2026-12-31"
+  )
+
+  testthat::expect_s3_class(settings, "cohortIncidenceSettings")
+  testthat::expect_equal(settings$startAnchor, c('cohort start', 'cohort start'))
+  testthat::expect_equal(settings$endAnchor, c('cohort start', 'cohort end'))
+  testthat::expect_equal(settings$riskWindowStart, c(1,1))
+  testthat::expect_equal(settings$riskWindowEnd, c(367,0))
+
+# error with different lengths
+  testthat::expect_error(
+    createCohortIncidenceSettings(
+      studyPopulationSettings = studyPopulationSettings,
+      outcomeIds = c(2, 3),
+      outcomeWashoutDays = c(10, 20),
+      startAnchor = c('cohort start', 'cohort start'),
+      endAnchor = c('cohort start'),
+      riskWindowStart = c(1),
+      riskWindowEnd = c(367),
+    )
+  )
+})
+
 test_that("createCharacterizationSettings accepts cohort-incidence settings", {
   cohortIncidenceSettings <- createCohortIncidenceSettings(
     studyPopulationSettings = createStudyPopulationSettings(targetIds = 1),
@@ -108,6 +166,40 @@ test_that("createCohortIncidenceDesign uses CohortIncidence inputs", {
   )$cohortIncidenceSettings[[1]]
 
   testthat::expect_silent(createCohortIncidenceDesign(defaultSettings)$asJSON())
+})
+
+
+test_that("createCohortIncidenceDesign multiple TARS", {
+  settings <- createCharacterizationSettings(
+    cohortIncidenceSettings = createCohortIncidenceSettings(
+      studyPopulationSettings = createStudyPopulationSettings(targetIds = 1),
+      outcomeIds = c(2, 3),
+      outcomeWashoutDays = 30,
+      startAnchor = c('cohort start', 'cohort start'),
+      endAnchor = c('cohort start', 'cohort end'),
+      riskWindowStart = c(1,2),
+      riskWindowEnd = c(367,0),
+      byAge = TRUE,
+      ageBreaks = c(18, 65),
+      startDate = "2020-01-01",
+      endDate = "2020-12-31"
+    )
+  )$cohortIncidenceSettings[[1]]
+
+  design <- createCohortIncidenceDesign(settings)
+
+  testthat::expect_s3_class(design, "IncidenceDesign")
+  testthat::expect_true(length(design$timeAtRiskDefs) == 2)
+  testthat::expect_equal(design$timeAtRiskDefs[[1]]$startWith, "start")
+  testthat::expect_equal(design$timeAtRiskDefs[[2]]$startWith, "start")
+  testthat::expect_equal(design$timeAtRiskDefs[[1]]$endWith, "start")
+  testthat::expect_equal(design$timeAtRiskDefs[[2]]$endWith, "end")
+  testthat::expect_equal(design$timeAtRiskDefs[[1]]$startOffset, 1)
+  testthat::expect_equal(design$timeAtRiskDefs[[2]]$startOffset, 2)
+  testthat::expect_equal(design$timeAtRiskDefs[[1]]$endOffset, 367)
+  testthat::expect_equal(design$timeAtRiskDefs[[2]]$endOffset, 0)
+  testthat::expect_silent(design$asJSON())
+
 })
 
 test_that("exportCohortIncidence uses characterization target IDs", {
