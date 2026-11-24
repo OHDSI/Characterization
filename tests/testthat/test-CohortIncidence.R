@@ -216,11 +216,12 @@ test_that("exportCohortIncidence uses characterization target IDs", {
     )$cohortIncidenceSettings[[1]]
   )
 
+  executeResults <- Andromeda::andromeda()
+  executeResults$incidence_summary <- data.frame(target_cohort_definition_id = 1)
+  executeResults$target_def <- data.frame(target_cohort_definition_id = 1)
+
   exportCohortIncidence(
-    executeResults = list(
-      incidence_summary = data.frame(target_cohort_definition_id = 1),
-      target_def = data.frame(target_cohort_definition_id = 1)
-    ),
+    executeResults = executeResults,
     databaseId = "test_database",
     exportFolder = outputFolder,
     irDesign = design,
@@ -229,6 +230,7 @@ test_that("exportCohortIncidence uses characterization target IDs", {
   )
 
   result <- Andromeda::loadAndromeda(file.path(outputFolder, "result"))
+  withr::defer(Andromeda::close(result))
 
   testthat::expect_true("characterizationTargetId" %in% names(result$incidenceSummary))
   testthat::expect_true("characterizationTargetId" %in% names(result$targetDef))
@@ -236,6 +238,38 @@ test_that("exportCohortIncidence uses characterization target IDs", {
   testthat::expect_true("databaseId" %in% names(result$incidenceSummary))
   testthat::expect_false("databaseId" %in% names(result$targetDef))
   testthat::expect_false("databaseId" %in% names(result$targetOutcomeRef))
+  testthat::expect_true("settingId" %in% names(result$targetDef))
+  testthat::expect_false("incidence_summary" %in% names(result))
+})
+
+test_that("target-outcome references are written to Andromeda in batches", {
+  settings <- createCharacterizationSettings(
+    cohortIncidenceSettings = createCohortIncidenceSettings(
+      studyPopulationSettings = createStudyPopulationSettings(targetIds = 1:3),
+      outcomeIds = 4:5
+    )
+  )$cohortIncidenceSettings[[1]]
+  design <- createCohortIncidenceDesign(settings)
+  andromeda <- Andromeda::andromeda()
+  withr::defer(Andromeda::close(andromeda))
+
+  addTargetOutcomeReference(
+    andromeda = andromeda,
+    irDesign = design,
+    refId = 7,
+    settingId = "setting",
+    batchSize = 2
+  )
+
+  result <- as.data.frame(andromeda$targetOutcomeRef)
+  testthat::expect_equal(nrow(result), 6)
+  testthat::expect_setequal(
+    result$characterizationTargetId,
+    design$analysisList[[1]]$targets
+  )
+  testthat::expect_setequal(result$outcomeCohortId, 4:5)
+  testthat::expect_identical(unique(result$refId), 7)
+  testthat::expect_identical(unique(result$settingId), "setting")
 })
 
 test_that("runCharacterizationAnalyses executes cohort incidence", {

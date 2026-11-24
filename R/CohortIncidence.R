@@ -323,9 +323,19 @@ computeCohortIncidenceAnalyses <- function(
 
         ),
 
-    incidenceDesign = ciDesign
+    incidenceDesign = ciDesign,
+    resultType = "andromeda"
 
       )
+
+  # executeAnalysis() creates a temporary, disk-backed Andromeda object. It is
+  # saved in the job's work folder below and closed by saveAndromeda(). Ensure
+  # it is also closed when processing or saving fails.
+  on.exit({
+    if (Andromeda::isValidAndromeda(executeResults)) {
+      Andromeda::close(executeResults)
+    }
+  }, add = TRUE)
 
   # download to CSV files
   createDirectory(file.path(outputFolder))
@@ -366,43 +376,121 @@ exportCohortIncidence <- function(
     executionId,
     refId
     ){
-  result <- Andromeda::andromeda()
+  if (!inherits(executeResults, "Andromeda")) {
+    stop("executeResults must be an Andromeda object")
+  }
+
+  result <- executeResults
   for (tableName in names(executeResults)) {
     tableData <- executeResults[[tableName]]
-    names(tableData)[names(tableData) == "target_cohort_definition_id"] <- "characterization_target_id"
-    names(tableData) <- SqlRender::snakeCaseToCamelCase(names(tableData))
-    result[[SqlRender::snakeCaseToCamelCase(tableName)]] <- tableData
+    tableData <- tableData %>%
+      dplyr::rename_with(
+        .fn = function(columnNames) {
+          columnNames[columnNames == "target_cohort_definition_id"] <- "characterization_target_id"
+          SqlRender::snakeCaseToCamelCase(columnNames)
+        }
+      )
+
+    outputTableName <- SqlRender::snakeCaseToCamelCase(tableName)
+    if (outputTableName == "incidenceSummary") {
+      tableData <- tableData %>%
+        dplyr::mutate(
+          databaseId = !!databaseId,
+          settingId = !!executionId
+        )
+    } else {
+      tableData <- tableData %>%
+        dplyr::mutate(settingId = !!executionId)
+    }
+
+    # Assigning an Andromeda table executes the transformation in DuckDB, so
+    # only the current table is copied on disk and is not materialized in R.
+    result[[outputTableName]] <- tableData
+    if (outputTableName != tableName) {
+      result[[tableName]] <- NULL
+    }
   }
 
   # in addition to the output of the module, we will produce a T-O lookup table that can be used to filter results
   # to either 'Outcomes for T' or 'Targets for Outcomes'
-
-  targetOutcomeDfList <- lapply(irDesign$analysisList, function(analysis) {
-    outcomeDefs <- Filter(function(o) o$id %in% analysis$outcomes, irDesign$outcomeDefs)
-    outcome_cohort_id <- sapply(outcomeDefs, function(o) o$cohortId)
-    as.data.frame(expand.grid(characterization_target_id = analysis$targets, outcome_cohort_id = outcome_cohort_id))
-  })
-
-  targetOutcomeRef <- unique(do.call(rbind, targetOutcomeDfList))
-  targetOutcomeRef$ref_id <- refId
-  names(targetOutcomeRef) <- SqlRender::snakeCaseToCamelCase(names(targetOutcomeRef))
-  result$targetOutcomeRef <- targetOutcomeRef
-
-  result <- addDbAndSettings(
+  addTargetOutcomeReference(
     andromeda = result,
-    databaseId = databaseId,
+    irDesign = irDesign,
+    refId = refId,
     settingId = executionId
   )
-  for (tableName in setdiff(names(result), "incidenceSummary")) {
-    tableData <- as.data.frame(result[[tableName]])
-    tableData$databaseId <- NULL
-    result[[tableName]] <- tableData
-  }
+
   saveCharacterizationAndromeda(
     andromeda = result,
     outputFolder = exportFolder
   )
 
+}
+
+
+addTargetOutcomeReference <- function(
+    andromeda,
+    irDesign,
+    refId,
+    settingId,
+    batchSize = 100000) {
+  wroteRows <- FALSE
+  needsDistinct <- length(irDesign$analysisList) > 1
+
+  for (analysis in irDesign$analysisList) {
+    outcomeDefs <- Filter(
+      function(outcome) outcome$id %in% analysis$outcomes,
+      irDesign$outcomeDefs
+    )
+    outcomeCohortIds <- vapply(outcomeDefs, function(outcome) outcome$cohortId, numeric(1))
+    needsDistinct <- needsDistinct || anyDuplicated(analysis$targets) > 0 ||
+      anyDuplicated(outcomeCohortIds) > 0
+
+    if (length(analysis$targets) == 0 || length(outcomeCohortIds) == 0) {
+      next
+    }
+
+    targetsPerBatch <- max(1, floor(batchSize / length(outcomeCohortIds)))
+    targetBatchIds <- ceiling(seq_along(analysis$targets) / targetsPerBatch)
+    targetBatches <- split(analysis$targets, targetBatchIds)
+
+    for (targetIds in targetBatches) {
+      targetOutcomeRef <- expand.grid(
+        characterizationTargetId = targetIds,
+        outcomeCohortId = outcomeCohortIds,
+        KEEP.OUT.ATTRS = FALSE,
+        stringsAsFactors = FALSE
+      )
+      targetOutcomeRef$refId <- refId
+      targetOutcomeRef$settingId <- settingId
+
+      if (!wroteRows) {
+        andromeda$targetOutcomeRef <- targetOutcomeRef
+        wroteRows <- TRUE
+      } else {
+        Andromeda::appendToTable(
+          tbl = andromeda$targetOutcomeRef,
+          data = targetOutcomeRef
+        )
+      }
+    }
+  }
+
+  if (!wroteRows) {
+    andromeda$targetOutcomeRef <- data.frame(
+      characterizationTargetId = numeric(),
+      outcomeCohortId = numeric(),
+      refId = numeric(),
+      settingId = character()
+    )
+  } else if (needsDistinct) {
+    # Multiple analyses can contain the same target-outcome pair. Perform the
+    # de-duplication in DuckDB instead of constructing all pairs in memory.
+    andromeda$targetOutcomeRef <- andromeda$targetOutcomeRef %>%
+      dplyr::distinct()
+  }
+
+  return(invisible(andromeda))
 }
 
 

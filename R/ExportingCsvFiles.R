@@ -108,7 +108,8 @@ exportAndromedaSubfilesToCsv <- function(
         fileName = file.path(executionPath, folderName, 'result')
       )
 
-      for (table in tablesToExport) {
+      tryCatch({
+        for (table in tablesToExport) {
 
         # export to snake case
         tableToExport <- SqlRender::camelCaseToSnakeCase(table)
@@ -168,7 +169,12 @@ exportAndromedaSubfilesToCsv <- function(
           }
 
         }
-      }
+        }
+      }, finally = {
+        # Close each job result before opening the next one. Otherwise a large
+        # number of jobs can leave DuckDB connections and caches resident.
+        Andromeda::close(andromeda)
+      })
 
     }
 
