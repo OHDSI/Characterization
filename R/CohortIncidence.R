@@ -307,6 +307,7 @@ computeCohortIncidenceAnalyses <- function(
 
 
   # run CI
+  ParallelLogger::logInfo("Starting CohortIncidence analysis")
   executeResults <- CohortIncidence::executeAnalysis(
     connectionDetails = connectionDetails,
 
@@ -327,6 +328,10 @@ computeCohortIncidenceAnalyses <- function(
     resultType = "andromeda"
 
       )
+
+  ParallelLogger::logInfo(
+    "CohortIncidence analysis completed; starting Characterization export"
+  )
 
   # executeAnalysis() creates a temporary, disk-backed Andromeda object. It is
   # saved in the job's work folder below and closed by saveAndromeda(). Ensure
@@ -381,8 +386,32 @@ exportCohortIncidence <- function(
   }
 
   result <- executeResults
-  for (tableName in names(executeResults)) {
+  sourceTableNames <- names(executeResults)
+  ParallelLogger::logInfo(
+    "Starting CohortIncidence export of ", length(sourceTableNames),
+    " table(s): ", paste(sourceTableNames, collapse = ", ")
+  )
+
+  for (tableIndex in seq_along(sourceTableNames)) {
+    tableName <- sourceTableNames[[tableIndex]]
     tableData <- executeResults[[tableName]]
+    rowCount <- tableData %>%
+      dplyr::count() %>%
+      dplyr::pull()
+    formattedRowCount <- format(
+      rowCount,
+      big.mark = ",",
+      scientific = FALSE,
+      trim = TRUE
+    )
+
+    outputTableName <- SqlRender::snakeCaseToCamelCase(tableName)
+    ParallelLogger::logInfo(
+      "Preparing CohortIncidence table ", tableIndex, " of ",
+      length(sourceTableNames), ": ", tableName, " -> ", outputTableName,
+      " (", formattedRowCount, " rows, ", ncol(tableData), " columns)"
+    )
+
     tableData <- tableData %>%
       dplyr::rename_with(
         .fn = function(columnNames) {
@@ -391,7 +420,6 @@ exportCohortIncidence <- function(
         }
       )
 
-    outputTableName <- SqlRender::snakeCaseToCamelCase(tableName)
     if (outputTableName == "incidenceSummary") {
       tableData <- tableData %>%
         dplyr::mutate(
@@ -405,25 +433,36 @@ exportCohortIncidence <- function(
 
     # Assigning an Andromeda table executes the transformation in DuckDB, so
     # only the current table is copied on disk and is not materialized in R.
+    ParallelLogger::logInfo(
+      "Materializing transformed CohortIncidence table: ", outputTableName
+    )
     result[[outputTableName]] <- tableData
     if (outputTableName != tableName) {
       result[[tableName]] <- NULL
     }
+    ParallelLogger::logInfo(
+      "Finished CohortIncidence table: ", outputTableName
+    )
   }
 
   # in addition to the output of the module, we will produce a T-O lookup table that can be used to filter results
   # to either 'Outcomes for T' or 'Targets for Outcomes'
+  ParallelLogger::logInfo("Creating CohortIncidence target-outcome reference table")
   addTargetOutcomeReference(
     andromeda = result,
     irDesign = irDesign,
     refId = refId,
     settingId = executionId
   )
+  ParallelLogger::logInfo("Finished CohortIncidence target-outcome reference table")
 
+  resultFile <- file.path(exportFolder, "result")
+  ParallelLogger::logInfo("Saving CohortIncidence Andromeda result to ", resultFile)
   saveCharacterizationAndromeda(
     andromeda = result,
     outputFolder = exportFolder
   )
+  ParallelLogger::logInfo("Finished saving CohortIncidence Andromeda result")
 
 }
 
@@ -437,7 +476,8 @@ addTargetOutcomeReference <- function(
   wroteRows <- FALSE
   needsDistinct <- length(irDesign$analysisList) > 1
 
-  for (analysis in irDesign$analysisList) {
+  for (analysisIndex in seq_along(irDesign$analysisList)) {
+    analysis <- irDesign$analysisList[[analysisIndex]]
     outcomeDefs <- Filter(
       function(outcome) outcome$id %in% analysis$outcomes,
       irDesign$outcomeDefs
@@ -447,14 +487,29 @@ addTargetOutcomeReference <- function(
       anyDuplicated(outcomeCohortIds) > 0
 
     if (length(analysis$targets) == 0 || length(outcomeCohortIds) == 0) {
+      ParallelLogger::logInfo(
+        "Skipping target-outcome reference analysis ", analysisIndex, " of ",
+        length(irDesign$analysisList), " because it has no targets or outcomes"
+      )
       next
     }
 
     targetsPerBatch <- max(1, floor(batchSize / length(outcomeCohortIds)))
-    targetBatchIds <- ceiling(seq_along(analysis$targets) / targetsPerBatch)
-    targetBatches <- split(analysis$targets, targetBatchIds)
+    batchCount <- ceiling(length(analysis$targets) / targetsPerBatch)
+    pairCount <- as.double(length(analysis$targets)) * length(outcomeCohortIds)
+    ParallelLogger::logInfo(
+      "Target-outcome reference analysis ", analysisIndex, " of ",
+      length(irDesign$analysisList), ": ",
+      format(length(analysis$targets), big.mark = ",", trim = TRUE), " targets x ",
+      format(length(outcomeCohortIds), big.mark = ",", trim = TRUE), " outcomes = ",
+      format(pairCount, big.mark = ",", scientific = FALSE, trim = TRUE),
+      " rows in ", format(batchCount, big.mark = ",", trim = TRUE), " batch(es)"
+    )
 
-    for (targetIds in targetBatches) {
+    for (batchIndex in seq_len(batchCount)) {
+      firstTargetIndex <- (batchIndex - 1) * targetsPerBatch + 1
+      lastTargetIndex <- min(batchIndex * targetsPerBatch, length(analysis$targets))
+      targetIds <- analysis$targets[firstTargetIndex:lastTargetIndex]
       targetOutcomeRef <- expand.grid(
         characterizationTargetId = targetIds,
         outcomeCohortId = outcomeCohortIds,
@@ -486,8 +541,14 @@ addTargetOutcomeReference <- function(
   } else if (needsDistinct) {
     # Multiple analyses can contain the same target-outcome pair. Perform the
     # de-duplication in DuckDB instead of constructing all pairs in memory.
+    ParallelLogger::logInfo(
+      "De-duplicating CohortIncidence target-outcome reference table in DuckDB"
+    )
     andromeda$targetOutcomeRef <- andromeda$targetOutcomeRef %>%
       dplyr::distinct()
+    ParallelLogger::logInfo(
+      "Finished de-duplicating CohortIncidence target-outcome reference table"
+    )
   }
 
   return(invisible(andromeda))
